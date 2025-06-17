@@ -263,7 +263,31 @@ Angular CDK provides additional functionality:
 
 ## Usage Reference
 
-This reference should be used to understand the available components and their intended purposes when generating code or building applications with this design system. For specific implementation details, consult the [Angular Material documentation](https://material.angular.io/).
+This reference should be used to understand the available components and their intended purposes when generating code or building applications with this design system.
+
+### Implementation Resources
+
+**For Angular Material Components**: Consult the [Angular Material documentation](https://material.angular.io/) for:
+
+- Complete API references
+- Interactive examples and demos
+- Integration guides and best practices
+- Theming and customization options
+- Accessibility guidelines
+
+**For Custom Components**: When custom components are added to `component-groups.json`, refer to:
+
+- Individual component documentation files in the `design-system-docs` folder
+- This reference document for component categorization and relationships
+- Integration patterns with existing Angular Material components
+
+### Getting Started
+
+1. **Use Angular Material First**: Check if Angular Material provides the component you need
+2. **Review Available Components**: Examine the categorized component lists above
+3. **Follow Integration Patterns**: Use the recommended patterns for combining components
+4. **Maintain Consistency**: Ensure all implementations follow Material Design principles
+5. **Document Custom Work**: If creating custom components, add them to the design system following the documentation structure
 
 ---
 
