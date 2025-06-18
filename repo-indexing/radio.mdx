@@ -1,0 +1,703 @@
+# Radio Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate radio button functionality with group support
+
+### When to Use
+
+The Radio component group is ideal for scenarios where users need to select exactly one option from a predefined set of mutually exclusive choices. Use this component group when you need:
+
+- **Single selection interfaces** - Allow users to select only one option from multiple choices with visual radio button indicators
+- **Form input controls** - Provide traditional radio button behavior for forms with mutually exclusive options
+- **Settings and preferences** - Enable users to choose one configuration option from several alternatives
+- **Survey and questionnaire forms** - Collect single-choice responses with clear visual feedback
+- **Filter interfaces** - Allow users to select one filtering criterion from multiple options
+- **Accessible choice selection** - Ensure keyboard navigation and screen reader support for single-choice interfaces
+- **Grouped option selection** - Organize related choices under a common name attribute for proper form submission
+
+### Architecture
+
+**Critical/Strong Coupling**: This component group requires a strict parent-child relationship where MatRadioButton components must be used within a MatRadioGroup container. The coupling ensures proper radio button group behavior, mutual exclusivity, form control integration, and accessibility compliance.
+
+### Component Interdependencies
+
+The Radio component group exhibits critical coupling with the following relationships:
+
+- **Required parent-child relationship**: MatRadioButton components must be direct children of MatRadioGroup
+- **Shared group context**: MatRadioGroup provides group state management and coordinates mutual exclusivity among all child radio buttons
+- **Form control integration**: MatRadioGroup implements ControlValueAccessor to integrate with Angular forms
+- **Name attribute coordination**: MatRadioGroup manages the name attribute across all child buttons for proper form submission
+- **Selection state management**: Only one MatRadioButton can be selected at a time within the group
+- **Event propagation**: Selection changes in MatRadioButton components bubble up to MatRadioGroup for centralized handling
+
+## Components
+
+### MatRadioGroup {Primary Component}
+
+The main container component that manages a group of mutually exclusive radio buttons with built-in form integration and accessibility features.
+
+**Purpose:** Provides the foundation for radio button groups with mutual exclusivity, form integration, accessibility features, and coordinated name attribute management.
+
+**Interface:**
+
+```typescript
+interface MatRadioGroupProps {
+  // Selection state
+  value: any; // The currently selected radio button value
+  selected: MatRadioButton | null; // Reference to the currently selected radio button
+
+  // Visual configuration
+  labelPosition: "before" | "after"; // Position of labels relative to radio buttons (default: 'after')
+  color: ThemePalette; // Theme color for radio buttons ('primary' | 'accent' | 'warn')
+
+  // Form integration
+  name: string; // HTML name attribute applied to all radio buttons in the group
+  required: boolean; // Whether selection is required for form validation
+  disabled: boolean; // Whether the entire radio group is disabled
+  disabledInteractive: boolean; // Whether disabled buttons should remain interactive
+
+  // Events
+  change: EventEmitter<MatRadioChange>; // Emitted when selection changes due to user interaction
+}
+
+interface MatRadioChange<T = any> {
+  source: MatRadioButton; // The radio button that triggered the change
+  value: T; // The value of the selected radio button
+}
+```
+
+**Dependencies:** Requires MatRadioButton components as direct children
+**Provides:** Group state management, mutual exclusivity, form control integration, name attribute coordination, and accessibility features to child radio buttons
+
+**Usage Example:**
+
+```typescript
+import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
+
+@Component({
+  template: `
+    <mat-radio-group
+      name="size"
+      [(value)]="selectedSize"
+      (change)="onSizeChange($event)"
+      labelPosition="after"
+      color="primary"
+    >
+      <!-- Required MatRadioButton children -->
+    </mat-radio-group>
+  `,
+})
+export class RadioGroupExample {
+  selectedSize = "medium";
+
+  onSizeChange(event: MatRadioChange) {
+    console.log("Selected size:", event.value);
+  }
+}
+```
+
+### MatRadioButton {Dependent Component}
+
+Individual radio button components that must be used within a MatRadioGroup container to function as mutually exclusive options.
+
+**Purpose:** Represents individual selectable radio button options with support for custom content, accessibility features, and integration with the parent group's selection state.
+
+**Interface:**
+
+```typescript
+interface MatRadioButtonProps {
+  // Core functionality
+  value: any; // The value associated with this radio button
+  checked: boolean; // Whether this radio button is currently selected
+  id: string; // Unique identifier for the radio button
+
+  // Visual configuration
+  labelPosition: "before" | "after"; // Position of label relative to radio button
+  color: ThemePalette; // Theme color for this specific radio button
+  disableRipple: boolean; // Whether ripple effects are disabled
+
+  // State management
+  disabled: boolean; // Whether this radio button is disabled
+  required: boolean; // Whether this radio button is required
+  disabledInteractive: boolean; // Whether disabled button should remain interactive
+
+  // Accessibility
+  name: string; // HTML name attribute (inherited from parent group)
+  ariaLabel: string; // Accessibility label
+  ariaLabelledby: string; // ID of element that labels this radio button
+  ariaDescribedby: string; // ID of element that describes this radio button
+  tabIndex: number; // Tab order index
+
+  // Events
+  change: EventEmitter<MatRadioChange>; // Emitted when this radio button becomes selected
+}
+```
+
+**Context Dependencies:**
+
+- Must be used within MatRadioGroup to access group state management and mutual exclusivity
+- Inherits name attribute, color theme, and label position from parent MatRadioGroup
+- Receives selection coordination and keyboard navigation support from parent component
+- Participates in form control integration through parent group
+
+**Parent Requirements:** Must be a direct child of MatRadioGroup for proper radio button group functionality
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatRadioGroup
+<mat-radio-group name="preference">
+  <mat-radio-button
+    value="option1"
+    [checked]="selectedValue === 'option1'"
+    (change)="onOptionChange($event)">
+    Option 1
+  </mat-radio-button>
+</mat-radio-group>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
+
+// Minimal required structure for radio button group
+@Component({
+  template: `
+    <mat-radio-group name="basicChoice">
+      <mat-radio-button value="yes">Yes</mat-radio-button>
+      <mat-radio-button value="no">No</mat-radio-button>
+      <mat-radio-button value="maybe">Maybe</mat-radio-button>
+    </mat-radio-group>
+  `,
+})
+export class BasicRadioExample {}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex usage with all features and form integration
+@Component({
+  template: `
+    <form [formGroup]="surveyForm">
+      <fieldset>
+        <legend>Survey Questions</legend>
+
+        <div class="question-group">
+          <h3>How would you rate our service?</h3>
+          <mat-radio-group
+            formControlName="serviceRating"
+            name="serviceRating"
+            labelPosition="after"
+            color="primary"
+            [required]="true"
+            (change)="onRatingChange($event)"
+          >
+            <mat-radio-button
+              *ngFor="let rating of serviceRatings; trackBy: trackByValue"
+              [value]="rating.value"
+              [disabled]="rating.disabled"
+              [id]="'rating-' + rating.value"
+            >
+              {{ rating.label }}
+              <span class="rating-description">{{ rating.description }}</span>
+            </mat-radio-button>
+          </mat-radio-group>
+          <mat-error
+            *ngIf="surveyForm.get('serviceRating')?.errors?.['required']"
+          >
+            Please select a rating
+          </mat-error>
+        </div>
+
+        <div class="question-group">
+          <h3>Preferred Contact Method</h3>
+          <mat-radio-group
+            formControlName="contactMethod"
+            name="contactMethod"
+            labelPosition="before"
+            color="accent"
+            [disabledInteractive]="allowDisabledInteraction"
+          >
+            <mat-radio-button value="email">
+              <mat-icon>email</mat-icon>
+              Email
+            </mat-radio-button>
+            <mat-radio-button value="phone">
+              <mat-icon>phone</mat-icon>
+              Phone
+            </mat-radio-button>
+            <mat-radio-button value="sms" [disabled]="!smsAvailable">
+              <mat-icon>sms</mat-icon>
+              SMS (Not Available)
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </fieldset>
+    </form>
+  `,
+})
+export class AdvancedRadioExample {
+  surveyForm = this.fb.group({
+    serviceRating: ["", Validators.required],
+    contactMethod: ["email"],
+  });
+
+  allowDisabledInteraction = false;
+  smsAvailable = false;
+
+  serviceRatings = [
+    {
+      value: "excellent",
+      label: "Excellent",
+      description: "5 stars",
+      disabled: false,
+    },
+    { value: "good", label: "Good", description: "4 stars", disabled: false },
+    {
+      value: "average",
+      label: "Average",
+      description: "3 stars",
+      disabled: false,
+    },
+    { value: "poor", label: "Poor", description: "2 stars", disabled: false },
+    {
+      value: "terrible",
+      label: "Terrible",
+      description: "1 star",
+      disabled: false,
+    },
+  ];
+
+  onRatingChange(event: MatRadioChange): void {
+    console.log("Service rating changed:", event.value);
+    // Trigger additional logic based on rating
+  }
+
+  trackByValue(index: number, rating: any): any {
+    return rating.value;
+  }
+}
+```
+
+### Common Variations
+
+```typescript
+// Template-driven form integration
+@Component({
+  template: `
+    <form #surveyForm="ngForm">
+      <mat-radio-group
+        name="priority"
+        [(ngModel)]="selectedPriority"
+        #priorityControl="ngModel"
+        required
+      >
+        <mat-radio-button value="high">High Priority</mat-radio-button>
+        <mat-radio-button value="medium">Medium Priority</mat-radio-button>
+        <mat-radio-button value="low">Low Priority</mat-radio-button>
+      </mat-radio-group>
+
+      <div
+        *ngIf="priorityControl.errors?.['required'] && priorityControl.touched"
+      >
+        Priority selection is required
+      </div>
+    </form>
+  `,
+})
+export class TemplateFormRadioExample {
+  selectedPriority = "";
+}
+
+// Dynamic radio options with conditional logic
+@Component({
+  template: `
+    <mat-radio-group
+      [(value)]="selectedCategory"
+      (change)="onCategoryChange($event)"
+      name="category"
+    >
+      <mat-radio-button
+        *ngFor="let category of availableCategories"
+        [value]="category.id"
+        [disabled]="!category.available"
+      >
+        {{ category.name }}
+        <span *ngIf="!category.available" class="unavailable-text">
+          (Unavailable)
+        </span>
+      </mat-radio-button>
+    </mat-radio-group>
+
+    <div *ngIf="selectedCategory" class="category-details">
+      <h4>{{ getCategoryDetails(selectedCategory).name }}</h4>
+      <p>{{ getCategoryDetails(selectedCategory).description }}</p>
+    </div>
+  `,
+})
+export class DynamicRadioExample {
+  selectedCategory = "";
+
+  availableCategories = [
+    { id: "tech", name: "Technology", available: true },
+    { id: "health", name: "Healthcare", available: true },
+    { id: "finance", name: "Finance", available: false },
+    { id: "education", name: "Education", available: true },
+  ];
+
+  onCategoryChange(event: MatRadioChange): void {
+    console.log("Category changed:", event.value);
+  }
+
+  getCategoryDetails(categoryId: string) {
+    return this.availableCategories.find((cat) => cat.id === categoryId) || {};
+  }
+}
+
+// Programmatic selection control
+@Component({
+  template: `
+    <div class="controls">
+      <button (click)="selectOption('option1')">Select Option 1</button>
+      <button (click)="selectOption('option2')">Select Option 2</button>
+      <button (click)="clearSelection()">Clear Selection</button>
+    </div>
+
+    <mat-radio-group [(value)]="selectedOption" name="programmaticOptions">
+      <mat-radio-button value="option1">Option 1</mat-radio-button>
+      <mat-radio-button value="option2">Option 2</mat-radio-button>
+      <mat-radio-button value="option3">Option 3</mat-radio-button>
+    </mat-radio-group>
+
+    <p>Currently selected: {{ selectedOption || "None" }}</p>
+  `,
+})
+export class ProgrammaticRadioExample {
+  selectedOption = "";
+
+  selectOption(value: string): void {
+    this.selectedOption = value;
+  }
+
+  clearSelection(): void {
+    this.selectedOption = "";
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **User Interaction**: User clicks on a MatRadioButton or uses keyboard navigation
+2. **Selection Change**: MatRadioButton updates its checked state and notifies the parent group
+3. **Group Coordination**: MatRadioGroup ensures mutual exclusivity by unchecking other radio buttons
+4. **Value Update**: MatRadioGroup updates its value property to match the selected radio button
+5. **Form Integration**: If connected to a form control, MatRadioGroup reports the new value
+6. **Event Emission**: MatRadioGroup emits change event with the selected radio button and value
+
+### Context Sharing
+
+- **Selection State**: MatRadioGroup maintains the currently selected radio button and coordinates mutual exclusivity
+- **Name Attribute**: MatRadioGroup provides a shared name attribute to all child radio buttons for proper form grouping
+- **Configuration Context**: Visual settings (color, label position), accessibility attributes, and disabled state are shared from parent to children
+- **Form Control Integration**: MatRadioGroup implements ControlValueAccessor to bridge with Angular forms and validation
+
+### Event Handling
+
+- **Selection Events**: MatRadioButton emits change events that bubble up to MatRadioGroup for coordination
+- **Form Events**: MatRadioGroup coordinates with Angular forms through ControlValueAccessor callbacks
+- **Keyboard Events**: MatRadioGroup handles arrow key navigation and space/enter key selection
+- **Focus Events**: Focus management is coordinated at the group level for proper accessibility and keyboard navigation
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always use MatRadioButton within MatRadioGroup** - Radio buttons require a parent group to function properly with mutual exclusivity and form integration
+- **Provide meaningful values** - Assign distinct, meaningful values to each radio button for proper form submission and data handling
+- **Use consistent naming** - The name attribute from MatRadioGroup ensures all radio buttons are treated as a single form field
+- **Consider label positioning** - Use labelPosition consistently across the group for visual coherence
+
+### Accessibility
+
+- **ARIA relationships** - MatRadioGroup automatically manages ARIA attributes and relationships between the group and individual radio buttons
+- **Keyboard navigation** - Built-in support for arrow keys to navigate between options and space/enter to select
+- **Screen reader support** - Selection state changes are automatically announced to assistive technologies
+- **Focus management** - Proper focus indication and keyboard navigation following ARIA best practices for radio button groups
+
+### Performance
+
+- **Use trackBy functions** - When rendering radio buttons with \*ngFor, provide trackBy functions to optimize change detection
+- **Minimize radio button re-creation** - Keep radio button references stable to prevent unnecessary DOM updates
+- **Batch updates** - When programmatically changing selections, update the group value rather than individual radio button states
+
+## Common Patterns
+
+### Pattern 1: Survey and Form Questions
+
+```typescript
+// Multi-question survey with validation and conditional logic
+@Component({
+  template: `
+    <form [formGroup]="surveyForm" class="survey-form">
+      <div
+        class="question"
+        *ngFor="let question of surveyQuestions; let i = index"
+      >
+        <h3>{{ question.text }}</h3>
+        <p class="question-description">{{ question.description }}</p>
+
+        <mat-radio-group
+          [formControlName]="question.key"
+          [name]="question.key"
+          [required]="question.required"
+          (change)="onQuestionChange(question.key, $event)"
+        >
+          <mat-radio-button
+            *ngFor="let option of question.options"
+            [value]="option.value"
+          >
+            {{ option.label }}
+            <span *ngIf="option.description" class="option-description">
+              {{ option.description }}
+            </span>
+          </mat-radio-button>
+        </mat-radio-group>
+
+        <mat-error *ngIf="surveyForm.get(question.key)?.errors?.['required']">
+          {{ question.errorMessage }}
+        </mat-error>
+      </div>
+    </form>
+  `,
+})
+export class SurveyFormExample {
+  surveyForm = this.fb.group({});
+
+  surveyQuestions = [
+    {
+      key: "satisfaction",
+      text: "How satisfied are you with our service?",
+      description: "Please rate your overall experience",
+      required: true,
+      errorMessage: "Please select a satisfaction rating",
+      options: [
+        { value: "very-satisfied", label: "Very Satisfied" },
+        { value: "satisfied", label: "Satisfied" },
+        { value: "neutral", label: "Neutral" },
+        { value: "dissatisfied", label: "Dissatisfied" },
+        { value: "very-dissatisfied", label: "Very Dissatisfied" },
+      ],
+    },
+    {
+      key: "recommendation",
+      text: "Would you recommend us to others?",
+      description:
+        "Based on your experience, how likely are you to recommend our service?",
+      required: true,
+      errorMessage: "Please select a recommendation rating",
+      options: [
+        {
+          value: "definitely",
+          label: "Definitely",
+          description: "I would actively recommend",
+        },
+        {
+          value: "probably",
+          label: "Probably",
+          description: "I would likely recommend",
+        },
+        { value: "maybe", label: "Maybe", description: "I might recommend" },
+        {
+          value: "probably-not",
+          label: "Probably Not",
+          description: "I would likely not recommend",
+        },
+        {
+          value: "definitely-not",
+          label: "Definitely Not",
+          description: "I would not recommend",
+        },
+      ],
+    },
+  ];
+
+  constructor(private fb: FormBuilder) {
+    // Dynamically create form controls for each question
+    this.surveyQuestions.forEach((question) => {
+      this.surveyForm.addControl(
+        question.key,
+        this.fb.control("", question.required ? Validators.required : null),
+      );
+    });
+  }
+
+  onQuestionChange(questionKey: string, event: MatRadioChange): void {
+    console.log(`Question ${questionKey} answered:`, event.value);
+    // Implement conditional logic based on answers
+    this.handleConditionalLogic(questionKey, event.value);
+  }
+
+  private handleConditionalLogic(questionKey: string, value: string): void {
+    // Example: Show follow-up questions based on answers
+    if (
+      questionKey === "satisfaction" &&
+      (value === "dissatisfied" || value === "very-dissatisfied")
+    ) {
+      // Could add additional questions or show support contact information
+    }
+  }
+}
+```
+
+### Pattern 2: Settings and Preferences Configuration
+
+```typescript
+// Application settings with grouped radio button preferences
+@Component({
+  template: `
+    <div class="settings-panel">
+      <h2>Application Settings</h2>
+
+      <div class="setting-group" *ngFor="let setting of settingsConfig">
+        <h3>{{ setting.title }}</h3>
+        <p class="setting-description">{{ setting.description }}</p>
+
+        <mat-radio-group
+          [(value)]="userSettings[setting.key]"
+          [name]="setting.key"
+          (change)="onSettingChange(setting.key, $event)"
+          class="setting-options"
+        >
+          <mat-radio-button
+            *ngFor="let option of setting.options"
+            [value]="option.value"
+            [disabled]="option.disabled"
+          >
+            <div class="option-content">
+              <span class="option-label">{{ option.label }}</span>
+              <span class="option-description">{{ option.description }}</span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <div class="settings-actions">
+        <button mat-raised-button color="primary" (click)="saveSettings()">
+          Save Settings
+        </button>
+        <button mat-button (click)="resetSettings()">Reset to Defaults</button>
+      </div>
+    </div>
+  `,
+})
+export class SettingsConfigExample {
+  userSettings: { [key: string]: any } = {
+    theme: "light",
+    notifications: "important",
+    autoSave: "enabled",
+  };
+
+  settingsConfig = [
+    {
+      key: "theme",
+      title: "Theme Preference",
+      description: "Choose your preferred application theme",
+      options: [
+        {
+          value: "light",
+          label: "Light Theme",
+          description: "Bright background with dark text",
+          disabled: false,
+        },
+        {
+          value: "dark",
+          label: "Dark Theme",
+          description: "Dark background with light text",
+          disabled: false,
+        },
+        {
+          value: "auto",
+          label: "System Default",
+          description: "Follow system theme settings",
+          disabled: false,
+        },
+      ],
+    },
+    {
+      key: "notifications",
+      title: "Notification Settings",
+      description: "Control when you receive notifications",
+      options: [
+        {
+          value: "all",
+          label: "All Notifications",
+          description: "Receive all available notifications",
+          disabled: false,
+        },
+        {
+          value: "important",
+          label: "Important Only",
+          description: "Only critical notifications",
+          disabled: false,
+        },
+        {
+          value: "none",
+          label: "No Notifications",
+          description: "Disable all notifications",
+          disabled: false,
+        },
+      ],
+    },
+  ];
+
+  onSettingChange(settingKey: string, event: MatRadioChange): void {
+    console.log(`Setting ${settingKey} changed to:`, event.value);
+    this.userSettings[settingKey] = event.value;
+
+    // Apply setting changes immediately for certain settings
+    this.applySettingChange(settingKey, event.value);
+  }
+
+  private applySettingChange(key: string, value: string): void {
+    switch (key) {
+      case "theme":
+        this.applyTheme(value);
+        break;
+      case "notifications":
+        this.configureNotifications(value);
+        break;
+    }
+  }
+
+  private applyTheme(theme: string): void {
+    // Implementation for theme switching
+  }
+
+  private configureNotifications(level: string): void {
+    // Implementation for notification configuration
+  }
+
+  saveSettings(): void {
+    // Save settings to backend or localStorage
+    console.log("Saving settings:", this.userSettings);
+  }
+
+  resetSettings(): void {
+    // Reset to default values
+    this.userSettings = {
+      theme: "light",
+      notifications: "important",
+      autoSave: "enabled",
+    };
+  }
+}
+```

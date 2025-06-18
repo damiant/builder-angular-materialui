@@ -1,0 +1,1065 @@
+# FabButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate floating action button functionality
+
+### When to Use
+
+FabButton components are designed for the primary or most prominent action in an interface. Use floating action buttons when you need to:
+
+- **Primary application actions** - Implement the most important action users can take in the current context, such as creating new content, starting a process, or initiating the main workflow
+- **Persistent action access** - Provide constant access to a crucial action across multiple views or states of the application
+- **Call-to-action emphasis** - Draw attention to the most important action with elevated, circular design that stands out from other interface elements
+- **Multi-step workflow initiation** - Start complex processes like creating documents, adding items, composing messages, or beginning forms
+- **Quick content creation** - Enable rapid creation of new content items like posts, photos, notes, or tasks with minimal friction
+- **Mobile-first interactions** - Implement thumb-friendly actions positioned for easy reach on mobile devices
+- **Overlay actions** - Provide actions that float above content without interfering with scrolling or content consumption
+- **Progressive enhancement** - Add enhanced functionality that becomes available when users need elevated actions
+- **Speed dial expansion** - Serve as the trigger for multiple related actions when using extended FAB patterns
+- **Context-sensitive actions** - Change behavior based on current screen or user state while maintaining consistent positioning
+
+### Architecture
+
+**No Coupling**: MatFabButton is a standalone component that operates independently without requiring other components or shared context. It extends Angular Material's button foundation with specialized floating action button styling, positioning, and interaction patterns optimized for primary actions in modern interfaces.
+
+### Component Interdependencies
+
+The FabButton component group has no interdependencies - MatFabButton is a self-contained component that:
+
+- Requires no parent components or containers for basic functionality
+- Does not depend on shared context or state management systems
+- Can be used independently as the primary action element
+- Integrates seamlessly with Angular Material Icons (mat-icon) for visual content
+- Supports extended mode for combining icons with text labels
+- Provides automatic elevation, ripple effects, and Material Design animations
+- Includes built-in accessibility features and keyboard navigation support
+- Offers positioning flexibility through CSS or Angular layout directives
+
+## Components
+
+### MatFabButton {Standalone Component}
+
+A floating action button component that provides the primary action interface with elevated, circular design and Material Design animations, optimized for prominence and accessibility in modern web applications.
+
+**Purpose:** Delivers a prominent, elevated action button with Material Design floating action button styling, including circular design, elevation shadows, ripple effects, and support for both icon-only and extended text+icon configurations.
+
+**Interface:**
+
+```typescript
+interface MatFabButtonProps {
+  children: React.ReactNode; // Icon and optional text content, typically mat-icon elements
+  color?: "primary" | "accent" | "warn" | string | null; // Material Design color theme
+  disabled?: boolean; // Disables button interaction and applies disabled styling
+  disableRipple?: boolean; // Disables the Material Design ripple effect animation
+  extended?: boolean; // Expands FAB to rounded rectangle allowing text labels alongside icons
+  ariaLabel?: string; // Accessible label describing the button's primary action
+  ariaDescribedBy?: string; // References elements that provide additional description
+  tabIndex?: number; // Tab order for keyboard navigation (default: 0)
+  type?: "button" | "submit" | "reset"; // Button type for form interactions
+  id?: string; // Unique identifier for the button element
+  class?: string; // CSS classes for additional styling and positioning
+  routerLink?: string; // Angular Router navigation path for navigation FABs
+  routerLinkActive?: string; // CSS class applied when route is active
+  href?: string; // URL for anchor-based navigation (when used as anchor element)
+  target?: string; // Target window/frame for anchor navigation
+  rel?: string; // Relationship attributes for anchor elements
+  form?: string; // Associates button with a form element by ID
+  formAction?: string; // Overrides form action URL for submit FABs
+  formMethod?: string; // Overrides form method for submit FABs
+  formNoValidate?: boolean; // Bypasses form validation for submit FABs
+  title?: string; // Tooltip text displayed on hover
+  role?: string; // ARIA role override (default: "button")
+  "data-*"?: string; // Custom data attributes for analytics or testing
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
+function BasicFabButtonExample() {
+  return (
+    <button
+      mat-fab
+      color="primary"
+      (click)="createNewItem()"
+      aria-label="Create new item"
+      title="Create a new item"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatFabButton } from "@angular/material/button";
+import { MatIcon } from "@angular/material/icon";
+
+// Simple floating action button with primary action
+@Component({
+  template: `
+    <button
+      mat-fab
+      color="primary"
+      (click)="performPrimaryAction()"
+      aria-label="Add new item"
+      title="Add new item"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      button[mat-fab] {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+    `,
+  ],
+})
+class BasicFabComponent {
+  performPrimaryAction() {
+    console.log("Primary action triggered");
+  }
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Floating action button with extended mode, state management, and animations
+@Component({
+  template: `
+    <div class="fab-container">
+      <!-- Standard FAB with color theming -->
+      <button
+        mat-fab
+        [color]="fabColor"
+        (click)="triggerMainAction()"
+        [disabled]="isActionDisabled"
+        aria-label="Create new document"
+        title="Create new document"
+        [@fabAnimation]="fabState"
+      >
+        <mat-icon>{{ isLoading ? "hourglass_empty" : "add" }}</mat-icon>
+      </button>
+
+      <!-- Extended FAB with text and icon -->
+      <button
+        mat-fab
+        extended="true"
+        color="accent"
+        (click)="startQuickAction()"
+        [class.extended-visible]="showExtended"
+        aria-label="Quick compose message"
+        title="Compose a new message"
+      >
+        <mat-icon>edit</mat-icon>
+        <span>Compose</span>
+      </button>
+
+      <!-- Navigation FAB with router integration -->
+      <a
+        mat-fab
+        routerLink="/dashboard"
+        routerLinkActive="active-fab"
+        color="primary"
+        aria-label="Go to dashboard"
+        title="Navigate to dashboard"
+      >
+        <mat-icon>dashboard</mat-icon>
+      </a>
+
+      <!-- Form submit FAB -->
+      <button
+        mat-fab
+        type="submit"
+        form="mainForm"
+        color="warn"
+        [disabled]="mainForm.invalid || isSubmitting"
+        aria-label="Submit form data"
+        title="Submit the form"
+      >
+        <mat-icon>{{ isSubmitting ? "sync" : "send" }}</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .fab-container {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        z-index: 1000;
+      }
+
+      .extended-visible {
+        transform: translateX(0);
+        opacity: 1;
+        transition: all 0.3s ease;
+      }
+
+      .extended-visible:not(.extended-visible) {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+
+      .active-fab {
+        background-color: #673ab7;
+      }
+    `,
+  ],
+  animations: [
+    trigger("fabAnimation", [
+      state("normal", style({ transform: "scale(1) rotate(0deg)" })),
+      state("loading", style({ transform: "scale(0.9) rotate(360deg)" })),
+      transition("normal => loading", animate("300ms ease-in-out")),
+      transition("loading => normal", animate("300ms ease-in-out")),
+    ]),
+  ],
+})
+class AdvancedFabComponent {
+  fabColor: ThemePalette = "primary";
+  isActionDisabled = false;
+  isLoading = false;
+  showExtended = true;
+  isSubmitting = false;
+  fabState = "normal";
+
+  triggerMainAction() {
+    this.isLoading = true;
+    this.fabState = "loading";
+
+    // Simulate async operation
+    setTimeout(() => {
+      this.isLoading = false;
+      this.fabState = "normal";
+    }, 2000);
+  }
+
+  startQuickAction() {
+    // Quick action implementation
+  }
+}
+```
+
+### Common Variations
+
+**Speed Dial Pattern:**
+
+```tsx
+// Multiple FABs arranged for speed dial functionality
+@Component({
+  template: `
+    <div class="speed-dial-container" [class.opened]="isSpeedDialOpen">
+      <!-- Main trigger FAB -->
+      <button
+        mat-fab
+        color="primary"
+        (click)="toggleSpeedDial()"
+        [attr.aria-label]="
+          isSpeedDialOpen ? 'Close actions menu' : 'Open actions menu'
+        "
+        [attr.aria-expanded]="isSpeedDialOpen"
+        [title]="isSpeedDialOpen ? 'Close actions' : 'More actions'"
+        class="main-fab"
+      >
+        <mat-icon [@rotateIcon]="isSpeedDialOpen ? 'rotated' : 'normal'">
+          {{ isSpeedDialOpen ? "close" : "add" }}
+        </mat-icon>
+      </button>
+
+      <!-- Speed dial actions -->
+      <div class="speed-dial-actions" [@speedDialAnimation]="speedDialState">
+        <button
+          mat-fab
+          color="accent"
+          (click)="createDocument()"
+          aria-label="Create document"
+          title="Create new document"
+          class="speed-dial-action"
+        >
+          <mat-icon>description</mat-icon>
+        </button>
+
+        <button
+          mat-fab
+          color="accent"
+          (click)="uploadFile()"
+          aria-label="Upload file"
+          title="Upload file"
+          class="speed-dial-action"
+        >
+          <mat-icon>cloud_upload</mat-icon>
+        </button>
+
+        <button
+          mat-fab
+          color="accent"
+          (click)="createFolder()"
+          aria-label="Create folder"
+          title="Create new folder"
+          class="speed-dial-action"
+        >
+          <mat-icon>folder</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .speed-dial-container {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+
+      .main-fab {
+        position: relative;
+        z-index: 2;
+      }
+
+      .speed-dial-actions {
+        position: absolute;
+        bottom: 72px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .speed-dial-action {
+        transform: scale(0.8);
+      }
+
+      .opened .speed-dial-action {
+        transform: scale(1);
+      }
+    `,
+  ],
+  animations: [
+    trigger("speedDialAnimation", [
+      state(
+        "closed",
+        style({
+          opacity: 0,
+          transform: "translateY(20px)",
+          pointerEvents: "none",
+        }),
+      ),
+      state(
+        "open",
+        style({
+          opacity: 1,
+          transform: "translateY(0)",
+          pointerEvents: "auto",
+        }),
+      ),
+      transition("closed => open", animate("200ms ease-out")),
+      transition("open => closed", animate("150ms ease-in")),
+    ]),
+    trigger("rotateIcon", [
+      state("normal", style({ transform: "rotate(0deg)" })),
+      state("rotated", style({ transform: "rotate(45deg)" })),
+      transition("normal => rotated", animate("200ms ease-in-out")),
+      transition("rotated => normal", animate("200ms ease-in-out")),
+    ]),
+  ],
+})
+class SpeedDialFabExample {
+  isSpeedDialOpen = false;
+  speedDialState = "closed";
+
+  toggleSpeedDial() {
+    this.isSpeedDialOpen = !this.isSpeedDialOpen;
+    this.speedDialState = this.isSpeedDialOpen ? "open" : "closed";
+  }
+
+  createDocument() {
+    this.toggleSpeedDial();
+    // Create document logic
+  }
+
+  uploadFile() {
+    this.toggleSpeedDial();
+    // Upload file logic
+  }
+
+  createFolder() {
+    this.toggleSpeedDial();
+    // Create folder logic
+  }
+}
+```
+
+**Contextual FAB Pattern:**
+
+```tsx
+// FAB that changes based on current context or route
+@Component({
+  template: `
+    <button
+      mat-fab
+      [color]="getCurrentFabColor()"
+      (click)="performContextualAction()"
+      [attr.aria-label]="getCurrentActionLabel()"
+      [title]="getCurrentActionLabel()"
+      class="contextual-fab"
+      [@fabTransition]="currentContext"
+    >
+      <mat-icon>{{ getCurrentActionIcon() }}</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      .contextual-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+    `,
+  ],
+  animations: [
+    trigger("fabTransition", [
+      transition("* => *", [
+        style({ transform: "scale(0.8)", opacity: 0.7 }),
+        animate(
+          "200ms ease-in-out",
+          style({ transform: "scale(1)", opacity: 1 }),
+        ),
+      ]),
+    ]),
+  ],
+})
+class ContextualFabExample implements OnInit, OnDestroy {
+  currentContext: string = "";
+  private routerSubscription: Subscription;
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.routerSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.updateContext(event.url);
+      });
+  }
+
+  ngOnDestroy() {
+    this.routerSubscription?.unsubscribe();
+  }
+
+  updateContext(url: string) {
+    if (url.includes("/documents")) {
+      this.currentContext = "documents";
+    } else if (url.includes("/contacts")) {
+      this.currentContext = "contacts";
+    } else if (url.includes("/calendar")) {
+      this.currentContext = "calendar";
+    } else {
+      this.currentContext = "default";
+    }
+  }
+
+  getCurrentFabColor(): ThemePalette {
+    const colorMap: Record<string, ThemePalette> = {
+      documents: "primary",
+      contacts: "accent",
+      calendar: "warn",
+      default: "primary",
+    };
+    return colorMap[this.currentContext] || "primary";
+  }
+
+  getCurrentActionIcon(): string {
+    const iconMap: Record<string, string> = {
+      documents: "add",
+      contacts: "person_add",
+      calendar: "event",
+      default: "add",
+    };
+    return iconMap[this.currentContext] || "add";
+  }
+
+  getCurrentActionLabel(): string {
+    const labelMap: Record<string, string> = {
+      documents: "Create new document",
+      contacts: "Add new contact",
+      calendar: "Create new event",
+      default: "Create new item",
+    };
+    return labelMap[this.currentContext] || "Create new item";
+  }
+
+  performContextualAction() {
+    switch (this.currentContext) {
+      case "documents":
+        this.createDocument();
+        break;
+      case "contacts":
+        this.addContact();
+        break;
+      case "calendar":
+        this.createEvent();
+        break;
+      default:
+        this.defaultAction();
+        break;
+    }
+  }
+
+  private createDocument() {
+    /* Implementation */
+  }
+  private addContact() {
+    /* Implementation */
+  }
+  private createEvent() {
+    /* Implementation */
+  }
+  private defaultAction() {
+    /* Implementation */
+  }
+}
+```
+
+**Mobile-Optimized Pattern:**
+
+```tsx
+// FAB with mobile-specific positioning and behavior
+@Component({
+  template: `
+    <button
+      mat-fab
+      color="primary"
+      (click)="performAction()"
+      aria-label="Primary action"
+      title="Primary action"
+      class="mobile-fab"
+      [class.fab-hidden]="isScrollingDown"
+      [@fabSlide]="fabVisibility"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      .mobile-fab {
+        position: fixed;
+        bottom: 88px; /* Account for mobile bottom navigation */
+        right: 16px;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-fab {
+          bottom: 72px;
+          right: 16px;
+          transform: scale(0.9); /* Slightly smaller on mobile */
+        }
+      }
+
+      @media (max-width: 480px) {
+        .mobile-fab {
+          bottom: 60px;
+          right: 12px;
+          transform: scale(0.85);
+        }
+      }
+
+      .fab-hidden {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+    `,
+  ],
+  animations: [
+    trigger("fabSlide", [
+      state(
+        "visible",
+        style({
+          transform: "translateY(0)",
+          opacity: 1,
+        }),
+      ),
+      state(
+        "hidden",
+        style({
+          transform: "translateY(100px)",
+          opacity: 0,
+        }),
+      ),
+      transition("visible => hidden", animate("300ms ease-in")),
+      transition("hidden => visible", animate("300ms ease-out")),
+    ]),
+  ],
+})
+class MobileFabExample implements OnInit, OnDestroy {
+  isScrollingDown = false;
+  fabVisibility = "visible";
+  private lastScrollTop = 0;
+  private scrollSubscription: Subscription;
+
+  ngOnInit() {
+    this.scrollSubscription = fromEvent(window, "scroll")
+      .pipe(throttleTime(100))
+      .subscribe(() => this.handleScroll());
+  }
+
+  ngOnDestroy() {
+    this.scrollSubscription?.unsubscribe();
+  }
+
+  handleScroll() {
+    const currentScrollTop =
+      window.pageYOffset || document.documentElement.scrollTop;
+
+    if (currentScrollTop > this.lastScrollTop && currentScrollTop > 100) {
+      // Scrolling down
+      this.isScrollingDown = true;
+      this.fabVisibility = "hidden";
+    } else {
+      // Scrolling up
+      this.isScrollingDown = false;
+      this.fabVisibility = "visible";
+    }
+
+    this.lastScrollTop = currentScrollTop;
+  }
+
+  performAction() {
+    // Primary action implementation
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Reserve for primary actions** - Use FABs only for the single most important action in the current context, avoiding multiple FABs competing for attention
+- **Maintain consistent positioning** - Place FABs in consistent locations across the application (typically bottom-right) to establish user expectations
+- **Provide clear visual hierarchy** - Ensure FABs visually stand out from other buttons through elevation, color, and size differences
+- **Use meaningful icons** - Choose universally recognizable icons that clearly communicate the primary action without requiring text explanation
+- **Consider mobile ergonomics** - Position FABs within comfortable thumb reach on mobile devices and account for virtual keyboards
+- **Implement progressive disclosure** - Use speed dial patterns sparingly and only when multiple related primary actions are genuinely needed
+- **Avoid overuse** - Limit to one primary FAB per screen to maintain the design pattern's effectiveness and visual hierarchy
+
+### Accessibility
+
+- **Descriptive labels are essential** - Always provide clear aria-label attributes that describe the specific action the FAB will perform
+- **Keyboard navigation support** - Ensure FABs are reachable and activatable via keyboard navigation with proper focus indicators
+- **Screen reader compatibility** - Use semantic button elements and provide appropriate ARIA attributes for state changes and dynamic content
+- **High contrast compliance** - Leverage Material Design color tokens to ensure adequate contrast ratios for accessibility standards
+- **Focus management** - Implement proper focus handling when FABs trigger dialogs, navigation, or other state changes
+- **State announcements** - Provide appropriate ARIA live regions for dynamic state changes like loading states or completion feedback
+- **Touch target sizing** - Maintain minimum 44px touch targets for mobile accessibility compliance and usability
+
+### Performance
+
+- **Optimize icon loading** - Use icon fonts or optimized SVG icons to minimize loading impact, especially for frequently used FAB icons
+- **Animation performance** - Leverage CSS transforms and opacity for smooth animations while avoiding layout-triggering properties
+- **Event handling efficiency** - Debounce rapid clicks and implement loading states to prevent multiple action triggers
+- **Memory management** - Properly dispose of subscriptions and event listeners, especially for scroll-based hiding behaviors
+- **Lazy loading considerations** - Consider lazy loading complex FAB interactions or speed dial components until needed
+- **Bundle optimization** - Import only necessary Material Design components to minimize application bundle size
+
+## Common Patterns
+
+### Pattern 1: Creation Workflow Initiation
+
+```tsx
+// FAB that initiates multi-step creation workflows with progress feedback
+@Component({
+  template: `
+    <button
+      mat-fab
+      color="primary"
+      (click)="startCreationWorkflow()"
+      [disabled]="isCreating"
+      aria-label="Create new project"
+      title="Start new project creation"
+      class="creation-fab"
+    >
+      <mat-icon *ngIf="!isCreating">add</mat-icon>
+      <mat-icon *ngIf="isCreating" class="spinning-icon">sync</mat-icon>
+    </button>
+
+    <!-- Creation progress indicator -->
+    <div *ngIf="isCreating" class="creation-progress">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <span class="progress-text">{{ currentCreationStep }}</span>
+    </div>
+  `,
+  styles: [
+    `
+      .creation-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+
+      .spinning-icon {
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .creation-progress {
+        position: fixed;
+        bottom: 88px;
+        right: 16px;
+        background: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 999;
+        min-width: 200px;
+      }
+
+      .progress-text {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+    `,
+  ],
+})
+class CreationWorkflowFabExample {
+  isCreating = false;
+  currentCreationStep = "";
+
+  async startCreationWorkflow() {
+    this.isCreating = true;
+
+    try {
+      this.currentCreationStep = "Initializing project...";
+      await this.initializeProject();
+
+      this.currentCreationStep = "Setting up workspace...";
+      await this.setupWorkspace();
+
+      this.currentCreationStep = "Finalizing...";
+      await this.finalizeCreation();
+
+      // Navigate to created project or show success
+      this.navigateToCreatedProject();
+    } catch (error) {
+      this.handleCreationError(error);
+    } finally {
+      this.isCreating = false;
+      this.currentCreationStep = "";
+    }
+  }
+
+  private async initializeProject(): Promise<void> {
+    // Project initialization logic
+    return new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  private async setupWorkspace(): Promise<void> {
+    // Workspace setup logic
+    return new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+
+  private async finalizeCreation(): Promise<void> {
+    // Finalization logic
+    return new Promise((resolve) => setTimeout(resolve, 800));
+  }
+
+  private navigateToCreatedProject(): void {
+    // Navigation logic
+  }
+
+  private handleCreationError(error: any): void {
+    // Error handling logic
+  }
+}
+```
+
+### Pattern 2: Context-Aware Action FAB
+
+```tsx
+// FAB that adapts its behavior based on user selection or application state
+@Component({
+  template: `
+    <button
+      mat-fab
+      [color]="getFabColor()"
+      (click)="performContextualAction()"
+      [disabled]="!hasValidContext()"
+      [attr.aria-label]="getContextualLabel()"
+      [title]="getContextualLabel()"
+      class="context-fab"
+      [@fabColorTransition]="currentActionType"
+    >
+      <mat-icon>{{ getContextualIcon() }}</mat-icon>
+    </button>
+
+    <!-- Context indicator -->
+    <div *ngIf="selectedItems.length > 0" class="context-indicator">
+      {{ selectedItems.length }} item{{
+        selectedItems.length !== 1 ? "s" : ""
+      }}
+      selected
+    </div>
+  `,
+  styles: [
+    `
+      .context-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+
+      .context-indicator {
+        position: fixed;
+        bottom: 88px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        z-index: 999;
+      }
+    `,
+  ],
+  animations: [
+    trigger("fabColorTransition", [
+      transition("* => *", [
+        style({ transform: "scale(0.9)" }),
+        animate("200ms ease-in-out", style({ transform: "scale(1)" })),
+      ]),
+    ]),
+  ],
+})
+class ContextAwareFabExample {
+  selectedItems: any[] = [];
+  currentView: "list" | "gallery" | "table" = "list";
+  currentActionType: "create" | "batch" | "share" = "create";
+
+  getFabColor(): ThemePalette {
+    if (this.selectedItems.length === 0) return "primary";
+    if (this.selectedItems.length === 1) return "accent";
+    return "warn"; // Multiple selection
+  }
+
+  getContextualIcon(): string {
+    if (this.selectedItems.length === 0) return "add";
+    if (this.selectedItems.length === 1) return "edit";
+    return "done_all"; // Batch action
+  }
+
+  getContextualLabel(): string {
+    if (this.selectedItems.length === 0) return "Create new item";
+    if (this.selectedItems.length === 1) return "Edit selected item";
+    return `Process ${this.selectedItems.length} selected items`;
+  }
+
+  hasValidContext(): boolean {
+    return true; // Can always create or has selection
+  }
+
+  performContextualAction() {
+    if (this.selectedItems.length === 0) {
+      this.createNewItem();
+    } else if (this.selectedItems.length === 1) {
+      this.editSelectedItem();
+    } else {
+      this.processBatchSelection();
+    }
+  }
+
+  private createNewItem() {
+    this.currentActionType = "create";
+    // Create new item logic
+  }
+
+  private editSelectedItem() {
+    this.currentActionType = "batch";
+    // Edit single item logic
+  }
+
+  private processBatchSelection() {
+    this.currentActionType = "share";
+    // Batch processing logic
+  }
+
+  // Called by parent component when selection changes
+  onSelectionChange(items: any[]) {
+    this.selectedItems = items;
+    this.updateActionType();
+  }
+
+  private updateActionType() {
+    if (this.selectedItems.length === 0) {
+      this.currentActionType = "create";
+    } else if (this.selectedItems.length === 1) {
+      this.currentActionType = "batch";
+    } else {
+      this.currentActionType = "share";
+    }
+  }
+}
+```
+
+### Pattern 3: Extended FAB with Text
+
+```tsx
+// Extended FAB that combines icon and text for enhanced clarity
+@Component({
+  template: `
+    <button
+      mat-fab
+      extended="true"
+      color="primary"
+      (click)="composeMessage()"
+      [class.expanded]="isExpanded"
+      aria-label="Compose new message"
+      title="Start composing a new message"
+      class="compose-fab"
+      (mouseenter)="expandFab()"
+      (mouseleave)="collapseFab()"
+    >
+      <mat-icon>edit</mat-icon>
+      <span class="fab-text" [@textAnimation]="textState">Compose</span>
+    </button>
+
+    <!-- Secondary extended FAB -->
+    <button
+      mat-fab
+      extended="true"
+      color="accent"
+      (click)="quickReply()"
+      [disabled]="!hasActiveConversation"
+      aria-label="Quick reply to current conversation"
+      title="Send a quick reply"
+      class="reply-fab"
+    >
+      <mat-icon>reply</mat-icon>
+      <span>Quick Reply</span>
+    </button>
+  `,
+  styles: [
+    `
+      .compose-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .reply-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 180px; /* Account for compose FAB width */
+        z-index: 1000;
+      }
+
+      .expanded {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .fab-text {
+        margin-left: 8px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      @media (max-width: 768px) {
+        .reply-fab {
+          bottom: 80px; /* Stack vertically on mobile */
+          right: 16px;
+        }
+      }
+    `,
+  ],
+  animations: [
+    trigger("textAnimation", [
+      state(
+        "normal",
+        style({
+          opacity: 1,
+          transform: "translateX(0)",
+        }),
+      ),
+      state(
+        "highlight",
+        style({
+          opacity: 1,
+          transform: "translateX(2px)",
+          color: "#fff",
+        }),
+      ),
+      transition("normal => highlight", animate("200ms ease-out")),
+      transition("highlight => normal", animate("200ms ease-in")),
+    ]),
+  ],
+})
+class ExtendedFabExample {
+  isExpanded = false;
+  textState = "normal";
+  hasActiveConversation = false;
+
+  expandFab() {
+    this.isExpanded = true;
+    this.textState = "highlight";
+  }
+
+  collapseFab() {
+    this.isExpanded = false;
+    this.textState = "normal";
+  }
+
+  composeMessage() {
+    // Open compose dialog or navigate to compose view
+    this.openComposeDialog();
+  }
+
+  quickReply() {
+    if (this.hasActiveConversation) {
+      // Open quick reply interface
+      this.openQuickReplyDialog();
+    }
+  }
+
+  private openComposeDialog() {
+    // Dialog or navigation logic
+  }
+
+  private openQuickReplyDialog() {
+    // Quick reply interface logic
+  }
+}
+```

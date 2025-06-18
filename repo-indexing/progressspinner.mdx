@@ -1,0 +1,745 @@
+# ProgressSpinner Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate progress spinner functionality
+
+### When to Use
+
+ProgressSpinner components are essential for providing visual feedback during asynchronous operations and data loading states. Use them when you need to:
+
+- **Data loading indicators** - Show progress while fetching data from APIs, databases, or external services
+- **File upload progress** - Display upload completion percentage with determinate progress visualization
+- **Form submission feedback** - Provide immediate visual confirmation that form data is being processed
+- **Background task monitoring** - Indicate ongoing operations like data processing, calculations, or batch operations
+- **Page transition states** - Show loading states during route changes or component initialization
+- **Search and filtering operations** - Display progress while applying complex filters or search queries
+- **Media loading indicators** - Show progress for image, video, or audio content loading
+- **Download progress tracking** - Visualize file download completion with percentage-based feedback
+- **Authentication flows** - Indicate login, logout, or token refresh operations in progress
+- **Dashboard refresh states** - Show when dashboard data or widgets are being updated
+- **Bulk operation feedback** - Display progress for operations affecting multiple items or records
+- **Real-time sync indicators** - Show synchronization progress for offline-to-online data updates
+
+### Architecture
+
+**No Coupling**: The ProgressSpinner component is a standalone component that operates independently without requiring other components for functionality. It provides self-contained progress indication with flexible configuration options for various loading scenarios.
+
+## Components
+
+### MatProgressSpinner {Standalone Component}
+
+A circular progress indicator that provides visual feedback for loading states and progress tracking with support for both determinate and indeterminate modes.
+
+**Purpose:** Displays circular progress indicators with customizable appearance, supporting both known progress percentages (determinate mode) and unknown progress states (indeterminate mode) for comprehensive loading feedback.
+
+**Interface:**
+
+```typescript
+interface MatProgressSpinnerProps {
+  mode: "determinate" | "indeterminate"; // Progress display mode (default: 'determinate')
+  value?: number; // Progress percentage (0-100) for determinate mode
+  diameter?: number; // Spinner diameter in pixels (default: 40)
+  strokeWidth?: number; // Stroke thickness in pixels (default: diameter / 10)
+  color?: "primary" | "accent" | "warn"; // Theme color palette
+  class?: string; // Additional CSS classes for customization
+  "aria-label"?: string; // Accessibility label for screen readers
+  "aria-labelledby"?: string; // Reference to element providing description
+}
+
+interface ProgressSpinnerConfig {
+  diameter?: number; // Default diameter for all spinners
+  strokeWidth?: number; // Default stroke width
+  mode?: "determinate" | "indeterminate"; // Default mode
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+
+// Indeterminate loading spinner
+function IndeterminateExample() {
+  return (
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="50"
+      strokeWidth="5"
+      color="primary"
+      aria-label="Loading content"
+    ></mat-progress-spinner>
+  );
+}
+
+// Determinate progress with percentage
+function DeterminateExample() {
+  return (
+    <mat-progress-spinner
+      mode="determinate"
+      value="75"
+      diameter="60"
+      strokeWidth="4"
+      color="accent"
+      aria-label="Upload progress: 75%"
+    ></mat-progress-spinner>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Loading States
+
+```tsx
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
+
+// Simple loading indicator
+@Component({
+  template: `
+    <div class="loading-container" *ngIf="isLoading">
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="40"
+        color="primary"
+        aria-label="Loading data"
+      >
+      </mat-progress-spinner>
+      <p>Loading...</p>
+    </div>
+  `,
+  styles: [
+    `
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .loading-container p {
+        margin-top: 16px;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class BasicLoadingExample {
+  isLoading = true;
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  private async loadData(): Promise<void> {
+    try {
+      await this.dataService.fetchData();
+    } finally {
+      this.isLoading = false;
+    }
+  }
+}
+```
+
+### Progress Tracking with Percentage
+
+```tsx
+// File upload with progress tracking
+@Component({
+  template: `
+    <div class="upload-container">
+      <mat-progress-spinner
+        *ngIf="uploadProgress < 100"
+        mode="determinate"
+        [value]="uploadProgress"
+        diameter="80"
+        strokeWidth="6"
+        color="primary"
+        [aria-label]="'Upload progress: ' + uploadProgress + '%'"
+      >
+      </mat-progress-spinner>
+
+      <mat-icon *ngIf="uploadProgress === 100" class="success-icon">
+        check_circle
+      </mat-icon>
+
+      <div class="progress-info">
+        <span class="progress-text">
+          {{ uploadProgress < 100 ? "Uploading..." : "Upload Complete!" }}
+        </span>
+        <span class="progress-percentage">{{ uploadProgress }}%</span>
+      </div>
+
+      <button mat-button (click)="startUpload()" [disabled]="isUploading">
+        {{ isUploading ? "Uploading..." : "Start Upload" }}
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .upload-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
+      .progress-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 16px 0;
+      }
+
+      .progress-text {
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .progress-percentage {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1976d2;
+      }
+
+      .success-icon {
+        font-size: 80px;
+        color: #4caf50;
+      }
+    `,
+  ],
+})
+export class ProgressTrackingExample {
+  uploadProgress = 0;
+  isUploading = false;
+
+  startUpload(): void {
+    this.isUploading = true;
+    this.uploadProgress = 0;
+
+    const interval = setInterval(() => {
+      this.uploadProgress += Math.random() * 15;
+
+      if (this.uploadProgress >= 100) {
+        this.uploadProgress = 100;
+        this.isUploading = false;
+        clearInterval(interval);
+      }
+    }, 500);
+  }
+}
+```
+
+### Multiple Simultaneous Operations
+
+```tsx
+// Dashboard with multiple loading states
+@Component({
+  template: `
+    <div class="dashboard-grid">
+      <mat-card *ngFor="let widget of widgets" class="dashboard-widget">
+        <mat-card-header>
+          <mat-card-title>{{ widget.title }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div *ngIf="widget.loading" class="widget-loading">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="32"
+              strokeWidth="3"
+              color="primary"
+              [aria-label]="'Loading ' + widget.title"
+            >
+            </mat-progress-spinner>
+          </div>
+
+          <div *ngIf="!widget.loading" class="widget-content">
+            {{ widget.data }}
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button
+            mat-button
+            (click)="refreshWidget(widget)"
+            [disabled]="widget.loading"
+          >
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .dashboard-widget {
+        min-height: 200px;
+      }
+
+      .widget-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 120px;
+      }
+
+      .widget-content {
+        padding: 20px;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+    `,
+  ],
+})
+export class DashboardLoadingExample {
+  widgets = [
+    { id: 1, title: "Sales Data", loading: true, data: "$45,230" },
+    { id: 2, title: "User Analytics", loading: true, data: "1,247 users" },
+    { id: 3, title: "Performance", loading: false, data: "98.5% uptime" },
+  ];
+
+  ngOnInit(): void {
+    this.loadAllWidgets();
+  }
+
+  refreshWidget(widget: any): void {
+    widget.loading = true;
+
+    // Simulate API call
+    setTimeout(() => {
+      widget.loading = false;
+      widget.data = this.generateRandomData(widget.title);
+    }, 2000);
+  }
+
+  private loadAllWidgets(): void {
+    this.widgets.forEach((widget, index) => {
+      if (widget.loading) {
+        setTimeout(
+          () => {
+            widget.loading = false;
+          },
+          (index + 1) * 1000,
+        );
+      }
+    });
+  }
+
+  private generateRandomData(title: string): string {
+    // Generate mock data based on widget type
+    switch (title) {
+      case "Sales Data":
+        return `$${Math.floor(Math.random() * 100000).toLocaleString()}`;
+      case "User Analytics":
+        return `${Math.floor(Math.random() * 10000).toLocaleString()} users`;
+      case "Performance":
+        return `${(Math.random() * 100).toFixed(1)}% uptime`;
+      default:
+        return "Data loaded";
+    }
+  }
+}
+```
+
+### Form Submission with Progress
+
+```tsx
+// Complex form with submission progress
+@Component({
+  template: `
+    <form
+      [formGroup]="profileForm"
+      (ngSubmit)="submitForm()"
+      class="profile-form"
+    >
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Update Profile</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Bio</mat-label>
+            <textarea matInput rows="4" formControlName="bio"></textarea>
+          </mat-form-field>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button
+            mat-button
+            type="button"
+            (click)="resetForm()"
+            [disabled]="isSubmitting"
+          >
+            Reset
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="profileForm.invalid || isSubmitting"
+            class="submit-button"
+          >
+            <mat-progress-spinner
+              *ngIf="isSubmitting"
+              mode="indeterminate"
+              diameter="18"
+              strokeWidth="2"
+              color="primary"
+              class="button-spinner"
+              aria-label="Saving profile"
+            >
+            </mat-progress-spinner>
+
+            <span [class.hidden]="isSubmitting">Save Profile</span>
+            <span *ngIf="isSubmitting">Saving...</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  `,
+  styles: [
+    `
+      .profile-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .full-width {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      .submit-button {
+        position: relative;
+        min-width: 140px;
+      }
+
+      .button-spinner {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+    `,
+  ],
+})
+export class FormProgressExample {
+  profileForm = this.fb.group({
+    firstName: ["", Validators.required],
+    email: ["", [Validators.required, Validators.email]],
+    bio: [""],
+  });
+
+  isSubmitting = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private snackBar: MatSnackBar,
+  ) {}
+
+  async submitForm(): Promise<void> {
+    if (this.profileForm.valid) {
+      this.isSubmitting = true;
+
+      try {
+        await this.profileService.updateProfile(this.profileForm.value);
+        this.snackBar.open("Profile updated successfully!", "Close", {
+          duration: 3000,
+        });
+      } catch (error) {
+        this.snackBar.open(
+          "Error updating profile. Please try again.",
+          "Close",
+          {
+            duration: 5000,
+          },
+        );
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  }
+
+  resetForm(): void {
+    this.profileForm.reset();
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Provide meaningful labels** - Always include aria-label or aria-labelledby attributes to describe the loading operation for screen readers
+- **Choose appropriate modes** - Use determinate mode when progress can be measured, indeterminate mode for unknown duration operations
+- **Size appropriately** - Match spinner size to the UI context - smaller for buttons (16-24px), larger for main content areas (40-80px)
+- **Use consistent colors** - Follow your application's color scheme using the color property to maintain visual coherence
+
+### Accessibility
+
+- **Screen reader support** - ProgressSpinner automatically provides ARIA live region updates for progress changes and completion states
+- **Descriptive labeling** - Use aria-label to describe what is loading: "Loading search results" rather than just "Loading"
+- **Focus management** - Consider announcing completion states and managing focus appropriately when loading completes
+- **Progress announcements** - For determinate progress, provide periodic announcements of progress milestones (25%, 50%, 75% complete)
+
+### Performance
+
+- **Conditional rendering** - Only render spinners when actually needed using \*ngIf to avoid unnecessary DOM elements
+- **Optimize animations** - Angular Material spinners use CSS transforms for smooth performance, avoid interfering with transform properties
+- **Memory management** - Clear intervals and subscriptions that update progress values to prevent memory leaks
+- **Debounce rapid updates** - For rapidly changing progress values, consider debouncing updates to reduce rendering overhead
+
+## Common Patterns
+
+### Pattern 1: Overlay Loading States
+
+```tsx
+// Full-screen or section overlay with spinner
+@Component({
+  template: `
+    <div class="content-container">
+      <!-- Main content -->
+      <div class="main-content" [class.blurred]="isLoading">
+        <h2>Dashboard Content</h2>
+        <p>Your dashboard data and widgets would appear here.</p>
+      </div>
+
+      <!-- Loading overlay -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <div class="loading-content">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="64"
+            strokeWidth="4"
+            color="primary"
+            aria-label="Loading dashboard data"
+          >
+          </mat-progress-spinner>
+          <h3>Loading Dashboard</h3>
+          <p>Please wait while we fetch your data...</p>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .content-container {
+        position: relative;
+        min-height: 400px;
+      }
+
+      .main-content {
+        transition: filter 0.3s ease;
+      }
+
+      .main-content.blurred {
+        filter: blur(2px);
+        pointer-events: none;
+      }
+
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      }
+
+      .loading-content {
+        text-align: center;
+        padding: 32px;
+      }
+
+      .loading-content h3 {
+        margin: 24px 0 8px 0;
+        color: #333;
+      }
+
+      .loading-content p {
+        margin: 0;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class OverlayLoadingExample {
+  isLoading = true;
+
+  ngOnInit(): void {
+    // Simulate data loading
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 3000);
+  }
+}
+```
+
+### Pattern 2: Button Loading States
+
+```tsx
+// Buttons with integrated loading spinners
+@Component({
+  template: `
+    <div class="button-examples">
+      <h3>Action Buttons with Loading States</h3>
+
+      <div class="button-row">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="performPrimaryAction()"
+          [disabled]="primaryLoading"
+          class="action-button"
+        >
+          <mat-progress-spinner
+            *ngIf="primaryLoading"
+            mode="indeterminate"
+            diameter="16"
+            strokeWidth="2"
+            class="button-spinner"
+          >
+          </mat-progress-spinner>
+          <mat-icon *ngIf="!primaryLoading">save</mat-icon>
+          {{ primaryLoading ? "Saving..." : "Save Changes" }}
+        </button>
+
+        <button
+          mat-stroked-button
+          (click)="performSecondaryAction()"
+          [disabled]="secondaryLoading"
+          class="action-button"
+        >
+          <mat-progress-spinner
+            *ngIf="secondaryLoading"
+            mode="indeterminate"
+            diameter="16"
+            strokeWidth="2"
+            class="button-spinner"
+          >
+          </mat-progress-spinner>
+          <mat-icon *ngIf="!secondaryLoading">refresh</mat-icon>
+          {{ secondaryLoading ? "Refreshing..." : "Refresh Data" }}
+        </button>
+
+        <button
+          mat-button
+          color="warn"
+          (click)="performDeleteAction()"
+          [disabled]="deleteLoading"
+          class="action-button"
+        >
+          <mat-progress-spinner
+            *ngIf="deleteLoading"
+            mode="indeterminate"
+            diameter="16"
+            strokeWidth="2"
+            class="button-spinner"
+          >
+          </mat-progress-spinner>
+          <mat-icon *ngIf="!deleteLoading">delete</mat-icon>
+          {{ deleteLoading ? "Deleting..." : "Delete Item" }}
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .button-examples {
+        padding: 24px;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .action-button {
+        position: relative;
+        min-width: 140px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .button-spinner {
+        margin-right: 8px;
+      }
+    `,
+  ],
+})
+export class ButtonLoadingExample {
+  primaryLoading = false;
+  secondaryLoading = false;
+  deleteLoading = false;
+
+  async performPrimaryAction(): Promise<void> {
+    this.primaryLoading = true;
+    try {
+      await this.simulateApiCall(2000);
+      // Success feedback
+    } finally {
+      this.primaryLoading = false;
+    }
+  }
+
+  async performSecondaryAction(): Promise<void> {
+    this.secondaryLoading = true;
+    try {
+      await this.simulateApiCall(1500);
+      // Refresh logic
+    } finally {
+      this.secondaryLoading = false;
+    }
+  }
+
+  async performDeleteAction(): Promise<void> {
+    this.deleteLoading = true;
+    try {
+      await this.simulateApiCall(1000);
+      // Delete logic
+    } finally {
+      this.deleteLoading = false;
+    }
+  }
+
+  private simulateApiCall(delay: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
+```

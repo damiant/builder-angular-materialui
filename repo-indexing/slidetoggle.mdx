@@ -1,0 +1,484 @@
+# SlideToggle Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate slide toggle functionality
+
+### When to Use
+
+SlideToggle components provide an intuitive way to control boolean settings and preferences throughout your application. Use them when you need to:
+
+- **User preferences** - Enable/disable application features, notifications, privacy settings, and theme preferences
+- **Boolean settings** - Control on/off states for features like auto-save, notifications, dark mode, and accessibility options
+- **Feature toggles** - Allow users to enable or disable specific functionality like geolocation, camera access, or premium features
+- **Form controls** - Collect boolean input in forms for agreements, confirmations, and opt-in choices
+- **Dashboard controls** - Provide quick toggles for dashboard widgets, data views, and real-time updates
+- **Account settings** - Manage user account preferences like email notifications, privacy settings, and security features
+- **Filter controls** - Create toggle filters for search results, content categories, and data visualization
+- **Administrative controls** - Enable admins to toggle system settings, user permissions, and feature availability
+- **Mobile-friendly interactions** - Provide touch-friendly boolean controls that work well on mobile devices
+- **Accessibility settings** - Control accessibility features like high contrast, large text, and screen reader preferences
+- **Integration settings** - Toggle third-party service integrations, API connections, and external tool access
+
+### Architecture
+
+**No Coupling**: The SlideToggle component is a standalone form control that implements Material Design switch patterns. It works independently but integrates seamlessly with Angular Material's FormField component for enhanced functionality and consistent styling.
+
+### Component Interdependencies
+
+The SlideToggle component demonstrates no coupling as it is a standalone component that:
+
+- **Direct application**: Can be used independently with its own styling and state management
+- **FormField integration**: Optionally works within `mat-form-field` for enhanced styling, labeling, and error handling
+- **Form integration**: Seamlessly integrates with Angular Reactive Forms and Template-driven Forms through ControlValueAccessor
+- **Accessibility enhancement**: Automatically handles ARIA attributes, keyboard navigation, and screen reader compatibility
+
+## Components
+
+### MatSlideToggle {Standalone Component}
+
+A Material Design switch component that provides an intuitive toggle interface for boolean values with smooth animations, accessibility features, and form integration.
+
+**Purpose:** Provides a user-friendly toggle control for boolean settings and preferences with Material Design styling, accessibility support, focus management, and seamless integration with Angular forms.
+
+**Interface:**
+
+```typescript
+interface MatSlideToggle {
+  // Core Properties
+  name: string | null; // Name attribute for form submission and identification
+  id: string; // Unique identifier for the toggle element
+  checked: boolean; // Current checked state of the toggle
+  disabled: boolean; // Controls whether the toggle is disabled
+  required: boolean; // Indicates if the toggle is required for form validation
+
+  // Styling and Layout
+  labelPosition: "before" | "after"; // Position of label relative to toggle (defaults to 'after')
+  color: string | undefined; // Theme color for M2 themes (primary, accent, warn)
+  hideIcon: boolean; // Whether to hide the icon inside the toggle
+  disableRipple: boolean; // Disables the ripple animation effect
+  disabledInteractive: boolean; // Whether disabled toggles remain interactive
+
+  // Accessibility
+  ariaLabel: string | null; // ARIA label for screen readers
+  ariaLabelledby: string | null; // References to elements that label this toggle
+  ariaDescribedby: string; // References to elements that describe this toggle
+  tabIndex: number; // Tab index for keyboard navigation
+
+  // Events
+  change: EventEmitter<MatSlideToggleChange>; // Emitted when toggle value changes
+  toggleChange: EventEmitter<void>; // Emitted when toggle is clicked (regardless of value change)
+
+  // Methods
+  focus(): void; // Programmatically focus the toggle
+  toggle(): void; // Programmatically toggle the checked state
+}
+
+interface MatSlideToggleChange {
+  source: MatSlideToggle; // The toggle that triggered the change
+  checked: boolean; // The new checked state
+}
+
+interface MatSlideToggleDefaultOptions {
+  disableToggleValue?: boolean; // Whether toggle action triggers value changes
+  color?: ThemePalette; // Default theme color for M2 themes
+  hideIcon?: boolean; // Whether to hide icons by default
+  disabledInteractive?: boolean; // Whether disabled toggles remain interactive
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+// Basic slide toggle
+function BasicToggleExample() {
+  return (
+    <mat-slide-toggle
+      [(ngModel)]="isEnabled"
+      (change)="onToggleChange($event)">
+      Enable notifications
+    </mat-slide-toggle>
+  );
+}
+
+// Toggle with FormField for enhanced styling
+function FormFieldToggleExample() {
+  return (
+    <mat-form-field>
+      <mat-slide-toggle
+        formControlName="emailNotifications"
+        color="primary"
+        required>
+        Email notifications
+      </mat-slide-toggle>
+      <mat-hint>Receive updates via email</mat-hint>
+    </mat-form-field>
+  );
+}
+
+// Reactive Forms integration
+function ReactiveFormToggleExample() {
+  return (
+    <mat-slide-toggle
+      formControlName="darkMode"
+      [checked]="settingsForm.get('darkMode')?.value"
+      (change)="onDarkModeToggle($event)">
+      Dark mode
+    </mat-slide-toggle>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Boolean Setting
+
+```tsx
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
+// Simple boolean toggle for user preferences
+function BasicBooleanToggle() {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  return (
+    <mat-slide-toggle
+      [(ngModel)]="notificationsEnabled"
+      (change)="onNotificationToggle($event)"
+      color="primary">
+      Push notifications
+    </mat-slide-toggle>
+  );
+}
+```
+
+### Reactive Forms Integration
+
+```tsx
+import { FormControl, FormGroup } from '@angular/forms';
+
+// Integration with Angular Reactive Forms
+function ReactiveFormToggleExample() {
+  const settingsForm = new FormGroup({
+    emailNotifications: new FormControl(true),
+    smsNotifications: new FormControl(false),
+    darkMode: new FormControl(false),
+    autoSave: new FormControl(true),
+  });
+
+  return (
+    <form [formGroup]="settingsForm">
+      <div class="settings-section">
+        <h3>Notification Preferences</h3>
+
+        <mat-slide-toggle
+          formControlName="emailNotifications"
+          color="primary">
+          Email notifications
+        </mat-slide-toggle>
+
+        <mat-slide-toggle
+          formControlName="smsNotifications"
+          color="primary">
+          SMS notifications
+        </mat-slide-toggle>
+      </div>
+
+      <div class="settings-section">
+        <h3>Application Settings</h3>
+
+        <mat-slide-toggle
+          formControlName="darkMode"
+          color="accent"
+          (change)="onThemeChange($event)">
+          Dark mode
+        </mat-slide-toggle>
+
+        <mat-slide-toggle
+          formControlName="autoSave"
+          color="primary"
+          [disabled]="!hasPermission">
+          Auto-save documents
+        </mat-slide-toggle>
+      </div>
+    </form>
+  );
+}
+```
+
+### Advanced Configuration Options
+
+```tsx
+// Toggle with custom styling and behavior
+function AdvancedToggleExample() {
+  return (
+    <div class="toggle-container">
+      <mat-slide-toggle
+        [checked]="featureEnabled"
+        [disabled]="!hasPermission"
+        [disableRipple]="reduceMotion"
+        [hideIcon]="compactMode"
+        [disabledInteractive]="true"
+        labelPosition="before"
+        color="warn"
+        tabIndex="0"
+        aria-label="Enable experimental features"
+        aria-describedby="feature-description"
+        (change)="onFeatureToggle($event)"
+        (toggleChange)="onToggleInteraction()">
+        Experimental features
+      </mat-slide-toggle>
+
+      <div id="feature-description" class="toggle-description">
+        Enable beta features that may be unstable
+      </div>
+    </div>
+  );
+}
+```
+
+## Common Patterns
+
+### Pattern 1: Settings Page Layout
+
+```tsx
+// Recommended pattern for settings and preferences pages
+// Group related toggles with clear sections and descriptions
+<div class="settings-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Privacy Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="setting-item">
+        <mat-slide-toggle formControlName="profileVisibility" color="primary">
+          Public profile
+        </mat-slide-toggle>
+        <p class="setting-description">
+          Make your profile visible to other users
+        </p>
+      </div>
+
+      <div class="setting-item">
+        <mat-slide-toggle formControlName="dataSharing" color="primary">
+          Share usage data
+        </mat-slide-toggle>
+        <p class="setting-description">
+          Help improve our service by sharing anonymous usage statistics
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+```
+
+### Pattern 2: Feature Toggle Lists
+
+```tsx
+// Pattern for managing multiple feature toggles
+<mat-list class="feature-toggles">
+  <mat-list-item *ngFor="let feature of features">
+    <mat-slide-toggle
+      [checked]="feature.enabled"
+      [disabled]="!feature.available"
+      (change)="onFeatureToggle(feature, $event)"
+      color="primary">
+      {{feature.name}}
+    </mat-slide-toggle>
+    <p matLine class="feature-description">
+      {{feature.description}}
+    </p>
+  </mat-list-item>
+</mat-list>
+```
+
+### Pattern 3: Conditional Content Display
+
+```tsx
+// Use toggles to control visibility of content sections
+<div class="dashboard-controls">
+  <mat-slide-toggle
+    [(ngModel)]="showAdvancedOptions"
+    color="accent">
+    Advanced options
+  </mat-slide-toggle>
+</div>
+
+<div class="advanced-section" *ngIf="showAdvancedOptions">
+  <mat-slide-toggle
+    [(ngModel)]="enableDebugMode"
+    color="warn">
+    Debug mode
+  </mat-slide-toggle>
+
+  <mat-slide-toggle
+    [(ngModel)]="enableExperimentalFeatures"
+    color="warn">
+    Experimental features
+  </mat-slide-toggle>
+</div>
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for boolean settings**: Reserve slide toggles for true/false, on/off, or enabled/disabled states rather than multiple choice options
+- **Provide clear labels**: Use descriptive text that clearly indicates what the toggle controls and what happens when enabled
+- **Group related toggles**: Organize toggles into logical sections or categories for better user comprehension
+- **Consider immediate effect**: Use toggles for settings that take effect immediately rather than requiring form submission
+- **Respect user expectations**: Follow platform conventions for toggle behavior and visual feedback
+
+### Accessibility
+
+- **Proper labeling**: Always provide clear labels through content or aria-label for screen reader users
+- **Keyboard navigation**: Toggles automatically support keyboard navigation with Space and Enter keys
+- **Focus indicators**: Clear focus indicators help keyboard users understand current selection
+- **Screen reader support**: State changes are automatically announced to assistive technologies
+- **ARIA attributes**: Use aria-describedby to provide additional context when needed
+
+### Performance
+
+- **Debounce rapid changes**: For toggles that trigger expensive operations, implement debouncing to avoid performance issues
+- **Async state management**: Handle loading states when toggle changes require server communication
+- **Local storage persistence**: Consider persisting toggle states in local storage for user convenience
+- **Batch updates**: When multiple toggles affect the same system, consider batching updates to reduce API calls
+
+### Form Integration
+
+- **Reactive Forms recommended**: Use Angular Reactive Forms for better control over validation and form state
+- **Default values**: Set appropriate default values that reflect the most common or safest option
+- **Validation handling**: Implement validation for required toggles and provide clear error messages
+- **Change detection**: Use proper change detection strategies to optimize performance with many toggles
+- **State synchronization**: Ensure toggle states remain synchronized with underlying data models
+
+## Common Use Cases
+
+### Application Settings
+
+```tsx
+// User preference settings with immediate effect
+<form [formGroup]="preferencesForm">
+  <div class="preferences-section">
+    <h3>Appearance</h3>
+
+    <mat-slide-toggle
+      formControlName="darkTheme"
+      (change)="applyTheme($event)"
+      color="primary">
+      Dark theme
+    </mat-slide-toggle>
+
+    <mat-slide-toggle
+      formControlName="compactMode"
+      (change)="applyLayoutMode($event)"
+      color="primary">
+      Compact layout
+    </mat-slide-toggle>
+
+    <mat-slide-toggle
+      formControlName="reduceAnimations"
+      (change)="applyMotionPreference($event)"
+      color="primary">
+      Reduce animations
+    </mat-slide-toggle>
+  </div>
+
+  <div class="preferences-section">
+    <h3>Notifications</h3>
+
+    <mat-slide-toggle
+      formControlName="browserNotifications"
+      [disabled]="!notificationPermission"
+      (change)="toggleBrowserNotifications($event)"
+      color="primary">
+      Browser notifications
+    </mat-slide-toggle>
+
+    <mat-slide-toggle
+      formControlName="emailDigest"
+      (change)="updateEmailPreferences($event)"
+      color="primary">
+      Daily email digest
+    </mat-slide-toggle>
+  </div>
+</form>
+```
+
+### Administrative Controls
+
+```tsx
+// Admin panel with feature toggles
+<div class="admin-features">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Feature Management</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="feature-toggle" *ngFor="let feature of adminFeatures">
+        <mat-slide-toggle
+          [checked]="feature.enabled"
+          [disabled]="feature.locked"
+          (change)="toggleFeature(feature, $event)"
+          [color]="feature.level === 'critical' ? 'warn' : 'primary'">
+          {{feature.displayName}}
+        </mat-slide-toggle>
+
+        <div class="feature-info">
+          <p class="feature-description">{{feature.description}}</p>
+          <span class="feature-status" [class]="feature.status">
+            {{feature.status | titlecase}}
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+```
+
+### Filter and Display Controls
+
+```tsx
+// Dashboard with view toggles
+<div class="dashboard-controls">
+  <mat-toolbar>
+    <span>Dashboard View</span>
+    <span class="spacer"></span>
+
+    <mat-slide-toggle
+      [(ngModel)]="showCharts"
+      (change)="updateDashboard()"
+      color="accent">
+      Show charts
+    </mat-slide-toggle>
+
+    <mat-slide-toggle
+      [(ngModel)]="showTables"
+      (change)="updateDashboard()"
+      color="accent">
+      Show tables
+    </mat-slide-toggle>
+
+    <mat-slide-toggle
+      [(ngModel)]="realTimeUpdates"
+      (change)="toggleRealTime($event)"
+      color="accent">
+      Real-time updates
+    </mat-slide-toggle>
+  </mat-toolbar>
+</div>
+
+<div class="dashboard-content">
+  <div class="charts-section" *ngIf="showCharts">
+    <!-- Chart components -->
+  </div>
+
+  <div class="tables-section" *ngIf="showTables">
+    <!-- Table components -->
+  </div>
+</div>
+```

@@ -1,0 +1,1398 @@
+# Dialog Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate dialog functionality
+
+### When to Use
+
+Dialog components are essential for modal interactions that require user attention or input without navigating away from the current page. Use them when you need to:
+
+- **User confirmations** - Display confirmation dialogs for destructive actions like deleting data or canceling operations
+- **Form overlays** - Present forms for creating or editing content without leaving the current context
+- **Information display** - Show detailed information, help content, or alerts that require user acknowledgment
+- **Selection interfaces** - Create modal pickers for dates, files, colors, or other complex selections
+- **Media viewers** - Display images, videos, or documents in an overlay format with navigation controls
+- **Settings dialogs** - Provide configuration interfaces that don't warrant a full page navigation
+- **Error handling** - Show critical error messages or system alerts that require immediate attention
+- **Multi-step workflows** - Guide users through complex processes in a contained, focused environment
+- **Authentication flows** - Present login, registration, or verification forms as overlays
+- **Rich notifications** - Display important announcements or updates with interactive elements
+
+### Architecture
+
+**Critical/Strong Coupling**: The Dialog component group exhibits strong coupling through a service-driven architecture where the MatDialog service manages dialog lifecycle, coordinates with container components, and provides context for content directives. All components must work together within the Material Design dialog system.
+
+### Component Interdependencies
+
+The Dialog components form a tightly integrated system with the following relationships:
+
+- **Service coordination**: MatDialog service creates and manages dialog instances, providing central control over dialog lifecycle
+- **Container management**: MatDialogContainer serves as the root container and coordinates with the service for proper rendering
+- **Content structure**: Layout directives (MatDialogTitle, MatDialogContent, MatDialogActions) provide semantic structure within dialog containers
+- **Reference system**: MatDialogRef provides programmatic control over individual dialog instances
+- **Context sharing**: Dialog service provides data injection and configuration context to dialog components
+- **State management**: Service manages global dialog state including open dialogs, z-index stacking, and backdrop behavior
+
+## Components
+
+### MatDialog {Primary Component}
+
+The core service component that manages dialog creation, lifecycle, and global dialog state with comprehensive configuration options.
+
+**Purpose:** Provides the central interface for opening, managing, and controlling modal dialogs with Material Design specifications, handling overlay positioning, backdrop behavior, and accessibility features.
+
+**Interface:**
+
+```typescript
+interface MatDialog {
+  // Core Methods
+  open<T, D = any, R = any>(
+    component: ComponentType<T>,
+    config?: MatDialogConfig<D>,
+  ): MatDialogRef<T, R>;
+
+  open<T, D = any, R = any>(
+    template: TemplateRef<T>,
+    config?: MatDialogConfig<D>,
+  ): MatDialogRef<T, R>;
+
+  closeAll(): void;
+  getDialogById(id: string): MatDialogRef<any> | undefined;
+
+  // Observables
+  afterOpened: Subject<MatDialogRef<any>>;
+  afterAllClosed: Observable<void>;
+  openDialogs: MatDialogRef<any>[];
+}
+
+interface MatDialogConfig<D = any> {
+  id?: string; // Unique identifier for the dialog
+  data?: D; // Data to inject into dialog component
+  width?: string; // Dialog width (default: auto)
+  height?: string; // Dialog height (default: auto)
+  minWidth?: string; // Minimum width constraint
+  maxWidth?: string; // Maximum width constraint
+  minHeight?: string; // Minimum height constraint
+  maxHeight?: string; // Maximum height constraint
+  position?: DialogPosition; // Custom positioning
+  disableClose?: boolean; // Prevent closing via backdrop/ESC (default: false)
+  hasBackdrop?: boolean; // Show backdrop overlay (default: true)
+  backdropClass?: string; // Custom backdrop CSS class
+  panelClass?: string; // Custom dialog panel CSS class
+  role?: DialogRole; // ARIA role (default: 'dialog')
+  autoFocus?: AutoFocusTarget; // Auto-focus behavior (default: 'first-tabbable')
+  restoreFocus?: boolean; // Restore focus on close (default: true)
+  scrollStrategy?: ScrollStrategy; // Scroll handling strategy
+  closeOnNavigation?: boolean; // Close on route change (default: true)
+  enterAnimationDuration?: string; // Enter animation duration
+  exitAnimationDuration?: string; // Exit animation duration
+}
+```
+
+**Dependencies:** None (root service)
+**Provides:** Dialog creation, lifecycle management, and global dialog state coordination
+
+**Usage Example:**
+
+```typescript
+import { MatDialog } from "@angular/material/dialog";
+import { Component, Inject } from "@angular/core";
+
+@Component({
+  template: ` <button mat-button (click)="openDialog()">Open Dialog</button> `,
+})
+export class DialogTriggerComponent {
+  constructor(private dialog: MatDialog) {}
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(DialogContentComponent, {
+      width: "400px",
+      height: "300px",
+      data: { message: "Hello from parent component!" },
+      disableClose: false,
+      autoFocus: true,
+      hasBackdrop: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log("Dialog closed with result:", result);
+    });
+  }
+}
+```
+
+### MatDialogRef {Reference Component}
+
+Reference object returned by MatDialog.open() that provides programmatic control over individual dialog instances.
+
+**Purpose:** Enables direct communication with opened dialog instances, providing methods for closing, updating data, and listening to dialog lifecycle events.
+
+**Interface:**
+
+```typescript
+interface MatDialogRef<T, R = any> {
+  // Instance control
+  close(dialogResult?: R): void;
+  updatePosition(position?: DialogPosition): this;
+  updateSize(width?: string, height?: string): this;
+  addPanelClass(classes: string | string[]): this;
+  removePanelClass(classes: string | string[]): this;
+
+  // State properties
+  id: string; // Unique dialog identifier
+  componentInstance: T; // Reference to dialog component instance
+  disableClose: boolean; // Current close prevention state
+
+  // Lifecycle observables
+  afterClosed(): Observable<R | undefined>;
+  beforeClosed(): Observable<R | undefined>;
+  afterOpened(): Observable<void>;
+  backdropClick(): Observable<MouseEvent>;
+  keydownEvents(): Observable<KeyboardEvent>;
+}
+```
+
+**Context Dependencies:** Created and managed by MatDialog service
+**Parent Requirements:** Obtained through MatDialog.open() method
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title>Confirmation</h2>
+    <mat-dialog-content>
+      <p>Are you sure you want to delete this item?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-button color="warn" (click)="onConfirm()">Delete</button>
+    </mat-dialog-actions>
+  `,
+})
+export class ConfirmDialogComponent {
+  constructor(private dialogRef: MatDialogRef<ConfirmDialogComponent>) {}
+
+  onCancel(): void {
+    this.dialogRef.close(false);
+  }
+
+  onConfirm(): void {
+    this.dialogRef.close(true);
+  }
+}
+```
+
+### MatDialogContainer {Container Component}
+
+The root container component that wraps dialog content and provides the visual dialog structure with proper accessibility and animation support.
+
+**Purpose:** Provides the foundational dialog container with Material Design styling, animations, backdrop handling, and accessibility features including focus management and ARIA attributes.
+
+**Interface:**
+
+```typescript
+interface MatDialogContainer {
+  // Internal container management - not directly used in templates
+  // Automatically created and managed by MatDialog service
+}
+```
+
+**Context Dependencies:** Created and managed by MatDialog service
+**Parent Requirements:** Automatically instantiated by MatDialog service
+
+**Usage Example:**
+
+```typescript
+// MatDialogContainer is automatically created by the service
+// Not directly used in component templates
+// Provides the structural foundation for all dialog content
+```
+
+### MatDialogTitle {Layout Directive}
+
+Title directive for dialog headers that provides semantic structure and stays fixed at the top during content scrolling.
+
+**Purpose:** Delivers consistent title styling and semantic structure for dialog headers while ensuring proper accessibility with heading levels and screen reader support.
+
+**Interface:**
+
+```typescript
+interface MatDialogTitle {
+  id: string; // Unique identifier for accessibility linking
+}
+```
+
+**Context Dependencies:** Must be used within dialog content for proper styling and accessibility
+**Parent Requirements:** Dialog component or template opened via MatDialog service
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title id="dialog-title">Edit Profile</h2>
+    <mat-dialog-content>
+      <!-- Dialog content -->
+    </mat-dialog-content>
+  `,
+})
+export class EditProfileDialogComponent {}
+```
+
+### MatDialogContent {Layout Directive}
+
+Scrollable content container directive that provides the main content area with proper spacing and scroll behavior.
+
+**Purpose:** Creates the primary content area with appropriate padding, typography, and scrolling behavior while maintaining proper spacing relationships with title and action areas.
+
+**Interface:**
+
+```typescript
+interface MatDialogContent {
+  // No specific configuration properties
+  // Provides structural and styling behavior through directive
+}
+```
+
+**Context Dependencies:** Used within dialog components for proper content layout
+**Parent Requirements:** Dialog component or template opened via MatDialog service
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title>Form Dialog</h2>
+    <mat-dialog-content>
+      <form [formGroup]="profileForm">
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Bio</mat-label>
+          <textarea matInput formControlName="bio" rows="4"></textarea>
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+  `,
+})
+export class FormDialogComponent {}
+```
+
+### MatDialogActions {Layout Directive}
+
+Action container directive for dialog buttons that provides proper spacing, alignment options, and stays fixed at the bottom during scrolling.
+
+**Purpose:** Provides a dedicated area for dialog actions with consistent spacing, alignment options, and proper visual separation from content areas.
+
+**Interface:**
+
+```typescript
+interface MatDialogActions {
+  align: "start" | "center" | "end"; // Horizontal alignment of action buttons (default: 'start')
+}
+```
+
+**Context Dependencies:** Used within dialog components for proper action layout
+**Parent Requirements:** Dialog component or template opened via MatDialog service
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title>Confirmation</h2>
+    <mat-dialog-content>
+      <p>This action cannot be undone. Continue?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="false">Cancel</button>
+      <button mat-button color="warn" [mat-dialog-close]="true">Confirm</button>
+    </mat-dialog-actions>
+  `,
+})
+export class ConfirmationDialogComponent {}
+```
+
+### MatDialogClose {Action Directive}
+
+Directive for buttons that provides automatic dialog closing functionality with optional result data.
+
+**Purpose:** Enables automatic dialog closing behavior on button clicks while optionally passing result data back to the dialog opener.
+
+**Interface:**
+
+```typescript
+interface MatDialogClose {
+  ariaLabel: string; // Screen-reader label for the button
+  type: "submit" | "button" | "reset"; // Button type (default: 'button')
+  dialogResult: any; // Result data to pass when closing
+  matDialogClose: any; // Alternative syntax for result data
+}
+```
+
+**Context Dependencies:** Must be used within dialog components for proper functionality
+**Parent Requirements:** Dialog component or template opened via MatDialog service
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title>Save Changes</h2>
+    <mat-dialog-content>
+      <p>Would you like to save your changes before leaving?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button
+        mat-button
+        [mat-dialog-close]="false"
+        aria-label="Discard changes"
+      >
+        Don't Save
+      </button>
+      <button mat-button mat-dialog-close aria-label="Cancel action">
+        Cancel
+      </button>
+      <button
+        mat-button
+        color="primary"
+        [mat-dialog-close]="true"
+        aria-label="Save changes"
+      >
+        Save
+      </button>
+    </mat-dialog-actions>
+  `,
+})
+export class SaveDialogComponent {}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import {
+  MatDialog,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+} from "@angular/material/dialog";
+
+// Simple confirmation dialog
+@Component({
+  template: `
+    <h2 mat-dialog-title>Confirm Action</h2>
+    <mat-dialog-content>
+      <p>Are you sure you want to proceed?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="false">Cancel</button>
+      <button mat-button color="primary" [mat-dialog-close]="true">
+        Confirm
+      </button>
+    </mat-dialog-actions>
+  `,
+})
+export class SimpleDialogComponent {}
+
+// Trigger component
+@Component({
+  template: ` <button mat-button (click)="openDialog()">Open Dialog</button> `,
+})
+export class DialogTriggerComponent {
+  constructor(private dialog: MatDialog) {}
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(SimpleDialogComponent, {
+      width: "300px",
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log("User confirmed");
+      }
+    });
+  }
+}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex dialog with data injection and form handling
+@Component({
+  template: `
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+
+    <mat-dialog-content>
+      <form [formGroup]="dialogForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required />
+          <mat-error *ngIf="dialogForm.get('name')?.hasError('required')">
+            Name is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="4"
+            placeholder="Enter description..."
+          >
+          </textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+            <mat-option
+              *ngFor="let category of categories"
+              [value]="category.id"
+            >
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Due Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="dueDate" />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button
+        mat-button
+        color="primary"
+        type="submit"
+        [disabled]="dialogForm.invalid || isSubmitting"
+        (click)="onSubmit()"
+      >
+        {{ data.mode === "edit" ? "Update" : "Create" }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .full-width {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      mat-dialog-content {
+        min-width: 400px;
+      }
+    `,
+  ],
+})
+export class AdvancedDialogComponent implements OnInit {
+  dialogForm: FormGroup;
+  isSubmitting = false;
+  categories = [
+    { id: 1, name: "Work" },
+    { id: 2, name: "Personal" },
+    { id: 3, name: "Shopping" },
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<AdvancedDialogComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      title: string;
+      mode: "create" | "edit";
+      item?: any;
+    },
+  ) {}
+
+  ngOnInit(): void {
+    this.dialogForm = this.fb.group({
+      name: [this.data.item?.name || "", Validators.required],
+      description: [this.data.item?.description || ""],
+      category: [this.data.item?.category || ""],
+      dueDate: [this.data.item?.dueDate || ""],
+    });
+  }
+
+  onSubmit(): void {
+    if (this.dialogForm.valid) {
+      this.isSubmitting = true;
+      const formData = this.dialogForm.value;
+
+      // Simulate API call
+      setTimeout(() => {
+        this.dialogRef.close({
+          action: this.data.mode,
+          data: formData,
+        });
+      }, 1000);
+    }
+  }
+
+  onCancel(): void {
+    this.dialogRef.close(null);
+  }
+}
+
+// Service for managing complex dialogs
+@Injectable({
+  providedIn: "root",
+})
+export class DialogService {
+  constructor(private dialog: MatDialog) {}
+
+  openCreateDialog(): Promise<any> {
+    const dialogRef = this.dialog.open(AdvancedDialogComponent, {
+      width: "500px",
+      maxHeight: "90vh",
+      data: {
+        title: "Create New Item",
+        mode: "create",
+      },
+      disableClose: true,
+      autoFocus: "first-tabbable",
+    });
+
+    return dialogRef.afterClosed().toPromise();
+  }
+
+  openEditDialog(item: any): Promise<any> {
+    const dialogRef = this.dialog.open(AdvancedDialogComponent, {
+      width: "500px",
+      maxHeight: "90vh",
+      data: {
+        title: "Edit Item",
+        mode: "edit",
+        item: item,
+      },
+      disableClose: true,
+      autoFocus: "first-tabbable",
+    });
+
+    return dialogRef.afterClosed().toPromise();
+  }
+
+  openConfirmDialog(
+    message: string,
+    title: string = "Confirm",
+  ): Promise<boolean> {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: "350px",
+      data: { title, message },
+      autoFocus: "dialog",
+    });
+
+    return dialogRef.afterClosed().toPromise();
+  }
+}
+```
+
+### Common Variations
+
+#### Information Dialog
+
+```typescript
+@Component({
+  template: `
+    <div class="dialog-header">
+      <mat-icon color="primary">info</mat-icon>
+      <h2 mat-dialog-title>{{ data.title }}</h2>
+    </div>
+
+    <mat-dialog-content>
+      <p>{{ data.message }}</p>
+      <div *ngIf="data.details" class="details">
+        <h4>Details:</h4>
+        <ul>
+          <li *ngFor="let detail of data.details">{{ detail }}</li>
+        </ul>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>OK</button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .details {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+      }
+    `,
+  ],
+})
+export class InfoDialogComponent {
+  constructor(
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      title: string;
+      message: string;
+      details?: string[];
+    },
+  ) {}
+}
+```
+
+#### Media Viewer Dialog
+
+```typescript
+@Component({
+  template: `
+    <div class="media-dialog">
+      <div class="media-header">
+        <h2 mat-dialog-title>{{ data.title }}</h2>
+        <button mat-icon-button mat-dialog-close aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <mat-dialog-content class="media-content">
+        <img
+          *ngIf="data.type === 'image'"
+          [src]="data.url"
+          [alt]="data.title"
+          class="media-image"
+        />
+
+        <video
+          *ngIf="data.type === 'video'"
+          [src]="data.url"
+          controls
+          class="media-video"
+        ></video>
+
+        <div *ngIf="data.description" class="media-description">
+          <p>{{ data.description }}</p>
+        </div>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="space-between">
+        <div class="media-info">
+          <small>{{ data.size }} • {{ data.date | date }}</small>
+        </div>
+        <div class="media-actions">
+          <button mat-button (click)="download()">
+            <mat-icon>download</mat-icon>
+            Download
+          </button>
+          <button mat-button (click)="share()">
+            <mat-icon>share</mat-icon>
+            Share
+          </button>
+        </div>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [
+    `
+      .media-dialog {
+        max-width: 90vw;
+        max-height: 90vh;
+      }
+
+      .media-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+      }
+
+      .media-content {
+        text-align: center;
+        padding: 0;
+      }
+
+      .media-image,
+      .media-video {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+      }
+
+      .media-description {
+        padding: 16px;
+        text-align: left;
+      }
+
+      .media-actions {
+        display: flex;
+        gap: 8px;
+      }
+    `,
+  ],
+})
+export class MediaViewerDialogComponent {
+  constructor(
+    private dialogRef: MatDialogRef<MediaViewerDialogComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      title: string;
+      type: "image" | "video";
+      url: string;
+      description?: string;
+      size: string;
+      date: Date;
+    },
+  ) {}
+
+  download(): void {
+    // Download logic
+  }
+
+  share(): void {
+    // Share logic
+  }
+}
+```
+
+#### Multi-Step Dialog
+
+```typescript
+@Component({
+  template: `
+    <h2 mat-dialog-title>{{ steps[currentStep].title }}</h2>
+
+    <mat-dialog-content>
+      <mat-stepper [selectedIndex]="currentStep" orientation="horizontal">
+        <mat-step *ngFor="let step of steps" [completed]="step.completed">
+          <ng-template matStepLabel>{{ step.label }}</ng-template>
+        </mat-step>
+      </mat-stepper>
+
+      <div class="step-content">
+        <ng-container [ngSwitch]="currentStep">
+          <div *ngSwitchCase="0" class="step">
+            <h4>Choose Service Type</h4>
+            <mat-radio-group [(ngModel)]="formData.serviceType">
+              <mat-radio-button value="basic">Basic Service</mat-radio-button>
+              <mat-radio-button value="premium"
+                >Premium Service</mat-radio-button
+              >
+              <mat-radio-button value="enterprise"
+                >Enterprise Service</mat-radio-button
+              >
+            </mat-radio-group>
+          </div>
+
+          <div *ngSwitchCase="1" class="step">
+            <h4>Contact Information</h4>
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput [(ngModel)]="formData.email" type="email" />
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Phone</mat-label>
+              <input matInput [(ngModel)]="formData.phone" />
+            </mat-form-field>
+          </div>
+
+          <div *ngSwitchCase="2" class="step">
+            <h4>Review & Confirm</h4>
+            <div class="review-section">
+              <p><strong>Service:</strong> {{ formData.serviceType }}</p>
+              <p><strong>Email:</strong> {{ formData.email }}</p>
+              <p><strong>Phone:</strong> {{ formData.phone }}</p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="space-between">
+      <button
+        mat-button
+        (click)="previousStep()"
+        [disabled]="currentStep === 0"
+      >
+        Previous
+      </button>
+
+      <div>
+        <button mat-button mat-dialog-close>Cancel</button>
+        <button
+          mat-button
+          color="primary"
+          (click)="nextStep()"
+          [disabled]="!canProceed()"
+        >
+          {{ isLastStep() ? "Submit" : "Next" }}
+        </button>
+      </div>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .step-content {
+        margin: 24px 0;
+        min-height: 200px;
+      }
+
+      .step {
+        padding: 16px 0;
+      }
+
+      .review-section {
+        background: #f5f5f5;
+        padding: 16px;
+        border-radius: 4px;
+      }
+
+      mat-form-field {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      mat-radio-button {
+        display: block;
+        margin-bottom: 12px;
+      }
+    `,
+  ],
+})
+export class MultiStepDialogComponent {
+  currentStep = 0;
+  formData = {
+    serviceType: "",
+    email: "",
+    phone: "",
+  };
+
+  steps = [
+    { title: "Service Selection", label: "Service", completed: false },
+    { title: "Contact Info", label: "Contact", completed: false },
+    { title: "Review", label: "Confirm", completed: false },
+  ];
+
+  constructor(private dialogRef: MatDialogRef<MultiStepDialogComponent>) {}
+
+  nextStep(): void {
+    if (this.isLastStep()) {
+      this.submit();
+    } else {
+      this.steps[this.currentStep].completed = true;
+      this.currentStep++;
+    }
+  }
+
+  previousStep(): void {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+    }
+  }
+
+  canProceed(): boolean {
+    switch (this.currentStep) {
+      case 0:
+        return !!this.formData.serviceType;
+      case 1:
+        return !!this.formData.email && !!this.formData.phone;
+      case 2:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  isLastStep(): boolean {
+    return this.currentStep === this.steps.length - 1;
+  }
+
+  submit(): void {
+    this.dialogRef.close(this.formData);
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Service to Container**: MatDialog service creates MatDialogContainer instances and injects configuration data
+2. **Container to Content**: Dialog container provides context and styling to content directives
+3. **Reference Communication**: MatDialogRef enables bidirectional communication between dialog instances and parent components
+4. **Data Injection**: Service provides data injection mechanism through MAT_DIALOG_DATA token
+5. **Result Propagation**: Dialog results flow back through MatDialogRef to subscribers
+
+### Context Sharing
+
+- **Configuration Context**: MatDialog service provides configuration context including theming, positioning, and behavior settings
+- **Data Injection**: Service provides MAT_DIALOG_DATA injection token for passing data to dialog components
+- **Reference Context**: MatDialogRef provides context for dialog instance control and communication
+- **Accessibility Context**: Container provides ARIA attributes and focus management context
+
+### Event Handling
+
+- **Lifecycle Events**: Dialog service emits events for opening, closing, and state changes
+- **User Interactions**: Backdrop clicks, keyboard events, and button actions are coordinated through the dialog system
+- **Close Events**: Multiple close triggers (backdrop, ESC key, programmatic) are handled consistently
+- **Focus Management**: Automatic focus management with restoration on dialog close
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use appropriate dialog types** - Choose simple confirmation dialogs for quick decisions, complex forms for data entry, and media viewers for content display
+- **Implement proper data flow** - Use MAT_DIALOG_DATA for input and MatDialogRef for output, maintaining clear communication patterns between dialog and parent components
+- **Configure responsive sizing** - Set appropriate width/height constraints and use percentage-based sizing for responsive behavior across devices
+- **Handle loading states** - Show loading indicators during asynchronous operations and prevent multiple submissions with proper button state management
+
+### Accessibility
+
+- **Focus management** - Configure autoFocus appropriately and ensure focus returns to the triggering element when dialogs close
+- **ARIA attributes** - Use proper dialog roles, labels, and descriptions to provide context for screen readers
+- **Keyboard navigation** - Support ESC key closing, tab navigation within dialogs, and proper focus trap behavior
+- **Screen reader announcements** - Ensure dialog opening/closing is announced and content is properly structured for assistive technologies
+
+### Performance
+
+- **Lazy loading** - Load dialog components only when needed using dynamic imports and avoid preloading heavy dialog content
+- **Memory management** - Properly unsubscribe from dialog observables and clean up component resources when dialogs close
+- **Animation optimization** - Use appropriate animation durations and consider reducing motion for users with motion sensitivity preferences
+- **Backdrop optimization** - Consider backdrop behavior and overlay performance for applications with multiple or large dialogs
+
+## Common Patterns
+
+### Pattern 1: Service-Based Dialog Management
+
+```typescript
+// Centralized dialog service for consistent dialog handling
+@Injectable({
+  providedIn: "root",
+})
+export class AppDialogService {
+  constructor(private dialog: MatDialog) {}
+
+  confirm(message: string, title: string = "Confirm"): Observable<boolean> {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: "400px",
+      data: { title, message },
+      disableClose: false,
+      autoFocus: "dialog",
+    });
+
+    return dialogRef.afterClosed().pipe(map((result) => !!result));
+  }
+
+  alert(message: string, title: string = "Alert"): Observable<void> {
+    const dialogRef = this.dialog.open(AlertDialogComponent, {
+      width: "350px",
+      data: { title, message },
+      disableClose: true,
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  prompt(
+    message: string,
+    defaultValue: string = "",
+    title: string = "Input",
+  ): Observable<string | null> {
+    const dialogRef = this.dialog.open(PromptDialogComponent, {
+      width: "400px",
+      data: { title, message, defaultValue },
+      disableClose: false,
+      autoFocus: "first-tabbable",
+    });
+
+    return dialogRef.afterClosed();
+  }
+}
+
+// Usage in components
+@Component({
+  template: `
+    <button mat-button (click)="handleDelete()">Delete Item</button>
+  `,
+})
+export class ItemComponent {
+  constructor(private dialogService: AppDialogService) {}
+
+  handleDelete(): void {
+    this.dialogService
+      .confirm("This action cannot be undone. Are you sure?", "Delete Item")
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          // Proceed with deletion
+        }
+      });
+  }
+}
+```
+
+### Pattern 2: Dynamic Dialog Content
+
+```typescript
+// Dynamic dialog with configurable content based on data
+@Component({
+  template: `
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+
+    <mat-dialog-content>
+      <ng-container [ngSwitch]="data.type">
+        <div *ngSwitchCase="'error'" class="error-content">
+          <mat-icon color="warn">error</mat-icon>
+          <p>{{ data.message }}</p>
+          <pre *ngIf="data.details">{{ data.details }}</pre>
+        </div>
+
+        <div *ngSwitchCase="'success'" class="success-content">
+          <mat-icon color="primary">check_circle</mat-icon>
+          <p>{{ data.message }}</p>
+          <ul *ngIf="data.items">
+            <li *ngFor="let item of data.items">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div *ngSwitchCase="'warning'" class="warning-content">
+          <mat-icon color="accent">warning</mat-icon>
+          <p>{{ data.message }}</p>
+          <mat-checkbox
+            *ngIf="data.showDontShowAgain"
+            [(ngModel)]="dontShowAgain"
+          >
+            Don't show this again
+          </mat-checkbox>
+        </div>
+      </ng-container>
+    </mat-dialog-content>
+
+    <mat-dialog-actions [align]="data.actionAlignment || 'end'">
+      <button
+        *ngFor="let action of data.actions"
+        mat-button
+        [color]="action.color"
+        [mat-dialog-close]="action.result"
+      >
+        {{ action.label }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .error-content,
+      .success-content,
+      .warning-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+      }
+
+      .error-content mat-icon {
+        color: #f44336;
+      }
+      .success-content mat-icon {
+        color: #4caf50;
+      }
+      .warning-content mat-icon {
+        color: #ff9800;
+      }
+
+      pre {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        max-height: 200px;
+        overflow: auto;
+      }
+    `,
+  ],
+})
+export class DynamicDialogComponent {
+  dontShowAgain = false;
+
+  constructor(
+    private dialogRef: MatDialogRef<DynamicDialogComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      type: "error" | "success" | "warning";
+      title: string;
+      message: string;
+      details?: string;
+      items?: string[];
+      showDontShowAgain?: boolean;
+      actionAlignment?: "start" | "center" | "end";
+      actions: Array<{
+        label: string;
+        result: any;
+        color?: "primary" | "accent" | "warn";
+      }>;
+    },
+  ) {}
+
+  ngOnDestroy(): void {
+    if (this.dontShowAgain) {
+      // Store preference to not show this dialog again
+      localStorage.setItem(`dialog_${this.data.type}_dismissed`, "true");
+    }
+  }
+}
+```
+
+### Pattern 3: Form Dialog with Validation
+
+```typescript
+// Reusable form dialog with comprehensive validation
+@Component({
+  template: `
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <h2 mat-dialog-title>{{ data.title }}</h2>
+
+      <mat-dialog-content>
+        <div *ngFor="let field of data.fields" class="form-field">
+          <ng-container [ngSwitch]="field.type">
+            <!-- Text Input -->
+            <mat-form-field *ngSwitchCase="'text'" appearance="fill">
+              <mat-label>{{ field.label }}</mat-label>
+              <input
+                matInput
+                [formControlName]="field.name"
+                [placeholder]="field.placeholder"
+                [required]="field.required"
+              />
+              <mat-error *ngIf="form.get(field.name)?.hasError('required')">
+                {{ field.label }} is required
+              </mat-error>
+              <mat-error *ngIf="form.get(field.name)?.hasError('email')">
+                Please enter a valid email address
+              </mat-error>
+              <mat-error *ngIf="form.get(field.name)?.hasError('pattern')">
+                {{ field.errorMessage || "Invalid format" }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Select -->
+            <mat-form-field *ngSwitchCase="'select'" appearance="fill">
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select [formControlName]="field.name">
+                <mat-option
+                  *ngFor="let option of field.options"
+                  [value]="option.value"
+                >
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Checkbox -->
+            <mat-checkbox
+              *ngSwitchCase="'checkbox'"
+              [formControlName]="field.name"
+            >
+              {{ field.label }}
+            </mat-checkbox>
+
+            <!-- Textarea -->
+            <mat-form-field *ngSwitchCase="'textarea'" appearance="fill">
+              <mat-label>{{ field.label }}</mat-label>
+              <textarea
+                matInput
+                [formControlName]="field.name"
+                [rows]="field.rows || 3"
+              >
+              </textarea>
+            </mat-form-field>
+          </ng-container>
+        </div>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end">
+        <button type="button" mat-button mat-dialog-close>Cancel</button>
+        <button
+          type="submit"
+          mat-button
+          color="primary"
+          [disabled]="form.invalid || isSubmitting"
+        >
+          <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+          {{ isSubmitting ? "Saving..." : "Save" }}
+        </button>
+      </mat-dialog-actions>
+    </form>
+  `,
+  styles: [
+    `
+      .form-field {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      mat-spinner {
+        margin-right: 8px;
+      }
+    `,
+  ],
+})
+export class FormDialogComponent implements OnInit {
+  form: FormGroup;
+  isSubmitting = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<FormDialogComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      title: string;
+      fields: Array<{
+        name: string;
+        label: string;
+        type: "text" | "email" | "select" | "checkbox" | "textarea";
+        required?: boolean;
+        placeholder?: string;
+        options?: Array<{ label: string; value: any }>;
+        rows?: number;
+        pattern?: string;
+        errorMessage?: string;
+        defaultValue?: any;
+      }>;
+      onSubmit: (data: any) => Promise<any>;
+    },
+  ) {}
+
+  ngOnInit(): void {
+    const formControls: { [key: string]: FormControl } = {};
+
+    this.data.fields.forEach((field) => {
+      const validators = [];
+
+      if (field.required) {
+        validators.push(Validators.required);
+      }
+
+      if (field.type === "email") {
+        validators.push(Validators.email);
+      }
+
+      if (field.pattern) {
+        validators.push(Validators.pattern(field.pattern));
+      }
+
+      formControls[field.name] = new FormControl(
+        field.defaultValue || "",
+        validators,
+      );
+    });
+
+    this.form = this.fb.group(formControls);
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.form.valid) {
+      this.isSubmitting = true;
+
+      try {
+        const result = await this.data.onSubmit(this.form.value);
+        this.dialogRef.close(result);
+      } catch (error) {
+        console.error("Form submission error:", error);
+        // Handle error (show message, etc.)
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  }
+}
+
+// Usage
+@Injectable()
+export class FormDialogService {
+  constructor(private dialog: MatDialog) {}
+
+  openUserForm(userData?: any): Promise<any> {
+    const dialogRef = this.dialog.open(FormDialogComponent, {
+      width: "500px",
+      data: {
+        title: userData ? "Edit User" : "Create User",
+        fields: [
+          {
+            name: "name",
+            label: "Full Name",
+            type: "text",
+            required: true,
+            defaultValue: userData?.name,
+          },
+          {
+            name: "email",
+            label: "Email",
+            type: "email",
+            required: true,
+            defaultValue: userData?.email,
+          },
+          {
+            name: "role",
+            label: "Role",
+            type: "select",
+            required: true,
+            options: [
+              { label: "Admin", value: "admin" },
+              { label: "User", value: "user" },
+              { label: "Viewer", value: "viewer" },
+            ],
+            defaultValue: userData?.role,
+          },
+          {
+            name: "active",
+            label: "Active User",
+            type: "checkbox",
+            defaultValue: userData?.active ?? true,
+          },
+        ],
+        onSubmit: async (data: any) => {
+          // API call to save user
+          return await this.saveUser(data);
+        },
+      },
+    });
+
+    return dialogRef.afterClosed().toPromise();
+  }
+
+  private async saveUser(userData: any): Promise<any> {
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(userData), 1000);
+    });
+  }
+}
+```

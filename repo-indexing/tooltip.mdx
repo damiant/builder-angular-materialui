@@ -1,0 +1,1054 @@
+# Tooltip Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate tooltip functionality
+
+### When to Use
+
+Tooltips are ideal for:
+
+- **Contextual help** - Provide brief explanations for buttons, icons, or form fields without cluttering the interface
+- **Supplementary information** - Display additional details about UI elements on hover or focus
+- **Clarification** - Explain abbreviations, technical terms, or complex controls
+- **Accessibility enhancement** - Provide descriptive text for icon-only buttons or controls
+- **Progressive disclosure** - Show detailed information on demand without overwhelming the primary interface
+- **Mobile-friendly alternatives** - Replace hover states with touch-friendly information displays
+
+### Architecture
+
+**No Coupling**: Tooltip is a standalone directive component that can be applied to any host element to display contextual information on hover, focus, or touch interactions.
+
+### Component Interdependencies
+
+Tooltip operates as an independent directive with no required parent-child relationships or shared context dependencies.
+
+## Components
+
+### MatTooltip {Standalone Component}
+
+**Purpose:** A directive that creates an overlay tooltip to display contextual information when users hover over, focus on, or touch the host element.
+
+**Interface:**
+
+```typescript
+interface MatTooltipProps {
+  // Content
+  message: string; // The message to be displayed in the tooltip
+  tooltipClass: string | string[] | { [key: string]: any }; // CSS classes for custom styling
+
+  // Positioning
+  position: "above" | "below" | "left" | "right" | "before" | "after"; // Position relative to host element
+  positionAtOrigin: boolean; // Position relative to click/touch origin instead of element bounds
+
+  // Timing
+  showDelay: number; // Delay in ms before showing tooltip (default: 0)
+  hideDelay: number; // Delay in ms before hiding tooltip (default: 0)
+
+  // Touch behavior
+  touchGestures: "auto" | "on" | "off"; // How touch gestures are handled
+
+  // State
+  disabled: boolean; // Whether the tooltip is disabled
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  template: `
+    <!-- Basic tooltip -->
+    <button matTooltip="Click to save your changes">Save</button>
+
+    <!-- Positioned tooltip with custom styling -->
+    <mat-icon
+      matTooltip="User profile settings"
+      matTooltipPosition="above"
+      matTooltipClass="custom-tooltip"
+      [matTooltipShowDelay]="500"
+      [matTooltipHideDelay]="200"
+    >
+      account_circle
+    </mat-icon>
+
+    <!-- Dynamic tooltip content -->
+    <input
+      matInput
+      placeholder="Username"
+      [matTooltip]="getUsernameHelp()"
+      [matTooltipDisabled]="isTooltipDisabled"
+      matTooltipPosition="below"
+    />
+
+    <!-- Touch-friendly tooltip -->
+    <button
+      matTooltip="Long press for additional options"
+      matTooltipTouchGestures="on"
+      matTooltipPosition="above"
+    >
+      Options
+    </button>
+  `,
+})
+export class TooltipExampleComponent {
+  isTooltipDisabled = false;
+
+  getUsernameHelp(): string {
+    return "Enter a unique username (3-20 characters)";
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+// Simple text tooltip
+<button matTooltip="This is a helpful tooltip">Hover me</button>
+
+// Icon with tooltip
+<mat-icon matTooltip="Settings">settings</mat-icon>
+
+// Form field with help tooltip
+<mat-form-field>
+  <mat-label>Password</mat-label>
+  <input
+    matInput
+    type="password"
+    matTooltip="Password must be at least 8 characters"
+    matTooltipPosition="below"
+  />
+</mat-form-field>
+```
+
+### Advanced Configuration
+
+```typescript
+// Comprehensive tooltip with all options
+<button
+  [matTooltip]="tooltipMessage"
+  matTooltipPosition="above"
+  matTooltipClass="custom-tooltip-style"
+  [matTooltipShowDelay]="1000"
+  [matTooltipHideDelay]="500"
+  [matTooltipDisabled]="!showHelp"
+  [matTooltipPositionAtOrigin]="useOriginPosition"
+  matTooltipTouchGestures="auto"
+>
+  Complex Button
+</button>
+```
+
+### Common Variations
+
+#### Icon Button Tooltips
+
+```typescript
+// Toolbar with icon buttons and descriptive tooltips
+<mat-toolbar>
+  <button
+    mat-icon-button
+    matTooltip="Create new document"
+    matTooltipPosition="below"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    matTooltip="Open existing document"
+    matTooltipPosition="below"
+  >
+    <mat-icon>folder_open</mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    [matTooltip]="saveTooltipText"
+    [matTooltipDisabled]="!hasUnsavedChanges"
+    matTooltipPosition="below"
+  >
+    <mat-icon>save</mat-icon>
+  </button>
+</mat-toolbar>
+```
+
+#### Form Field Helpers
+
+```typescript
+// Form with contextual help tooltips
+<form [formGroup]="userForm">
+  <mat-form-field>
+    <mat-label>Email</mat-label>
+    <input
+      matInput
+      formControlName="email"
+      matTooltip="We'll use this email for account verification"
+      matTooltipPosition="right"
+      [matTooltipShowDelay]="800"
+    />
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Phone Number</mat-label>
+    <input
+      matInput
+      formControlName="phone"
+      matTooltip="Optional: For account recovery and notifications"
+      matTooltipClass="help-tooltip"
+      matTooltipPosition="right"
+    />
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Birth Date</mat-label>
+    <input
+      matInput
+      [matDatepicker]="picker"
+      formControlName="birthDate"
+      matTooltip="Must be 18 or older to create an account"
+      matTooltipPosition="above"
+    />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+</form>
+```
+
+#### Status Indicators with Tooltips
+
+```typescript
+// Status indicators with detailed tooltips
+<mat-list>
+  <mat-list-item *ngFor="let server of servers">
+    <mat-icon
+      matListItemIcon
+      [color]="getServerStatusColor(server.status)"
+      [matTooltip]="getServerStatusTooltip(server)"
+      matTooltipPosition="right"
+      [matTooltipClass]="getTooltipClass(server.status)"
+    >
+      {{ getServerStatusIcon(server.status) }}
+    </mat-icon>
+
+    <span matListItemTitle>{{ server.name }}</span>
+    <span matListItemLine>{{ server.description }}</span>
+
+    <button
+      mat-icon-button
+      matListItemMeta
+      [matTooltip]="getActionTooltip(server)"
+      [matTooltipDisabled]="!canPerformAction(server)"
+      (click)="performAction(server)"
+    >
+      <mat-icon>{{ getActionIcon(server) }}</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
+```
+
+#### Data Table with Cell Tooltips
+
+```typescript
+// Table with truncated content and full text tooltips
+<mat-table [dataSource]="dataSource">
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+    <mat-cell
+      *matCellDef="let element"
+      class="truncated-cell"
+      [matTooltip]="element.fullName"
+      [matTooltipDisabled]="element.name.length <= 20"
+      matTooltipPosition="above"
+    >
+      {{ element.name }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="description">
+    <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+    <mat-cell
+      *matCellDef="let element"
+      class="description-cell"
+      [matTooltip]="element.fullDescription"
+      matTooltipClass="description-tooltip"
+      matTooltipPosition="right"
+      [matTooltipShowDelay]="600"
+    >
+      {{ element.shortDescription }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <button
+        mat-icon-button
+        matTooltip="Edit item"
+        [disabled]="!canEdit(element)"
+        (click)="editItem(element)"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        matTooltip="Delete item"
+        [matTooltipClass]="'warning-tooltip'"
+        [disabled]="!canDelete(element)"
+        (click)="deleteItem(element)"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+```
+
+#### Custom Styled Tooltips
+
+```typescript
+// Component with custom tooltip styling
+@Component({
+  template: `
+    <div class="feature-showcase">
+      <button
+        mat-raised-button
+        color="primary"
+        matTooltip="This feature requires a premium subscription"
+        matTooltipClass="premium-tooltip"
+        matTooltipPosition="above"
+        [matTooltipDisabled]="isPremiumUser"
+      >
+        Premium Feature
+      </button>
+
+      <mat-chip-set>
+        <mat-chip
+          *ngFor="let tag of tags"
+          [matTooltip]="getTagDescription(tag)"
+          matTooltipClass="tag-tooltip"
+          matTooltipPosition="above"
+          [matTooltipShowDelay]="300"
+        >
+          {{ tag.name }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+  `,
+  styles: [
+    `
+      ::ng-deep .premium-tooltip {
+        background-color: #gold;
+        color: #333;
+        font-weight: 500;
+      }
+
+      ::ng-deep .tag-tooltip {
+        font-size: 12px;
+        max-width: 200px;
+        white-space: normal;
+      }
+
+      .truncated-cell {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .description-cell {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      ::ng-deep .description-tooltip {
+        max-width: 300px;
+        white-space: normal;
+        text-align: left;
+      }
+
+      ::ng-deep .warning-tooltip {
+        background-color: #f44336;
+        color: white;
+      }
+    `,
+  ],
+})
+export class CustomTooltipComponent {
+  isPremiumUser = false;
+  tags = [
+    {
+      name: "Angular",
+      description: "Modern web framework for building applications",
+    },
+    {
+      name: "Material",
+      description: "Design system based on Google Material Design",
+    },
+  ];
+
+  getTagDescription(tag: any): string {
+    return tag.description;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Keep content concise** - Tooltips should provide brief, helpful information without overwhelming users
+- **Use consistent positioning** - Establish patterns for tooltip placement to create predictable user experiences
+- **Avoid redundant information** - Don't duplicate text that's already visible in the interface
+- **Consider timing** - Use appropriate show/hide delays for different contexts (longer delays for non-essential information)
+- **Test across devices** - Ensure tooltips work well on both desktop (hover) and mobile (touch) interactions
+- **Provide meaningful context** - Tooltips should add value, not just repeat what's already obvious
+
+### Accessibility
+
+- **ARIA integration** - Tooltips automatically use `aria-describedby` to associate with their trigger elements
+- **Keyboard navigation** - Tooltips appear on focus and disappear when focus moves away
+- **Screen reader support** - Tooltip content is announced to screen readers when the element receives focus
+- **Touch accessibility** - Touch gestures provide alternative access methods for mobile and tablet users
+- **Focus management** - Proper focus handling ensures tooltips don't interfere with keyboard navigation
+- **High contrast support** - Ensure tooltip styling maintains sufficient contrast in high contrast modes
+
+### Performance
+
+- **Lazy initialization** - Tooltips are created only when needed, reducing initial bundle size and memory usage
+- **Efficient positioning** - Angular CDK overlay system provides optimized positioning calculations
+- **Animation optimization** - Built-in animations are optimized for performance across different devices
+- **Memory management** - Tooltip instances are properly cleaned up when components are destroyed
+- **Event listener efficiency** - Passive event listeners are used where appropriate to improve scroll performance
+
+## Common Patterns
+
+### Pattern 1: Help System Integration
+
+```typescript
+// Help system with contextual tooltips
+@Component({
+  template: `
+    <div class="help-enabled-form" [class.help-mode]="helpMode">
+      <mat-slide-toggle
+        [(ngModel)]="helpMode"
+        matTooltip="Toggle contextual help throughout the form"
+        matTooltipPosition="right"
+      >
+        Help Mode
+      </mat-slide-toggle>
+
+      <mat-form-field>
+        <mat-label>Project Name</mat-label>
+        <input
+          matInput
+          [(ngModel)]="projectName"
+          [matTooltip]="
+            helpMode
+              ? 'Enter a descriptive name for your project (2-50 characters)'
+              : ''
+          "
+          [matTooltipDisabled]="!helpMode"
+          matTooltipPosition="right"
+          [matTooltipShowDelay]="helpMode ? 0 : 1000"
+        />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="description"
+          [matTooltip]="helpMode ? getDescriptionHelp() : ''"
+          [matTooltipDisabled]="!helpMode"
+          matTooltipPosition="right"
+          matTooltipClass="help-tooltip"
+        ></textarea>
+      </mat-form-field>
+    </div>
+  `,
+  styles: [
+    `
+      .help-mode {
+        border-left: 3px solid #2196f3;
+        padding-left: 16px;
+      }
+
+      ::ng-deep .help-tooltip {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #2196f3;
+        border-radius: 4px;
+        font-size: 13px;
+        max-width: 250px;
+      }
+    `,
+  ],
+})
+export class HelpSystemComponent {
+  helpMode = false;
+  projectName = "";
+  description = "";
+
+  getDescriptionHelp(): string {
+    return `Provide a detailed description of your project. This helps team members understand the project's purpose and scope. Aim for 2-3 sentences.`;
+  }
+}
+```
+
+### Pattern 2: Progressive Disclosure
+
+```typescript
+// Feature discovery with progressive tooltips
+@Component({
+  template: `
+    <mat-toolbar>
+      <span>My Application</span>
+
+      <span class="spacer"></span>
+
+      <button
+        mat-icon-button
+        [matTooltip]="getTooltipForNewUser('search')"
+        [matTooltipDisabled]="!isNewUser"
+        matTooltipPosition="below"
+        (click)="markFeatureDiscovered('search')"
+      >
+        <mat-icon
+          [matBadge]="isFeatureNew('search') ? '!' : null"
+          matBadgeColor="accent"
+          >search</mat-icon
+        >
+      </button>
+
+      <button
+        mat-icon-button
+        [matTooltip]="getTooltipForNewUser('notifications')"
+        [matTooltipDisabled]="!isNewUser"
+        matTooltipPosition="below"
+        (click)="markFeatureDiscovered('notifications')"
+      >
+        <mat-icon
+          [matBadge]="
+            notificationCount > 0
+              ? notificationCount
+              : isFeatureNew('notifications')
+                ? '!'
+                : null
+          "
+          matBadgeColor="warn"
+        >
+          notifications
+        </mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="menu"
+        [matTooltip]="getTooltipForNewUser('menu')"
+        [matTooltipDisabled]="!isNewUser"
+        matTooltipPosition="below"
+        (click)="markFeatureDiscovered('menu')"
+      >
+        <mat-icon
+          [matBadge]="isFeatureNew('menu') ? '!' : null"
+          matBadgeColor="accent"
+          >more_vert</mat-icon
+        >
+      </button>
+    </mat-toolbar>
+
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>Profile</button>
+      <button mat-menu-item>Settings</button>
+      <button mat-menu-item>Logout</button>
+    </mat-menu>
+  `,
+})
+export class ProgressiveDiscoveryComponent {
+  isNewUser = true;
+  notificationCount = 3;
+  discoveredFeatures = new Set<string>();
+
+  isFeatureNew(feature: string): boolean {
+    return this.isNewUser && !this.discoveredFeatures.has(feature);
+  }
+
+  getTooltipForNewUser(feature: string): string {
+    if (!this.isNewUser || this.discoveredFeatures.has(feature)) {
+      return "";
+    }
+
+    const tooltips = {
+      search: "Click here to search for content across your workspace",
+      notifications: "View and manage your notifications here",
+      menu: "Access additional options and settings",
+    };
+
+    return tooltips[feature] || "";
+  }
+
+  markFeatureDiscovered(feature: string): void {
+    this.discoveredFeatures.add(feature);
+    // Save to user preferences or local storage
+    this.saveUserProgress();
+  }
+
+  private saveUserProgress(): void {
+    localStorage.setItem(
+      "discoveredFeatures",
+      JSON.stringify([...this.discoveredFeatures]),
+    );
+  }
+}
+```
+
+### Pattern 3: Dynamic Content Tooltips
+
+```typescript
+// Dynamic tooltips based on state and user context
+@Component({
+  template: `
+    <mat-card class="user-dashboard">
+      <mat-card-header>
+        <mat-card-title>Dashboard</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="metrics-grid">
+          <div
+            class="metric-card"
+            *ngFor="let metric of metrics"
+            [matTooltip]="getMetricTooltip(metric)"
+            matTooltipClass="metric-tooltip"
+            matTooltipPosition="above"
+            [matTooltipShowDelay]="500"
+          >
+            <mat-icon [color]="getMetricColor(metric)">{{
+              metric.icon
+            }}</mat-icon>
+            <div class="metric-value">{{ formatMetricValue(metric) }}</div>
+            <div class="metric-label">{{ metric.label }}</div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="action-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!canPerformAction('export')"
+            [matTooltip]="getActionTooltip('export')"
+            matTooltipPosition="above"
+            (click)="exportData()"
+          >
+            Export Data
+          </button>
+
+          <button
+            mat-raised-button
+            [disabled]="!canPerformAction('sync')"
+            [matTooltip]="getActionTooltip('sync')"
+            matTooltipPosition="above"
+            [class.loading]="isSyncing"
+            (click)="syncData()"
+          >
+            {{ isSyncing ? "Syncing..." : "Sync" }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  `,
+  styles: [
+    `
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .metric-card {
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        text-align: center;
+        cursor: help;
+        transition: background-color 0.2s;
+      }
+
+      .metric-card:hover {
+        background-color: #f5f5f5;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 24px;
+      }
+
+      ::ng-deep .metric-tooltip {
+        max-width: 300px;
+        white-space: normal;
+        text-align: left;
+        font-size: 13px;
+      }
+    `,
+  ],
+})
+export class DynamicTooltipComponent {
+  isSyncing = false;
+  lastSyncTime = new Date();
+
+  metrics = [
+    {
+      id: "users",
+      icon: "people",
+      label: "Active Users",
+      value: 1250,
+      trend: "up",
+      change: 15.5,
+    },
+    {
+      id: "revenue",
+      icon: "attach_money",
+      label: "Revenue",
+      value: 45000,
+      trend: "up",
+      change: 8.2,
+    },
+    {
+      id: "conversion",
+      icon: "trending_up",
+      label: "Conversion Rate",
+      value: 3.8,
+      trend: "down",
+      change: -2.1,
+    },
+  ];
+
+  getMetricTooltip(metric: any): string {
+    const trend = metric.trend === "up" ? "increased" : "decreased";
+    const changeText = Math.abs(metric.change).toFixed(1);
+
+    return `${metric.label}: ${this.formatMetricValue(metric)}
+    
+This metric has ${trend} by ${changeText}% compared to last month.
+    
+Click for detailed analytics and historical data.`;
+  }
+
+  getMetricColor(metric: any): string {
+    return metric.trend === "up" ? "primary" : "warn";
+  }
+
+  formatMetricValue(metric: any): string {
+    if (metric.id === "revenue") {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(metric.value);
+    } else if (metric.id === "conversion") {
+      return `${metric.value}%`;
+    }
+    return metric.value.toLocaleString();
+  }
+
+  canPerformAction(action: string): boolean {
+    if (action === "sync") {
+      return !this.isSyncing;
+    }
+    return true;
+  }
+
+  getActionTooltip(action: string): string {
+    if (action === "export") {
+      return "Export current dashboard data to CSV or PDF format";
+    } else if (action === "sync") {
+      if (this.isSyncing) {
+        return "Synchronization in progress...";
+      }
+      const timeSinceSync = Date.now() - this.lastSyncTime.getTime();
+      const minutesAgo = Math.floor(timeSinceSync / (1000 * 60));
+      return `Refresh data from server. Last sync: ${minutesAgo} minutes ago`;
+    }
+    return "";
+  }
+
+  exportData(): void {
+    // Export logic
+  }
+
+  syncData(): void {
+    this.isSyncing = true;
+    // Sync logic
+    setTimeout(() => {
+      this.isSyncing = false;
+      this.lastSyncTime = new Date();
+    }, 2000);
+  }
+}
+```
+
+### Pattern 4: Validation and Error Tooltips
+
+```typescript
+// Form validation with contextual error tooltips
+@Component({
+  template: `
+    <form [formGroup]="registrationForm" class="registration-form">
+      <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input
+          matInput
+          formControlName="username"
+          [matTooltip]="getUsernameTooltip()"
+          [matTooltipClass]="getUsernameTooltipClass()"
+          [matTooltipPosition]="'right'"
+          [matTooltipShowDelay]="getTooltipDelay()"
+          (blur)="validateUsername()"
+        />
+        <mat-error
+          *ngIf="registrationForm.get('username')?.hasError('required')"
+        >
+          Username is required
+        </mat-error>
+        <mat-error
+          *ngIf="registrationForm.get('username')?.hasError('minlength')"
+        >
+          Username must be at least 3 characters
+        </mat-error>
+        <mat-error *ngIf="registrationForm.get('username')?.hasError('taken')">
+          Username is already taken
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          [matTooltip]="getPasswordTooltip()"
+          [matTooltipClass]="'password-requirements'"
+          matTooltipPosition="right"
+          [matTooltipShowDelay]="200"
+        />
+        <mat-error
+          *ngIf="registrationForm.get('password')?.hasError('required')"
+        >
+          Password is required
+        </mat-error>
+        <mat-error
+          *ngIf="registrationForm.get('password')?.hasError('minlength')"
+        >
+          Password must be at least 8 characters
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Confirm Password</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="confirmPassword"
+          [matTooltip]="getConfirmPasswordTooltip()"
+          [matTooltipClass]="getConfirmPasswordTooltipClass()"
+          matTooltipPosition="right"
+        />
+        <mat-error
+          *ngIf="registrationForm.get('confirmPassword')?.hasError('mismatch')"
+        >
+          Passwords do not match
+        </mat-error>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="!registrationForm.valid"
+        [matTooltip]="getSubmitTooltip()"
+        [matTooltipDisabled]="registrationForm.valid"
+        type="submit"
+      >
+        Register
+      </button>
+    </form>
+  `,
+  styles: [
+    `
+      .registration-form {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .registration-form mat-form-field {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      ::ng-deep .password-requirements {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+        border: 1px solid #4caf50;
+        max-width: 250px;
+        white-space: normal;
+        font-size: 12px;
+      }
+
+      ::ng-deep .error-tooltip {
+        background-color: #ffebee;
+        color: #c62828;
+        border: 1px solid #f44336;
+      }
+
+      ::ng-deep .help-tooltip {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #2196f3;
+      }
+    `,
+  ],
+})
+export class ValidationTooltipComponent implements OnInit {
+  registrationForm!: FormGroup;
+
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.registrationForm = this.fb.group(
+      {
+        username: ["", [Validators.required, Validators.minLength(3)]],
+        password: ["", [Validators.required, Validators.minLength(8)]],
+        confirmPassword: ["", [Validators.required]],
+      },
+      { validators: this.passwordMatchValidator },
+    );
+  }
+
+  passwordMatchValidator(form: AbstractControl): ValidationErrors | null {
+    const password = form.get("password");
+    const confirmPassword = form.get("confirmPassword");
+
+    if (
+      password &&
+      confirmPassword &&
+      password.value !== confirmPassword.value
+    ) {
+      confirmPassword.setErrors({ mismatch: true });
+    }
+
+    return null;
+  }
+
+  getUsernameTooltip(): string {
+    const control = this.registrationForm.get("username");
+
+    if (control?.hasError("taken")) {
+      return "This username is already taken. Please choose a different one.";
+    } else if (control?.hasError("minlength")) {
+      return "Username must be at least 3 characters long. Try adding more characters.";
+    } else if (control?.errors && control.touched) {
+      return "Please enter a valid username.";
+    }
+
+    return "Choose a unique username (3-20 characters). Only letters, numbers, and underscores allowed.";
+  }
+
+  getUsernameTooltipClass(): string {
+    const control = this.registrationForm.get("username");
+    return control?.errors && control.touched
+      ? "error-tooltip"
+      : "help-tooltip";
+  }
+
+  getPasswordTooltip(): string {
+    const control = this.registrationForm.get("password");
+
+    if (control?.hasError("minlength")) {
+      const currentLength = control.value?.length || 0;
+      const required = 8;
+      return `Password needs ${required - currentLength} more characters. Include letters, numbers, and symbols for better security.`;
+    }
+
+    return `Password requirements:
+• At least 8 characters
+• Mix of letters and numbers
+• Include special characters for stronger security`;
+  }
+
+  getConfirmPasswordTooltip(): string {
+    const control = this.registrationForm.get("confirmPassword");
+
+    if (control?.hasError("mismatch")) {
+      return "Passwords do not match. Please make sure both password fields are identical.";
+    }
+
+    return "Re-enter your password to confirm it matches.";
+  }
+
+  getConfirmPasswordTooltipClass(): string {
+    const control = this.registrationForm.get("confirmPassword");
+    return control?.hasError("mismatch") ? "error-tooltip" : "help-tooltip";
+  }
+
+  getSubmitTooltip(): string {
+    const errors = this.getFormErrors();
+
+    if (errors.length === 0) {
+      return "";
+    }
+
+    return `Please fix the following issues before submitting:\n• ${errors.join("\n• ")}`;
+  }
+
+  getTooltipDelay(): number {
+    const control = this.registrationForm.get("username");
+    return control?.errors && control.touched ? 0 : 500;
+  }
+
+  private getFormErrors(): string[] {
+    const errors: string[] = [];
+    const controls = this.registrationForm.controls;
+
+    Object.keys(controls).forEach((key) => {
+      const control = controls[key];
+      if (control.errors) {
+        if (key === "username" && control.errors["required"]) {
+          errors.push("Username is required");
+        } else if (key === "password" && control.errors["required"]) {
+          errors.push("Password is required");
+        } else if (key === "confirmPassword" && control.errors["mismatch"]) {
+          errors.push("Passwords must match");
+        }
+      }
+    });
+
+    return errors;
+  }
+
+  validateUsername(): void {
+    // Simulate username availability check
+    const username = this.registrationForm.get("username")?.value;
+    if (username === "admin" || username === "test") {
+      this.registrationForm.get("username")?.setErrors({ taken: true });
+    }
+  }
+}
+```

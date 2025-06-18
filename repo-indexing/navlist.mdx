@@ -1,0 +1,1015 @@
+# NavList Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate navigation list functionality
+
+### When to Use
+
+NavList components are ideal for creating navigation interfaces where users can navigate between different sections, pages, or routes within an application. Use them when you need to:
+
+- **Primary navigation menus** - Create main navigation lists for application sections like dashboard, settings, profile, or feature areas
+- **Sidebar navigation** - Build collapsible or persistent navigation panels with structured menu items and router integration
+- **Breadcrumb-like navigation** - Implement hierarchical navigation lists that show the current path or allow navigation to parent sections
+- **Category navigation** - Create organized navigation for content categories, filters, or organizational structures
+- **Router-integrated menus** - Build navigation lists that integrate seamlessly with Angular Router for programmatic and declarative routing
+- **Multi-level navigation** - Implement nested navigation structures with clear visual hierarchy and proper accessibility
+- **Mobile navigation** - Create responsive navigation lists that work well in mobile drawer or bottom navigation patterns
+- **Application shell navigation** - Build the core navigation framework for single-page applications with route state management
+
+### Architecture
+
+**No Coupling**: The NavList component is a standalone component that operates independently without requiring other components or shared context. It provides specialized navigation functionality with built-in Angular Router integration and can be used in isolation or combined with other layout components as needed.
+
+### Component Interdependencies
+
+The NavList component group has no interdependencies - MatNavList is a self-contained component that:
+
+- Requires no parent components or containers
+- Does not depend on shared context or state management
+- Can be used independently or as a building block for navigation interfaces
+- Provides specialized navigation capabilities with router integration
+- Integrates seamlessly with Angular Router for declarative and programmatic navigation
+- Supports accessibility features specifically designed for navigation patterns
+
+## Components
+
+### MatNavList {Standalone Component}
+
+A specialized navigation list component that provides built-in Angular Router integration, active state management, and accessibility features optimized for navigation use cases.
+
+**Purpose:** Provides the foundation for creating navigation interfaces where each item represents a route or navigation target, with automatic active state management, proper ARIA navigation attributes, and seamless router integration.
+
+**Interface:**
+
+```typescript
+interface MatNavListProps {
+  children: React.ReactNode; // Navigation content, typically mat-list-item elements with routerLink
+  disableRipple?: boolean; // Disables ripple effects on navigation items (default: false)
+  disabled?: boolean; // Disables the entire navigation list and all item interactions (default: false)
+  id?: string; // Unique identifier for the navigation list
+  class?: string; // CSS classes for additional styling
+  role?: string; // ARIA role for accessibility (default: 'navigation')
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatNavList } from "@angular/material/list";
+
+@Component({
+  template: `
+    <mat-nav-list>
+      <mat-list-item routerLink="/dashboard" routerLinkActive="active-nav-item">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+        <span matListItemLine>View application overview</span>
+      </mat-list-item>
+      <mat-list-item routerLink="/projects" routerLinkActive="active-nav-item">
+        <mat-icon matListItemIcon>folder</mat-icon>
+        <span matListItemTitle>Projects</span>
+        <span matListItemLine>Manage your projects</span>
+      </mat-list-item>
+      <mat-list-item routerLink="/settings" routerLinkActive="active-nav-item">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Settings</span>
+        <span matListItemLine>Configure preferences</span>
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+})
+export class BasicNavListExample {}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatNavList } from "@angular/material/list";
+
+// Simple navigation list with router integration
+@Component({
+  template: `
+    <mat-nav-list>
+      <mat-list-item routerLink="/home">
+        <mat-icon matListItemIcon>home</mat-icon>
+        Home
+      </mat-list-item>
+      <mat-list-item routerLink="/about">
+        <mat-icon matListItemIcon>info</mat-icon>
+        About
+      </mat-list-item>
+      <mat-list-item routerLink="/contact">
+        <mat-icon matListItemIcon>contact_mail</mat-icon>
+        Contact
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+})
+export class SimpleNavListExample {}
+```
+
+### Advanced Usage
+
+```tsx
+// Complex navigation with conditional routing, nested structure, and state management
+@Component({
+  template: `
+    <mat-nav-list [disableRipple]="navigationDisabled" [disabled]="isLoading">
+      <!-- Primary Navigation Section -->
+      <h3 matSubheader>Main Navigation</h3>
+
+      <mat-list-item
+        *ngFor="let navItem of primaryNavigation; trackBy: trackByNavItem"
+        [routerLink]="navItem.route"
+        routerLinkActive="active-nav-item"
+        [routerLinkActiveOptions]="{ exact: navItem.exact }"
+        [class.disabled]="navItem.disabled"
+        [attr.aria-label]="navItem.ariaLabel"
+      >
+        <mat-icon
+          matListItemIcon
+          [color]="navItem.iconColor"
+          [class.disabled-icon]="navItem.disabled"
+        >
+          {{ navItem.icon }}
+        </mat-icon>
+
+        <div matListItemTitle>{{ navItem.title }}</div>
+        <div matListItemLine>{{ navItem.description }}</div>
+
+        <mat-badge
+          *ngIf="navItem.badge"
+          matListItemMeta
+          [content]="navItem.badge.content"
+          [color]="navItem.badge.color"
+        >
+        </mat-badge>
+
+        <mat-icon *ngIf="navItem.hasSubmenu" matListItemMeta>
+          expand_more
+        </mat-icon>
+      </mat-list-item>
+
+      <mat-divider *ngIf="showDividers"></mat-divider>
+
+      <!-- Secondary Navigation Section -->
+      <h3 matSubheader *ngIf="secondaryNavigation.length">Tools & Settings</h3>
+
+      <mat-list-item
+        *ngFor="let secondaryItem of secondaryNavigation"
+        [routerLink]="secondaryItem.route"
+        routerLinkActive="active-nav-item"
+        [queryParams]="secondaryItem.queryParams"
+        [fragment]="secondaryItem.fragment"
+      >
+        <mat-icon matListItemIcon>{{ secondaryItem.icon }}</mat-icon>
+        <div matListItemTitle>{{ secondaryItem.title }}</div>
+      </mat-list-item>
+
+      <!-- External Links Section -->
+      <mat-divider *ngIf="externalLinks.length && showDividers"></mat-divider>
+
+      <mat-list-item
+        *ngFor="let externalLink of externalLinks"
+        [href]="externalLink.url"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="externalLink.title + ' (opens in new tab)'"
+      >
+        <mat-icon matListItemIcon>{{ externalLink.icon }}</mat-icon>
+        <div matListItemTitle>{{ externalLink.title }}</div>
+        <mat-icon matListItemMeta>open_in_new</mat-icon>
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .active-nav-item {
+        background-color: rgba(63, 81, 181, 0.12);
+        color: #3f51b5;
+      }
+      .active-nav-item .mat-icon {
+        color: #3f51b5;
+      }
+      .disabled-icon {
+        opacity: 0.38;
+      }
+    `,
+  ],
+})
+export class AdvancedNavListExample {
+  navigationDisabled = false;
+  isLoading = false;
+  showDividers = true;
+
+  primaryNavigation = [
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      description: "Application overview and metrics",
+      icon: "dashboard",
+      iconColor: "primary",
+      route: "/dashboard",
+      exact: true,
+      disabled: false,
+      badge: { content: "2", color: "accent" },
+      hasSubmenu: false,
+      ariaLabel: "Navigate to dashboard",
+    },
+    {
+      id: "projects",
+      title: "Projects",
+      description: "Manage and view your projects",
+      icon: "folder",
+      iconColor: "primary",
+      route: "/projects",
+      exact: false,
+      disabled: false,
+      hasSubmenu: true,
+      ariaLabel: "Navigate to projects section",
+    },
+    {
+      id: "team",
+      title: "Team",
+      description: "Team members and collaboration",
+      icon: "people",
+      iconColor: "primary",
+      route: "/team",
+      exact: false,
+      disabled: false,
+      hasSubmenu: false,
+      ariaLabel: "Navigate to team section",
+    },
+    {
+      id: "reports",
+      title: "Reports",
+      description: "Analytics and reporting dashboard",
+      icon: "analytics",
+      iconColor: "primary",
+      route: "/reports",
+      exact: false,
+      disabled: true,
+      hasSubmenu: false,
+      ariaLabel: "Reports section (currently unavailable)",
+    },
+  ];
+
+  secondaryNavigation = [
+    {
+      id: "settings",
+      title: "Settings",
+      icon: "settings",
+      route: "/settings",
+      queryParams: { tab: "general" },
+    },
+    {
+      id: "profile",
+      title: "Profile",
+      icon: "account_circle",
+      route: "/profile",
+      fragment: "personal-info",
+    },
+  ];
+
+  externalLinks = [
+    {
+      id: "documentation",
+      title: "Documentation",
+      icon: "help",
+      url: "https://docs.example.com",
+    },
+    {
+      id: "support",
+      title: "Support",
+      icon: "support",
+      url: "https://support.example.com",
+    },
+  ];
+
+  trackByNavItem(index: number, item: any): string {
+    return item.id;
+  }
+}
+```
+
+### Common Variations
+
+#### Primary Navigation Menu
+
+```tsx
+// Main application navigation with active state management
+@Component({
+  template: `
+    <mat-nav-list>
+      <mat-list-item
+        *ngFor="let item of mainNavItems"
+        [routerLink]="item.route"
+        routerLinkActive="active-nav"
+        [routerLinkActiveOptions]="{ exact: item.exact }"
+      >
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle>{{ item.label }}</span>
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .active-nav {
+        background-color: var(--mat-primary-50);
+        border-right: 3px solid var(--mat-primary-500);
+      }
+    `,
+  ],
+})
+export class PrimaryNavigationExample {
+  mainNavItems = [
+    { route: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true },
+    { route: "/workspace", icon: "work", label: "Workspace", exact: false },
+    { route: "/calendar", icon: "event", label: "Calendar", exact: false },
+    { route: "/messages", icon: "message", label: "Messages", exact: false },
+  ];
+}
+```
+
+#### Hierarchical Navigation
+
+```tsx
+// Multi-level navigation with parent-child relationships
+@Component({
+  template: `
+    <mat-nav-list>
+      <ng-container *ngFor="let category of navigationCategories">
+        <h3 matSubheader>{{ category.title }}</h3>
+
+        <mat-list-item
+          *ngFor="let item of category.items"
+          [routerLink]="item.route"
+          routerLinkActive="active-nav-item"
+          [class.nav-child-item]="item.isChild"
+        >
+          <mat-icon
+            matListItemIcon
+            [style.margin-left]="item.isChild ? '16px' : '0'"
+          >
+            {{ item.icon }}
+          </mat-icon>
+          <span matListItemTitle>{{ item.title }}</span>
+          <span *ngIf="item.description" matListItemLine>{{
+            item.description
+          }}</span>
+        </mat-list-item>
+
+        <mat-divider *ngIf="!category.isLast"></mat-divider>
+      </ng-container>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .nav-child-item {
+        padding-left: 32px;
+      }
+      .active-nav-item {
+        background-color: rgba(var(--mat-primary-rgb), 0.08);
+        color: var(--mat-primary-text);
+      }
+    `,
+  ],
+})
+export class HierarchicalNavigationExample {
+  navigationCategories = [
+    {
+      title: "Content Management",
+      isLast: false,
+      items: [
+        {
+          route: "/content",
+          icon: "article",
+          title: "Articles",
+          description: "Manage blog posts and articles",
+          isChild: false,
+        },
+        {
+          route: "/content/drafts",
+          icon: "edit",
+          title: "Drafts",
+          description: "Work in progress content",
+          isChild: true,
+        },
+        {
+          route: "/content/published",
+          icon: "publish",
+          title: "Published",
+          description: "Live content",
+          isChild: true,
+        },
+      ],
+    },
+    {
+      title: "User Management",
+      isLast: true,
+      items: [
+        {
+          route: "/users",
+          icon: "people",
+          title: "Users",
+          description: "Manage user accounts",
+          isChild: false,
+        },
+        {
+          route: "/users/roles",
+          icon: "admin_panel_settings",
+          title: "Roles & Permissions",
+          description: "Configure user access",
+          isChild: true,
+        },
+      ],
+    },
+  ];
+}
+```
+
+#### Responsive Navigation with State
+
+```tsx
+// Mobile-friendly navigation with responsive behavior
+@Component({
+  template: `
+    <mat-nav-list [class.mobile-nav]="isMobile">
+      <mat-list-item
+        *ngFor="let navItem of navigationItems"
+        [routerLink]="navItem.route"
+        routerLinkActive="active-nav-item"
+        (click)="onNavItemClick(navItem)"
+      >
+        <mat-icon matListItemIcon>{{ navItem.icon }}</mat-icon>
+
+        <span matListItemTitle>{{ navItem.title }}</span>
+        <span *ngIf="!isMobile" matListItemLine>{{ navItem.subtitle }}</span>
+
+        <mat-badge
+          *ngIf="navItem.badgeCount > 0"
+          matListItemMeta
+          [content]="navItem.badgeCount"
+          color="warn"
+          size="small"
+        >
+        </mat-badge>
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .mobile-nav mat-list-item {
+        height: 48px;
+      }
+      .mobile-nav .mat-list-item-content {
+        padding: 0 8px;
+      }
+      .active-nav-item {
+        background-color: var(--mat-primary-container);
+        color: var(--mat-primary-on-container);
+      }
+    `,
+  ],
+})
+export class ResponsiveNavigationExample implements OnInit, OnDestroy {
+  isMobile = false;
+  private destroy$ = new Subject<void>();
+
+  navigationItems = [
+    {
+      route: "/inbox",
+      icon: "inbox",
+      title: "Inbox",
+      subtitle: "New messages and notifications",
+      badgeCount: 3,
+    },
+    {
+      route: "/favorites",
+      icon: "star",
+      title: "Favorites",
+      subtitle: "Bookmarked items",
+      badgeCount: 0,
+    },
+    {
+      route: "/archive",
+      icon: "archive",
+      title: "Archive",
+      subtitle: "Archived conversations",
+      badgeCount: 0,
+    },
+  ];
+
+  constructor(private breakpointObserver: BreakpointObserver) {}
+
+  ngOnInit(): void {
+    this.breakpointObserver
+      .observe(["(max-width: 768px)"])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        this.isMobile = result.matches;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onNavItemClick(navItem: any): void {
+    // Handle mobile-specific navigation behavior
+    if (this.isMobile) {
+      // Close mobile drawer or trigger mobile-specific actions
+      console.log(`Mobile navigation to: ${navItem.route}`);
+    }
+  }
+}
+```
+
+#### Contextual Navigation
+
+```tsx
+// Context-aware navigation that changes based on current route
+@Component({
+  template: `
+    <mat-nav-list>
+      <ng-container *ngIf="currentContext">
+        <h3 matSubheader>{{ currentContext.title }}</h3>
+
+        <mat-list-item
+          *ngFor="let item of currentContext.items"
+          [routerLink]="item.route"
+          routerLinkActive="active-context-nav"
+          [queryParams]="item.queryParams"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.title }}</span>
+        </mat-list-item>
+      </ng-container>
+
+      <mat-divider
+        *ngIf="currentContext && globalNavigation.length"
+      ></mat-divider>
+
+      <h3 matSubheader *ngIf="globalNavigation.length">Global</h3>
+      <mat-list-item
+        *ngFor="let globalItem of globalNavigation"
+        [routerLink]="globalItem.route"
+        routerLinkActive="active-global-nav"
+      >
+        <mat-icon matListItemIcon>{{ globalItem.icon }}</mat-icon>
+        <span matListItemTitle>{{ globalItem.title }}</span>
+      </mat-list-item>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .active-context-nav {
+        background-color: rgba(var(--mat-accent-rgb), 0.12);
+        border-left: 3px solid var(--mat-accent-500);
+      }
+      .active-global-nav {
+        background-color: rgba(var(--mat-primary-rgb), 0.12);
+        border-left: 3px solid var(--mat-primary-500);
+      }
+    `,
+  ],
+})
+export class ContextualNavigationExample implements OnInit {
+  currentContext: any = null;
+  globalNavigation = [
+    { route: "/dashboard", icon: "dashboard", title: "Dashboard" },
+    { route: "/settings", icon: "settings", title: "Settings" },
+  ];
+
+  private navigationContexts = {
+    "/projects": {
+      title: "Project Tools",
+      items: [
+        { route: "/projects/board", icon: "view_kanban", title: "Board" },
+        { route: "/projects/timeline", icon: "timeline", title: "Timeline" },
+        { route: "/projects/files", icon: "folder", title: "Files" },
+      ],
+    },
+    "/team": {
+      title: "Team Management",
+      items: [
+        { route: "/team/members", icon: "people", title: "Members" },
+        {
+          route: "/team/permissions",
+          icon: "admin_panel_settings",
+          title: "Permissions",
+        },
+        { route: "/team/activity", icon: "history", title: "Activity" },
+      ],
+    },
+  };
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.updateContextualNavigation(event.url);
+      });
+
+    // Set initial context
+    this.updateContextualNavigation(this.router.url);
+  }
+
+  private updateContextualNavigation(url: string): void {
+    const contextKey = Object.keys(this.navigationContexts).find((key) =>
+      url.startsWith(key),
+    );
+
+    this.currentContext = contextKey
+      ? this.navigationContexts[contextKey]
+      : null;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for navigation only** - MatNavList is specifically designed for navigation patterns with router integration, unlike MatActionList which is for general actions
+- **Implement proper routing** - Always use routerLink directives with navigation items to ensure proper browser history and accessibility
+- **Leverage active state management** - Use routerLinkActive to provide visual feedback about the current page or section
+- **Consider mobile responsiveness** - Design navigation patterns that work well on both desktop and mobile devices, potentially using drawer containers
+
+### Accessibility
+
+- **Navigation semantics** - MatNavList automatically provides proper ARIA navigation role and supports screen reader navigation patterns
+- **Keyboard navigation** - Built-in support for arrow key navigation, Enter activation, and proper focus management for navigation flows
+- **Route announcements** - Active route changes are automatically announced to screen readers when using proper router integration
+- **Landmark navigation** - Use as primary navigation landmark to help users orient themselves within the application structure
+
+### Performance
+
+- **Route optimization** - Use exact route matching appropriately to prevent unnecessary active state calculations
+- **TrackBy functions** - When rendering dynamic navigation items with \*ngFor, provide trackBy functions to optimize change detection
+- **Lazy loading integration** - Works seamlessly with Angular's lazy loading modules for performance optimization
+- **Memory management** - Clean up route subscriptions and observers properly to prevent memory leaks in navigation components
+
+## Common Patterns
+
+### Pattern 1: Application Shell Navigation
+
+```tsx
+// Main application navigation integrated with layout
+@Component({
+  template: `
+    <mat-sidenav-container class="app-container">
+      <mat-sidenav mode="side" opened="true" class="app-sidenav">
+        <mat-toolbar color="primary">
+          <span>My Application</span>
+        </mat-toolbar>
+
+        <mat-nav-list class="app-navigation">
+          <mat-list-item
+            *ngFor="let item of appNavigation"
+            [routerLink]="item.route"
+            routerLinkActive="active-app-nav"
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.title }}</span>
+            <mat-badge
+              *ngIf="item.notifications > 0"
+              matListItemMeta
+              [content]="item.notifications"
+              color="warn"
+            >
+            </mat-badge>
+          </mat-list-item>
+        </mat-nav-list>
+      </mat-sidenav>
+
+      <mat-sidenav-content>
+        <router-outlet></router-outlet>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .app-container {
+        height: 100vh;
+      }
+      .app-sidenav {
+        width: 280px;
+      }
+      .app-navigation {
+        padding-top: 16px;
+      }
+      .active-app-nav {
+        background-color: rgba(var(--mat-primary-rgb), 0.12);
+        border-right: 4px solid var(--mat-primary-500);
+      }
+    `,
+  ],
+})
+export class ApplicationShellExample {
+  appNavigation = [
+    {
+      route: "/dashboard",
+      icon: "dashboard",
+      title: "Dashboard",
+      exact: true,
+      notifications: 0,
+    },
+    {
+      route: "/projects",
+      icon: "work",
+      title: "Projects",
+      exact: false,
+      notifications: 2,
+    },
+    {
+      route: "/team",
+      icon: "people",
+      title: "Team",
+      exact: false,
+      notifications: 0,
+    },
+    {
+      route: "/reports",
+      icon: "analytics",
+      title: "Reports",
+      exact: false,
+      notifications: 0,
+    },
+    {
+      route: "/settings",
+      icon: "settings",
+      title: "Settings",
+      exact: false,
+      notifications: 1,
+    },
+  ];
+}
+```
+
+### Pattern 2: Feature-Specific Navigation
+
+```tsx
+// Navigation specific to a feature module or section
+@Component({
+  template: `
+    <div class="feature-layout">
+      <mat-card class="feature-nav-card">
+        <mat-card-header>
+          <mat-card-title>Project Management</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <mat-nav-list>
+            <mat-list-item
+              *ngFor="let feature of projectFeatures"
+              [routerLink]="feature.route"
+              routerLinkActive="active-feature-nav"
+              [class.disabled]="!feature.enabled"
+            >
+              <mat-icon
+                matListItemIcon
+                [color]="feature.enabled ? 'primary' : ''"
+              >
+                {{ feature.icon }}
+              </mat-icon>
+
+              <span matListItemTitle>{{ feature.title }}</span>
+              <span matListItemLine>{{ feature.description }}</span>
+
+              <mat-chip
+                *ngIf="feature.status"
+                matListItemMeta
+                [color]="feature.statusColor"
+              >
+                {{ feature.status }}
+              </mat-chip>
+            </mat-list-item>
+          </mat-nav-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .feature-layout {
+        padding: 16px;
+      }
+      .feature-nav-card {
+        max-width: 400px;
+      }
+      .active-feature-nav {
+        background-color: var(--mat-primary-container);
+        color: var(--mat-primary-on-container);
+      }
+      .disabled {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    `,
+  ],
+})
+export class FeatureNavigationExample {
+  projectFeatures = [
+    {
+      route: "/projects/overview",
+      icon: "visibility",
+      title: "Overview",
+      description: "Project summary and metrics",
+      enabled: true,
+      status: "Active",
+      statusColor: "primary",
+    },
+    {
+      route: "/projects/tasks",
+      icon: "task_alt",
+      title: "Tasks",
+      description: "Manage project tasks and milestones",
+      enabled: true,
+      status: "Beta",
+      statusColor: "accent",
+    },
+    {
+      route: "/projects/resources",
+      icon: "folder_shared",
+      title: "Resources",
+      description: "Project files and documentation",
+      enabled: true,
+      status: null,
+      statusColor: null,
+    },
+    {
+      route: "/projects/analytics",
+      icon: "analytics",
+      title: "Analytics",
+      description: "Performance metrics and insights",
+      enabled: false,
+      status: "Coming Soon",
+      statusColor: "warn",
+    },
+  ];
+}
+```
+
+### Pattern 3: Dynamic Role-Based Navigation
+
+```tsx
+// Navigation that adapts based on user permissions and roles
+@Component({
+  template: `
+    <mat-nav-list>
+      <ng-container *ngFor="let section of allowedNavigation">
+        <h3 matSubheader *ngIf="section.items.length">{{ section.title }}</h3>
+
+        <mat-list-item
+          *ngFor="let item of section.items"
+          [routerLink]="item.route"
+          routerLinkActive="active-role-nav"
+          [attr.aria-label]="
+            item.title + ' - ' + item.accessLevel + ' access required'
+          "
+        >
+          <mat-icon matListItemIcon [color]="item.iconColor">
+            {{ item.icon }}
+          </mat-icon>
+
+          <span matListItemTitle>{{ item.title }}</span>
+          <span matListItemLine>{{ item.description }}</span>
+
+          <mat-chip
+            matListItemMeta
+            [color]="getRoleChipColor(item.accessLevel)"
+            size="small"
+          >
+            {{ item.accessLevel }}
+          </mat-chip>
+        </mat-list-item>
+
+        <mat-divider
+          *ngIf="!section.isLast && section.items.length"
+        ></mat-divider>
+      </ng-container>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .active-role-nav {
+        background-color: rgba(var(--mat-primary-rgb), 0.08);
+        border-left: 3px solid var(--mat-primary-500);
+      }
+    `,
+  ],
+})
+export class RoleBasedNavigationExample implements OnInit {
+  userRole = "admin"; // This would come from an authentication service
+  allowedNavigation: any[] = [];
+
+  private allNavigation = [
+    {
+      title: "Dashboard",
+      isLast: false,
+      items: [
+        {
+          route: "/dashboard/overview",
+          icon: "dashboard",
+          iconColor: "primary",
+          title: "Overview",
+          description: "Application dashboard and metrics",
+          accessLevel: "user",
+          requiredRole: ["user", "admin", "manager"],
+        },
+        {
+          route: "/dashboard/admin",
+          icon: "admin_panel_settings",
+          iconColor: "warn",
+          title: "Admin Dashboard",
+          description: "Administrative controls and monitoring",
+          accessLevel: "admin",
+          requiredRole: ["admin"],
+        },
+      ],
+    },
+    {
+      title: "Management",
+      isLast: false,
+      items: [
+        {
+          route: "/users",
+          icon: "people",
+          iconColor: "accent",
+          title: "User Management",
+          description: "Manage user accounts and permissions",
+          accessLevel: "manager",
+          requiredRole: ["admin", "manager"],
+        },
+        {
+          route: "/system",
+          icon: "settings",
+          iconColor: "warn",
+          title: "System Settings",
+          description: "Configure system-wide settings",
+          accessLevel: "admin",
+          requiredRole: ["admin"],
+        },
+      ],
+    },
+    {
+      title: "Tools",
+      isLast: true,
+      items: [
+        {
+          route: "/reports",
+          icon: "assessment",
+          iconColor: "primary",
+          title: "Reports",
+          description: "Generate and view reports",
+          accessLevel: "user",
+          requiredRole: ["user", "admin", "manager"],
+        },
+        {
+          route: "/audit",
+          icon: "history",
+          iconColor: "warn",
+          title: "Audit Log",
+          description: "View system audit trail",
+          accessLevel: "admin",
+          requiredRole: ["admin"],
+        },
+      ],
+    },
+  ];
+
+  ngOnInit(): void {
+    this.filterNavigationByRole();
+  }
+
+  private filterNavigationByRole(): void {
+    this.allowedNavigation = this.allNavigation
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) =>
+          item.requiredRole.includes(this.userRole),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }
+
+  getRoleChipColor(accessLevel: string): string {
+    const colors = {
+      user: "primary",
+      manager: "accent",
+      admin: "warn",
+    };
+    return colors[accessLevel] || "primary";
+  }
+}
+```

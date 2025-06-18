@@ -1,0 +1,1001 @@
+# Tree Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate tree functionality
+
+### When to Use
+
+Tree components are ideal for displaying hierarchical data structures where parent-child relationships need to be clearly visualized and navigated. Use them when you need to:
+
+- **File system navigation** - Display folders, subfolders, and files in a hierarchical structure with expand/collapse functionality
+- **Organizational charts** - Show company structure, department hierarchies, or team organization with clear parent-child relationships
+- **Category management** - Present product categories, content taxonomies, or classification systems with nested subcategories
+- **Menu structures** - Create navigation menus with multiple levels and subsections for complex site architectures
+- **Data exploration** - Allow users to drill down through nested data sets, reports, or analytical hierarchies
+- **Taxonomy visualization** - Display scientific classifications, knowledge bases, or structured reference materials
+- **Decision trees** - Present branching logic, workflow steps, or conditional processes in a visual hierarchy
+- **Code structure** - Show class hierarchies, module dependencies, or package structures in development tools
+- **Geographic hierarchies** - Display country, state, city, or regional data with nested geographic relationships
+- **Project breakdowns** - Organize work items, tasks, or deliverables in hierarchical project structures
+
+### Architecture
+
+**No Coupling**: The Tree component group consists of a single, standalone component (MatTree) that independently handles hierarchical data display and interaction. The component provides complete tree functionality without requiring other components for basic operation.
+
+## Components
+
+### MatTree {Standalone Component}
+
+The primary component for displaying hierarchical data structures with Material Design styling and accessible navigation patterns.
+
+**Purpose:** Provides a complete tree interface for hierarchical data with built-in expansion/collapse functionality, keyboard navigation, and customizable node templates while maintaining accessibility standards.
+
+**Interface:**
+
+```typescript
+interface MatTreeProps {
+  dataSource: TreeDataSource<T>; // Data source providing hierarchical data
+  treeControl: TreeControl<T>; // Controls tree expansion, collapse, and navigation
+  trackByFn?: (index: number, item: T) => any; // Function for tracking items for performance
+}
+
+interface MatTreeNodeProps {
+  disabled?: boolean; // Whether the node is disabled
+  data: T; // The data associated with the tree node
+  isExpanded: boolean; // Whether the node is currently expanded
+  level: number; // Hierarchical level of the node (0-based)
+}
+
+interface MatTreeNodeDefProps {
+  when?: (index: number, nodeData: T) => boolean; // Predicate to determine when to use this template
+  data: T; // The data associated with the node definition
+}
+
+interface MatTreeFlattenerConfig<T, F> {
+  transformFunction: (node: T, level: number) => F; // Transforms nested data to flat structure
+  getLevel: (node: F) => number; // Returns the level of a flattened node
+  isExpandable: (node: F) => boolean; // Determines if a node can be expanded
+  getChildren: (node: T) => Observable<T[]> | T[] | undefined | null; // Retrieves child nodes
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatTree, MatTreeModule } from "@angular/material/tree";
+import { NestedTreeControl } from "@angular/cdk/tree";
+import { MatTreeNestedDataSource } from "@angular/material/tree";
+
+interface FoodNode {
+  name: string;
+  children?: FoodNode[];
+}
+
+@Component({
+  selector: "tree-basic-example",
+  template: `
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        {{ node.name }}
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Toggle ' + node.name"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
+          </mat-icon>
+        </button>
+        {{ node.name }}
+      </mat-tree-node>
+    </mat-tree>
+  `,
+})
+export class TreeBasicExample {
+  treeControl = new NestedTreeControl<FoodNode>((node) => node.children);
+  dataSource = new MatTreeNestedDataSource<FoodNode>();
+
+  TREE_DATA: FoodNode[] = [
+    {
+      name: "Fruit",
+      children: [{ name: "Apple" }, { name: "Banana" }, { name: "Orange" }],
+    },
+    {
+      name: "Vegetables",
+      children: [{ name: "Carrot" }, { name: "Lettuce" }, { name: "Broccoli" }],
+    },
+  ];
+
+  constructor() {
+    this.dataSource.data = this.TREE_DATA;
+  }
+
+  hasChild = (_: number, node: FoodNode) =>
+    !!node.children && node.children.length > 0;
+}
+```
+
+## Integration Patterns
+
+### Basic Nested Tree
+
+```tsx
+import { NestedTreeControl } from "@angular/cdk/tree";
+import { MatTreeNestedDataSource } from "@angular/material/tree";
+
+interface FileNode {
+  name: string;
+  type: "file" | "folder";
+  children?: FileNode[];
+}
+
+@Component({
+  template: `
+    <mat-tree
+      [dataSource]="dataSource"
+      [treeControl]="treeControl"
+      class="file-tree"
+    >
+      <!-- Leaf node template -->
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        <mat-icon [attr.aria-label]="node.type" class="type-icon">
+          {{ node.type === "file" ? "description" : "folder" }}
+        </mat-icon>
+        {{ node.name }}
+      </mat-tree-node>
+
+      <!-- Expandable node template -->
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Toggle ' + node.name"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
+          </mat-icon>
+        </button>
+        <mat-icon class="type-icon">folder</mat-icon>
+        {{ node.name }}
+      </mat-tree-node>
+    </mat-tree>
+  `,
+  styles: [
+    `
+      .file-tree {
+        margin: 16px;
+      }
+
+      .type-icon {
+        margin-right: 8px;
+      }
+    `,
+  ],
+})
+export class FileTreeExample {
+  treeControl = new NestedTreeControl<FileNode>((node) => node.children);
+  dataSource = new MatTreeNestedDataSource<FileNode>();
+
+  FILE_TREE_DATA: FileNode[] = [
+    {
+      name: "src",
+      type: "folder",
+      children: [
+        {
+          name: "app",
+          type: "folder",
+          children: [
+            { name: "app.component.ts", type: "file" },
+            { name: "app.component.html", type: "file" },
+            { name: "app.module.ts", type: "file" },
+          ],
+        },
+        {
+          name: "assets",
+          type: "folder",
+          children: [
+            { name: "logo.png", type: "file" },
+            { name: "styles.css", type: "file" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "package.json",
+      type: "file",
+    },
+  ];
+
+  constructor() {
+    this.dataSource.data = this.FILE_TREE_DATA;
+  }
+
+  hasChild = (_: number, node: FileNode) =>
+    !!node.children && node.children.length > 0;
+}
+```
+
+### Flat Tree with Dynamic Data
+
+```tsx
+import { FlatTreeControl } from "@angular/cdk/tree";
+import {
+  MatTreeFlatDataSource,
+  MatTreeFlattener,
+} from "@angular/material/tree";
+
+interface TodoItemNode {
+  item: string;
+  level: number;
+  expandable: boolean;
+}
+
+interface TodoItemFlatNode {
+  item: string;
+  level: number;
+  expandable: boolean;
+}
+
+@Component({
+  template: `
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        <mat-checkbox
+          class="checklist-leaf-node"
+          [checked]="descendantsAllSelected(node)"
+          [indeterminate]="descendantsPartiallySelected(node)"
+          (change)="todoLeafItemSelectionToggle(node)"
+        >
+          {{ node.item }}
+        </mat-checkbox>
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Toggle ' + node.item"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
+          </mat-icon>
+        </button>
+        <mat-checkbox
+          [checked]="descendantsAllSelected(node)"
+          [indeterminate]="descendantsPartiallySelected(node)"
+          (change)="todoItemSelectionToggle(node)"
+        >
+          {{ node.item }}
+        </mat-checkbox>
+      </mat-tree-node>
+    </mat-tree>
+  `,
+  styles: [
+    `
+      .checklist-leaf-node {
+        margin-left: 40px;
+      }
+    `,
+  ],
+})
+export class TreeChecklistExample {
+  private _transformer = (node: TodoItemNode, level: number) => {
+    return {
+      expandable: !!node.children && node.children.length > 0,
+      item: node.item,
+      level: level,
+    };
+  };
+
+  treeControl = new FlatTreeControl<TodoItemFlatNode>(
+    (node) => node.level,
+    (node) => node.expandable,
+  );
+
+  treeFlattener = new MatTreeFlattener(
+    this._transformer,
+    (node) => node.level,
+    (node) => node.expandable,
+    (node) => node.children,
+  );
+
+  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+
+  checklistSelection = new SelectionModel<TodoItemFlatNode>(true);
+
+  TREE_DATA: TodoItemNode[] = [
+    {
+      item: "Fruit",
+      children: [{ item: "Apple" }, { item: "Banana" }, { item: "Orange" }],
+    },
+    {
+      item: "Vegetables",
+      children: [{ item: "Carrot" }, { item: "Lettuce" }, { item: "Broccoli" }],
+    },
+  ];
+
+  constructor() {
+    this.dataSource.data = this.TREE_DATA;
+  }
+
+  hasChild = (_: number, node: TodoItemFlatNode) => node.expandable;
+
+  descendantsAllSelected(node: TodoItemFlatNode): boolean {
+    const descendants = this.treeControl.getDescendants(node);
+    const descAllSelected =
+      descendants.length > 0 &&
+      descendants.every((child) => {
+        return this.checklistSelection.isSelected(child);
+      });
+    return descAllSelected;
+  }
+
+  descendantsPartiallySelected(node: TodoItemFlatNode): boolean {
+    const descendants = this.treeControl.getDescendants(node);
+    const result = descendants.some((child) =>
+      this.checklistSelection.isSelected(child),
+    );
+    return result && !this.descendantsAllSelected(node);
+  }
+
+  todoItemSelectionToggle(node: TodoItemFlatNode): void {
+    this.checklistSelection.toggle(node);
+    const descendants = this.treeControl.getDescendants(node);
+    this.checklistSelection.isSelected(node)
+      ? this.checklistSelection.select(...descendants)
+      : this.checklistSelection.deselect(...descendants);
+
+    descendants.forEach((child) => this.checklistSelection.isSelected(child));
+    this.checkAllParentsSelection(node);
+  }
+
+  todoLeafItemSelectionToggle(node: TodoItemFlatNode): void {
+    this.checklistSelection.toggle(node);
+    this.checkAllParentsSelection(node);
+  }
+
+  checkAllParentsSelection(node: TodoItemFlatNode): void {
+    let parent: TodoItemFlatNode | null = this.getParentNode(node);
+    while (parent) {
+      this.checkRootNodeSelection(parent);
+      parent = this.getParentNode(parent);
+    }
+  }
+
+  checkRootNodeSelection(node: TodoItemFlatNode): void {
+    const nodeSelected = this.checklistSelection.isSelected(node);
+    const descendants = this.treeControl.getDescendants(node);
+    const descAllSelected =
+      descendants.length > 0 &&
+      descendants.every((child) => {
+        return this.checklistSelection.isSelected(child);
+      });
+    if (nodeSelected && !descAllSelected) {
+      this.checklistSelection.deselect(node);
+    } else if (!nodeSelected && descAllSelected) {
+      this.checklistSelection.select(node);
+    }
+  }
+
+  getParentNode(node: TodoItemFlatNode): TodoItemFlatNode | null {
+    const currentLevel = this.getLevel(node);
+
+    if (currentLevel < 1) {
+      return null;
+    }
+
+    const startIndex = this.treeControl.dataNodes.indexOf(node) - 1;
+
+    for (let i = startIndex; i >= 0; i--) {
+      const currentNode = this.treeControl.dataNodes[i];
+
+      if (this.getLevel(currentNode) < currentLevel) {
+        return currentNode;
+      }
+    }
+    return null;
+  }
+
+  getLevel = (node: TodoItemFlatNode) => node.level;
+}
+```
+
+### Common Variations
+
+#### Loadable Tree with Async Data
+
+```tsx
+import { BehaviorSubject, Observable, merge } from "rxjs";
+import { map } from "rxjs/operators";
+
+interface LoadmoreNode {
+  childrenChange: BehaviorSubject<LoadmoreNode[]>;
+  item: string;
+  hasChildren: boolean;
+  isLoading: boolean;
+}
+
+@Component({
+  template: `
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        {{ node.item }}
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+      >
+        <button
+          mat-icon-button
+          [attr.aria-label]="'Toggle ' + node.item"
+          (click)="loadChildren(node)"
+          [disabled]="node.isLoading"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
+          </mat-icon>
+        </button>
+        {{ node.item }}
+        <mat-progress-spinner
+          *ngIf="node.isLoading"
+          mode="indeterminate"
+          diameter="20"
+        >
+        </mat-progress-spinner>
+      </mat-tree-node>
+    </mat-tree>
+  `,
+  styles: [
+    `
+      mat-progress-spinner {
+        margin-left: 8px;
+      }
+    `,
+  ],
+})
+export class LoadmoreTreeExample {
+  nodeMap = new Map<string, LoadmoreNode>();
+  treeControl: FlatTreeControl<LoadmoreNode>;
+  dataSource: MatTreeFlatDataSource<LoadmoreNode, LoadmoreNode>;
+
+  constructor(private database: FileDatabase) {
+    this.treeControl = new FlatTreeControl<LoadmoreNode>(
+      this.getLevel,
+      this.isExpandable,
+    );
+    this.dataSource = new MatTreeFlatDataSource(
+      this.treeControl,
+      this.treeFlattener,
+    );
+
+    database.dataChange.subscribe((data) => {
+      this.dataSource.data = data;
+    });
+
+    database.initialize();
+  }
+
+  getLevel = (node: LoadmoreNode): number => node.level;
+  isExpandable = (node: LoadmoreNode): boolean => node.hasChildren;
+  hasChild = (_: number, _nodeData: LoadmoreNode): boolean =>
+    _nodeData.hasChildren;
+
+  loadChildren(node: LoadmoreNode) {
+    if (this.treeControl.isExpanded(node)) {
+      this.treeControl.collapse(node);
+    } else {
+      node.isLoading = true;
+      this.database.loadMore(node.item).subscribe(() => {
+        node.isLoading = false;
+        this.treeControl.expand(node);
+      });
+    }
+  }
+
+  treeFlattener = new MatTreeFlattener(
+    this.transformer,
+    this.getLevel,
+    this.isExpandable,
+    this.getChildren,
+  );
+
+  transformer = (node: LoadmoreNode, level: number) => {
+    const existingNode = this.nodeMap.get(node.item);
+    const flatNode =
+      existingNode && existingNode.item === node.item
+        ? existingNode
+        : new LoadmoreNode();
+    flatNode.item = node.item;
+    flatNode.level = level;
+    flatNode.hasChildren = node.hasChildren;
+    this.nodeMap.set(node.item, flatNode);
+    return flatNode;
+  };
+
+  getChildren = (node: LoadmoreNode): Observable<LoadmoreNode[]> =>
+    node.childrenChange;
+}
+```
+
+#### Interactive Tree with Actions
+
+```tsx
+@Component({
+  template: `
+    <mat-tree
+      [dataSource]="dataSource"
+      [treeControl]="treeControl"
+      class="action-tree"
+    >
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        <span class="node-content">
+          <mat-icon class="node-icon">{{ getNodeIcon(node) }}</mat-icon>
+          <span class="node-name">{{ node.name }}</span>
+        </span>
+        <span class="node-actions">
+          <button mat-icon-button (click)="editNode(node)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="deleteNode(node)"
+            matTooltip="Delete"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </span>
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+      >
+        <button
+          mat-icon-button
+          matTreeNodeToggle
+          [attr.aria-label]="'Toggle ' + node.name"
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? "expand_more" : "chevron_right" }}
+          </mat-icon>
+        </button>
+        <span class="node-content">
+          <mat-icon class="node-icon">{{ getNodeIcon(node) }}</mat-icon>
+          <span class="node-name">{{ node.name }}</span>
+        </span>
+        <span class="node-actions">
+          <button
+            mat-icon-button
+            (click)="addChild(node)"
+            matTooltip="Add Child"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+          <button mat-icon-button (click)="editNode(node)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="deleteNode(node)"
+            matTooltip="Delete"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </span>
+      </mat-tree-node>
+    </mat-tree>
+  `,
+  styles: [
+    `
+      .action-tree .mat-tree-node {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+      }
+
+      .node-content {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+
+      .node-icon {
+        margin-right: 8px;
+        color: #666;
+      }
+
+      .node-name {
+        font-weight: 400;
+      }
+
+      .node-actions {
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .mat-tree-node:hover .node-actions {
+        opacity: 1;
+      }
+    `,
+  ],
+})
+export class ActionTreeExample {
+  treeControl = new NestedTreeControl<TreeNode>((node) => node.children);
+  dataSource = new MatTreeNestedDataSource<TreeNode>();
+
+  TREE_DATA: TreeNode[] = [
+    {
+      name: "Documents",
+      type: "folder",
+      children: [
+        { name: "Resume.pdf", type: "file" },
+        { name: "Cover Letter.docx", type: "file" },
+      ],
+    },
+    {
+      name: "Pictures",
+      type: "folder",
+      children: [
+        { name: "Vacation.jpg", type: "file" },
+        { name: "Family.png", type: "file" },
+      ],
+    },
+  ];
+
+  constructor() {
+    this.dataSource.data = this.TREE_DATA;
+  }
+
+  hasChild = (_: number, node: TreeNode) =>
+    !!node.children && node.children.length > 0;
+
+  getNodeIcon(node: TreeNode): string {
+    if (node.type === "folder") {
+      return this.treeControl.isExpanded(node) ? "folder_open" : "folder";
+    }
+    return this.getFileIcon(node.name);
+  }
+
+  getFileIcon(filename: string): string {
+    const extension = filename.split(".").pop()?.toLowerCase();
+    switch (extension) {
+      case "pdf":
+        return "picture_as_pdf";
+      case "doc":
+      case "docx":
+        return "description";
+      case "jpg":
+      case "png":
+      case "gif":
+        return "image";
+      default:
+        return "insert_drive_file";
+    }
+  }
+
+  addChild(node: TreeNode): void {
+    if (!node.children) {
+      node.children = [];
+    }
+    const newNode: TreeNode = {
+      name: "New Item",
+      type: "file",
+    };
+    node.children.push(newNode);
+    this.dataSource.data = this.dataSource.data; // Trigger change detection
+    if (!this.treeControl.isExpanded(node)) {
+      this.treeControl.expand(node);
+    }
+  }
+
+  editNode(node: TreeNode): void {
+    // Open edit dialog or inline editing
+    console.log("Edit node:", node.name);
+  }
+
+  deleteNode(node: TreeNode): void {
+    // Implement deletion logic
+    console.log("Delete node:", node.name);
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use appropriate data structures** - Choose between nested and flat tree controls based on your data source and performance requirements
+- **Provide clear visual hierarchy** - Use consistent indentation, icons, and typography to make parent-child relationships obvious
+- **Include meaningful node content** - Display relevant information and actions that help users understand and interact with each tree node
+- **Implement efficient data loading** - For large datasets, use lazy loading and virtual scrolling to maintain good performance
+
+### Accessibility
+
+- **Keyboard navigation** - Tree nodes support full keyboard navigation with arrow keys, Enter, and Space for expansion/collapse
+- **Screen reader support** - Proper ARIA attributes and roles ensure screen readers can navigate and understand the tree structure
+- **Focus management** - Focus moves appropriately when expanding, collapsing, or navigating between tree nodes
+- **Action accessibility** - All interactive elements within tree nodes are keyboard accessible and properly labeled
+
+### Performance
+
+- **Choose optimal data source** - Use flat tree for large datasets with frequent filtering, nested tree for simpler hierarchical data
+- **Implement virtual scrolling** - For trees with many nodes, use CDK virtual scrolling to improve rendering performance
+- **Optimize change detection** - Use OnPush change detection strategy and trackBy functions for better performance with dynamic data
+- **Lazy load children** - Load child nodes on demand rather than loading the entire tree structure upfront
+
+## Common Patterns
+
+### Pattern 1: File Explorer Tree
+
+```tsx
+// File system explorer with context menus and drag-drop
+@Component({
+  template: `
+    <mat-tree
+      [dataSource]="dataSource"
+      [treeControl]="treeControl"
+      cdkDropList
+      (cdkDropListDropped)="drop($event)"
+    >
+      <mat-tree-node
+        *matTreeNodeDef="let node"
+        matTreeNodePadding
+        cdkDrag
+        [cdkDragData]="node"
+        (contextmenu)="onRightClick($event, node)"
+      >
+        <button mat-icon-button disabled></button>
+        <mat-icon class="file-icon">{{ getFileIcon(node) }}</mat-icon>
+        <span class="file-name">{{ node.name }}</span>
+        <span class="file-size">{{ node.size | fileSize }}</span>
+        <span class="file-date">{{ node.modified | date: "short" }}</span>
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasChild"
+        matTreeNodePadding
+        cdkDrag
+        [cdkDragData]="node"
+        (contextmenu)="onRightClick($event, node)"
+      >
+        <button mat-icon-button matTreeNodeToggle>
+          <mat-icon>{{
+            treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
+          }}</mat-icon>
+        </button>
+        <mat-icon class="folder-icon">folder</mat-icon>
+        <span class="folder-name">{{ node.name }}</span>
+        <span class="item-count">({{ node.children?.length || 0 }} items)</span>
+      </mat-tree-node>
+    </mat-tree>
+
+    <!-- Context menu -->
+    <div
+      class="context-menu"
+      [style.left.px]="contextMenuPosition.x"
+      [style.top.px]="contextMenuPosition.y"
+      *ngIf="contextMenuNode"
+    >
+      <button mat-menu-item (click)="openFile(contextMenuNode)">Open</button>
+      <button mat-menu-item (click)="copyPath(contextMenuNode)">
+        Copy Path
+      </button>
+      <button mat-menu-item (click)="renameItem(contextMenuNode)">
+        Rename
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="deleteItem(contextMenuNode)">
+        Delete
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .mat-tree-node {
+        display: grid;
+        grid-template-columns: auto auto 1fr auto auto;
+        gap: 8px;
+        align-items: center;
+        padding: 4px 16px;
+      }
+
+      .file-icon,
+      .folder-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+      }
+
+      .file-name,
+      .folder-name {
+        font-weight: 400;
+      }
+
+      .file-size,
+      .file-date,
+      .item-count {
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .context-menu {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+      }
+    `,
+  ],
+})
+export class FileExplorerExample {
+  // Implementation details for file explorer functionality
+}
+```
+
+### Pattern 2: Organization Chart Tree
+
+```tsx
+// Organization hierarchy with employee details
+@Component({
+  template: `
+    <mat-tree
+      [dataSource]="dataSource"
+      [treeControl]="treeControl"
+      class="org-chart"
+    >
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        <div class="employee-card">
+          <img [src]="node.avatar" [alt]="node.name" class="employee-avatar" />
+          <div class="employee-info">
+            <div class="employee-name">{{ node.name }}</div>
+            <div class="employee-title">{{ node.title }}</div>
+            <div class="employee-department">{{ node.department }}</div>
+          </div>
+          <div class="employee-actions">
+            <button
+              mat-icon-button
+              (click)="viewProfile(node)"
+              matTooltip="View Profile"
+            >
+              <mat-icon>person</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="sendMessage(node)"
+              matTooltip="Send Message"
+            >
+              <mat-icon>message</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-tree-node>
+
+      <mat-tree-node
+        *matTreeNodeDef="let node; when: hasReports"
+        matTreeNodePadding
+      >
+        <button mat-icon-button matTreeNodeToggle>
+          <mat-icon>{{
+            treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
+          }}</mat-icon>
+        </button>
+        <div class="employee-card manager">
+          <img [src]="node.avatar" [alt]="node.name" class="employee-avatar" />
+          <div class="employee-info">
+            <div class="employee-name">{{ node.name }}</div>
+            <div class="employee-title">{{ node.title }}</div>
+            <div class="employee-department">{{ node.department }}</div>
+            <div class="report-count">
+              {{ node.reports?.length || 0 }} direct reports
+            </div>
+          </div>
+          <div class="employee-actions">
+            <button
+              mat-icon-button
+              (click)="viewProfile(node)"
+              matTooltip="View Profile"
+            >
+              <mat-icon>person</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="sendMessage(node)"
+              matTooltip="Send Message"
+            >
+              <mat-icon>message</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="viewTeam(node)"
+              matTooltip="View Team"
+            >
+              <mat-icon>group</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-tree-node>
+    </mat-tree>
+  `,
+  styles: [
+    `
+      .org-chart .mat-tree-node {
+        min-height: 80px;
+        margin-bottom: 8px;
+      }
+
+      .employee-card {
+        display: flex;
+        align-items: center;
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        border-left: 4px solid #2196f3;
+      }
+
+      .employee-card.manager {
+        border-left-color: #ff9800;
+        background: #fff3e0;
+      }
+
+      .employee-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 12px;
+      }
+
+      .employee-info {
+        flex: 1;
+      }
+
+      .employee-name {
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .employee-title {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .employee-department,
+      .report-count {
+        color: #888;
+        font-size: 0.8rem;
+      }
+
+      .employee-actions {
+        display: flex;
+        flex-direction: column;
+      }
+    `,
+  ],
+})
+export class OrganizationChartExample {
+  // Implementation details for organization chart functionality
+}
+```

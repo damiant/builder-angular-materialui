@@ -1,0 +1,610 @@
+# IconButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate icon button functionality
+
+### When to Use
+
+IconButton components are ideal for creating compact, icon-based interactive elements that perform actions with minimal visual footprint. Use them when you need to:
+
+- **Space-constrained interfaces** - Provide actions in toolbars, table cells, or compact layouts where text buttons would be too large
+- **Secondary actions** - Implement supplementary actions like edit, delete, share, or more options that support primary content
+- **Quick actions** - Create instant-access buttons for common operations like refresh, search, favorite, or navigation
+- **Table and list actions** - Add row-level actions in data tables or list items without cluttering the interface
+- **Menu triggers** - Provide access to dropdown menus, context menus, or more options dialogs
+- **Modal and dialog controls** - Implement close, minimize, or other dialog control buttons
+- **Media controls** - Create play, pause, skip, volume, or other media player controls
+- **Form field enhancements** - Add functional icons to input fields like visibility toggles, clear buttons, or help triggers
+- **Floating action alternatives** - Provide smaller, less prominent action buttons when full FABs are too dominant
+- **Status indicators with actions** - Combine visual status indication with clickable functionality
+
+### Architecture
+
+**No Coupling**: MatIconButton is a standalone component that operates independently without requiring other components or shared context. It extends the base Material Design button functionality with icon-specific styling and behavior optimizations, and can be used in isolation or integrated seamlessly with other components.
+
+### Component Interdependencies
+
+The IconButton component group has no interdependencies - MatIconButton is a self-contained component that:
+
+- Requires no parent components or containers for basic functionality
+- Does not depend on shared context or state management
+- Can be used independently or as an enhancement to other components
+- Integrates naturally with Angular Material Icons (mat-icon) for visual content
+- Supports all standard button interactions, accessibility features, and Angular routing
+- Provides optimized styling and behavior specifically designed for icon-based interactions
+
+## Components
+
+### MatIconButton {Standalone Component}
+
+A compact button component optimized for displaying single icons as interactive elements, providing all the functionality of a standard button with Material Design icon button styling and behavior.
+
+**Purpose:** Provides a compact, icon-focused button implementation with proper Material Design styling, accessibility support, and interaction patterns specifically optimized for icon-based user interfaces and space-constrained layouts.
+
+**Interface:**
+
+```typescript
+interface MatIconButtonProps {
+  children: React.ReactNode; // Icon content, typically mat-icon or other icon elements
+  color?: "primary" | "accent" | "warn" | string | null; // Material Design color theme
+  disabled?: boolean; // Disables button interaction and applies disabled styling
+  disableRipple?: boolean; // Disables the Material Design ripple effect
+  disabledInteractive?: boolean; // Allows interaction while maintaining disabled appearance
+  ariaLabel?: string; // Accessible label describing the button's purpose (highly recommended)
+  ariaDescribedBy?: string; // References elements that provide additional description
+  tabIndex?: number; // Tab order for keyboard navigation
+  type?: "button" | "submit" | "reset"; // Button type for form interactions
+  id?: string; // Unique identifier for the button
+  class?: string; // CSS classes for additional styling
+  routerLink?: string; // Angular Router navigation path (when used as navigation element)
+  routerLinkActive?: string; // CSS class applied when route is active
+  href?: string; // URL for anchor-based navigation (when used as anchor element)
+  target?: string; // Target window/frame for anchor navigation
+  rel?: string; // Relationship attributes for anchor elements
+  form?: string; // Associates button with a form element by ID
+  formAction?: string; // Overrides form action URL for submit buttons
+  formMethod?: string; // Overrides form method for submit buttons
+  formNoValidate?: boolean; // Bypasses form validation for submit buttons
+  title?: string; // Tooltip text displayed on hover
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
+function BasicIconButtonExample() {
+  return (
+    <button
+      mat-icon-button
+      (click)="performAction()"
+      aria-label="Edit item"
+      title="Edit this item"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatIconButton } from "@angular/material/button";
+import { MatIcon } from "@angular/material/icon";
+
+// Simple icon button with click handler
+@Component({
+  template: `
+    <button mat-icon-button (click)="handleClick()" aria-label="Refresh data">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  `,
+})
+class BasicIconButtonComponent {
+  handleClick() {
+    console.log("Button clicked");
+  }
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Icon button with color theming, disabled state, and form integration
+@Component({
+  template: `
+    <div class="action-toolbar">
+      <!-- Primary action with color theming -->
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="saveChanges()"
+        [disabled]="!hasChanges"
+        aria-label="Save changes"
+        title="Save your changes"
+      >
+        <mat-icon>save</mat-icon>
+      </button>
+
+      <!-- Destructive action with warning color -->
+      <button
+        mat-icon-button
+        color="warn"
+        (click)="deleteItem()"
+        aria-label="Delete item"
+        title="Delete this item permanently"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+
+      <!-- Navigation with router integration -->
+      <a
+        mat-icon-button
+        routerLink="/settings"
+        routerLinkActive="active-nav-button"
+        aria-label="Open settings"
+        title="Configure application settings"
+      >
+        <mat-icon>settings</mat-icon>
+      </a>
+
+      <!-- Form submit button -->
+      <button
+        mat-icon-button
+        type="submit"
+        form="dataForm"
+        [disabled]="dataForm.invalid"
+        aria-label="Submit form"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  `,
+})
+class AdvancedIconButtonComponent {
+  hasChanges = false;
+
+  saveChanges() {
+    // Implementation
+  }
+
+  deleteItem() {
+    // Implementation with confirmation
+  }
+}
+```
+
+### Common Variations
+
+**Table Actions Pattern:**
+
+```tsx
+// Icon buttons in data table cells for row-level actions
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource">
+      <!-- Data columns -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Actions column with icon buttons -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button
+            mat-icon-button
+            (click)="editElement(element)"
+            aria-label="Edit {{ element.name }}"
+            title="Edit this item"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteElement(element)"
+            aria-label="Delete {{ element.name }}"
+            title="Delete this item"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="shareElement(element)"
+            aria-label="Share {{ element.name }}"
+            title="Share this item"
+          >
+            <mat-icon>share</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+    </mat-table>
+  `,
+})
+class TableActionsExample {}
+```
+
+**List Item Actions Pattern:**
+
+```tsx
+// Icon buttons as secondary actions in list items
+@Component({
+  template: `
+    <mat-action-list>
+      <mat-list-item *ngFor="let file of files" (click)="openFile(file)">
+        <mat-icon matListItemIcon [color]="getFileIconColor(file.type)">
+          {{ getFileIcon(file.type) }}
+        </mat-icon>
+        <span matListItemTitle>{{ file.name }}</span>
+        <span matListItemLine
+          >{{ file.size | fileSize }} • Modified
+          {{ file.modified | date }}</span
+        >
+        <button
+          mat-icon-button
+          matListItemMeta
+          (click)="showFileOptions($event, file)"
+          [attr.aria-label]="'Options for ' + file.name"
+          title="Show file options"
+          (click)="$event.stopPropagation()"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+class FileListExample {}
+```
+
+**Toolbar Pattern:**
+
+```tsx
+// Icon buttons in application toolbar
+@Component({
+  template: `
+    <mat-toolbar color="primary">
+      <button
+        mat-icon-button
+        (click)="toggleSidenav()"
+        aria-label="Toggle navigation menu"
+        title="Toggle navigation"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span>Application Title</span>
+
+      <span class="toolbar-spacer"></span>
+
+      <button
+        mat-icon-button
+        (click)="toggleNotifications()"
+        aria-label="View notifications"
+        title="View notifications"
+        [matBadge]="notificationCount"
+        [matBadgeHidden]="notificationCount === 0"
+        matBadgeColor="accent"
+      >
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="userMenu"
+        aria-label="User menu"
+        title="User account options"
+      >
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+})
+class ToolbarExample {}
+```
+
+**Form Field Enhancement Pattern:**
+
+```tsx
+// Icon buttons enhancing form fields
+@Component({
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        formControlName="password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="hidePassword = !hidePassword"
+        [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+        [attr.aria-pressed]="!hidePassword"
+        title="Toggle password visibility"
+        type="button"
+      >
+        <mat-icon>{{
+          hidePassword ? "visibility" : "visibility_off"
+        }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput formControlName="search" />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="clearSearch()"
+        *ngIf="searchControl.value"
+        aria-label="Clear search"
+        title="Clear search text"
+        type="button"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-form-field>
+  `,
+})
+class FormFieldEnhancementExample {}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always provide aria-label** - Icon buttons rely on accessible labels since they lack visible text content
+- **Use clear, recognizable icons** - Choose universally understood icons from Material Design icon set
+- **Maintain consistent sizing** - Use icon buttons of similar importance at the same size within interface sections
+- **Group related actions** - Place functionally related icon buttons together with appropriate spacing
+- **Provide hover states** - Leverage Material Design's built-in hover effects and consider adding tooltips for clarity
+- **Consider touch targets** - Ensure adequate spacing and size for mobile touch interaction (minimum 44px touch target)
+- **Use color meaningfully** - Apply color theming to convey action importance or type (primary for positive actions, warn for destructive)
+
+### Accessibility
+
+- **Descriptive labels are mandatory** - Use aria-label to describe the button's action clearly and concisely
+- **Keyboard navigation support** - Icon buttons automatically support focus and activation via keyboard
+- **Screen reader compatibility** - Proper labeling ensures screen readers can announce button purpose and state
+- **High contrast support** - Material Design colors provide adequate contrast ratios for accessibility compliance
+- **Focus indicators** - Built-in focus rings help keyboard users understand current focus position
+- **State announcements** - Use aria-pressed for toggle buttons and aria-expanded for buttons that control expandable content
+
+### Performance
+
+- **Icon loading optimization** - Use Material Design icon font or SVG icons for optimal loading performance
+- **Ripple effects** - Disable ripples with disableRipple if performance is critical in high-frequency interaction scenarios
+- **Event handling efficiency** - Use event delegation for large numbers of icon buttons in tables or lists
+- **Change detection optimization** - Use OnPush change detection strategy when appropriate for components with many icon buttons
+
+## Common Patterns
+
+### Pattern 1: CRUD Operations
+
+```tsx
+// Standard Create, Read, Update, Delete operations pattern
+@Component({
+  template: `
+    <div class="crud-actions">
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="createNew()"
+        aria-label="Create new item"
+        title="Create new item"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        (click)="refreshData()"
+        aria-label="Refresh data"
+        title="Refresh data"
+        [disabled]="isLoading"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        (click)="editSelected()"
+        aria-label="Edit selected items"
+        title="Edit selected items"
+        [disabled]="!hasSelection"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        color="warn"
+        (click)="deleteSelected()"
+        aria-label="Delete selected items"
+        title="Delete selected items"
+        [disabled]="!hasSelection"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  `,
+})
+class CrudActionsExample {
+  isLoading = false;
+  hasSelection = false;
+
+  createNew() {
+    // Navigate to creation form or open dialog
+  }
+
+  refreshData() {
+    this.isLoading = true;
+    // Refresh data logic
+  }
+
+  editSelected() {
+    // Edit selected items
+  }
+
+  deleteSelected() {
+    // Confirm and delete selected items
+  }
+}
+```
+
+### Pattern 2: Toggle State Management
+
+```tsx
+// Icon buttons that toggle between states with visual feedback
+@Component({
+  template: `
+    <div class="toggle-controls">
+      <!-- Favorite toggle -->
+      <button
+        mat-icon-button
+        [color]="isFavorited ? 'warn' : ''"
+        (click)="toggleFavorite()"
+        [attr.aria-label]="
+          isFavorited ? 'Remove from favorites' : 'Add to favorites'
+        "
+        [attr.aria-pressed]="isFavorited"
+        [title]="isFavorited ? 'Remove from favorites' : 'Add to favorites'"
+      >
+        <mat-icon>{{ isFavorited ? "favorite" : "favorite_border" }}</mat-icon>
+      </button>
+
+      <!-- Visibility toggle -->
+      <button
+        mat-icon-button
+        [color]="isVisible ? 'primary' : ''"
+        (click)="toggleVisibility()"
+        [attr.aria-label]="isVisible ? 'Hide item' : 'Show item'"
+        [attr.aria-pressed]="isVisible"
+        [title]="isVisible ? 'Hide item' : 'Show item'"
+      >
+        <mat-icon>{{ isVisible ? "visibility" : "visibility_off" }}</mat-icon>
+      </button>
+
+      <!-- Notification toggle -->
+      <button
+        mat-icon-button
+        [color]="notificationsEnabled ? 'accent' : ''"
+        (click)="toggleNotifications()"
+        [attr.aria-label]="
+          notificationsEnabled
+            ? 'Disable notifications'
+            : 'Enable notifications'
+        "
+        [attr.aria-pressed]="notificationsEnabled"
+        [title]="
+          notificationsEnabled
+            ? 'Disable notifications'
+            : 'Enable notifications'
+        "
+      >
+        <mat-icon>{{
+          notificationsEnabled ? "notifications" : "notifications_off"
+        }}</mat-icon>
+      </button>
+    </div>
+  `,
+})
+class ToggleStateExample {
+  isFavorited = false;
+  isVisible = true;
+  notificationsEnabled = false;
+
+  toggleFavorite() {
+    this.isFavorited = !this.isFavorited;
+    // Save favorite state
+  }
+
+  toggleVisibility() {
+    this.isVisible = !this.isVisible;
+    // Update visibility state
+  }
+
+  toggleNotifications() {
+    this.notificationsEnabled = !this.notificationsEnabled;
+    // Update notification preferences
+  }
+}
+```
+
+### Pattern 3: Context Menu Trigger
+
+```tsx
+// Icon button that triggers context menus or dropdown options
+@Component({
+  template: `
+    <div class="context-menu-container">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="contextMenu"
+        aria-label="Show options menu"
+        title="Show options"
+        #menuTrigger="matMenuTrigger"
+        [attr.aria-expanded]="menuTrigger.menuOpen"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #contextMenu="matMenu">
+        <button mat-menu-item (click)="shareItem()">
+          <mat-icon>share</mat-icon>
+          <span>Share</span>
+        </button>
+        <button mat-menu-item (click)="duplicateItem()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="exportItem()">
+          <mat-icon>download</mat-icon>
+          <span>Export</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="deleteItem()" class="warn-action">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+  `,
+  styles: [
+    `
+      .warn-action {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+class ContextMenuExample {
+  shareItem() {
+    // Share functionality
+  }
+
+  duplicateItem() {
+    // Duplicate functionality
+  }
+
+  exportItem() {
+    // Export functionality
+  }
+
+  deleteItem() {
+    // Delete with confirmation
+  }
+}
+```

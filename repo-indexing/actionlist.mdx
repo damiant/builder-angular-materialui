@@ -1,0 +1,725 @@
+# ActionList Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate action list functionality
+
+### When to Use
+
+ActionList components are ideal for creating interactive lists where users can trigger actions on list items. Use them when you need to:
+
+- **Interactive content lists** - Create lists where users can click, tap, or interact with individual items to perform actions
+- **Navigation menus** - Build clickable navigation lists that route users to different sections or pages
+- **Settings and configuration interfaces** - Provide interactive lists for user preferences, settings, or configuration options
+- **Command palettes** - Implement lists of available actions or commands that users can select from
+- **File browsers** - Create lists of files, folders, or documents that users can open, select, or manipulate
+- **Contact lists** - Build interactive contact or user lists with click-to-call, message, or profile actions
+- **Menu-like interfaces** - Implement dropdown menus, context menus, or sidebar navigation with actionable items
+- **Dashboard widgets** - Create interactive list components for dashboards where items represent actionable data
+
+### Architecture
+
+**No Coupling**: The ActionList component is a standalone component that operates independently without requiring other components or shared context. It provides enhanced list functionality with built-in interaction capabilities and can be used in isolation or combined with other components as needed.
+
+### Component Interdependencies
+
+The ActionList component group has no interdependencies - MatActionList is a self-contained component that:
+
+- Requires no parent components or containers
+- Does not depend on shared context or state management
+- Can be used independently or as a building block for interactive interfaces
+- Provides enhanced interaction capabilities beyond basic MatList functionality
+- Integrates seamlessly with Angular routing and event handling systems
+
+## Components
+
+### MatActionList {Standalone Component}
+
+An interactive list component that provides built-in click handling, keyboard navigation, and accessibility features for actionable list items.
+
+**Purpose:** Provides the foundation for creating interactive lists where each item can trigger actions, navigate to routes, or perform user-defined behaviors with proper Material Design styling and accessibility support.
+
+**Interface:**
+
+```typescript
+interface MatActionListProps {
+  children: React.ReactNode; // List content, typically mat-list-item elements with actions
+  disableRipple?: boolean; // Disables ripple effects on list items (default: false)
+  disabled?: boolean; // Disables the entire list and all item interactions (default: false)
+  id?: string; // Unique identifier for the list
+  class?: string; // CSS classes for additional styling
+  role?: string; // ARIA role for accessibility (default: 'list')
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatActionList } from "@angular/material/list";
+
+function BasicActionListExample() {
+  return (
+    <mat-action-list>
+      <mat-list-item (click)="handleItemClick('item1')">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Settings</span>
+        <span matListItemLine>Configure application preferences</span>
+      </mat-list-item>
+      <mat-list-item (click)="handleItemClick('item2')">
+        <mat-icon matListItemIcon>account_circle</mat-icon>
+        <span matListItemTitle>Profile</span>
+        <span matListItemLine>Manage your account information</span>
+      </mat-list-item>
+      <mat-list-item (click)="handleItemClick('item3')">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Logout</span>
+        <span matListItemLine>Sign out of your account</span>
+      </mat-list-item>
+    </mat-action-list>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatActionList } from "@angular/material/list";
+
+// Simple interactive list with click handlers
+@Component({
+  template: `
+    <mat-action-list>
+      <mat-list-item (click)="navigateToSettings()">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        Settings
+      </mat-list-item>
+      <mat-list-item (click)="viewProfile()">
+        <mat-icon matListItemIcon>person</mat-icon>
+        Profile
+      </mat-list-item>
+      <mat-list-item (click)="showHelp()">
+        <mat-icon matListItemIcon>help</mat-icon>
+        Help
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class BasicActionListExample {
+  navigateToSettings(): void {
+    console.log("Navigate to settings");
+  }
+
+  viewProfile(): void {
+    console.log("View profile");
+  }
+
+  showHelp(): void {
+    console.log("Show help");
+  }
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Complex action list with routing, conditional actions, and rich content
+@Component({
+  template: `
+    <mat-action-list
+      [disableRipple]="disableInteractions"
+      [disabled]="isLoading"
+    >
+      <mat-list-item
+        *ngFor="let action of availableActions; trackBy: trackByAction"
+        (click)="executeAction(action)"
+        [class.disabled]="action.disabled"
+        [attr.aria-label]="action.ariaLabel"
+      >
+        <mat-icon
+          matListItemIcon
+          [color]="action.iconColor"
+          [class.disabled-icon]="action.disabled"
+        >
+          {{ action.icon }}
+        </mat-icon>
+
+        <div matListItemTitle>{{ action.title }}</div>
+        <div matListItemLine>{{ action.description }}</div>
+
+        <mat-badge
+          *ngIf="action.badge"
+          matListItemMeta
+          [content]="action.badge.content"
+          [color]="action.badge.color"
+        >
+        </mat-badge>
+
+        <mat-icon *ngIf="action.showChevron" matListItemMeta>
+          chevron_right
+        </mat-icon>
+      </mat-list-item>
+
+      <mat-divider *ngIf="showDividers"></mat-divider>
+
+      <mat-list-item
+        *ngFor="let secondaryAction of secondaryActions"
+        (click)="executeSecondaryAction(secondaryAction)"
+        [routerLink]="secondaryAction.route"
+      >
+        <mat-icon matListItemIcon>{{ secondaryAction.icon }}</mat-icon>
+        <div matListItemTitle>{{ secondaryAction.title }}</div>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class AdvancedActionListExample {
+  disableInteractions = false;
+  isLoading = false;
+  showDividers = true;
+
+  availableActions = [
+    {
+      id: "notifications",
+      title: "Notifications",
+      description: "Manage your notification preferences",
+      icon: "notifications",
+      iconColor: "primary",
+      disabled: false,
+      badge: { content: "3", color: "warn" },
+      showChevron: true,
+      ariaLabel: "Open notification settings",
+    },
+    {
+      id: "privacy",
+      title: "Privacy & Security",
+      description: "Control your data and security settings",
+      icon: "security",
+      iconColor: "accent",
+      disabled: false,
+      showChevron: true,
+      ariaLabel: "Open privacy settings",
+    },
+    {
+      id: "billing",
+      title: "Billing",
+      description: "Manage subscription and payment methods",
+      icon: "payment",
+      iconColor: "warn",
+      disabled: true,
+      showChevron: false,
+      ariaLabel: "Billing settings (currently unavailable)",
+    },
+  ];
+
+  secondaryActions = [
+    {
+      id: "about",
+      title: "About",
+      icon: "info",
+      route: "/about",
+    },
+    {
+      id: "feedback",
+      title: "Send Feedback",
+      icon: "feedback",
+      route: "/feedback",
+    },
+  ];
+
+  executeAction(action: any): void {
+    if (action.disabled) return;
+
+    switch (action.id) {
+      case "notifications":
+        this.router.navigate(["/settings/notifications"]);
+        break;
+      case "privacy":
+        this.router.navigate(["/settings/privacy"]);
+        break;
+      default:
+        console.log(`Executing action: ${action.id}`);
+    }
+  }
+
+  executeSecondaryAction(action: any): void {
+    console.log(`Secondary action: ${action.id}`);
+  }
+
+  trackByAction(index: number, action: any): string {
+    return action.id;
+  }
+}
+```
+
+### Common Variations
+
+#### Navigation Menu
+
+```tsx
+// Primary navigation with routing
+@Component({
+  template: `
+    <mat-action-list>
+      <mat-list-item
+        *ngFor="let navItem of navigationItems"
+        [routerLink]="navItem.route"
+        routerLinkActive="active-nav-item"
+      >
+        <mat-icon matListItemIcon>{{ navItem.icon }}</mat-icon>
+        <span matListItemTitle>{{ navItem.label }}</span>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class NavigationMenuExample {
+  navigationItems = [
+    { route: "/dashboard", icon: "dashboard", label: "Dashboard" },
+    { route: "/projects", icon: "folder", label: "Projects" },
+    { route: "/team", icon: "people", label: "Team" },
+    { route: "/reports", icon: "analytics", label: "Reports" },
+  ];
+}
+```
+
+#### Settings Menu
+
+```tsx
+// Settings interface with toggle actions
+@Component({
+  template: `
+    <mat-action-list>
+      <h3 matSubheader>Account Settings</h3>
+
+      <mat-list-item (click)="toggleNotifications()">
+        <mat-icon matListItemIcon>notifications</mat-icon>
+        <span matListItemTitle>Push Notifications</span>
+        <span matListItemLine>Receive app notifications</span>
+        <mat-slide-toggle
+          matListItemMeta
+          [checked]="notificationsEnabled"
+          (click)="$event.stopPropagation()"
+          (change)="toggleNotifications()"
+        >
+        </mat-slide-toggle>
+      </mat-list-item>
+
+      <mat-list-item (click)="toggleDarkMode()">
+        <mat-icon matListItemIcon>dark_mode</mat-icon>
+        <span matListItemTitle>Dark Mode</span>
+        <span matListItemLine>Use dark theme</span>
+        <mat-slide-toggle
+          matListItemMeta
+          [checked]="darkModeEnabled"
+          (click)="$event.stopPropagation()"
+          (change)="toggleDarkMode()"
+        >
+        </mat-slide-toggle>
+      </mat-list-item>
+
+      <mat-divider></mat-divider>
+
+      <mat-list-item (click)="changePassword()">
+        <mat-icon matListItemIcon>lock</mat-icon>
+        <span matListItemTitle>Change Password</span>
+        <mat-icon matListItemMeta>chevron_right</mat-icon>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class SettingsMenuExample {
+  notificationsEnabled = true;
+  darkModeEnabled = false;
+
+  toggleNotifications(): void {
+    this.notificationsEnabled = !this.notificationsEnabled;
+    // Save preference logic
+  }
+
+  toggleDarkMode(): void {
+    this.darkModeEnabled = !this.darkModeEnabled;
+    // Apply theme logic
+  }
+
+  changePassword(): void {
+    this.router.navigate(["/settings/password"]);
+  }
+}
+```
+
+#### Command Palette
+
+```tsx
+// Action-based command interface
+@Component({
+  template: `
+    <mat-action-list>
+      <mat-list-item
+        *ngFor="let command of filteredCommands"
+        (click)="executeCommand(command)"
+      >
+        <mat-icon matListItemIcon>{{ command.icon }}</mat-icon>
+        <span matListItemTitle>{{ command.name }}</span>
+        <span matListItemLine>{{ command.description }}</span>
+        <kbd matListItemMeta>{{ command.shortcut }}</kbd>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class CommandPaletteExample {
+  commands = [
+    {
+      id: "new-project",
+      name: "New Project",
+      description: "Create a new project",
+      icon: "add",
+      shortcut: "Ctrl+N",
+      action: () => this.createNewProject(),
+    },
+    {
+      id: "open-project",
+      name: "Open Project",
+      description: "Open an existing project",
+      icon: "folder_open",
+      shortcut: "Ctrl+O",
+      action: () => this.openProject(),
+    },
+    {
+      id: "save-all",
+      name: "Save All",
+      description: "Save all open files",
+      icon: "save",
+      shortcut: "Ctrl+Shift+S",
+      action: () => this.saveAll(),
+    },
+  ];
+
+  filteredCommands = this.commands;
+
+  executeCommand(command: any): void {
+    command.action();
+  }
+
+  createNewProject(): void {
+    console.log("Creating new project");
+  }
+
+  openProject(): void {
+    console.log("Opening project");
+  }
+
+  saveAll(): void {
+    console.log("Saving all files");
+  }
+}
+```
+
+#### File Browser Actions
+
+```tsx
+// File system interaction list
+@Component({
+  template: `
+    <mat-action-list [disableRipple]="false">
+      <mat-list-item
+        *ngFor="let file of files"
+        (click)="openFile(file)"
+        (contextmenu)="showContextMenu($event, file)"
+      >
+        <mat-icon matListItemIcon [color]="getFileIconColor(file.type)">
+          {{ getFileIcon(file.type) }}
+        </mat-icon>
+
+        <span matListItemTitle>{{ file.name }}</span>
+        <span matListItemLine>
+          {{ file.size | fileSize }} • Modified {{ file.modified | date }}
+        </span>
+
+        <button
+          mat-icon-button
+          matListItemMeta
+          (click)="showFileOptions($event, file)"
+          [attr.aria-label]="'Options for ' + file.name"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+})
+export class FileBrowserExample {
+  files = [
+    {
+      id: "1",
+      name: "document.pdf",
+      type: "pdf",
+      size: 2048000,
+      modified: new Date("2024-01-15"),
+    },
+    {
+      id: "2",
+      name: "presentation.pptx",
+      type: "presentation",
+      size: 5120000,
+      modified: new Date("2024-01-14"),
+    },
+    {
+      id: "3",
+      name: "image.jpg",
+      type: "image",
+      size: 1024000,
+      modified: new Date("2024-01-13"),
+    },
+  ];
+
+  openFile(file: any): void {
+    console.log(`Opening file: ${file.name}`);
+    // File opening logic
+  }
+
+  showContextMenu(event: MouseEvent, file: any): void {
+    event.preventDefault();
+    console.log(`Context menu for: ${file.name}`);
+    // Context menu logic
+  }
+
+  showFileOptions(event: MouseEvent, file: any): void {
+    event.stopPropagation();
+    console.log(`Options for: ${file.name}`);
+    // Options menu logic
+  }
+
+  getFileIcon(type: string): string {
+    const iconMap = {
+      pdf: "picture_as_pdf",
+      presentation: "slideshow",
+      image: "image",
+      default: "insert_drive_file",
+    };
+    return iconMap[type] || iconMap["default"];
+  }
+
+  getFileIconColor(type: string): string {
+    const colorMap = {
+      pdf: "warn",
+      presentation: "accent",
+      image: "primary",
+    };
+    return colorMap[type] || "";
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for interactive content** - MatActionList is specifically designed for lists where items trigger actions, unlike MatList which is for static content display
+- **Implement proper click handlers** - Always provide meaningful click handlers for list items to ensure interactive functionality works as expected
+- **Consider keyboard accessibility** - Ensure that all actions can be triggered via keyboard navigation using Enter or Space keys
+- **Provide visual feedback** - Use ripple effects and hover states to indicate interactive elements and provide immediate user feedback
+
+### Accessibility
+
+- **ARIA labels and roles** - MatActionList automatically provides proper ARIA attributes, but add custom aria-label attributes for complex actions
+- **Keyboard navigation** - Built-in support for arrow key navigation and Enter/Space activation following ARIA best practices
+- **Screen reader support** - Action descriptions and states are automatically announced to assistive technologies
+- **Focus management** - Proper focus indication and restoration when navigating between list items and performing actions
+
+### Performance
+
+- **Use trackBy functions** - When rendering dynamic action lists with \*ngFor, provide trackBy functions to optimize change detection
+- **Minimize action handler complexity** - Keep click handlers lightweight and delegate heavy operations to services or use async operations
+- **Optimize large lists** - For action lists with many items, consider virtual scrolling or pagination to maintain performance
+- **Event delegation** - Use event delegation patterns for similar actions to reduce memory usage and improve performance
+
+## Common Patterns
+
+### Pattern 1: Dashboard Quick Actions
+
+```tsx
+// Dashboard widget with quick action shortcuts
+@Component({
+  template: `
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Quick Actions</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-action-list>
+          <mat-list-item
+            *ngFor="let action of quickActions"
+            (click)="executeQuickAction(action)"
+            [class.disabled]="action.disabled"
+          >
+            <mat-icon matListItemIcon [color]="action.color">
+              {{ action.icon }}
+            </mat-icon>
+
+            <span matListItemTitle>{{ action.title }}</span>
+            <span matListItemLine>{{ action.description }}</span>
+
+            <mat-badge
+              *ngIf="action.count"
+              matListItemMeta
+              [content]="action.count"
+              color="primary"
+            >
+            </mat-badge>
+          </mat-list-item>
+        </mat-action-list>
+      </mat-card-content>
+    </mat-card>
+  `,
+})
+export class DashboardQuickActionsExample {
+  quickActions = [
+    {
+      id: "new-task",
+      title: "Create Task",
+      description: "Add a new task to your project",
+      icon: "add_task",
+      color: "primary",
+      disabled: false,
+      action: () => this.createTask(),
+    },
+    {
+      id: "review-pending",
+      title: "Review Pending",
+      description: "Items waiting for your review",
+      icon: "rate_review",
+      color: "accent",
+      disabled: false,
+      count: 5,
+      action: () => this.reviewPending(),
+    },
+    {
+      id: "generate-report",
+      title: "Generate Report",
+      description: "Create weekly status report",
+      icon: "assessment",
+      color: "warn",
+      disabled: false,
+      action: () => this.generateReport(),
+    },
+  ];
+
+  executeQuickAction(action: any): void {
+    if (!action.disabled) {
+      action.action();
+    }
+  }
+
+  createTask(): void {
+    console.log("Creating new task");
+  }
+
+  reviewPending(): void {
+    console.log("Opening pending reviews");
+  }
+
+  generateReport(): void {
+    console.log("Generating report");
+  }
+}
+```
+
+### Pattern 2: User Profile Actions
+
+```tsx
+// User profile management with contextual actions
+@Component({
+  template: `
+    <mat-action-list>
+      <h3 matSubheader>Profile Management</h3>
+
+      <mat-list-item (click)="editProfile()">
+        <mat-icon matListItemIcon color="primary">edit</mat-icon>
+        <span matListItemTitle>Edit Profile</span>
+        <span matListItemLine>Update your personal information</span>
+        <mat-icon matListItemMeta>chevron_right</mat-icon>
+      </mat-list-item>
+
+      <mat-list-item (click)="changeAvatar()">
+        <mat-icon matListItemIcon color="primary">photo_camera</mat-icon>
+        <span matListItemTitle>Change Avatar</span>
+        <span matListItemLine>Upload a new profile picture</span>
+        <mat-icon matListItemMeta>chevron_right</mat-icon>
+      </mat-list-item>
+
+      <mat-divider></mat-divider>
+
+      <h3 matSubheader>Security</h3>
+
+      <mat-list-item (click)="changePassword()">
+        <mat-icon matListItemIcon color="accent">lock</mat-icon>
+        <span matListItemTitle>Change Password</span>
+        <span matListItemLine>Update your account password</span>
+        <mat-icon matListItemMeta>chevron_right</mat-icon>
+      </mat-list-item>
+
+      <mat-list-item (click)="manageTwoFactor()">
+        <mat-icon matListItemIcon color="accent">security</mat-icon>
+        <span matListItemTitle>Two-Factor Authentication</span>
+        <span matListItemLine>{{
+          twoFactorEnabled ? "Enabled" : "Disabled"
+        }}</span>
+        <mat-slide-toggle
+          matListItemMeta
+          [checked]="twoFactorEnabled"
+          (click)="$event.stopPropagation()"
+          (change)="toggleTwoFactor()"
+        >
+        </mat-slide-toggle>
+      </mat-list-item>
+
+      <mat-divider></mat-divider>
+
+      <mat-list-item (click)="logout()" class="danger-action">
+        <mat-icon matListItemIcon color="warn">logout</mat-icon>
+        <span matListItemTitle>Logout</span>
+        <span matListItemLine>Sign out of your account</span>
+      </mat-list-item>
+    </mat-action-list>
+  `,
+  styles: [
+    `
+      .danger-action {
+        color: rgba(244, 67, 54, 0.87);
+      }
+    `,
+  ],
+})
+export class UserProfileActionsExample {
+  twoFactorEnabled = false;
+
+  editProfile(): void {
+    this.router.navigate(["/profile/edit"]);
+  }
+
+  changeAvatar(): void {
+    // Open avatar upload dialog
+  }
+
+  changePassword(): void {
+    this.router.navigate(["/profile/password"]);
+  }
+
+  manageTwoFactor(): void {
+    this.router.navigate(["/profile/security"]);
+  }
+
+  toggleTwoFactor(): void {
+    this.twoFactorEnabled = !this.twoFactorEnabled;
+    // Save two-factor preference
+  }
+
+  logout(): void {
+    // Logout logic
+  }
+}
+```

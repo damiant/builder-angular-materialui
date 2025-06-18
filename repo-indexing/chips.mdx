@@ -1,0 +1,1365 @@
+---
+
+# Chips Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate chips functionality with input support. The Chips component group provides a comprehensive solution for creating tag-like interactive elements that can be used for filters, labels, selections, and data input with built-in accessibility and form integration.
+
+### When to Use
+
+- **Tags and Labels**: Display categorization, status indicators, or metadata in a compact visual format
+- **Filter Selection**: Allow users to select and remove multiple filter criteria with immediate visual feedback
+- **Input Collections**: Enable users to input multiple values (emails, keywords, tags) with validation and removal capabilities
+- **Selection Display**: Show selected items from autocomplete, multi-select, or search interfaces
+- **Content Organization**: Organize and categorize content with removable, interactive labels
+- **Form Input Enhancement**: Enhance text inputs with chip-based multi-value selection capabilities
+- **Dynamic Lists**: Create editable lists where users can add and remove items dynamically
+
+### Architecture
+
+**Critical/Strong Coupling**: The Chips component group requires specific hierarchical relationships and shared context between components. MatChipSet serves as the container coordinating all chip interactions, while MatChipInput provides input capabilities that integrate seamlessly with the chip collection.
+
+### Component Interdependencies
+
+The Chips components form a tightly coupled system with specific requirements:
+
+- **MatChipSet**: Root container that orchestrates chip layout, keyboard navigation, and provides context for all chip interactions
+- **MatChip**: Individual chip components that display content and handle user interactions (selection, removal)
+- **MatChipInput**: Input component that enables adding new chips through user input and keyboard interactions
+- **Shared State Management**: All components coordinate selection state, focus management, and form integration
+- **Event Coordination**: Chip addition, removal, and selection events flow between components for synchronized behavior
+
+## Components
+
+### MatChipSet {Primary Component}
+
+**Purpose:** The root container component that orchestrates the chip collection layout, manages focus and keyboard navigation, and provides context for all chip interactions within the set.
+
+**Interface:**
+
+```typescript
+class MatChipSet {
+  // Collection management
+  readonly chips: QueryList<MatChip>; // All chips within the set
+  
+  // Interaction state
+  disabled: boolean; // Whether the entire chip set is disabled
+  role: string | null; // ARIA role for the chip set
+  tabIndex: number; // Tab index for keyboard navigation
+
+  // Layout and appearance
+  readonly empty: boolean; // Whether the chip set contains any chips
+  readonly focused: boolean; // Whether any chip in the set has focus
+
+  // Event streams for coordinated interactions
+  readonly chipFocusChanges: Observable<MatChipEvent>; // Focus changes across chips
+  readonly chipDestroyedChanges: Observable<MatChipEvent>; // Chip removal events
+  readonly chipRemovedChanges: Observable<MatChipEvent>; // Chip removal actions
+
+  // Navigation and focus management
+  focus(): void; // Focus the first available chip
+  _handleKeydown(event: KeyboardEvent): void; // Coordinate keyboard navigation
+}
+```
+
+**Dependencies:** None (root component)
+**Provides:** Layout context, keyboard navigation coordination, and interaction state management for all child chips
+
+**Usage Example:**
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+
+@Component({
+  template: `
+    <mat-chip-set>
+      <mat-chip>Chip 1</mat-chip>
+      <mat-chip>Chip 2</mat-chip>
+      <mat-chip removable>Removable Chip</mat-chip>
+    </mat-chip-set>
+  `,
+})
+export class BasicChipSetExample {}
+```
+
+### MatChip {Core Chip Component}
+
+**Purpose:** Individual chip component that displays content, handles user interactions, and provides visual feedback for selection, removal, and disabled states.
+
+**Interface:**
+
+```typescript
+class MatChip {
+  // Content and identification
+  value: any; // The value associated with this chip
+  id: string; // Unique identifier for the chip
+  ariaLabel: string | null; // ARIA label for accessibility
+  ariaDescription: string | null; // ARIA description for additional context
+
+  // Visual appearance
+  color: string | null; // Theme color ('primary' | 'accent' | 'warn')
+  highlighted: boolean; // Whether the chip appears highlighted
+  
+  // Interaction behavior
+  disabled: boolean; // Whether the chip is disabled
+  removable: boolean; // Whether the chip can be removed
+  disableRipple: boolean; // Whether ripple effects are disabled
+
+  // State management
+  readonly destroyed: EventEmitter<MatChipEvent>; // Emitted when chip is destroyed
+  readonly removed: EventEmitter<MatChipEvent>; // Emitted when chip removal is requested
+
+  // Actions
+  focus(): void; // Programmatically focus the chip
+  remove(): void; // Trigger chip removal
+}
+
+interface MatChipEvent {
+  chip: MatChip; // Reference to the chip that emitted the event
+}
+```
+
+**Context Dependencies:** Chip layout and navigation context from parent MatChipSet
+**Parent Requirements:** Should be within MatChipSet for proper keyboard navigation and layout
+
+**Usage Example:**
+
+```typescript
+<mat-chip-set>
+  <mat-chip
+    [value]="chip.id"
+    [removable]="chip.canRemove"
+    [disabled]="chip.disabled"
+    [color]="chip.color"
+    (removed)="removeChip(chip)">
+    {{ chip.label }}
+  </mat-chip>
+</mat-chip-set>
+```
+
+### MatChipInput {Input Integration Component}
+
+**Purpose:** Input directive that enables adding new chips through text input, with support for separator keys, validation, and seamless integration with chip collections.
+
+**Interface:**
+
+```typescript
+class MatChipInput implements MatChipTextControl {
+  // Connection to chip collection
+  chipGrid: MatChipGrid; // Associated chip grid for input functionality
+  
+  // Input behavior
+  placeholder: string; // Placeholder text for the input
+  addOnBlur: boolean; // Whether to add chips when input loses focus
+  separatorKeyCodes: readonly number[] | ReadonlySet<number>; // Keys that trigger chip creation
+  
+  // State and accessibility
+  id: string; // Unique identifier for the input
+  disabled: boolean; // Whether the input is disabled
+  readonly: boolean; // Whether the input is readonly
+  readonly empty: boolean; // Whether the input is empty
+  focused: boolean; // Whether the input has focus
+
+  // Input events
+  readonly chipEnd: EventEmitter<MatChipInputEvent>; // Emitted when a chip should be created
+
+  // Input control methods
+  focus(): void; // Focus the input
+  clear(): void; // Clear the input value
+  readonly inputElement: HTMLInputElement; // Native input element reference
+}
+
+interface MatChipInputEvent {
+  input: HTMLInputElement; // The input element (deprecated)
+  value: string; // The input value to be converted to a chip
+  chipInput: MatChipInput; // Reference to the chip input instance
+}
+```
+
+**Context Dependencies:** Must be associated with a chip collection (MatChipGrid) for proper functionality
+**Parent Requirements:** Typically used within or alongside chip containers
+
+**Usage Example:**
+
+```typescript
+<mat-chip-grid #chipGrid>
+  <mat-chip *ngFor="let tag of tags" [removable]="true" (removed)="removeTag(tag)">
+    {{ tag.name }}
+  </mat-chip>
+  
+  <input
+    placeholder="Add tag..."
+    [matChipInputFor]="chipGrid"
+    [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+    (matChipInputTokenEnd)="addTag($event)" />
+</mat-chip-grid>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { COMMA, ENTER } from "@angular/cdk/keycodes";
+
+// Simple chip collection with removable chips
+@Component({
+  selector: "app-basic-chips",
+  template: `
+    <mat-chip-set>
+      <mat-chip
+        *ngFor="let tag of tags"
+        [removable]="true"
+        (removed)="removeTag(tag)">
+        {{ tag }}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  `,
+})
+export class BasicChipsComponent {
+  tags = ["Angular", "Material", "Chips"];
+
+  removeTag(tag: string): void {
+    const index = this.tags.indexOf(tag);
+    if (index >= 0) {
+      this.tags.splice(index, 1);
+    }
+  }
+}
+```
+
+### Advanced Usage with Input
+
+```typescript
+// Comprehensive chip input with validation and form integration
+@Component({
+  selector: "app-advanced-chips",
+  template: `
+    <mat-form-field class="chip-input-field">
+      <mat-label>Skills</mat-label>
+      <mat-chip-grid #chipGrid formControlName="skills">
+        <mat-chip
+          *ngFor="let skill of skills"
+          [removable]="!readonly"
+          [disabled]="disabled"
+          (removed)="removeSkill(skill)">
+          {{ skill.name }}
+          <mat-icon matChipRemove *ngIf="!readonly">cancel</mat-icon>
+        </mat-chip>
+        
+        <input
+          placeholder="Add skill..."
+          [matChipInputFor]="chipGrid"
+          [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+          [matChipInputAddOnBlur]="true"
+          [disabled]="readonly"
+          (matChipInputTokenEnd)="addSkill($event)" />
+      </mat-chip-grid>
+      
+      <mat-error *ngIf="skillsControl.hasError('required')">
+        At least one skill is required
+      </mat-error>
+      <mat-error *ngIf="skillsControl.hasError('maxItems')">
+        Maximum 10 skills allowed
+      </mat-error>
+      <mat-hint>Press Enter or comma to add skills</mat-hint>
+    </mat-form-field>
+  `,
+  styles: [`
+    .chip-input-field {
+      width: 100%;
+    }
+    
+    mat-chip {
+      margin: 2px;
+    }
+    
+    mat-chip.mat-mdc-chip-selected {
+      background-color: #1976d2;
+      color: white;
+    }
+  `]
+})
+export class AdvancedChipsComponent implements OnInit {
+  separatorKeyCodes: number[] = [ENTER, COMMA];
+  skills: Skill[] = [];
+  readonly = false;
+  disabled = false;
+
+  skillsForm = this.fb.group({
+    skills: [[], [Validators.required, this.maxItemsValidator(10)]]
+  });
+
+  get skillsControl() {
+    return this.skillsForm.get('skills')!;
+  }
+
+  ngOnInit() {
+    // Sync chips with form control
+    this.skillsControl.valueChanges.subscribe(value => {
+      this.skills = value || [];
+    });
+  }
+
+  addSkill(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+    
+    if (value && !this.isDuplicateSkill(value)) {
+      const newSkill: Skill = {
+        id: this.generateId(),
+        name: value,
+        level: 'beginner'
+      };
+      
+      const currentSkills = this.skillsControl.value || [];
+      this.skillsControl.setValue([...currentSkills, newSkill]);
+      
+      // Clear the input
+      event.chipInput.clear();
+    }
+  }
+
+  removeSkill(skill: Skill): void {
+    const currentSkills = this.skillsControl.value || [];
+    const index = currentSkills.findIndex(s => s.id === skill.id);
+    
+    if (index >= 0) {
+      const updatedSkills = [...currentSkills];
+      updatedSkills.splice(index, 1);
+      this.skillsControl.setValue(updatedSkills);
+    }
+  }
+
+  private isDuplicateSkill(skillName: string): boolean {
+    return this.skills.some(skill => 
+      skill.name.toLowerCase() === skillName.toLowerCase()
+    );
+  }
+
+  private maxItemsValidator(maxItems: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value && value.length > maxItems) {
+        return { maxItems: { actual: value.length, max: maxItems } };
+      }
+      return null;
+    };
+  }
+
+  private generateId(): string {
+    return Math.random().toString(36).substr(2, 9);
+  }
+}
+
+interface Skill {
+  id: string;
+  name: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+}
+```
+
+### Common Variations
+
+#### Selectable Chips (Chip Listbox)
+
+```typescript
+@Component({
+  template: `
+    <mat-chip-listbox 
+      [multiple]="true" 
+      formControlName="selectedCategories">
+      <mat-chip-option 
+        *ngFor="let category of categories" 
+        [value]="category.id"
+        [selected]="category.selected">
+        {{ category.name }}
+      </mat-chip-option>
+    </mat-chip-listbox>
+  `
+})
+export class SelectableChipsComponent {
+  categories = [
+    { id: 1, name: 'Technology', selected: false },
+    { id: 2, name: 'Design', selected: true },
+    { id: 3, name: 'Business', selected: false }
+  ];
+}
+```
+
+#### Autocomplete with Chips
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-chip-grid #chipGrid>
+        <mat-chip 
+          *ngFor="let tag of selectedTags" 
+          [removable]="true"
+          (removed)="removeTag(tag)">
+          {{ tag.name }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+        
+        <input
+          #tagInput
+          [matChipInputFor]="chipGrid"
+          [matAutocomplete]="auto"
+          (matChipInputTokenEnd)="addTag($event)" />
+      </mat-chip-grid>
+      
+      <mat-autocomplete 
+        #auto="matAutocomplete" 
+        (optionSelected)="selectTag($event)">
+        <mat-option 
+          *ngFor="let tag of filteredTags | async" 
+          [value]="tag">
+          {{ tag.name }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  `
+})
+export class AutocompleteChipsComponent {
+  tagCtrl = new FormControl();
+  selectedTags: Tag[] = [];
+  allTags: Tag[] = [
+    { id: 1, name: 'Angular' },
+    { id: 2, name: 'React' },
+    { id: 3, name: 'Vue' }
+  ];
+
+  filteredTags: Observable<Tag[]> = this.tagCtrl.valueChanges.pipe(
+    startWith(''),
+    map(value => this.filterTags(value || ''))
+  );
+
+  private filterTags(value: string): Tag[] {
+    const filterValue = value.toLowerCase();
+    return this.allTags.filter(tag => 
+      tag.name.toLowerCase().includes(filterValue) &&
+      !this.selectedTags.some(selected => selected.id === tag.id)
+    );
+  }
+
+  selectTag(event: MatAutocompleteSelectedEvent): void {
+    this.selectedTags.push(event.option.value);
+    this.tagCtrl.setValue('');
+  }
+}
+```
+
+#### Dynamic Chip Colors and States
+
+```typescript
+@Component({
+  template: `
+    <mat-chip-set>
+      <mat-chip 
+        *ngFor="let status of statuses"
+        [color]="getChipColor(status.type)"
+        [disabled]="status.disabled">
+        <mat-icon *ngIf="status.icon">{{ status.icon }}</mat-icon>
+        {{ status.label }}
+        <mat-icon 
+          matChipRemove 
+          *ngIf="status.removable"
+          (click)="removeStatus(status)">
+          cancel
+        </mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  `
+})
+export class DynamicChipsComponent {
+  statuses = [
+    { 
+      id: 1, 
+      label: 'Active', 
+      type: 'success', 
+      icon: 'check_circle',
+      removable: false,
+      disabled: false
+    },
+    { 
+      id: 2, 
+      label: 'Pending', 
+      type: 'warning',
+      icon: 'schedule',
+      removable: true,
+      disabled: false
+    },
+    { 
+      id: 3, 
+      label: 'Error', 
+      type: 'error',
+      icon: 'error',
+      removable: true,
+      disabled: false
+    }
+  ];
+
+  getChipColor(type: string): string {
+    const colorMap: Record<string, string> = {
+      'success': 'primary',
+      'warning': 'accent',
+      'error': 'warn'
+    };
+    return colorMap[type] || '';
+  }
+
+  removeStatus(status: any): void {
+    const index = this.statuses.findIndex(s => s.id === status.id);
+    if (index >= 0) {
+      this.statuses.splice(index, 1);
+    }
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **User Input**: User types in MatChipInput and presses separator key or loses focus
+2. **Input Processing**: MatChipInput validates input and emits chipEnd event with input value
+3. **Chip Creation**: Parent component receives event and creates new MatChip in the collection
+4. **State Update**: MatChipSet updates its internal state and coordinates focus management
+5. **Form Integration**: If connected to forms, chip collection value is updated and propagated
+6. **Removal Flow**: User interacts with remove action, MatChip emits removed event, parent removes chip from collection
+
+### Context Sharing
+
+- **Layout Context**: MatChipSet provides layout coordination and spacing for all child chips
+- **Navigation Context**: Shared keyboard navigation state allows seamless movement between chips and input
+- **Form Context**: When integrated with MatChipGrid, form control state is shared across all chips
+- **Selection Context**: For selectable chips, selection state is coordinated at the container level
+
+### Event Handling
+
+- **Input Events**: MatChipInput processes keyboard input and emits chip creation events
+- **Removal Events**: MatChip components emit removal requests that bubble up to parent handlers
+- **Focus Events**: Focus management is coordinated between chips and input for smooth user experience
+- **Selection Events**: For selectable variants, selection changes are propagated through the component hierarchy
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Provide clear visual feedback**: Use appropriate colors and icons to indicate chip states (selected, disabled, removable)
+- **Implement proper validation**: Validate chip input to prevent duplicates and enforce constraints
+- **Optimize for keyboard users**: Ensure all chip interactions are accessible via keyboard navigation
+- **Use meaningful separator keys**: Configure separator keys that match user expectations (Enter, comma, semicolon)
+- **Handle edge cases**: Properly handle empty input, maximum limits, and validation errors
+
+### Accessibility
+
+- **ARIA support**: Built-in ARIA attributes ensure proper screen reader announcements for chip interactions
+- **Keyboard navigation**: Complete keyboard support with arrow keys for chip navigation and standard keys for actions
+- **Focus management**: Proper focus handling when chips are added, removed, or navigation occurs
+- **Labeling**: Provide clear labels and descriptions for chip collections and individual chips
+- **State announcements**: Chip state changes (selection, removal) are automatically announced to assistive technology
+
+### Performance
+
+- **TrackBy optimization**: Use trackBy functions when rendering chips with \*ngFor to optimize change detection
+- **Efficient validation**: Implement debounced validation for chip input to avoid excessive processing
+- **Memory management**: Properly clean up subscriptions and event listeners in chip components
+- **Large collections**: Consider virtual scrolling or pagination for very large chip collections
+- **Input optimization**: Debounce input processing to avoid creating chips on every keystroke
+
+## Common Patterns
+
+### Pattern 1: Tag Management System
+
+```typescript
+// Complete tag management with categories, validation, and persistence
+@Component({
+  template: `
+    <div class="tag-management">
+      <mat-form-field class="tag-input">
+        <mat-label>Add Tags</mat-label>
+        <mat-chip-grid #chipGrid formControlName="tags">
+          <mat-chip 
+            *ngFor="let tag of tags; trackBy: trackByTagId"
+            [removable]="!tag.system"
+            [color]="getTagColor(tag.category)"
+            (removed)="removeTag(tag)">
+            
+            <mat-icon *ngIf="tag.icon">{{ tag.icon }}</mat-icon>
+            {{ tag.name }}
+            <span class="tag-category">({{ tag.category }})</span>
+            
+            <mat-icon matChipRemove *ngIf="!tag.system">
+              cancel
+            </mat-icon>
+          </mat-chip>
+          
+          <input
+            placeholder="Enter tag name..."
+            [matChipInputFor]="chipGrid"
+            [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+            [matAutocomplete]="tagAutocomplete"
+            (matChipInputTokenEnd)="addTag($event)"
+            #tagInput />
+        </mat-chip-grid>
+        
+        <mat-autocomplete 
+          #tagAutocomplete="matAutocomplete"
+          (optionSelected)="selectSuggestedTag($event)">
+          <mat-optgroup 
+            *ngFor="let category of filteredSuggestions | async | keyvalue" 
+            [label]="category.key">
+            <mat-option 
+              *ngFor="let tag of category.value" 
+              [value]="tag">
+              <mat-icon>{{ tag.icon }}</mat-icon>
+              {{ tag.name }}
+            </mat-option>
+          </mat-optgroup>
+        </mat-autocomplete>
+        
+        <mat-error *ngIf="tagsControl.hasError('maxTags')">
+          Maximum {{ maxTags }} tags allowed
+        </mat-error>
+        <mat-error *ngIf="tagsControl.hasError('duplicateTag')">
+          This tag already exists
+        </mat-error>
+        
+        <mat-hint>
+          {{ tags.length }} / {{ maxTags }} tags • 
+          Categories: {{ getUsedCategories().join(', ') }}
+        </mat-hint>
+      </mat-form-field>
+
+      <div class="tag-actions">
+        <button mat-button (click)="clearAllTags()" [disabled]="tags.length === 0">
+          Clear All
+        </button>
+        <button mat-button (click)="importTags()" color="primary">
+          Import Tags
+        </button>
+        <button mat-raised-button (click)="saveTags()" color="primary">
+          Save Tags
+        </button>
+      </div>
+
+      <div class="tag-statistics" *ngIf="tags.length > 0">
+        <h4>Tag Statistics</h4>
+        <mat-chip-set>
+          <mat-chip 
+            *ngFor="let stat of getTagStatistics()"
+            [color]="stat.color">
+            {{ stat.category }}: {{ stat.count }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .tag-management {
+      max-width: 600px;
+      padding: 16px;
+    }
+
+    .tag-input {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .tag-category {
+      font-size: 0.8em;
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+
+    .tag-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag-statistics {
+      border-top: 1px solid #ddd;
+      padding-top: 16px;
+    }
+
+    mat-chip.system-tag {
+      opacity: 0.8;
+      font-style: italic;
+    }
+  `]
+})
+export class TagManagementComponent implements OnInit, OnDestroy {
+  maxTags = 20;
+  separatorKeyCodes: number[] = [ENTER, COMMA];
+  
+  tagForm = this.fb.group({
+    tags: [[], [this.maxTagsValidator(), this.duplicateTagValidator()]]
+  });
+
+  tags: Tag[] = [];
+  suggestedTags: Tag[] = [
+    { id: 's1', name: 'Frontend', category: 'Technology', icon: 'web', system: false },
+    { id: 's2', name: 'Backend', category: 'Technology', icon: 'storage', system: false },
+    { id: 's3', name: 'Design', category: 'Creative', icon: 'palette', system: false },
+    { id: 's4', name: 'UX', category: 'Creative', icon: 'psychology', system: false }
+  ];
+
+  filteredSuggestions: Observable<{[key: string]: Tag[]}>;
+  private destroy$ = new Subject<void>();
+
+  get tagsControl() {
+    return this.tagForm.get('tags')!;
+  }
+
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
+    this.filteredSuggestions = this.tagsControl.valueChanges.pipe(
+      startWith(''),
+      map(() => this.groupSuggestionsByCategory()),
+      takeUntil(this.destroy$)
+    );
+  }
+
+  ngOnInit() {
+    this.loadSavedTags();
+    
+    // Sync tags array with form control
+    this.tagsControl.valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(tags => {
+      this.tags = tags || [];
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  addTag(event: MatChipInputEvent): void {
+    const value = event.value.trim();
+    if (!value) return;
+
+    const newTag: Tag = {
+      id: this.generateTagId(),
+      name: value,
+      category: this.detectCategory(value),
+      icon: this.getDefaultIcon(this.detectCategory(value)),
+      system: false
+    };
+
+    this.addTagToCollection(newTag);
+    event.chipInput.clear();
+  }
+
+  selectSuggestedTag(event: MatAutocompleteSelectedEvent): void {
+    const selectedTag = event.option.value as Tag;
+    const newTag: Tag = {
+      ...selectedTag,
+      id: this.generateTagId()
+    };
+    
+    this.addTagToCollection(newTag);
+  }
+
+  removeTag(tag: Tag): void {
+    if (tag.system) return;
+    
+    const currentTags = this.tagsControl.value || [];
+    const updatedTags = currentTags.filter(t => t.id !== tag.id);
+    this.tagsControl.setValue(updatedTags);
+    
+    this.snackBar.open(`Tag "${tag.name}" removed`, 'Undo', {
+      duration: 3000
+    }).onAction().subscribe(() => {
+      this.addTagToCollection(tag);
+    });
+  }
+
+  getTagColor(category: string): string {
+    const colorMap: Record<string, string> = {
+      'Technology': 'primary',
+      'Creative': 'accent',
+      'Business': 'warn',
+      'Other': ''
+    };
+    return colorMap[category] || '';
+  }
+
+  trackByTagId(index: number, tag: Tag): string {
+    return tag.id;
+  }
+
+  clearAllTags(): void {
+    const systemTags = this.tags.filter(tag => tag.system);
+    this.tagsControl.setValue(systemTags);
+  }
+
+  importTags(): void {
+    // Implementation for importing tags from file or other source
+    const importedTags: Tag[] = [
+      { id: 'i1', name: 'JavaScript', category: 'Technology', icon: 'code', system: false },
+      { id: 'i2', name: 'TypeScript', category: 'Technology', icon: 'code', system: false }
+    ];
+    
+    const currentTags = this.tagsControl.value || [];
+    const uniqueNewTags = importedTags.filter(importedTag => 
+      !currentTags.some(existingTag => existingTag.name === importedTag.name)
+    );
+    
+    this.tagsControl.setValue([...currentTags, ...uniqueNewTags]);
+    this.snackBar.open(`${uniqueNewTags.length} tags imported`, 'OK', { duration: 2000 });
+  }
+
+  saveTags(): void {
+    localStorage.setItem('savedTags', JSON.stringify(this.tags));
+    this.snackBar.open('Tags saved successfully', 'OK', { duration: 2000 });
+  }
+
+  getUsedCategories(): string[] {
+    const categories = this.tags.map(tag => tag.category);
+    return [...new Set(categories)].sort();
+  }
+
+  getTagStatistics(): {category: string, count: number, color: string}[] {
+    const categoryCount: Record<string, number> = {};
+    
+    this.tags.forEach(tag => {
+      categoryCount[tag.category] = (categoryCount[tag.category] || 0) + 1;
+    });
+
+    return Object.entries(categoryCount).map(([category, count]) => ({
+      category,
+      count,
+      color: this.getTagColor(category)
+    }));
+  }
+
+  private addTagToCollection(tag: Tag): void {
+    const currentTags = this.tagsControl.value || [];
+    this.tagsControl.setValue([...currentTags, tag]);
+  }
+
+  private loadSavedTags(): void {
+    const savedTags = localStorage.getItem('savedTags');
+    if (savedTags) {
+      try {
+        const tags = JSON.parse(savedTags);
+        this.tagsControl.setValue(tags);
+      } catch (e) {
+        console.error('Failed to load saved tags:', e);
+      }
+    }
+  }
+
+  private groupSuggestionsByCategory(): {[key: string]: Tag[]} {
+    const currentTagNames = this.tags.map(tag => tag.name.toLowerCase());
+    const availableSuggestions = this.suggestedTags.filter(tag => 
+      !currentTagNames.includes(tag.name.toLowerCase())
+    );
+
+    return availableSuggestions.reduce((groups, tag) => {
+      const category = tag.category;
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(tag);
+      return groups;
+    }, {} as {[key: string]: Tag[]});
+  }
+
+  private detectCategory(tagName: string): string {
+    const techKeywords = ['js', 'javascript', 'typescript', 'angular', 'react', 'vue', 'css', 'html'];
+    const creativeKeywords = ['design', 'ui', 'ux', 'graphics', 'art', 'creative'];
+    const businessKeywords = ['management', 'sales', 'marketing', 'finance', 'strategy'];
+
+    const lowerTagName = tagName.toLowerCase();
+    
+    if (techKeywords.some(keyword => lowerTagName.includes(keyword))) {
+      return 'Technology';
+    }
+    if (creativeKeywords.some(keyword => lowerTagName.includes(keyword))) {
+      return 'Creative';
+    }
+    if (businessKeywords.some(keyword => lowerTagName.includes(keyword))) {
+      return 'Business';
+    }
+    
+    return 'Other';
+  }
+
+  private getDefaultIcon(category: string): string {
+    const iconMap: Record<string, string> = {
+      'Technology': 'code',
+      'Creative': 'palette',
+      'Business': 'business',
+      'Other': 'label'
+    };
+    return iconMap[category] || 'label';
+  }
+
+  private generateTagId(): string {
+    return 'tag_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  private maxTagsValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value && value.length > this.maxTags) {
+        return { maxTags: { actual: value.length, max: this.maxTags } };
+      }
+      return null;
+    };
+  }
+
+  private duplicateTagValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value && Array.isArray(value)) {
+        const names = value.map(tag => tag.name.toLowerCase());
+        const hasDuplicates = names.length !== new Set(names).size;
+        if (hasDuplicates) {
+          return { duplicateTag: true };
+        }
+      }
+      return null;
+    };
+  }
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  category: string;
+  icon: string;
+  system: boolean;
+}
+```
+
+### Pattern 2: Filter Chips with Search Integration
+
+```typescript
+// Advanced filtering system with chip-based filter management
+@Component({
+  template: `
+    <div class="filter-system">
+      <mat-form-field class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput 
+               [(ngModel)]="searchQuery" 
+               (ngModelChange)="onSearchChange()"
+               placeholder="Search items...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="active-filters" *ngIf="activeFilters.length > 0">
+        <span class="filter-label">Active Filters:</span>
+        <mat-chip-set>
+          <mat-chip 
+            *ngFor="let filter of activeFilters"
+            [removable]="true"
+            [color]="getFilterColor(filter.type)"
+            (removed)="removeFilter(filter)">
+            
+            <mat-icon>{{ getFilterIcon(filter.type) }}</mat-icon>
+            {{ filter.label }}: {{ filter.value }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+        
+        <button mat-button 
+                (click)="clearAllFilters()" 
+                class="clear-filters">
+          Clear All
+        </button>
+      </div>
+
+      <mat-expansion-panel class="filter-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Advanced Filters
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="filter-options">
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <label>Categories:</label>
+            <mat-chip-listbox 
+              [multiple]="true" 
+              (selectionChange)="onCategoryFilterChange($event)">
+              <mat-chip-option 
+                *ngFor="let category of availableCategories" 
+                [value]="category.id">
+                {{ category.name }} ({{ category.count }})
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="filter-group">
+            <label>Price Range:</label>
+            <mat-chip-set>
+              <mat-chip 
+                *ngFor="let range of priceRanges"
+                [class.selected]="isRangeSelected(range)"
+                (click)="togglePriceRange(range)">
+                {{ range.label }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-group">
+            <label>Status:</label>
+            <mat-chip-listbox (selectionChange)="onStatusFilterChange($event)">
+              <mat-chip-option 
+                *ngFor="let status of availableStatuses" 
+                [value]="status.value">
+                <mat-icon>{{ status.icon }}</mat-icon>
+                {{ status.label }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Results Summary -->
+      <div class="results-summary">
+        <span>{{ filteredResults.length }} of {{ totalResults }} items</span>
+        <button mat-button 
+                *ngIf="hasActiveFilters()" 
+                (click)="saveFilterPreset()">
+          Save Filter Preset
+        </button>
+      </div>
+
+      <!-- Saved Filter Presets -->
+      <div class="filter-presets" *ngIf="savedPresets.length > 0">
+        <span class="preset-label">Quick Filters:</span>
+        <mat-chip-set>
+          <mat-chip 
+            *ngFor="let preset of savedPresets"
+            (click)="applyPreset(preset)"
+            color="accent">
+            <mat-icon>bookmark</mat-icon>
+            {{ preset.name }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .filter-system {
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-field {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .active-filters {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label, .preset-label {
+      font-weight: bold;
+      color: #666;
+    }
+
+    .filter-panel {
+      margin-bottom: 16px;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .results-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-top: 1px solid #eee;
+      margin-top: 16px;
+    }
+
+    .filter-presets {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    mat-chip.selected {
+      background-color: #1976d2;
+      color: white;
+    }
+  `]
+})
+export class FilterChipsComponent implements OnInit {
+  searchQuery = '';
+  activeFilters: FilterChip[] = [];
+  filteredResults: any[] = [];
+  totalResults = 0;
+
+  availableCategories = [
+    { id: 'electronics', name: 'Electronics', count: 156 },
+    { id: 'clothing', name: 'Clothing', count: 89 },
+    { id: 'books', name: 'Books', count: 234 },
+    { id: 'home', name: 'Home & Garden', count: 78 }
+  ];
+
+  priceRanges = [
+    { id: 'under25', label: 'Under $25', min: 0, max: 25 },
+    { id: '25to50', label: '$25 - $50', min: 25, max: 50 },
+    { id: '50to100', label: '$50 - $100', min: 50, max: 100 },
+    { id: 'over100', label: 'Over $100', min: 100, max: Infinity }
+  ];
+
+  availableStatuses = [
+    { value: 'available', label: 'Available', icon: 'check_circle' },
+    { value: 'out_of_stock', label: 'Out of Stock', icon: 'cancel' },
+    { value: 'discontinued', label: 'Discontinued', icon: 'block' }
+  ];
+
+  savedPresets: FilterPreset[] = [];
+
+  ngOnInit() {
+    this.loadSavedPresets();
+    this.applyFilters();
+  }
+
+  onSearchChange(): void {
+    this.updateSearchFilter();
+    this.applyFilters();
+  }
+
+  onCategoryFilterChange(event: any): void {
+    this.updateCategoryFilters(event.value);
+    this.applyFilters();
+  }
+
+  onStatusFilterChange(event: any): void {
+    this.updateStatusFilters(event.value);
+    this.applyFilters();
+  }
+
+  togglePriceRange(range: any): void {
+    const existingIndex = this.activeFilters.findIndex(
+      f => f.type === 'price' && f.data.id === range.id
+    );
+
+    if (existingIndex >= 0) {
+      this.activeFilters.splice(existingIndex, 1);
+    } else {
+      this.activeFilters.push({
+        id: this.generateFilterId(),
+        type: 'price',
+        label: 'Price',
+        value: range.label,
+        data: range
+      });
+    }
+
+    this.applyFilters();
+  }
+
+  removeFilter(filter: FilterChip): void {
+    const index = this.activeFilters.findIndex(f => f.id === filter.id);
+    if (index >= 0) {
+      this.activeFilters.splice(index, 1);
+      this.applyFilters();
+    }
+  }
+
+  clearAllFilters(): void {
+    this.activeFilters = [];
+    this.searchQuery = '';
+    this.applyFilters();
+  }
+
+  saveFilterPreset(): void {
+    const presetName = prompt('Enter preset name:');
+    if (presetName && presetName.trim()) {
+      const preset: FilterPreset = {
+        id: this.generateFilterId(),
+        name: presetName.trim(),
+        filters: [...this.activeFilters],
+        searchQuery: this.searchQuery
+      };
+      
+      this.savedPresets.push(preset);
+      this.savePersistentPresets();
+    }
+  }
+
+  applyPreset(preset: FilterPreset): void {
+    this.activeFilters = [...preset.filters];
+    this.searchQuery = preset.searchQuery;
+    this.applyFilters();
+  }
+
+  getFilterColor(type: string): string {
+    const colorMap: Record<string, string> = {
+      'search': 'primary',
+      'category': 'accent',
+      'price': 'warn',
+      'status': ''
+    };
+    return colorMap[type] || '';
+  }
+
+  getFilterIcon(type: string): string {
+    const iconMap: Record<string, string> = {
+      'search': 'search',
+      'category': 'category',
+      'price': 'attach_money',
+      'status': 'info'
+    };
+    return iconMap[type] || 'filter_list';
+  }
+
+  isRangeSelected(range: any): boolean {
+    return this.activeFilters.some(f => 
+      f.type === 'price' && f.data.id === range.id
+    );
+  }
+
+  hasActiveFilters(): boolean {
+    return this.activeFilters.length > 0 || this.searchQuery.trim().length > 0;
+  }
+
+  private updateSearchFilter(): void {
+    // Remove existing search filter
+    this.activeFilters = this.activeFilters.filter(f => f.type !== 'search');
+    
+    // Add new search filter if query exists
+    if (this.searchQuery.trim()) {
+      this.activeFilters.push({
+        id: this.generateFilterId(),
+        type: 'search',
+        label: 'Search',
+        value: this.searchQuery.trim(),
+        data: { query: this.searchQuery.trim() }
+      });
+    }
+  }
+
+  private updateCategoryFilters(selectedCategories: string[]): void {
+    // Remove existing category filters
+    this.activeFilters = this.activeFilters.filter(f => f.type !== 'category');
+    
+    // Add new category filters
+    selectedCategories.forEach(categoryId => {
+      const category = this.availableCategories.find(c => c.id === categoryId);
+      if (category) {
+        this.activeFilters.push({
+          id: this.generateFilterId(),
+          type: 'category',
+          label: 'Category',
+          value: category.name,
+          data: { categoryId }
+        });
+      }
+    });
+  }
+
+  private updateStatusFilters(selectedStatuses: string[]): void {
+    // Remove existing status filters
+    this.activeFilters = this.activeFilters.filter(f => f.type !== 'status');
+    
+    // Add new status filters
+    selectedStatuses.forEach(statusValue => {
+      const status = this.availableStatuses.find(s => s.value === statusValue);
+      if (status) {
+        this.activeFilters.push({
+          id: this.generateFilterId(),
+          type: 'status',
+          label: 'Status',
+          value: status.label,
+          data: { statusValue }
+        });
+      }
+    });
+  }
+
+  private applyFilters(): void {
+    // Apply filtering logic based on activeFilters and searchQuery
+    // This would typically filter your data source
+    // For demonstration, we'll just update the count
+    this.filteredResults = this.performFiltering();
+    this.totalResults = 1000; // Your total data count
+  }
+
+  private performFiltering(): any[] {
+    // Implementation would depend on your data source
+    // Return filtered results based on active filters
+    return []; // Placeholder
+  }
+
+  private loadSavedPresets(): void {
+    const saved = localStorage.getItem('filterPresets');
+    if (saved) {
+      try {
+        this.savedPresets = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to load filter presets:', e);
+      }
+    }
+  }
+
+  private savePersistentPresets(): void {
+    localStorage.setItem('filterPresets', JSON.stringify(this.savedPresets));
+  }
+
+  private generateFilterId(): string {
+    return 'filter_' + Math.random().toString(36).substr(2, 9);
+  }
+}
+
+interface FilterChip {
+  id: string;
+  type: string;
+  label: string;
+  value: string;
+  data: any;
+}
+
+interface FilterPreset {
+  id: string;
+  name: string;
+  filters: FilterChip[];
+  searchQuery: string;
+}
+```
+
+---

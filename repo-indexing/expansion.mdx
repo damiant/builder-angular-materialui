@@ -1,0 +1,578 @@
+---
+
+# Expansion Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate expandable accordion components with required hierarchical structure
+
+### When to Use
+
+Expansion components are ideal for organizing and presenting large amounts of information in a compact, scannable format. Use them when you need to:
+
+- **Content organization**: Group related content under collapsible sections to reduce visual clutter
+- **Progressive disclosure**: Allow users to reveal additional details on demand without overwhelming the interface
+- **FAQ sections**: Create expandable question-answer pairs that users can explore selectively
+- **Settings panels**: Organize configuration options into logical, expandable categories
+- **Form sections**: Break long forms into manageable, expandable segments
+- **Documentation**: Structure help content or specifications with expandable sections
+- **Dashboard panels**: Create collapsible widgets or information panels in dashboards
+
+### Architecture
+
+**Critical/Strong Coupling**: The Expansion component group follows a strict hierarchical structure where components must be properly nested to function correctly. The components share context and state through the accordion container, requiring specific parent-child relationships for proper behavior.
+
+### Component Interdependencies
+
+The Expansion components form a tightly coupled system with the following relationships:
+
+- **Required hierarchy**: `MatAccordion` serves as the root container that manages the state and behavior of all child panels
+- **Panel structure**: Each `MatExpansionPanel` must be a direct child of `MatAccordion` and contains the expandable content
+- **Header composition**: `MatExpansionPanelHeader` provides the clickable area and must contain title/description components
+- **Content organization**: Panel content is structured using specific content and action components
+- **Shared context**: The accordion container provides configuration that affects all panels (multi-expand, display mode, etc.)
+- **State coordination**: The accordion manages panel states to enforce single or multi-selection behavior
+
+## Components
+
+### MatAccordion {Primary Component}
+
+The root container component that manages a collection of expansion panels with coordinated behavior and shared configuration.
+
+**Purpose:** Provides the foundational structure and shared context for expansion panels, managing their collective behavior including single/multi-selection modes and visual styling.
+
+**Interface:**
+
+```typescript
+interface MatAccordionProps {
+  children: React.ReactNode; // Required MatExpansionPanel components
+  multi?: boolean; // Allow multiple panels to be expanded simultaneously (default: false)
+  hideToggle?: boolean; // Hide expansion indicators on all panels (default: false)
+  displayMode?: "default" | "flat"; // Visual presentation mode (default: 'default')
+  togglePosition?: "before" | "after"; // Position of expansion indicators (default: 'after')
+  id?: string; // Unique identifier for the accordion
+}
+```
+
+**Dependencies:** None (root component)
+**Provides:** Shared configuration context and state management for all child expansion panels
+
+**Usage Example:**
+
+```tsx
+import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
+
+function BasicAccordion() {
+  return (
+    <mat-accordion [multi]="false" [hideToggle]="false" displayMode="default">
+      <mat-expansion-panel>
+        <!-- Panel content -->
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+        <!-- Panel content -->
+      </mat-expansion-panel>
+    </mat-accordion>
+  );
+}
+```
+
+### MatExpansionPanel {Dependent Component}
+
+Individual expandable panel within the accordion that contains the collapsible content and manages its own expanded state.
+
+**Purpose:** Provides the expandable container for content with header, body, and optional action areas that can be toggled between expanded and collapsed states.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelProps {
+  children: React.ReactNode; // MatExpansionPanelHeader and content components
+  expanded?: boolean; // Current expanded state (default: false)
+  disabled?: boolean; // Disable panel interaction (default: false)
+  hideToggle?: boolean; // Override accordion hideToggle for this panel
+  togglePosition?: "before" | "after"; // Override accordion togglePosition for this panel
+  opened?: () => void; // Callback when panel opens
+  closed?: () => void; // Callback when panel closes
+  afterExpand?: () => void; // Callback after expansion animation completes
+  afterCollapse?: () => void; // Callback after collapse animation completes
+}
+```
+
+**Context Dependencies:** Must be used within MatAccordion for proper state management and styling
+**Parent Requirements:** Direct child of MatAccordion component
+
+**Usage Example:**
+
+```tsx
+<mat-accordion>
+  <mat-expansion-panel
+    [expanded]="isExpanded"
+    [disabled]="false"
+    (opened)="onPanelOpened()"
+    (closed)="onPanelClosed()"
+  >
+    <mat-expansion-panel-header>
+      <!-- Header content -->
+    </mat-expansion-panel-header>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+### MatExpansionPanelHeader {Dependent Component}
+
+The clickable header area of an expansion panel that displays summary information and controls panel expansion.
+
+**Purpose:** Provides the interactive header that users click to expand/collapse the panel, containing title, description, and expansion indicator.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelHeaderProps {
+  children: React.ReactNode; // MatExpansionPanelTitle, MatExpansionPanelDescription, and other header content
+  collapsedHeight?: string; // Height when panel is collapsed
+  expandedHeight?: string; // Height when panel is expanded
+}
+```
+
+**Context Dependencies:** Must be used within MatExpansionPanel
+**Parent Requirements:** Direct child of MatExpansionPanel component
+
+**Usage Example:**
+
+```tsx
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Panel Title</mat-panel-title>
+    <mat-panel-description>Brief description</mat-panel-description>
+  </mat-expansion-panel-header>
+  <!-- Panel content -->
+</mat-expansion-panel>
+```
+
+### MatExpansionPanelTitle {Dependent Component}
+
+The primary title text displayed in the expansion panel header.
+
+**Purpose:** Displays the main heading or title for the expansion panel, providing users with a clear indication of the panel's content.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelTitleProps {
+  children: React.ReactNode; // Title text content
+}
+```
+
+**Context Dependencies:** Should be used within MatExpansionPanelHeader
+**Parent Requirements:** Typically placed within MatExpansionPanelHeader
+
+**Usage Example:**
+
+```tsx
+<mat-expansion-panel-header>
+  <mat-panel-title>Personal Information</mat-panel-title>
+</mat-expansion-panel-header>
+```
+
+### MatExpansionPanelDescription {Dependent Component}
+
+Supplementary description text displayed alongside the title in the panel header.
+
+**Purpose:** Provides additional context or summary information about the panel's content, helping users understand what they'll find when expanding the panel.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelDescriptionProps {
+  children: React.ReactNode; // Description text content
+}
+```
+
+**Context Dependencies:** Should be used within MatExpansionPanelHeader
+**Parent Requirements:** Typically placed within MatExpansionPanelHeader
+
+**Usage Example:**
+
+```tsx
+<mat-expansion-panel-header>
+  <mat-panel-title>Settings</mat-panel-title>
+  <mat-panel-description>Configure your preferences</mat-panel-description>
+</mat-expansion-panel-header>
+```
+
+### MatExpansionPanelContent {Dependent Component}
+
+Container for the main content that becomes visible when the panel is expanded.
+
+**Purpose:** Wraps the expandable content with lazy loading capabilities, allowing content to be deferred until the panel is opened for performance optimization.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelContentProps {
+  children: React.ReactNode; // Main panel content
+}
+```
+
+**Context Dependencies:** Must be used within MatExpansionPanel
+**Parent Requirements:** Child of MatExpansionPanel component
+
+**Usage Example:**
+
+```tsx
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Details</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <ng-template matExpansionPanelContent>
+    <p>This content is loaded lazily when the panel opens.</p>
+    <form>
+      <!-- Form content -->
+    </form>
+  </ng-template>
+</mat-expansion-panel>
+```
+
+### MatExpansionPanelActionRow {Dependent Component}
+
+Container for action buttons displayed at the bottom of the expanded panel content.
+
+**Purpose:** Provides a dedicated area for action buttons (Save, Cancel, etc.) that appear at the bottom of the panel when expanded, maintaining consistent spacing and alignment.
+
+**Interface:**
+
+```typescript
+interface MatExpansionPanelActionRowProps {
+  children: React.ReactNode; // Action buttons and controls
+}
+```
+
+**Context Dependencies:** Must be used within MatExpansionPanel
+**Parent Requirements:** Child of MatExpansionPanel component
+
+**Usage Example:**
+
+```tsx
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Form Section</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <p>Form content here...</p>
+
+  <mat-action-row>
+    <button mat-button color="warn">
+      Cancel
+    </button>
+    <button mat-button color="primary">
+      Save
+    </button>
+  </mat-action-row>
+</mat-expansion-panel>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from "@angular/material/expansion";
+
+// Minimal required structure
+function BasicExpansionExample() {
+  return (
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>First Panel</mat-panel-title>
+          <mat-panel-description>
+            This is the first expandable panel
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>Content of the first panel goes here.</p>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Second Panel</mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>Content of the second panel goes here.</p>
+      </mat-expansion-panel>
+    </mat-accordion>
+  );
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Complex usage with all features
+function AdvancedExpansionExample() {
+  const [step1Expanded, setStep1Expanded] = useState(false);
+  const [step2Expanded, setStep2Expanded] = useState(false);
+
+  return (
+    <mat-accordion [multi]="true" displayMode="default">
+      <mat-expansion-panel
+        [expanded]="step1Expanded"
+        (opened)="handleStep1Opened()"
+        (closed)="handleStep1Closed()"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>Personal Information</mat-panel-title>
+          <mat-panel-description>
+            Enter your basic details
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <ng-template matExpansionPanelContent>
+          <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Enter your name">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Email</mat-label>
+            <input matInput type="email" placeholder="Enter your email">
+          </mat-form-field>
+        </ng-template>
+
+        <mat-action-row>
+          <button mat-button color="warn">Clear</button>
+          <button mat-button color="primary">Next</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [disabled]="!step1Expanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Address Information</mat-panel-title>
+          <mat-panel-description>
+            Complete your address details
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-form-field>
+          <mat-label>Address</mat-label>
+          <textarea matInput placeholder="Enter your address"></textarea>
+        </mat-form-field>
+
+        <mat-action-row>
+          <button mat-button color="warn">Cancel</button>
+          <button mat-button color="primary">Submit</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+    </mat-accordion>
+  );
+}
+```
+
+### Common Variations
+
+#### Single Panel Mode (Default)
+
+```tsx
+// Only one panel can be expanded at a time
+<mat-accordion [multi]="false">
+  <mat-expansion-panel>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+  <mat-expansion-panel>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+#### Multi-Panel Mode
+
+```tsx
+// Multiple panels can be expanded simultaneously
+<mat-accordion [multi]="true">
+  <mat-expansion-panel>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+  <mat-expansion-panel>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+#### Flat Display Mode
+
+```tsx
+// All panels at same elevation without spacing
+<mat-accordion displayMode="flat">
+  <mat-expansion-panel>
+    <!-- Panel content -->
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+#### Programmatic Control
+
+```tsx
+// Control panel state programmatically
+<mat-expansion-panel
+  [expanded]="isExpanded"
+  [disabled]="isDisabled"
+  (afterExpand)="onExpanded()"
+  (afterCollapse)="onCollapsed()"
+>
+  <!-- Panel content -->
+</mat-expansion-panel>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Accordion to Panels**: The MatAccordion component passes configuration (multi, hideToggle, displayMode) down to all child panels
+2. **Panel State Management**: Each MatExpansionPanel manages its own expanded/collapsed state while coordinating with the accordion for multi-selection behavior
+3. **Header Interaction**: MatExpansionPanelHeader captures user clicks and communicates with its parent panel to trigger state changes
+4. **Event Bubbling**: Panel state change events (opened, closed, afterExpand, afterCollapse) bubble up from panels to be handled by parent components
+
+### Context Sharing
+
+- **Accordion Configuration**: MatAccordion provides a shared context containing display mode, toggle visibility, and multi-selection settings
+- **Panel State Coordination**: When multi="false", the accordion ensures only one panel is expanded by automatically closing others when a new panel opens
+- **Styling Context**: The accordion provides theming and spacing context that affects all child panels
+
+### Event Handling
+
+- **Click Events**: Header clicks trigger panel toggle through internal event handling
+- **State Events**: Panel state changes emit events that can be captured by parent components
+- **Animation Events**: Expand/collapse animations emit completion events for coordination with other UI elements
+- **Keyboard Navigation**: Built-in keyboard support for accessibility with focus management between panels
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Content Organization**: Group related content logically within panels, using clear and descriptive titles that indicate what users will find inside
+- **Progressive Disclosure**: Start with the most important panels expanded by default, allowing users to explore additional details as needed
+- **Performance Optimization**: Use MatExpansionPanelContent with ng-template for lazy loading of complex content that should only render when panels are opened
+- **Consistent Interaction**: Maintain consistent behavior across all panels in an accordion - avoid mixing different interaction patterns within the same accordion
+
+### Accessibility
+
+- **ARIA Relationships**: The accordion automatically provides proper ARIA relationships between headers and content panels for screen reader navigation
+- **Keyboard Navigation**: Support built-in keyboard controls (Enter/Space to toggle, Tab to navigate between panels) without additional configuration
+- **Screen Reader Support**: Use descriptive panel titles and descriptions that clearly communicate the content purpose to assistive technology users
+- **Focus Management**: Ensure proper focus indication and logical tab order when panels are expanded or collapsed
+
+### Performance
+
+- **Lazy Loading**: Implement lazy loading for heavy content using ng-template with matExpansionPanelContent directive to defer rendering until needed
+- **State Management**: Avoid unnecessary re-renders by using trackBy functions when panels are generated dynamically with \*ngFor
+- **Animation Performance**: Consider disabling animations for large accordions or complex content to improve performance on lower-end devices
+- **Memory Management**: Clean up event listeners and subscriptions in panel content components to prevent memory leaks
+
+## Common Patterns
+
+### Pattern 1: FAQ Section
+
+```tsx
+// Frequently Asked Questions with expandable answers
+<mat-accordion [multi]="true" displayMode="flat">
+  <mat-expansion-panel *ngFor="let faq of faqs">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ faq.question }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <p>{{ faq.answer }}</p>
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+### Pattern 2: Multi-Step Form
+
+```tsx
+// Step-by-step form with validation and conditional progression
+<mat-accordion [multi]="false">
+  <mat-expansion-panel [expanded]="currentStep === 1">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Step 1: Basic Information</mat-panel-title>
+      <mat-panel-description>
+        Enter your personal details
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="step1Form">
+      <!-- Form fields -->
+    </form>
+
+    <mat-action-row>
+      <button mat-button
+              [disabled]="!step1Form.valid"
+              (click)="nextStep()">
+        Next
+      </button>
+    </mat-action-row>
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+### Pattern 3: Settings Panel
+
+```tsx
+// Organized settings with immediate save actions
+<mat-accordion [multi]="true" displayMode="default">
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>account_circle</mat-icon>
+        Account Settings
+      </mat-panel-title>
+      <mat-panel-description>
+        Manage your account preferences
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <ng-template matExpansionPanelContent>
+      <!-- Settings content loaded lazily -->
+      <app-account-settings></app-account-settings>
+    </ng-template>
+
+    <mat-action-row>
+      <button mat-button color="primary" (click)="saveSettings()">
+        Save Changes
+      </button>
+    </mat-action-row>
+  </mat-expansion-panel>
+</mat-accordion>
+```
+
+### Pattern 4: Conditional Panel Access
+
+```tsx
+// Panels that enable based on previous selections
+<mat-accordion>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Choose Service Type</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-radio-group [(ngModel)]="serviceType">
+      <mat-radio-button value="basic">Basic</mat-radio-button>
+      <mat-radio-button value="premium">Premium</mat-radio-button>
+    </mat-radio-group>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel [disabled]="!serviceType">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Service Details</mat-panel-title>
+      <mat-panel-description>
+        Configure your {{serviceType}} service
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <!-- Service-specific configuration -->
+  </mat-expansion-panel>
+</mat-accordion>
+```
