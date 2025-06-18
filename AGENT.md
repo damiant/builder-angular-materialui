@@ -25,8 +25,8 @@ For example:
 
 - `design-system-docs/button.mdx` - Detailed documentation for Button component
 - `design-system-docs/table.mdx` - Detailed documentation for Table component
-- `design-system-docs/annotationcontext.mdx` - Detailed documentation for the AnnotationContext group
-- `design-system-docs/applayout.mdx` - Detailed documentation for AppLayout component
+- `design-system-docs/formfield.mdx` - Detailed documentation for the FormField group
+- `design-system-docs/stepper.mdx` - Detailed documentation for Stepper component
 
 These MDX files contain comprehensive information including:
 
@@ -39,268 +39,215 @@ These MDX files contain comprehensive information including:
 
 ## Component Categories
 
-The components are organized into logical groups based on their primary functionality:
-
 ### Layout & Structure
 
 Components that provide foundational layout and structural elements for applications.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Toolbar** - Use this component to generate toolbar functionality
+**Sidenav** - Use this component group to generate sidenav functionality with container support
+**Drawer** - Use this component group to generate drawer functionality with container support
+**GridList** - Use this component group to generate grid list functionality with tile support
+**Divider** - Use this component to generate divider functionality
 
 ### Navigation
 
 Components for user navigation and wayfinding within applications.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Tabs** - Use this component group to generate tab navigation components with required hierarchical structure
+**TabNavigation** - Use this component group to generate navigation tab components with required hierarchical structure
+**Stepper** - Use this component group to generate step-by-step workflow components with required hierarchical structure
+**NavList** - Use this component to generate navigation list functionality
+**Menu** - Use this component to generate menu functionality
 
 ### Form Controls
 
 Interactive components for user input and data collection.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**FormField** - Use this component group to generate form field components with required context sharing
+**Input** - Use this component to generate input field functionality
+**Select** - Use this component group to generate select dropdown components with options
+**Checkbox** - Use this component to generate checkbox functionality
+**Radio** - Use this component group to generate radio button functionality with group support
+**SlideToggle** - Use this component to generate slide toggle functionality
+**Slider** - Use this component to generate slider functionality
+**Autocomplete** - Use this component to generate autocomplete functionality
+**Datepicker** - Use this component group to generate datepicker functionality with input and toggle support
+**Timepicker** - Use this component to generate timepicker functionality
 
 ### Data Display
 
 Components for presenting and organizing data and content.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
-
-### Charts & Visualization
-
-Components for data visualization and graphical representation.
-
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Table** - Use this component group to generate components that handle tabular data with required hierarchical structure
+**List** - Use this component to generate basic list functionality
+**ActionList** - Use this component to generate action list functionality
+**SelectionList** - Use this component group to generate selection list components with required interdependency
+**ListItem** - Use this component group to generate list item components with optional sub-components
+**Card** - Use this component to generate card functionality
+**Tree** - Use this component to generate tree functionality
 
 ### Interactive Elements
 
 Components for user interaction and actions.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Button** - Use this component to generate button functionality
+**IconButton** - Use this component to generate icon button functionality
+**FabButton** - Use this component to generate floating action button functionality
+**MiniFabButton** - Use this component to generate mini floating action button functionality
+**ButtonToggle** - Use this component group to generate button toggle functionality with group support
+**Chips** - Use this component group to generate chips functionality with input support
 
 ### Feedback & Communication
 
 Components for providing feedback and communicating with users.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
-
-### Form Organization
-
-Components for structuring and organizing forms.
-
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Dialog** - Use this component to generate dialog functionality
+**BottomSheet** - Use this component to generate bottom sheet functionality
+**SnackBar** - Use this component to generate snack bar functionality
+**Tooltip** - Use this component to generate tooltip functionality
+**ProgressBar** - Use this component to generate progress bar functionality
+**ProgressSpinner** - Use this component to generate progress spinner functionality
 
 ### Content Organization
 
 Components for organizing and structuring content.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Expansion** - Use this component group to generate expandable accordion components with required hierarchical structure
+**Badge** - Use this component to generate badge functionality
+**Icon** - Use this component to generate icon functionality
 
-### Advanced Controls
+### Data Management & Navigation
 
-Specialized components for complex interactions and data management.
+Components for data manipulation and navigation assistance.
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+**Paginator** - Use this component to generate paginator functionality
+**Sort** - Use this component to generate sort functionality
 
-### Selection & Control
+## Component Dependencies
 
-Components for user selections and interface controls.
+### Hierarchical Component Groups
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+Some component groups require multiple components to work together in a specific hierarchical structure:
 
-### Specialized Components
+- **Table Group**: Requires proper hierarchy of MatTable, MatHeaderCell, MatFooterCell, MatCell, MatHeaderRow, MatFooterRow, MatRow, and various definition components
+- **Stepper Group**: Requires MatStepper as container with MatStep components and related step navigation elements
+- **Tabs Group**: Requires MatTabGroup as container with MatTab components and related tab elements
+- **TabNavigation Group**: Requires MatTabNav with MatTabLink components
+- **Expansion Group**: Requires MatAccordion as container with MatExpansionPanel components and related content elements
+- **FormField Group**: Requires MatFormField as wrapper with MatLabel, MatError, MatHint, and optional MatPrefix/MatSuffix components
+- **SelectionList Group**: Requires MatSelectionList with MatListOption components
+- **ListItem Group**: Supports optional sub-components like MatListItemTitle, MatListItemLine, etc.
+- **Select Group**: Requires MatSelect with MatOption components, optionally grouped with MatOptgroup
+- **Radio Group**: Requires MatRadioGroup as container with MatRadioButton components
+- **ButtonToggle Group**: Requires MatButtonToggleGroup as container with MatButtonToggle components
+- **Sidenav Group**: Requires MatSidenavContainer with MatSidenav components
+- **Drawer Group**: Requires MatDrawerContainer with MatDrawer components
+- **GridList Group**: Requires MatGridList with MatGridTile components
+- **Chips Group**: Requires MatChipSet with MatChip components and optional MatChipInput
+- **Datepicker Group**: Requires MatDatepicker with MatDatepickerInput and MatDatepickerToggle
 
-Components for specific use cases and advanced functionality.
+### Context Sharing Components
 
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
+- **FormField**: Provides required context sharing for form controls
 
-### Tutorial & Annotation System
+### Interdependent Components
 
-A specialized component group for creating interactive tutorials and annotations.
-
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
-
-### System Components
-
-Components for system-level functionality and configuration.
-
-**Note**: This section will be populated with actual component data from `component-groups.json` when available.
-
-## Available Angular Material Components
-
-Since this project uses Angular Material UI (version 20.0.3), the following Material Design components are available:
-
-### Layout & Structure
-
-- **mat-toolbar** - Application toolbar for branding and actions
-- **mat-sidenav** - Navigation drawer for mobile and desktop
-- **mat-card** - Content container with Material Design styling
-- **mat-grid-list** - Grid-based layout with responsive tiles
-- **mat-divider** - Visual separator for content sections
-
-### Navigation
-
-- **mat-menu** - Contextual menu overlay
-- **mat-tab-group** - Tabbed navigation interface
-- **mat-stepper** - Step-by-step navigation component
-- **mat-tree** - Hierarchical data navigation
-
-### Form Controls
-
-- **mat-form-field** - Container for form controls with labeling
-- **mat-input** - Text input with Material Design styling
-- **mat-select** - Dropdown selection component
-- **mat-checkbox** - Boolean selection control
-- **mat-radio-group** - Single selection from multiple options
-- **mat-slider** - Continuous value selection control
-- **mat-datepicker** - Date selection component
-- **mat-autocomplete** - Text input with auto-completion
-
-### Data Display
-
-- **mat-table** - Data table with sorting and pagination
-- **mat-list** - Vertical list of items
-- **mat-chip** - Compact element for tags or filters
-- **mat-badge** - Notification indicator
-- **mat-tooltip** - Contextual information overlay
-
-### Interactive Elements
-
-- **mat-button** - Action buttons with various styles
-- **mat-fab** - Floating action button
-- **mat-icon-button** - Circular button with icon
-- **mat-button-toggle** - Toggle button group
-
-### Feedback & Communication
-
-- **mat-snack-bar** - Brief message notifications
-- **mat-dialog** - Modal dialog overlay
-- **mat-bottom-sheet** - Bottom-anchored overlay panel
-- **mat-progress-bar** - Linear progress indicator
-- **mat-progress-spinner** - Circular progress indicator
-
-### Advanced Controls
-
-- **mat-expansion-panel** - Collapsible content container
-- **mat-paginator** - Data pagination controls
-- **mat-sort** - Table column sorting functionality
+- **SelectionList**: Components have required interdependency between list and options
 
 ## Usage Guidelines
 
 ### Component Dependencies
 
-- Most Angular Material components are self-contained and can be used independently
-- Form controls should be wrapped in `mat-form-field` for proper labeling
+- Most single components (Button, Card, Checkbox, etc.) are self-contained and can be used independently
+- Hierarchical component groups require specific parent-child relationships
+- Form controls should be wrapped in FormField components for proper labeling and validation display
 - Navigation components can be used independently or as part of larger layout structures
-- Data display components can be enhanced with interactive elements like buttons and menus
 
 ### Integration Patterns
 
-- Layout components like `mat-toolbar` and `mat-sidenav` typically serve as containers for other components
-- Form controls should be wrapped in `mat-form-field` components for proper Material Design styling
-- Navigation components can be used independently or as part of larger layout structures
-- Data display components can be enhanced with interactive elements like buttons and popovers
+- Layout components (Toolbar, Sidenav, Drawer) typically serve as containers for other components
+- Form controls work best when combined with FormField for proper labeling and error handling
+- Data display components (Table, List) can be enhanced with interactive elements like buttons and pagination
+- Navigation components (Tabs, Stepper, Menu) provide structure for organizing content and workflows
 
 ### Accessibility Considerations
 
-- All Angular Material components are built with accessibility in mind
-- Components use semantic HTML structures and proper ARIA attributes
-- Keyboard navigation is supported across all interactive components
-- Screen reader compatibility is built into all components
+- All components are built with accessibility in mind using Angular Material's accessibility features
+- Use semantic HTML structures provided by the components
+- Leverage built-in ARIA attributes and keyboard navigation
+- Form components include proper labeling and error announcement capabilities
 
 ### Responsive Design
 
-- Angular Material components provide responsive behavior through the Angular CDK
-- Layout components adapt to different screen sizes automatically
-- Mobile-friendly navigation patterns are built into components like `mat-sidenav`
+- Layout components provide responsive behavior out of the box
+- Grid and list components adapt to different screen sizes
+- Mobile-friendly navigation patterns are built into navigation components
+- Material Design principles ensure consistent responsive behavior
 
-### Theming and Customization
+## Angular Material Integration
 
-- Components support Angular Material's theming system
-- Custom themes can be applied globally or per-component
-- CSS custom properties enable runtime theme customization
-- Component density can be adjusted for different use cases
+This design system is built on Angular Material UI components, providing:
 
-## Integration with Angular
-
-### Module Imports
-
-Components must be imported from their respective Angular Material modules:
-
-```typescript
-import { MatButtonModule } from "@angular/material/button";
-import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldModule } from "@angular/material/form-field";
-// ... other imports
-```
-
-### Component Registration
-
-Components are automatically available in templates after module import:
-
-```html
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Example Card</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <p>Card content goes here</p>
-  </mat-card-content>
-  <mat-card-actions>
-    <button mat-button>Action</button>
-  </mat-card-actions>
-</mat-card>
-```
-
-### CDK Integration
-
-Angular CDK provides additional functionality:
-
-- **Layout** - Responsive breakpoints and layout utilities
-- **A11y** - Accessibility utilities and focus management
-- **Overlay** - Positioning and overlay services
-- **Drag & Drop** - Drag and drop functionality
-- **Virtual Scrolling** - Performance optimization for large lists
+- **Consistent theming** across all components
+- **Built-in accessibility** features and ARIA support
+- **Material Design** compliance and visual consistency
+- **TypeScript support** with full type definitions
+- **Reactive forms** integration for form controls
+- **CDK integration** for advanced component behaviors
 
 ## Usage Reference
 
-This reference should be used to understand the available components and their intended purposes when generating code or building applications with this design system.
+This reference should be used to understand the available components and their intended purposes when generating code or building applications with this design system. For specific implementation details, always consult the corresponding MDX documentation file in the `design-system-docs` folder.
 
-### Implementation Resources
+### Component Group Reference
 
-**For Angular Material Components**: Consult the [Angular Material documentation](https://material.angular.io/) for:
+The following component groups are available in this design system:
 
-- Complete API references
-- Interactive examples and demos
-- Integration guides and best practices
-- Theming and customization options
-- Accessibility guidelines
+| Component Group | Description            | Components Count | Key Features                               |
+| --------------- | ---------------------- | ---------------- | ------------------------------------------ |
+| Table           | Tabular data handling  | 16 components    | Hierarchical structure, sorting, filtering |
+| Stepper         | Step-by-step workflows | 8 components     | Sequential navigation, validation          |
+| Tabs            | Tab navigation         | 9 components     | Content organization, lazy loading         |
+| TabNavigation   | Navigation tabs        | 3 components     | Router integration, active states          |
+| Expansion       | Accordion panels       | 7 components     | Collapsible content, animations            |
+| FormField       | Form field wrapper     | 6 components     | Context sharing, validation display        |
+| SelectionList   | Selection lists        | 2 components     | Multi-selection, checkboxes                |
+| List            | Basic lists            | 1 component      | Simple content display                     |
+| ActionList      | Action lists           | 1 component      | Clickable list items                       |
+| NavList         | Navigation lists       | 1 component      | Router integration                         |
+| ListItem        | List item details      | 6 components     | Rich content, metadata                     |
+| Select          | Dropdown selection     | 3 components     | Options, grouping, search                  |
+| Button          | Basic buttons          | 1 component      | Actions, forms, navigation                 |
+| IconButton      | Icon buttons           | 1 component      | Compact actions, toolbars                  |
+| FabButton       | Floating action        | 1 component      | Primary actions, overlays                  |
+| MiniFabButton   | Mini floating action   | 1 component      | Secondary actions                          |
+| ButtonToggle    | Toggle buttons         | 2 components     | State selection, filters                   |
+| Card            | Content cards          | 1 component      | Content grouping, elevation                |
+| Checkbox        | Checkboxes             | 1 component      | Boolean selection, forms                   |
+| Radio           | Radio buttons          | 2 components     | Single selection, groups                   |
+| Input           | Text inputs            | 1 component      | Data entry, validation                     |
+| SlideToggle     | Toggle switches        | 1 component      | Boolean settings, preferences              |
+| Slider          | Range sliders          | 1 component      | Numeric input, ranges                      |
+| ProgressBar     | Progress indicators    | 1 component      | Loading states, completion                 |
+| ProgressSpinner | Loading spinners       | 1 component      | Async operations, loading                  |
+| Icon            | Icons                  | 1 component      | Visual indicators, decoration              |
+| Badge           | Badges                 | 1 component      | Notifications, counts                      |
+| Divider         | Dividers               | 1 component      | Content separation, layout                 |
+| Toolbar         | Toolbars               | 1 component      | App bars, action containers                |
+| Tooltip         | Tooltips               | 1 component      | Help text, information                     |
+| Menu            | Menus                  | 1 component      | Context actions, navigation                |
+| Dialog          | Dialogs                | 1 component      | Modal interactions, forms                  |
+| BottomSheet     | Bottom sheets          | 1 component      | Mobile interactions, actions               |
+| SnackBar        | Snack bars             | 1 component      | Notifications, feedback                    |
+| Sidenav         | Side navigation        | 2 components     | App navigation, responsive                 |
+| Drawer          | Drawers                | 2 components     | Temporary panels, content                  |
+| GridList        | Grid lists             | 2 components     | Grid layouts, image galleries              |
+| Chips           | Chips                  | 3 components     | Tags, filters, input                       |
+| Autocomplete    | Autocomplete           | 1 component      | Search, suggestions                        |
+| Datepicker      | Date pickers           | 3 components     | Date selection, calendars                  |
+| Timepicker      | Time pickers           | 1 component      | Time selection                             |
+| Paginator       | Pagination             | 1 component      | Data navigation, tables                    |
+| Sort            | Sorting                | 1 component      | Data ordering, tables                      |
+| Tree            | Tree views             | 1 component      | Hierarchical data, navigation              |
 
-**For Custom Components**: When custom components are added to `component-groups.json`, refer to:
-
-- Individual component documentation files in the `design-system-docs` folder
-- This reference document for component categorization and relationships
-- Integration patterns with existing Angular Material components
-
-### Getting Started
-
-1. **Use Angular Material First**: Check if Angular Material provides the component you need
-2. **Review Available Components**: Examine the categorized component lists above
-3. **Follow Integration Patterns**: Use the recommended patterns for combining components
-4. **Maintain Consistency**: Ensure all implementations follow Material Design principles
-5. **Document Custom Work**: If creating custom components, add them to the design system following the documentation structure
-
----
-
-**Note**: This documentation template is ready to be populated with actual component groups data. Once the `component-groups.json` file contains component data, this documentation should be updated to reflect the specific components available in the design system.
-
-## Future Updates
-
-When component groups data becomes available:
-
-1. Replace the placeholder sections with actual component listings
-2. Categorize components based on their functionality and description
-3. Add specific usage examples for custom components
-4. Include component dependencies and integration patterns
-5. Update the documentation structure to reflect the actual component architecture
-
-For questions about specific component implementation or usage, refer to the individual component documentation files in the `design-system-docs` folder when they become available.
+This design system provides a comprehensive set of 43 component groups with over 100 individual components, covering all aspects of modern web application development with Angular Material UI.

@@ -1,0 +1,451 @@
+# SelectionList Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate selection list components with required interdependency
+
+### When to Use
+
+The SelectionList component group is ideal for scenarios where users need to select one or multiple items from a predefined list of options. Use this component group when you need:
+
+- **Multi-selection interfaces** - Allow users to select multiple items from a list with checkboxes
+- **Single-selection lists** - Provide radio button-style selection with visual feedback
+- **Form integration** - Connect selection state to Angular reactive forms and template-driven forms
+- **Accessible selection** - Ensure keyboard navigation and screen reader support for selection interfaces
+- **Searchable/filterable lists** - Provide a base for implementing search and filter functionality over selectable items
+- **Settings and preferences** - Allow users to choose multiple options in configuration screens
+- **Data filtering interfaces** - Enable users to select filter criteria from lists of available options
+
+### Architecture
+
+**Critical/Strong Coupling**: This component group requires a strict parent-child relationship where MatListOption components must be used within a MatSelectionList container. The coupling ensures proper selection state management, keyboard navigation, and form control integration.
+
+### Component Interdependencies
+
+The SelectionList component group exhibits critical coupling with the following relationships:
+
+- **Required parent-child relationship**: MatListOption components must be direct children of MatSelectionList
+- **Shared selection context**: MatSelectionList provides selection state management and coordinates the behavior of all child options
+- **Form control integration**: MatSelectionList implements ControlValueAccessor to integrate with Angular forms
+- **Keyboard navigation coordination**: MatSelectionList manages focus and keyboard navigation across all options
+- **Event propagation**: Selection changes in MatListOption components bubble up to MatSelectionList for centralized handling
+
+## Components
+
+### MatSelectionList {Primary Component}
+
+The main container component that manages a collection of selectable list options with support for single or multiple selection modes.
+
+**Purpose:** Provides the foundation for selectable lists with built-in form integration, accessibility features, and selection state management.
+
+**Interface:**
+
+```typescript
+interface MatSelectionListProps {
+  // Selection behavior
+  multiple: boolean; // Whether multiple options can be selected (default: true)
+  hideSingleSelectionIndicator: boolean; // Hide radio indicators in single-selection mode
+
+  // Styling and theming
+  color: ThemePalette; // Theme color for checkboxes/radios ('primary' | 'accent' | 'warn')
+
+  // State management
+  disabled: boolean; // Whether the entire list is disabled
+  disableRipple: boolean; // Whether ripple effects are disabled
+
+  // Form integration
+  compareWith: (o1: any, o2: any) => boolean; // Function for comparing option values
+
+  // Events
+  selectionChange: EventEmitter<MatSelectionListChange>; // Emitted when selection changes
+}
+
+interface MatSelectionListChange {
+  source: MatSelectionList; // Reference to the selection list
+  options: MatListOption[]; // Array of options that changed
+}
+```
+
+**Dependencies:** Requires MatListOption components as direct children
+**Provides:** Selection state management, form control integration, keyboard navigation, and accessibility features to child options
+
+**Usage Example:**
+
+```typescript
+import { MatSelectionList, MatListOption } from "@angular/material/list";
+
+@Component({
+  template: `
+    <mat-selection-list
+      [multiple]="true"
+      color="primary"
+      (selectionChange)="onSelectionChange($event)"
+    >
+      <!-- Required MatListOption children -->
+    </mat-selection-list>
+  `,
+})
+export class SelectionExample {
+  onSelectionChange(event: MatSelectionListChange) {
+    console.log("Selection changed:", event.options);
+  }
+}
+```
+
+### MatListOption {Dependent Component}
+
+Individual selectable items that must be used within a MatSelectionList container.
+
+**Purpose:** Represents individual selectable items with support for custom content, selection indicators, and accessibility features.
+
+**Interface:**
+
+```typescript
+interface MatListOptionProps {
+  // Content and behavior
+  value: any; // The value associated with this option
+  selected: boolean; // Whether this option is currently selected
+  disabled: boolean; // Whether this option is disabled
+
+  // Visual configuration
+  togglePosition: MatListOptionTogglePosition; // Position of checkbox/radio ('before' | 'after')
+  color: ThemePalette; // Theme color for the selection indicator
+
+  // Accessibility
+  lines: number | string | null; // Number of lines this option should reserve
+  disableRipple: boolean; // Whether ripple effects are disabled
+
+  // Events
+  selectedChange: EventEmitter<boolean>; // Emitted when selection state changes
+}
+
+type MatListOptionTogglePosition = "before" | "after";
+```
+
+**Context Dependencies:**
+
+- Must be used within MatSelectionList to access selection state management
+- Inherits selection behavior (single/multiple) from parent MatSelectionList
+- Receives keyboard navigation coordination from parent component
+
+**Parent Requirements:** Must be a direct child of MatSelectionList for proper functionality
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatSelectionList
+<mat-selection-list>
+  <mat-list-option
+    [value]="option.id"
+    [selected]="option.selected"
+    (selectedChange)="onOptionChange($event)">
+    {{ option.label }}
+  </mat-list-option>
+</mat-selection-list>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatSelectionList, MatListOption } from "@angular/material/list";
+
+// Minimal required structure for multiple selection
+@Component({
+  template: `
+    <mat-selection-list>
+      <mat-list-option value="option1">Option 1</mat-list-option>
+      <mat-list-option value="option2">Option 2</mat-list-option>
+      <mat-list-option value="option3">Option 3</mat-list-option>
+    </mat-selection-list>
+  `,
+})
+export class BasicSelectionExample {}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex usage with all features and form integration
+@Component({
+  template: `
+    <form [formGroup]="selectionForm">
+      <mat-selection-list
+        formControlName="selectedItems"
+        [multiple]="allowMultiple"
+        [hideSingleSelectionIndicator]="hideIndicators"
+        color="primary"
+        [compareWith]="compareOptions"
+        (selectionChange)="onSelectionChange($event)"
+      >
+        <mat-list-option
+          *ngFor="let option of availableOptions; trackBy: trackByValue"
+          [value]="option.value"
+          [disabled]="option.disabled"
+          togglePosition="before"
+          [color]="option.color"
+        >
+          <mat-icon matListItemIcon>{{ option.icon }}</mat-icon>
+          <div matListItemTitle>{{ option.title }}</div>
+          <div matListItemLine>{{ option.description }}</div>
+          <mat-icon matListItemMeta *ngIf="option.hasMetadata">info</mat-icon>
+        </mat-list-option>
+      </mat-selection-list>
+    </form>
+  `,
+})
+export class AdvancedSelectionExample {
+  selectionForm = this.fb.group({
+    selectedItems: [[]],
+  });
+
+  allowMultiple = true;
+  hideIndicators = false;
+
+  availableOptions = [
+    {
+      value: 1,
+      title: "Option 1",
+      description: "First option",
+      icon: "star",
+      disabled: false,
+    },
+    {
+      value: 2,
+      title: "Option 2",
+      description: "Second option",
+      icon: "favorite",
+      disabled: false,
+    },
+    {
+      value: 3,
+      title: "Option 3",
+      description: "Third option",
+      icon: "bookmark",
+      disabled: true,
+    },
+  ];
+
+  compareOptions(o1: any, o2: any): boolean {
+    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  }
+
+  onSelectionChange(event: MatSelectionListChange): void {
+    console.log(
+      "Selected options:",
+      event.options.map((opt) => opt.value),
+    );
+  }
+
+  trackByValue(index: number, option: any): any {
+    return option.value;
+  }
+}
+```
+
+### Common Variations
+
+```typescript
+// Single selection mode with radio buttons
+@Component({
+  template: `
+    <mat-selection-list [multiple]="false" color="accent">
+      <mat-list-option value="small">Small</mat-list-option>
+      <mat-list-option value="medium">Medium</mat-list-option>
+      <mat-list-option value="large">Large</mat-list-option>
+    </mat-selection-list>
+  `,
+})
+export class SingleSelectionExample {}
+
+// Template-driven form integration
+@Component({
+  template: `
+    <mat-selection-list [(ngModel)]="selectedValues" name="preferences">
+      <mat-list-option value="notifications"
+        >Enable Notifications</mat-list-option
+      >
+      <mat-list-option value="newsletter"
+        >Subscribe to Newsletter</mat-list-option
+      >
+      <mat-list-option value="updates">Receive Updates</mat-list-option>
+    </mat-selection-list>
+  `,
+})
+export class TemplateFormExample {
+  selectedValues: string[] = [];
+}
+
+// Programmatic selection control
+@Component({
+  template: `
+    <div>
+      <button (click)="selectAll()">Select All</button>
+      <button (click)="deselectAll()">Deselect All</button>
+    </div>
+
+    <mat-selection-list #selectionList>
+      <mat-list-option value="item1">Item 1</mat-list-option>
+      <mat-list-option value="item2">Item 2</mat-list-option>
+      <mat-list-option value="item3">Item 3</mat-list-option>
+    </mat-selection-list>
+  `,
+})
+export class ProgrammaticSelectionExample {
+  @ViewChild("selectionList") selectionList!: MatSelectionList;
+
+  selectAll(): void {
+    this.selectionList.selectAll();
+  }
+
+  deselectAll(): void {
+    this.selectionList.deselectAll();
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **User Interaction**: User clicks on a MatListOption or uses keyboard navigation
+2. **Option State Change**: MatListOption updates its internal selected state
+3. **Parent Notification**: MatListOption notifies MatSelectionList of the change
+4. **Selection Coordination**: MatSelectionList updates its selection model and coordinates with other options
+5. **Form Integration**: If connected to a form control, MatSelectionList reports the new value
+6. **Event Emission**: MatSelectionList emits selectionChange event with affected options
+
+### Context Sharing
+
+- **Selection Model**: MatSelectionList maintains a SelectionModel that tracks all selected options
+- **Configuration Context**: Selection behavior (single/multiple), color theme, and accessibility settings are shared from parent to children
+- **Form Control Integration**: MatSelectionList implements ControlValueAccessor to bridge with Angular forms
+- **Keyboard Navigation**: MatSelectionList provides a FocusKeyManager for coordinated keyboard navigation
+
+### Event Handling
+
+- **Selection Events**: MatListOption emits selectedChange events that bubble up to MatSelectionList
+- **Form Events**: MatSelectionList coordinates with Angular forms through ControlValueAccessor callbacks
+- **Keyboard Events**: MatSelectionList handles keyboard navigation and delegates to appropriate options
+- **Focus Events**: Focus management is coordinated at the list level for proper accessibility
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always use MatListOption within MatSelectionList** - The components are designed to work together and cannot function properly in isolation
+- **Provide meaningful values** - Assign distinct, meaningful values to each option for proper form integration and selection tracking
+- **Consider selection mode** - Use `multiple="false"` for radio-button-style selection when only one option should be selectable
+- **Implement compareWith for object values** - When using complex objects as option values, provide a compareWith function for accurate comparison
+
+### Accessibility
+
+- **ARIA relationships** - MatSelectionList automatically manages ARIA attributes and relationships between the list and its options
+- **Keyboard navigation** - Built-in support for arrow keys, space bar, and Enter key navigation following ARIA best practices
+- **Screen reader support** - Selection state changes are automatically announced to assistive technologies
+- **Focus management** - Proper focus restoration and keyboard trap behavior when navigating between options
+
+### Performance
+
+- **Use trackBy functions** - When rendering options with \*ngFor, provide trackBy functions to optimize change detection
+- **Minimize option re-creation** - Keep option references stable to prevent unnecessary DOM updates
+- **Batch selection changes** - Use programmatic methods like selectAll() and deselectAll() for better performance with large lists
+- **Consider virtual scrolling** - For very large lists, consider implementing virtual scrolling with CDK Virtual Scrolling
+
+## Common Patterns
+
+### Pattern 1: Settings and Preferences
+
+```typescript
+// User preferences with grouped options and form validation
+@Component({
+  template: `
+    <form [formGroup]="preferencesForm">
+      <h3>Notification Preferences</h3>
+      <mat-selection-list formControlName="notifications" color="primary">
+        <mat-list-option value="email">
+          <mat-icon matListItemIcon>email</mat-icon>
+          Email Notifications
+          <div matListItemLine>Receive updates via email</div>
+        </mat-list-option>
+        <mat-list-option value="sms">
+          <mat-icon matListItemIcon>sms</mat-icon>
+          SMS Notifications
+          <div matListItemLine>Receive text message alerts</div>
+        </mat-list-option>
+        <mat-list-option value="push">
+          <mat-icon matListItemIcon>notifications</mat-icon>
+          Push Notifications
+          <div matListItemLine>Browser and mobile push notifications</div>
+        </mat-list-option>
+      </mat-selection-list>
+
+      <mat-error
+        *ngIf="preferencesForm.get('notifications')?.errors?.['required']"
+      >
+        Please select at least one notification method
+      </mat-error>
+    </form>
+  `,
+})
+export class PreferencesExample {
+  preferencesForm = this.fb.group({
+    notifications: [[], Validators.required],
+  });
+}
+```
+
+### Pattern 2: Data Filtering Interface
+
+```typescript
+// Multi-criteria filtering with search and category selection
+@Component({
+  template: `
+    <div class="filter-container">
+      <mat-form-field>
+        <input
+          matInput
+          placeholder="Search categories"
+          [(ngModel)]="searchTerm"
+        />
+      </mat-form-field>
+
+      <mat-selection-list
+        [(ngModel)]="selectedCategories"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-list-option
+          *ngFor="let category of filteredCategories"
+          [value]="category.id"
+        >
+          {{ category.name }}
+          <span matListItemMeta>({{ category.count }})</span>
+        </mat-list-option>
+      </mat-selection-list>
+    </div>
+  `,
+})
+export class FilterExample {
+  categories = [
+    { id: "electronics", name: "Electronics", count: 156 },
+    { id: "clothing", name: "Clothing", count: 89 },
+    { id: "home", name: "Home & Garden", count: 234 },
+  ];
+
+  searchTerm = "";
+  selectedCategories: string[] = [];
+
+  get filteredCategories() {
+    return this.categories.filter((cat) =>
+      cat.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
+    );
+  }
+
+  applyFilters(): void {
+    // Apply filtering logic based on selected categories
+  }
+}
+```

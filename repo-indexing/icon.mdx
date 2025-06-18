@@ -1,0 +1,855 @@
+# Icon Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate icon functionality
+
+### When to Use
+
+Icon components are essential visual elements that enhance user interface communication and provide intuitive visual cues throughout your application. Use them when you need to:
+
+- **Visual communication** - Convey meaning and actions through universally recognized symbols and graphics
+- **Space-efficient UI** - Replace text labels with compact visual representations in toolbars, buttons, and navigation
+- **User guidance** - Provide visual cues for actions, status, and navigation to improve user experience
+- **Brand consistency** - Display logos, brand icons, and custom graphics that align with your design system
+- **Interactive elements** - Enhance buttons, links, and form controls with meaningful visual indicators
+- **Status indication** - Show loading states, success/error states, and progress indicators
+- **Navigation aids** - Create visual hierarchy and wayfinding through menu icons, arrows, and directional indicators
+- **Content categorization** - Use icons to represent different content types, file formats, or data categories
+- **Accessibility enhancement** - Provide visual support for users while maintaining screen reader compatibility
+- **International applications** - Use universal symbols that transcend language barriers
+- **Dashboard elements** - Create data visualizations and metric displays with appropriate iconography
+
+### Architecture
+
+**No Coupling**: The Icon component is a standalone component that can be used independently throughout your application. It provides flexible icon display capabilities from multiple sources including SVG icons, font-based icon sets, and custom graphics without requiring any parent or child components.
+
+### Component Interdependencies
+
+The Icon component demonstrates no coupling as it is a self-contained component that:
+
+- **Independent usage**: Can be placed anywhere in your application without dependencies on other components
+- **Flexible integration**: Works seamlessly with buttons, form fields, menus, and other Material Design components
+- **Multiple icon sources**: Supports both SVG icons and font-based icon sets for maximum flexibility
+- **Theme integration**: Automatically inherits theming and color palettes from Angular Material's theming system
+
+## Components
+
+### MatIcon {Standalone Component}
+
+A versatile component for displaying icons from various sources including SVG icon sets, font-based icon libraries, and inline SVG graphics with full Material Design theming and accessibility support.
+
+**Purpose:** Provides a consistent, accessible way to display icons throughout your application with support for multiple icon sources, theming integration, and responsive sizing while maintaining performance and accessibility standards.
+
+**Interface:**
+
+```typescript
+interface MatIconProps {
+  // Icon Source Configuration
+  svgIcon?: string; // Name of SVG icon from registered icon sets (e.g., 'home', 'menu')
+  fontIcon?: string; // Name of icon from font-based icon set (e.g., 'material-icons')
+  fontSet?: string; // Font set to use for font-based icons (default: 'material-icons')
+
+  // Styling and Appearance
+  color?: ThemePalette; // Theme color palette ('primary', 'accent', 'warn')
+  inline?: boolean; // Whether to display icon inline with text (default: false)
+
+  // Accessibility
+  ariaHidden?: boolean; // Hide from screen readers when decorative (default: true)
+  ariaLabel?: string; // Accessible label for screen readers
+
+  // Standard Attributes
+  class?: string; // Additional CSS classes
+  style?: React.CSSProperties; // Inline styles
+  id?: string; // Unique identifier
+
+  // Events
+  onClick?: (event: MouseEvent) => void; // Click event handler
+}
+
+interface IconRegistry {
+  // Icon registration methods for custom SVG icons
+  addSvgIcon(iconName: string, url: SafeResourceUrl): IconRegistry;
+  addSvgIconSet(url: SafeResourceUrl): IconRegistry;
+  addSvgIconInNamespace(
+    namespace: string,
+    iconName: string,
+    url: SafeResourceUrl,
+  ): IconRegistry;
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatIconModule } from '@angular/material/icon';
+
+// Basic material design icons
+function BasicIconExample() {
+  return (
+    <div class="icon-examples">
+      {/* Font-based Material Icons */}
+      <mat-icon>home</mat-icon>
+      <mat-icon>favorite</mat-icon>
+      <mat-icon>settings</mat-icon>
+
+      {/* With theme colors */}
+      <mat-icon color="primary">star</mat-icon>
+      <mat-icon color="accent">bookmark</mat-icon>
+      <mat-icon color="warn">warning</mat-icon>
+    </div>
+  );
+}
+
+// SVG icons from registered icon sets
+function SvgIconExample() {
+  return (
+    <div class="svg-icons">
+      <mat-icon svgIcon="custom-logo"></mat-icon>
+      <mat-icon svgIcon="company:brand-icon"></mat-icon>
+    </div>
+  );
+}
+
+// Interactive icons with click handlers
+function InteractiveIconExample() {
+  return (
+    <div class="interactive-icons">
+      <mat-icon
+        (click)="toggleFavorite()"
+        [class.favorited]="isFavorited"
+        role="button"
+        tabindex="0"
+        aria-label="Toggle favorite">
+        {{isFavorited ? 'favorite' : 'favorite_border'}}
+      </mat-icon>
+
+      <mat-icon
+        (click)="openMenu()"
+        role="button"
+        tabindex="0"
+        aria-label="Open menu">
+        menu
+      </mat-icon>
+    </div>
+  );
+}
+
+// Inline icons with text
+function InlineIconExample() {
+  return (
+    <p class="text-with-icons">
+      <mat-icon inline>info</mat-icon>
+      Important information with an inline icon
+    </p>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Material Design Icons
+
+```tsx
+import { MatIconModule } from "@angular/material/icon";
+
+// Most common usage with Material Design icon font
+function MaterialIconsExample() {
+  return (
+    <div class="icon-grid">
+      {/* Navigation icons */}
+      <mat-icon>menu</mat-icon>
+      <mat-icon>home</mat-icon>
+      <mat-icon>search</mat-icon>
+      <mat-icon>arrow_back</mat-icon>
+
+      {/* Action icons */}
+      <mat-icon>add</mat-icon>
+      <mat-icon>edit</mat-icon>
+      <mat-icon>delete</mat-icon>
+      <mat-icon>share</mat-icon>
+
+      {/* Status icons */}
+      <mat-icon>check_circle</mat-icon>
+      <mat-icon>error</mat-icon>
+      <mat-icon>warning</mat-icon>
+      <mat-icon>info</mat-icon>
+    </div>
+  );
+}
+```
+
+### Custom SVG Icon Integration
+
+```tsx
+import { MatIconRegistry } from "@angular/material/icon";
+import { DomSanitizer } from "@angular/platform-browser";
+
+// Register custom SVG icons
+@Component({
+  template: `
+    <div class="custom-icons">
+      <mat-icon svgIcon="custom-logo"></mat-icon>
+      <mat-icon svgIcon="company:analytics-chart"></mat-icon>
+      <mat-icon svgIcon="company:user-profile"></mat-icon>
+    </div>
+  `,
+})
+export class CustomIconExample {
+  constructor(
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer,
+  ) {
+    // Register individual SVG icons
+    this.iconRegistry.addSvgIcon(
+      "custom-logo",
+      this.sanitizer.bypassSecurityTrustResourceUrl("/assets/icons/logo.svg"),
+    );
+
+    // Register namespaced icon set
+    this.iconRegistry.addSvgIconSetInNamespace(
+      "company",
+      this.sanitizer.bypassSecurityTrustResourceUrl(
+        "/assets/icons/company-icons.svg",
+      ),
+    );
+  }
+}
+```
+
+### Themed Icon Variations
+
+```tsx
+// Icons with different theme colors and sizes
+@Component({
+  template: `
+    <div class="themed-icons">
+      {/* Primary theme color */}
+      <mat-icon color="primary">star</mat-icon>
+      <mat-icon color="primary">favorite</mat-icon>
+      
+      {/* Accent theme color */}
+      <mat-icon color="accent">bookmark</mat-icon>
+      <mat-icon color="accent">notifications</mat-icon>
+      
+      {/* Warning theme color */}
+      <mat-icon color="warn">warning</mat-icon>
+      <mat-icon color="warn">error</mat-icon>
+      
+      {/* Custom colors via CSS */}
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <mat-icon class="info-icon">info</mat-icon>
+    </div>
+  `,
+  styles: [
+    `
+      .success-icon {
+        color: #4caf50;
+      }
+
+      .info-icon {
+        color: #2196f3;
+      }
+
+      .themed-icons mat-icon {
+        margin: 8px;
+        font-size: 24px;
+      }
+    `,
+  ],
+})
+export class ThemedIconExample {}
+```
+
+## Common Patterns
+
+### Pattern 1: Button Integration
+
+```tsx
+// Icons commonly used within Material Design buttons
+@Component({
+  template: `
+    <div class="button-icons">
+      {/* Icon buttons */}
+      <button mat-icon-button>
+        <mat-icon>favorite</mat-icon>
+      </button>
+      
+      <button mat-icon-button color="primary">
+        <mat-icon>bookmark</mat-icon>
+      </button>
+      
+      {/* Buttons with icons and text */}
+      <button mat-raised-button color="primary">
+        <mat-icon>add</mat-icon>
+        Create New
+      </button>
+      
+      <button mat-stroked-button>
+        <mat-icon>download</mat-icon>
+        Download
+      </button>
+      
+      {/* FAB buttons with icons */}
+      <button mat-fab color="accent">
+        <mat-icon>edit</mat-icon>
+      </button>
+      
+      <button mat-mini-fab>
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .button-icons {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .button-icons button mat-icon {
+        margin-right: 8px;
+      }
+
+      .button-icons .mat-icon-button mat-icon,
+      .button-icons .mat-fab mat-icon,
+      .button-icons .mat-mini-fab mat-icon {
+        margin: 0;
+      }
+    `,
+  ],
+})
+export class ButtonIconExample {}
+```
+
+### Pattern 2: List and Menu Integration
+
+```tsx
+// Icons in lists, menus, and navigation
+@Component({
+  template: `
+    <div class="navigation-icons">
+      {/* Navigation list with icons */}
+      <mat-nav-list>
+        <a mat-list-item href="/dashboard">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle>Dashboard</span>
+        </a>
+        <a mat-list-item href="/profile">
+          <mat-icon matListItemIcon>person</mat-icon>
+          <span matListItemTitle>Profile</span>
+        </a>
+        <a mat-list-item href="/settings">
+          <mat-icon matListItemIcon>settings</mat-icon>
+          <span matListItemTitle>Settings</span>
+        </a>
+      </mat-nav-list>
+      
+      {/* Menu with icons */}
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item>
+          <mat-icon>account_circle</mat-icon>
+          <span>Profile</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item>
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </mat-menu>
+    </div>
+  `,
+})
+export class NavigationIconExample {}
+```
+
+### Pattern 3: Status and Feedback Icons
+
+```tsx
+// Icons for displaying status, feedback, and state
+@Component({
+  template: `
+    <div class="status-icons">
+      {/* Success states */}
+      <div class="status-item success">
+        <mat-icon>check_circle</mat-icon>
+        <span>Operation completed successfully</span>
+      </div>
+      
+      {/* Error states */}
+      <div class="status-item error">
+        <mat-icon>error</mat-icon>
+        <span>An error occurred</span>
+      </div>
+      
+      {/* Warning states */}
+      <div class="status-item warning">
+        <mat-icon>warning</mat-icon>
+        <span>Please review your input</span>
+      </div>
+      
+      {/* Information states */}
+      <div class="status-item info">
+        <mat-icon>info</mat-icon>
+        <span>Additional information available</span>
+      </div>
+      
+      {/* Loading states */}
+      <div class="status-item loading">
+        <mat-icon class="spinning">refresh</mat-icon>
+        <span>Loading...</span>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .status-icons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 4px;
+      }
+
+      .status-item.success {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .status-item.error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+
+      .status-item.warning {
+        background-color: #fff8e1;
+        color: #f57c00;
+      }
+
+      .status-item.info {
+        background-color: #e3f2fd;
+        color: #1565c0;
+      }
+
+      .status-item.loading {
+        background-color: #f5f5f5;
+        color: #757575;
+      }
+
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    `,
+  ],
+})
+export class StatusIconExample {}
+```
+
+### Pattern 4: Form and Input Integration
+
+```tsx
+// Icons in form fields and input elements
+@Component({
+  template: `
+    <div class="form-icons">
+      {/* Icons as form field prefixes */}
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email">
+      </mat-form-field>
+      
+      <mat-form-field>
+        <mat-label>Phone</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput type="tel" formControlName="phone">
+      </mat-form-field>
+      
+      {/* Icons as form field suffixes */}
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+      
+      <mat-form-field>
+        <mat-label>Search</mat-label>
+        <input matInput formControlName="search">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      
+      {/* Validation state icons */}
+      <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+        <mat-icon matSuffix [color]="usernameControl.valid ? 'primary' : 'warn'">
+          {{usernameControl.valid ? 'check_circle' : 'error'}}
+        </mat-icon>
+      </mat-form-field>
+    </div>
+  `,
+  styles: [
+    `
+      .form-icons {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+      }
+
+      .form-icons mat-form-field {
+        width: 100%;
+      }
+    `,
+  ],
+})
+export class FormIconExample {
+  hidePassword = true;
+
+  get usernameControl() {
+    return this.form.get("username");
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose meaningful icons**: Select icons that clearly represent their intended function or content to avoid user confusion
+- **Maintain consistency**: Use the same icon for the same action throughout your application to build user familiarity
+- **Consider cultural context**: Be aware that icon meanings can vary across cultures and regions
+- **Provide alternative text**: Always include appropriate labels or tooltips for accessibility when icons are interactive
+- **Use appropriate sizing**: Ensure icons are large enough to be easily recognizable but not overwhelming in the interface
+
+### Accessibility
+
+- **Screen reader support**: Use `aria-label` for interactive icons and `aria-hidden="true"` for purely decorative icons
+- **Keyboard navigation**: Ensure interactive icons are accessible via keyboard navigation with proper focus management
+- **Color contrast**: Maintain sufficient color contrast between icons and their background for users with visual impairments
+- **Alternative text**: Provide text alternatives or labels for icons that convey important information
+- **Focus indicators**: Ensure interactive icons have clear focus indicators for keyboard users
+
+### Performance
+
+- **Icon optimization**: Use SVG icons when possible for scalability and smaller file sizes compared to raster images
+- **Icon fonts**: Consider using icon fonts for common icons to reduce HTTP requests and improve loading performance
+- **Lazy loading**: For applications with many custom SVG icons, consider lazy loading icon sets to improve initial load time
+- **Caching strategy**: Implement proper caching for custom icon assets to reduce repeated downloads
+- **Bundle optimization**: Only include the icon sets you actually use to minimize bundle size
+
+### Theming and Customization
+
+- **Theme integration**: Use Angular Material's color palette properties (`primary`, `accent`, `warn`) for consistent theming
+- **Custom colors**: Define custom CSS classes for specific icon colors that align with your brand guidelines
+- **Size consistency**: Establish a consistent icon sizing scale and use CSS classes to maintain uniformity
+- **Icon registration**: Register custom SVG icons once during application initialization for optimal performance
+- **Responsive behavior**: Ensure icons scale appropriately across different device sizes and screen densities
+
+## Common Use Cases
+
+### Dashboard and Analytics
+
+```tsx
+// Icons for dashboard metrics and data visualization
+@Component({
+  template: `
+    <div class="dashboard-section">
+      <div class="metric-card">
+        <mat-icon color="primary" class="large-icon">trending_up</mat-icon>
+        <div class="metric-info">
+          <h3>Revenue Growth</h3>
+          <p class="metric-value">+15.3%</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <mat-icon color="accent" class="large-icon">people</mat-icon>
+        <div class="metric-info">
+          <h3>Active Users</h3>
+          <p class="metric-value">12,450</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <mat-icon color="warn" class="large-icon">bug_report</mat-icon>
+        <div class="metric-info">
+          <h3>Issues</h3>
+          <p class="metric-value">23</p>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .dashboard-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .metric-card {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .large-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-right: 16px;
+      }
+
+      .metric-info h3 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .metric-value {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+      }
+    `,
+  ],
+})
+export class DashboardIconExample {}
+```
+
+### E-commerce and Shopping
+
+```tsx
+// Icons for shopping and e-commerce interfaces
+@Component({
+  template: `
+    <div class="shopping-interface">
+      {/* Product actions */}
+      <div class="product-actions">
+        <button mat-icon-button (click)="addToCart()" aria-label="Add to cart">
+          <mat-icon>add_shopping_cart</mat-icon>
+        </button>
+        <button mat-icon-button (click)="addToWishlist()" aria-label="Add to wishlist">
+          <mat-icon [class.favorited]="isWishlisted">favorite</mat-icon>
+        </button>
+        <button mat-icon-button (click)="compareProduct()" aria-label="Compare product">
+          <mat-icon>compare_arrows</mat-icon>
+        </button>
+      </div>
+      
+      {/* Shopping cart status */}
+      <div class="cart-status">
+        <mat-icon>shopping_cart</mat-icon>
+        <span class="cart-count">{{cartItemCount}}</span>
+      </div>
+      
+      {/* Payment and security icons */}
+      <div class="payment-icons">
+        <mat-icon>payment</mat-icon>
+        <mat-icon>security</mat-icon>
+        <mat-icon>local_shipping</mat-icon>
+        <mat-icon>assignment_return</mat-icon>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .shopping-interface {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .product-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .favorited {
+        color: #f44336;
+      }
+
+      .cart-status {
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+
+      .cart-count {
+        background: #f44336;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        position: absolute;
+        top: -8px;
+        right: -8px;
+      }
+
+      .payment-icons {
+        display: flex;
+        gap: 16px;
+        opacity: 0.7;
+      }
+    `,
+  ],
+})
+export class ShoppingIconExample {
+  cartItemCount = 3;
+  isWishlisted = false;
+
+  addToCart(): void {
+    this.cartItemCount++;
+  }
+
+  addToWishlist(): void {
+    this.isWishlisted = !this.isWishlisted;
+  }
+
+  compareProduct(): void {
+    // Add to comparison
+  }
+}
+```
+
+### Content Management and Editorial
+
+```tsx
+// Icons for content creation and management
+@Component({
+  template: `
+    <div class="content-management">
+      {/* Editor toolbar */}
+      <div class="editor-toolbar">
+        <button mat-icon-button title="Bold">
+          <mat-icon>format_bold</mat-icon>
+        </button>
+        <button mat-icon-button title="Italic">
+          <mat-icon>format_italic</mat-icon>
+        </button>
+        <button mat-icon-button title="Underline">
+          <mat-icon>format_underlined</mat-icon>
+        </button>
+        <mat-divider vertical></mat-divider>
+        <button mat-icon-button title="Insert link">
+          <mat-icon>insert_link</mat-icon>
+        </button>
+        <button mat-icon-button title="Insert image">
+          <mat-icon>image</mat-icon>
+        </button>
+        <button mat-icon-button title="Insert table">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </div>
+      
+      {/* Content status indicators */}
+      <div class="content-status">
+        <div class="status-item">
+          <mat-icon color="primary">edit</mat-icon>
+          <span>Draft</span>
+        </div>
+        <div class="status-item">
+          <mat-icon color="accent">schedule</mat-icon>
+          <span>Scheduled</span>
+        </div>
+        <div class="status-item">
+          <mat-icon color="primary">publish</mat-icon>
+          <span>Published</span>
+        </div>
+        <div class="status-item">
+          <mat-icon>archive</mat-icon>
+          <span>Archived</span>
+        </div>
+      </div>
+      
+      {/* File type indicators */}
+      <div class="file-types">
+        <mat-icon>description</mat-icon> {/* Document */}
+        <mat-icon>image</mat-icon> {/* Image */}
+        <mat-icon>videocam</mat-icon> {/* Video */}
+        <mat-icon>audiotrack</mat-icon> {/* Audio */}
+        <mat-icon>attachment</mat-icon> {/* Attachment */}
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .content-management {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .editor-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+
+      .content-status {
+        display: flex;
+        gap: 16px;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 16px;
+        background: #f5f5f5;
+        font-size: 14px;
+      }
+
+      .file-types {
+        display: flex;
+        gap: 16px;
+        opacity: 0.7;
+      }
+
+      .file-types mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    `,
+  ],
+})
+export class ContentManagementIconExample {}
+```

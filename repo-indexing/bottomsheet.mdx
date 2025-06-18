@@ -1,0 +1,1452 @@
+# BottomSheet Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate bottom sheet functionality
+
+### When to Use
+
+BottomSheet components are ideal for mobile-first interactions that provide contextual actions and content without full page navigation. Use them when you need to:
+
+- **Mobile action menus** - Present contextual actions, sharing options, or quick settings that slide up from the bottom of the screen
+- **Confirmation dialogs on mobile** - Display mobile-friendly confirmation prompts that feel natural on touch devices
+- **Filter and sort interfaces** - Provide filtering, sorting, or search options that can be easily accessed and dismissed
+- **Quick forms** - Present simple forms for comments, feedback, or data entry without losing current page context
+- **Media controls** - Show playback controls, volume settings, or media metadata that can be partially visible or fully expanded
+- **Navigation shortcuts** - Offer quick navigation options, bookmarks, or frequently used actions in a slide-up interface
+- **Settings panels** - Display contextual settings, preferences, or configuration options relevant to current content
+- **Contact information** - Show contact details, social profiles, or communication options in an easily dismissible format
+- **Product details** - Present additional product information, specifications, or purchase options in e-commerce applications
+- **Social interactions** - Provide reaction options, sharing interfaces, or social actions that complement main content
+- **Progressive disclosure** - Reveal additional content or options gradually without overwhelming the main interface
+- **Touch-friendly alternatives** - Replace traditional dropdowns or tooltips with more accessible touch interactions
+
+### Architecture
+
+**No Coupling**: The BottomSheet component is a standalone service-driven component that operates independently. It provides a complete bottom sheet implementation through the MatBottomSheet service without requiring additional components or complex hierarchical structures.
+
+### Component Interdependencies
+
+As a standalone component, BottomSheet operates independently with:
+
+- **Service-driven architecture**: MatBottomSheet service manages bottom sheet lifecycle and configuration
+- **Template/component flexibility**: Supports both component-based and template-based content rendering
+- **Self-contained behavior**: Handles its own backdrop, animations, positioning, and responsive behavior
+- **Independent state management**: Manages internal state without dependencies on other components
+
+## Components
+
+### MatBottomSheet {Primary Component}
+
+The core service component that manages bottom sheet creation, lifecycle, and global bottom sheet state with comprehensive mobile-optimized configuration options.
+
+**Purpose:** Provides the central interface for opening, managing, and controlling mobile-friendly bottom sheets with Material Design specifications, handling overlay positioning, backdrop behavior, touch gestures, and responsive layouts.
+
+**Interface:**
+
+```typescript
+interface MatBottomSheet {
+  // Core Methods
+  open<T, D = any, R = any>(
+    component: ComponentType<T>,
+    config?: MatBottomSheetConfig<D>,
+  ): MatBottomSheetRef<T, R>;
+
+  open<T, D = any, R = any>(
+    template: TemplateRef<T>,
+    config?: MatBottomSheetConfig<D>,
+  ): MatBottomSheetRef<T, R>;
+
+  dismiss(): void;
+  _openedBottomSheetRef: MatBottomSheetRef<any> | null;
+}
+
+interface MatBottomSheetConfig<D = any> {
+  // Accessibility
+  ariaLabel?: string; // ARIA label for the bottom sheet element
+  ariaLabelledBy?: string; // ID of element that labels the bottom sheet
+  ariaDescribedBy?: string; // ID of element that describes the bottom sheet
+
+  // Auto-focus behavior
+  autoFocus?: AutoFocusTarget; // Auto-focus behavior (default: 'first-tabbable')
+  restoreFocus?: boolean; // Restore focus on close (default: true)
+
+  // Backdrop configuration
+  hasBackdrop?: boolean; // Show backdrop overlay (default: true)
+  backdropClass?: string | string[]; // Custom backdrop CSS classes
+
+  // Closing behavior
+  disableClose?: boolean; // Prevent closing via backdrop/ESC (default: false)
+  closeOnNavigation?: boolean; // Close on route change (default: true)
+
+  // Data injection
+  data?: D; // Data to inject into bottom sheet component
+
+  // Layout and positioning
+  panelClass?: string | string[]; // Custom bottom sheet panel CSS classes
+  maxWidth?: number | string; // Maximum width constraint
+  minWidth?: number | string; // Minimum width constraint
+  width?: number | string; // Bottom sheet width
+  height?: number | string; // Bottom sheet height
+  maxHeight?: number | string; // Maximum height constraint
+  minHeight?: number | string; // Minimum height constraint
+
+  // Text direction
+  direction?: Direction; // Text layout direction (ltr/rtl)
+
+  // Scroll behavior
+  scrollStrategy?: ScrollStrategy; // Scroll handling strategy
+
+  // Container positioning
+  viewContainerRef?: ViewContainerRef; // Custom view container for overlay
+}
+
+type AutoFocusTarget = "dialog" | "first-tabbable" | "first-heading" | boolean;
+type Direction = "ltr" | "rtl";
+```
+
+**Dependencies:** None (root service)
+**Provides:** Bottom sheet creation, lifecycle management, mobile-optimized interactions, and responsive behavior
+
+**Usage Example:**
+
+```typescript
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { Component, Inject } from "@angular/core";
+
+@Component({
+  template: `
+    <button mat-button (click)="openBottomSheet()">Open Bottom Sheet</button>
+  `,
+})
+export class BottomSheetTriggerComponent {
+  constructor(private bottomSheet: MatBottomSheet) {}
+
+  openBottomSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(ShareBottomSheetComponent, {
+      data: {
+        title: "Share this content",
+        url: "https://example.com/article",
+        description: "Check out this amazing article!",
+      },
+      ariaLabel: "Share options",
+      hasBackdrop: true,
+      disableClose: false,
+      autoFocus: true,
+      panelClass: ["custom-bottom-sheet", "share-bottom-sheet"],
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((result) => {
+      if (result) {
+        console.log("User selected sharing option:", result);
+      }
+    });
+  }
+}
+```
+
+### MatBottomSheetRef {Reference Component}
+
+Reference object returned by MatBottomSheet.open() that provides programmatic control over individual bottom sheet instances with mobile-specific interaction methods.
+
+**Purpose:** Enables direct communication with opened bottom sheet instances, providing methods for dismissing, updating configuration, and listening to bottom sheet lifecycle events optimized for mobile interactions.
+
+**Interface:**
+
+```typescript
+interface MatBottomSheetRef<T, R = any> {
+  // Instance control
+  dismiss(result?: R): void;
+  backdropClick(): Observable<MouseEvent>;
+  keydownEvents(): Observable<KeyboardEvent>;
+
+  // State properties
+  instance: T; // Reference to bottom sheet component instance
+  containerInstance: MatBottomSheetContainer; // Container component reference
+  disableClose: boolean; // Current close prevention state
+
+  // Lifecycle observables
+  afterDismissed(): Observable<R | undefined>;
+  afterOpened(): Observable<void>;
+}
+```
+
+**Context Dependencies:** Created and managed by MatBottomSheet service
+**Parent Requirements:** Obtained through MatBottomSheet.open() method
+
+**Usage Example:**
+
+```typescript
+@Component({
+  selector: "app-share-bottom-sheet",
+  template: `
+    <mat-nav-list>
+      <h3 mat-subheader>{{ data.title }}</h3>
+
+      <a mat-list-item (click)="share('email')">
+        <mat-icon mat-list-icon>email</mat-icon>
+        <span mat-line>Email</span>
+      </a>
+
+      <a mat-list-item (click)="share('sms')">
+        <mat-icon mat-list-icon>sms</mat-icon>
+        <span mat-line>SMS</span>
+      </a>
+
+      <a mat-list-item (click)="share('social')">
+        <mat-icon mat-list-icon>share</mat-icon>
+        <span mat-line>Social Media</span>
+      </a>
+
+      <a mat-list-item (click)="copyLink()">
+        <mat-icon mat-list-icon>link</mat-icon>
+        <span mat-line>Copy Link</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <a mat-list-item (click)="cancel()">
+        <mat-icon mat-list-icon>close</mat-icon>
+        <span mat-line>Cancel</span>
+      </a>
+    </mat-nav-list>
+  `,
+})
+export class ShareBottomSheetComponent {
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<ShareBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA)
+    public data: {
+      title: string;
+      url: string;
+      description: string;
+    },
+  ) {}
+
+  share(method: string): void {
+    this.bottomSheetRef.dismiss({
+      action: "share",
+      method: method,
+      url: this.data.url,
+    });
+  }
+
+  copyLink(): void {
+    navigator.clipboard.writeText(this.data.url);
+    this.bottomSheetRef.dismiss({
+      action: "copy",
+      url: this.data.url,
+    });
+  }
+
+  cancel(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import {
+  MatBottomSheet,
+  MatBottomSheetRef,
+} from "@angular/material/bottom-sheet";
+
+// Simple action bottom sheet
+@Component({
+  template: `
+    <mat-action-list>
+      <button mat-list-item (click)="action('edit')">
+        <mat-icon mat-list-icon>edit</mat-icon>
+        <span mat-line>Edit</span>
+      </button>
+
+      <button mat-list-item (click)="action('delete')">
+        <mat-icon mat-list-icon>delete</mat-icon>
+        <span mat-line>Delete</span>
+      </button>
+
+      <button mat-list-item (click)="action('archive')">
+        <mat-icon mat-list-icon>archive</mat-icon>
+        <span mat-line>Archive</span>
+      </button>
+    </mat-action-list>
+  `,
+})
+export class ActionBottomSheetComponent {
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<ActionBottomSheetComponent>,
+  ) {}
+
+  action(type: string): void {
+    this.bottomSheetRef.dismiss(type);
+  }
+}
+
+// Trigger component
+@Component({
+  template: `
+    <button mat-icon-button (click)="openActionSheet()">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  `,
+})
+export class MenuTriggerComponent {
+  constructor(private bottomSheet: MatBottomSheet) {}
+
+  openActionSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(ActionBottomSheetComponent);
+
+    bottomSheetRef.afterDismissed().subscribe((action) => {
+      if (action) {
+        this.handleAction(action);
+      }
+    });
+  }
+
+  handleAction(action: string): void {
+    switch (action) {
+      case "edit":
+        // Handle edit action
+        break;
+      case "delete":
+        // Handle delete action
+        break;
+      case "archive":
+        // Handle archive action
+        break;
+    }
+  }
+}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex bottom sheet with form and validation
+@Component({
+  template: `
+    <div class="bottom-sheet-header">
+      <h2>{{ data.mode === "edit" ? "Edit Comment" : "Add Comment" }}</h2>
+      <button mat-icon-button (click)="cancel()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form
+      [formGroup]="commentForm"
+      (ngSubmit)="onSubmit()"
+      class="comment-form"
+    >
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Your comment</mat-label>
+        <textarea
+          matInput
+          formControlName="comment"
+          rows="4"
+          placeholder="Share your thoughts..."
+          #commentTextarea
+        >
+        </textarea>
+        <mat-hint align="end">
+          {{ commentTextarea.value.length }}/500
+        </mat-hint>
+        <mat-error *ngIf="commentForm.get('comment')?.hasError('required')">
+          Comment is required
+        </mat-error>
+        <mat-error *ngIf="commentForm.get('comment')?.hasError('maxlength')">
+          Comment must be less than 500 characters
+        </mat-error>
+      </mat-form-field>
+
+      <div class="form-options">
+        <mat-checkbox formControlName="anonymous">
+          Post anonymously
+        </mat-checkbox>
+
+        <mat-checkbox formControlName="notifications">
+          Notify me of replies
+        </mat-checkbox>
+      </div>
+
+      <div class="attachment-section" *ngIf="allowAttachments">
+        <button
+          type="button"
+          mat-button
+          (click)="addAttachment()"
+          [disabled]="attachments.length >= maxAttachments"
+        >
+          <mat-icon>attach_file</mat-icon>
+          Add Attachment
+        </button>
+
+        <div class="attachments" *ngIf="attachments.length > 0">
+          <mat-chip-set>
+            <mat-chip
+              *ngFor="let file of attachments; let i = index"
+              (removed)="removeAttachment(i)"
+              removable
+            >
+              <mat-icon matChipAvatar>insert_drive_file</mat-icon>
+              {{ file.name }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" mat-button (click)="cancel()">Cancel</button>
+        <button
+          type="submit"
+          mat-raised-button
+          color="primary"
+          [disabled]="commentForm.invalid || isSubmitting"
+        >
+          <mat-spinner *ngIf="isSubmitting" diameter="16"></mat-spinner>
+          {{
+            isSubmitting
+              ? "Posting..."
+              : data.mode === "edit"
+                ? "Update"
+                : "Post"
+          }}
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .bottom-sheet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px 8px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .comment-form {
+        padding: 16px 24px 24px;
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .form-options {
+        margin: 16px 0;
+      }
+
+      .form-options mat-checkbox {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .attachment-section {
+        margin: 16px 0;
+      }
+
+      .attachments {
+        margin-top: 8px;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+      }
+
+      mat-spinner {
+        margin-right: 8px;
+      }
+    `,
+  ],
+})
+export class CommentBottomSheetComponent implements OnInit {
+  commentForm: FormGroup;
+  isSubmitting = false;
+  attachments: File[] = [];
+  maxAttachments = 3;
+  allowAttachments = true;
+
+  constructor(
+    private fb: FormBuilder,
+    private bottomSheetRef: MatBottomSheetRef<CommentBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA)
+    public data: {
+      mode: "create" | "edit";
+      comment?: string;
+      postId: string;
+      onSubmit: (data: any) => Promise<any>;
+    },
+  ) {}
+
+  ngOnInit(): void {
+    this.commentForm = this.fb.group({
+      comment: [
+        this.data.comment || "",
+        [Validators.required, Validators.maxLength(500)],
+      ],
+      anonymous: [false],
+      notifications: [true],
+    });
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.commentForm.valid) {
+      this.isSubmitting = true;
+
+      try {
+        const formData = {
+          ...this.commentForm.value,
+          postId: this.data.postId,
+          attachments: this.attachments,
+        };
+
+        const result = await this.data.onSubmit(formData);
+        this.bottomSheetRef.dismiss(result);
+      } catch (error) {
+        console.error("Error submitting comment:", error);
+        // Handle error state
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  }
+
+  addAttachment(): void {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = false;
+    input.accept = "image/*,.pdf,.doc,.docx";
+
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file && this.attachments.length < this.maxAttachments) {
+        this.attachments.push(file);
+      }
+    };
+
+    input.click();
+  }
+
+  removeAttachment(index: number): void {
+    this.attachments.splice(index, 1);
+  }
+
+  cancel(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+
+// Service for managing comment bottom sheets
+@Injectable({
+  providedIn: "root",
+})
+export class CommentService {
+  constructor(private bottomSheet: MatBottomSheet) {}
+
+  openCommentEditor(postId: string, existingComment?: string): Promise<any> {
+    const bottomSheetRef = this.bottomSheet.open(CommentBottomSheetComponent, {
+      data: {
+        mode: existingComment ? "edit" : "create",
+        comment: existingComment,
+        postId: postId,
+        onSubmit: (data: any) => this.submitComment(data),
+      },
+      disableClose: false,
+      hasBackdrop: true,
+      panelClass: "comment-bottom-sheet",
+    });
+
+    return bottomSheetRef.afterDismissed().toPromise();
+  }
+
+  private async submitComment(commentData: any): Promise<any> {
+    // API call to submit comment
+    return new Promise((resolve) => {
+      setTimeout(() => resolve({ ...commentData, id: Date.now() }), 1000);
+    });
+  }
+}
+```
+
+### Common Variations
+
+#### Filter Bottom Sheet
+
+```typescript
+@Component({
+  template: `
+    <div class="filter-header">
+      <h3>Filter Options</h3>
+      <button mat-button (click)="clearAll()">Clear All</button>
+    </div>
+
+    <div class="filter-content">
+      <div class="filter-section">
+        <h4>Category</h4>
+        <mat-selection-list [(ngModel)]="selectedCategories">
+          <mat-list-option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </mat-list-option>
+        </mat-selection-list>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="filter-section">
+        <h4>Price Range</h4>
+        <mat-slider
+          [min]="priceRange.min"
+          [max]="priceRange.max"
+          [step]="10"
+          [(ngModel)]="selectedPriceRange"
+          thumbLabel
+          tickInterval="auto">
+        </mat-slider>
+        <div class="price-labels">
+          <span>${{ selectedPriceRange[0] }}</span>
+          <span>${{ selectedPriceRange[1] }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="filter-section">
+        <h4>Rating</h4>
+        <mat-radio-group [(ngModel)]="selectedRating">
+          <mat-radio-button [value]="4">4 stars & up</mat-radio-button>
+          <mat-radio-button [value]="3">3 stars & up</mat-radio-button>
+          <mat-radio-button [value]="2">2 stars & up</mat-radio-button>
+          <mat-radio-button [value]="1">1 star & up</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button mat-button (click)="cancel()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="applyFilters()">
+        Apply Filters
+      </button>
+    </div>
+  `,
+  styles: [`
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .filter-content {
+      padding: 0 24px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .filter-section {
+      padding: 16px 0;
+    }
+
+    .filter-section h4 {
+      margin: 0 0 12px 0;
+      font-weight: 500;
+    }
+
+    .price-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    mat-radio-button {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 24px;
+      border-top: 1px solid #e0e0e0;
+      background: #fafafa;
+    }
+  `]
+})
+export class FilterBottomSheetComponent {
+  categories = [
+    { id: 1, name: 'Electronics' },
+    { id: 2, name: 'Clothing' },
+    { id: 3, name: 'Books' },
+    { id: 4, name: 'Home & Garden' }
+  ];
+
+  priceRange = { min: 0, max: 1000 };
+  selectedCategories: number[] = [];
+  selectedPriceRange = [0, 1000];
+  selectedRating = 0;
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<FilterBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any
+  ) {
+    // Initialize with existing filters
+    if (data.filters) {
+      this.selectedCategories = data.filters.categories || [];
+      this.selectedPriceRange = data.filters.priceRange || [0, 1000];
+      this.selectedRating = data.filters.rating || 0;
+    }
+  }
+
+  applyFilters(): void {
+    const filters = {
+      categories: this.selectedCategories,
+      priceRange: this.selectedPriceRange,
+      rating: this.selectedRating
+    };
+
+    this.bottomSheetRef.dismiss(filters);
+  }
+
+  clearAll(): void {
+    this.selectedCategories = [];
+    this.selectedPriceRange = [0, 1000];
+    this.selectedRating = 0;
+  }
+
+  cancel(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+```
+
+#### Quick Settings Bottom Sheet
+
+```typescript
+@Component({
+  template: `
+    <div class="settings-header">
+      <h3>Quick Settings</h3>
+    </div>
+
+    <div class="settings-content">
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>wifi</mat-icon>
+          <span>Wi-Fi</span>
+        </div>
+        <mat-slide-toggle
+          [(ngModel)]="settings.wifi"
+          (change)="updateSetting('wifi', $event.checked)"
+        >
+        </mat-slide-toggle>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>bluetooth</mat-icon>
+          <span>Bluetooth</span>
+        </div>
+        <mat-slide-toggle
+          [(ngModel)]="settings.bluetooth"
+          (change)="updateSetting('bluetooth', $event.checked)"
+        >
+        </mat-slide-toggle>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>location_on</mat-icon>
+          <span>Location</span>
+        </div>
+        <mat-slide-toggle
+          [(ngModel)]="settings.location"
+          (change)="updateSetting('location', $event.checked)"
+        >
+        </mat-slide-toggle>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>brightness_6</mat-icon>
+          <span>Brightness</span>
+        </div>
+        <mat-slider
+          [min]="0"
+          [max]="100"
+          [step]="5"
+          [(ngModel)]="settings.brightness"
+          (change)="updateSetting('brightness', $event.value)"
+          class="brightness-slider"
+        >
+        </mat-slider>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>volume_up</mat-icon>
+          <span>Volume</span>
+        </div>
+        <mat-slider
+          [min]="0"
+          [max]="100"
+          [step]="5"
+          [(ngModel)]="settings.volume"
+          (change)="updateSetting('volume', $event.value)"
+          class="volume-slider"
+        >
+        </mat-slider>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>dark_mode</mat-icon>
+          <span>Dark Mode</span>
+        </div>
+        <mat-slide-toggle
+          [(ngModel)]="settings.darkMode"
+          (change)="updateSetting('darkMode', $event.checked)"
+        >
+        </mat-slide-toggle>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <mat-icon>notifications</mat-icon>
+          <span>Do Not Disturb</span>
+        </div>
+        <mat-slide-toggle
+          [(ngModel)]="settings.doNotDisturb"
+          (change)="updateSetting('doNotDisturb', $event.checked)"
+        >
+        </mat-slide-toggle>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button mat-button (click)="openFullSettings()">All Settings</button>
+      <button mat-button (click)="close()">Done</button>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .settings-content {
+        padding: 8px 24px;
+      }
+
+      .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        min-height: 48px;
+      }
+
+      .setting-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+      }
+
+      .brightness-slider,
+      .volume-slider {
+        width: 120px;
+        margin-left: 16px;
+      }
+
+      .settings-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-top: 1px solid #e0e0e0;
+        background: #fafafa;
+      }
+
+      mat-divider {
+        margin: 8px 0;
+      }
+    `,
+  ],
+})
+export class QuickSettingsBottomSheetComponent {
+  settings = {
+    wifi: true,
+    bluetooth: false,
+    location: true,
+    brightness: 70,
+    volume: 50,
+    darkMode: false,
+    doNotDisturb: false,
+  };
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<QuickSettingsBottomSheetComponent>,
+  ) {}
+
+  updateSetting(key: string, value: any): void {
+    this.settings[key] = value;
+    // Apply setting immediately
+    this.applySetting(key, value);
+  }
+
+  applySetting(key: string, value: any): void {
+    // Apply the setting change to the system/app
+    console.log(`Setting ${key} to ${value}`);
+  }
+
+  openFullSettings(): void {
+    this.bottomSheetRef.dismiss({ action: "openFullSettings" });
+  }
+
+  close(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+```
+
+#### Contact Info Bottom Sheet
+
+```typescript
+@Component({
+  template: `
+    <div class="contact-header">
+      <div class="contact-avatar">
+        <img [src]="contact.avatar" [alt]="contact.name" />
+      </div>
+      <div class="contact-details">
+        <h2>{{ contact.name }}</h2>
+        <p>{{ contact.title }}</p>
+      </div>
+    </div>
+
+    <mat-list class="contact-actions">
+      <mat-list-item (click)="action('call')">
+        <mat-icon mat-list-icon>phone</mat-icon>
+        <span mat-line>Call</span>
+        <span mat-line>{{ contact.phone }}</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="action('message')">
+        <mat-icon mat-list-icon>message</mat-icon>
+        <span mat-line>Message</span>
+        <span mat-line>{{ contact.phone }}</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="action('email')">
+        <mat-icon mat-list-icon>email</mat-icon>
+        <span mat-line>Email</span>
+        <span mat-line>{{ contact.email }}</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="action('video')">
+        <mat-icon mat-list-icon>videocam</mat-icon>
+        <span mat-line>Video Call</span>
+        <span mat-line>Available</span>
+      </mat-list-item>
+
+      <mat-divider></mat-divider>
+
+      <mat-list-item (click)="action('info')">
+        <mat-icon mat-list-icon>info</mat-icon>
+        <span mat-line>Contact Info</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="action('edit')">
+        <mat-icon mat-list-icon>edit</mat-icon>
+        <span mat-line>Edit Contact</span>
+      </mat-list-item>
+    </mat-list>
+  `,
+  styles: [
+    `
+      .contact-header {
+        display: flex;
+        align-items: center;
+        padding: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .contact-avatar {
+        margin-right: 16px;
+      }
+
+      .contact-avatar img {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .contact-details h2 {
+        margin: 0 0 4px 0;
+        font-size: 1.5rem;
+      }
+
+      .contact-details p {
+        margin: 0;
+        opacity: 0.9;
+      }
+
+      .contact-actions {
+        padding: 0;
+      }
+
+      .contact-actions mat-list-item {
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .contact-actions mat-list-item:last-child {
+        border-bottom: none;
+      }
+    `,
+  ],
+})
+export class ContactBottomSheetComponent {
+  contact = {
+    name: "Sarah Johnson",
+    title: "Product Manager",
+    phone: "+1 (555) 123-4567",
+    email: "sarah.johnson@company.com",
+    avatar: "/assets/contact-avatar.jpg",
+  };
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<ContactBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+  ) {
+    if (data.contact) {
+      this.contact = data.contact;
+    }
+  }
+
+  action(type: string): void {
+    this.bottomSheetRef.dismiss({
+      action: type,
+      contact: this.contact,
+    });
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+BottomSheet follows a service-driven data flow where the MatBottomSheet service manages the creation and lifecycle of bottom sheet instances. Data flows unidirectionally from the service configuration to the bottom sheet content component through dependency injection.
+
+### Context Sharing
+
+BottomSheet utilizes Angular Material's theming system and provides data injection through the MAT_BOTTOM_SHEET_DATA token. The service manages global bottom sheet state and ensures only one bottom sheet can be open at a time.
+
+### Event Handling
+
+Event handling in bottom sheets follows Angular patterns where the bottom sheet content component handles its own events and communicates results back through the MatBottomSheetRef. The service manages backdrop clicks, keyboard events, and gesture-based dismissal.
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for mobile-first interactions** - Bottom sheets are optimized for touch devices and should be your primary choice for mobile action interfaces
+- **Keep content focused** - Present specific, contextual actions or information rather than complex navigation or lengthy content
+- **Provide clear dismissal options** - Always include obvious ways to close the bottom sheet, either through explicit close buttons or intuitive gestures
+- **Consider responsive behavior** - Bottom sheets work best on mobile but should gracefully adapt to larger screens with appropriate maximum widths
+
+### Accessibility
+
+- **Keyboard navigation** - Ensure all interactive elements within bottom sheets are keyboard accessible with proper focus management
+- **ARIA attributes** - Use appropriate ARIA labels and descriptions to provide context for screen readers about bottom sheet purpose and content
+- **Focus management** - Configure autoFocus appropriately and ensure focus returns to the triggering element when bottom sheets close
+- **Screen reader announcements** - Ensure bottom sheet opening and content are properly announced to assistive technologies
+
+### Performance
+
+- **Lazy loading** - Load bottom sheet components only when needed to optimize initial bundle size and application startup performance
+- **Memory management** - Properly clean up subscriptions and component resources when bottom sheets are dismissed
+- **Animation optimization** - Use hardware-accelerated animations and consider reduced motion preferences for smooth interactions
+- **Touch responsiveness** - Optimize touch interactions and gesture recognition for responsive feel on mobile devices
+
+## Common Patterns
+
+### Pattern 1: Service-Based Bottom Sheet Management
+
+```typescript
+// Centralized bottom sheet service for consistent behavior
+@Injectable({
+  providedIn: "root",
+})
+export class AppBottomSheetService {
+  constructor(private bottomSheet: MatBottomSheet) {}
+
+  showShareOptions(data: any): Promise<any> {
+    const bottomSheetRef = this.bottomSheet.open(ShareBottomSheetComponent, {
+      data: data,
+      ariaLabel: "Share options",
+      panelClass: "share-bottom-sheet",
+    });
+
+    return bottomSheetRef.afterDismissed().toPromise();
+  }
+
+  showActionMenu(actions: any[]): Promise<string> {
+    const bottomSheetRef = this.bottomSheet.open(
+      ActionMenuBottomSheetComponent,
+      {
+        data: { actions },
+        ariaLabel: "Action menu",
+      },
+    );
+
+    return bottomSheetRef.afterDismissed().toPromise();
+  }
+
+  showFilterOptions(currentFilters: any): Promise<any> {
+    const bottomSheetRef = this.bottomSheet.open(FilterBottomSheetComponent, {
+      data: { filters: currentFilters },
+      ariaLabel: "Filter options",
+      hasBackdrop: true,
+      disableClose: false,
+    });
+
+    return bottomSheetRef.afterDismissed().toPromise();
+  }
+
+  showQuickSettings(): Promise<any> {
+    const bottomSheetRef = this.bottomSheet.open(
+      QuickSettingsBottomSheetComponent,
+      {
+        ariaLabel: "Quick settings",
+        panelClass: "settings-bottom-sheet",
+      },
+    );
+
+    return bottomSheetRef.afterDismissed().toPromise();
+  }
+}
+
+// Usage in components
+@Component({
+  template: `
+    <button mat-icon-button (click)="showActions()">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  `,
+})
+export class ItemComponent {
+  constructor(private bottomSheetService: AppBottomSheetService) {}
+
+  async showActions(): Promise<void> {
+    const action = await this.bottomSheetService.showActionMenu([
+      { id: "edit", label: "Edit", icon: "edit" },
+      { id: "delete", label: "Delete", icon: "delete" },
+      { id: "share", label: "Share", icon: "share" },
+    ]);
+
+    if (action) {
+      this.handleAction(action);
+    }
+  }
+
+  handleAction(action: string): void {
+    // Handle the selected action
+  }
+}
+```
+
+### Pattern 2: Responsive Bottom Sheet with Breakpoints
+
+```typescript
+// Responsive bottom sheet that adapts to screen size
+@Injectable({
+  providedIn: "root",
+})
+export class ResponsiveBottomSheetService {
+  constructor(
+    private bottomSheet: MatBottomSheet,
+    private breakpointObserver: BreakpointObserver,
+  ) {}
+
+  openResponsive<T>(
+    component: ComponentType<T>,
+    data?: any,
+    options?: Partial<MatBottomSheetConfig>,
+  ): MatBottomSheetRef<T> {
+    const isMobile = this.breakpointObserver.isMatched("(max-width: 768px)");
+
+    const config: MatBottomSheetConfig = {
+      data,
+      hasBackdrop: true,
+      disableClose: false,
+      autoFocus: true,
+      ...options,
+      panelClass: [
+        ...(Array.isArray(options?.panelClass)
+          ? options.panelClass
+          : [options?.panelClass].filter(Boolean)),
+        isMobile ? "mobile-bottom-sheet" : "desktop-bottom-sheet",
+      ],
+      maxWidth: isMobile ? "100vw" : "500px",
+      width: isMobile ? "100vw" : "500px",
+    };
+
+    return this.bottomSheet.open(component, config);
+  }
+}
+
+// Global styles for responsive behavior
+/*
+.mobile-bottom-sheet {
+  max-height: 90vh;
+}
+
+.desktop-bottom-sheet {
+  border-radius: 8px 8px 0 0;
+  max-height: 80vh;
+  margin: 0 auto;
+}
+
+@media (min-width: 769px) {
+  .desktop-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+*/
+```
+
+### Pattern 3: Bottom Sheet with Progressive Disclosure
+
+```typescript
+// Multi-level bottom sheet with expandable content
+@Component({
+  template: `
+    <div class="expandable-bottom-sheet">
+      <!-- Collapsed header that's always visible -->
+      <div
+        class="sheet-header"
+        (click)="toggleExpanded()"
+        [class.expanded]="isExpanded"
+      >
+        <div class="drag-handle"></div>
+        <div class="header-content">
+          <h3>{{ title }}</h3>
+          <mat-icon>{{ isExpanded ? "expand_less" : "expand_more" }}</mat-icon>
+        </div>
+      </div>
+
+      <!-- Expandable content -->
+      <div
+        class="sheet-content"
+        [class.expanded]="isExpanded"
+        [@slideContent]="isExpanded ? 'expanded' : 'collapsed'"
+      >
+        <div class="content-summary" *ngIf="!isExpanded">
+          <p>{{ summary }}</p>
+        </div>
+
+        <div class="content-details" *ngIf="isExpanded">
+          <ng-content></ng-content>
+
+          <!-- Detailed content here -->
+          <div class="details-section">
+            <h4>Details</h4>
+            <p>{{ details }}</p>
+          </div>
+
+          <div class="actions-section">
+            <h4>Actions</h4>
+            <mat-list>
+              <mat-list-item
+                *ngFor="let action of actions"
+                (click)="performAction(action)"
+              >
+                <mat-icon mat-list-icon>{{ action.icon }}</mat-icon>
+                <span mat-line>{{ action.label }}</span>
+              </mat-list-item>
+            </mat-list>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .expandable-bottom-sheet {
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+      }
+
+      .sheet-header {
+        padding: 16px 24px;
+        cursor: pointer;
+        background: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+        transition: background-color 0.2s;
+      }
+
+      .sheet-header:hover {
+        background: #eeeeee;
+      }
+
+      .drag-handle {
+        width: 32px;
+        height: 4px;
+        background: #c0c0c0;
+        border-radius: 2px;
+        margin: 0 auto 12px;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sheet-content {
+        overflow-y: auto;
+        transition: max-height 0.3s ease-in-out;
+      }
+
+      .sheet-content:not(.expanded) {
+        max-height: 100px;
+      }
+
+      .sheet-content.expanded {
+        max-height: 70vh;
+      }
+
+      .content-summary {
+        padding: 16px 24px;
+      }
+
+      .content-details {
+        padding: 16px 24px;
+      }
+
+      .details-section,
+      .actions-section {
+        margin-bottom: 24px;
+      }
+
+      .details-section h4,
+      .actions-section h4 {
+        margin: 0 0 12px 0;
+        font-weight: 500;
+      }
+    `,
+  ],
+  animations: [
+    trigger("slideContent", [
+      state(
+        "collapsed",
+        style({
+          maxHeight: "100px",
+          opacity: 0.7,
+        }),
+      ),
+      state(
+        "expanded",
+        style({
+          maxHeight: "70vh",
+          opacity: 1,
+        }),
+      ),
+      transition("collapsed <=> expanded", [animate("0.3s ease-in-out")]),
+    ]),
+  ],
+})
+export class ExpandableBottomSheetComponent {
+  @Input() title = "Content";
+  @Input() summary = "Tap to expand";
+  @Input() details = "Detailed content goes here";
+  @Input() actions: Array<{ icon: string; label: string; action: string }> = [];
+
+  isExpanded = false;
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<ExpandableBottomSheetComponent>,
+  ) {}
+
+  toggleExpanded(): void {
+    this.isExpanded = !this.isExpanded;
+  }
+
+  performAction(action: any): void {
+    this.bottomSheetRef.dismiss({
+      action: action.action,
+      expanded: this.isExpanded,
+    });
+  }
+}
+
+// Usage
+@Component({
+  template: `
+    <button mat-button (click)="showExpandableSheet()">Show Details</button>
+  `,
+})
+export class ExampleComponent {
+  constructor(private bottomSheet: MatBottomSheet) {}
+
+  showExpandableSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(
+      ExpandableBottomSheetComponent,
+      {
+        data: {
+          title: "Product Details",
+          summary: "Wireless Bluetooth Headphones - $99.99",
+          details:
+            "High-quality wireless headphones with noise cancellation, 30-hour battery life, and premium sound quality.",
+          actions: [
+            {
+              icon: "add_shopping_cart",
+              label: "Add to Cart",
+              action: "addToCart",
+            },
+            {
+              icon: "favorite",
+              label: "Add to Wishlist",
+              action: "addToWishlist",
+            },
+            { icon: "share", label: "Share Product", action: "share" },
+          ],
+        },
+        panelClass: "expandable-bottom-sheet-container",
+      },
+    );
+
+    bottomSheetRef.afterDismissed().subscribe((result) => {
+      if (result) {
+        this.handleAction(result.action);
+      }
+    });
+  }
+
+  handleAction(action: string): void {
+    // Handle the action
+  }
+}
+```

@@ -1,0 +1,1036 @@
+# Card Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate card functionality
+
+### When to Use
+
+Card components are ideal for displaying related information and actions in a contained, visually distinct format. Use them when you need to:
+
+- **Content organization** - Group related information, actions, or media into a cohesive, scannable unit
+- **Dashboard layouts** - Create dashboard widgets that contain metrics, charts, or quick action sets
+- **Product displays** - Showcase products, services, or portfolio items with images, descriptions, and actions
+- **Article previews** - Display blog posts, news articles, or content summaries with preview images and metadata
+- **User profiles** - Present user information, avatars, bio details, and profile actions in a contained format
+- **Settings panels** - Organize configuration options, preferences, or account settings into logical groupings
+- **Media galleries** - Display images, videos, or media content with titles, descriptions, and interaction options
+- **List enhancements** - Elevate important list items or provide rich content alternatives to simple lists
+- **Call-to-action sections** - Highlight important actions, announcements, or promotional content
+- **Form sections** - Group related form fields and actions within visually distinct containers
+
+### Architecture
+
+**Moderate Coupling**: The Card component group consists of a primary container component (MatCard) that works together with several optional sub-components to create rich, structured content displays. The components are designed to work together harmoniously while maintaining flexibility for custom implementations.
+
+### Component Interdependencies
+
+The Card component group demonstrates moderate coupling through:
+
+- **Structured composition**: MatCard serves as the primary container with optional sub-components for headers, content, actions, and media
+- **Visual hierarchy**: Sub-components follow Material Design guidelines for proper spacing, typography, and visual hierarchy
+- **Flexible layout**: Components can be combined in various ways while maintaining consistent styling and accessibility
+- **Content organization**: Sub-components provide semantic structure for different types of card content (header, body, footer, actions)
+
+## Components
+
+### MatCard {Primary Component}
+
+The primary container component that provides the foundational card structure with Material Design elevation, spacing, and visual treatment.
+
+**Purpose:** Serves as the main container for card content, providing consistent styling, elevation effects, and responsive behavior while allowing flexible content composition through projection.
+
+**Interface:**
+
+```typescript
+interface MatCardProps {
+  appearance: "outlined" | "raised" | "filled"; // Visual appearance variant (default: 'raised')
+  children: React.ReactNode; // Card content including optional sub-components
+  class?: string; // Additional CSS classes for customization
+  id?: string; // Unique identifier for the card
+}
+
+interface MatCardConfig {
+  appearance?: "outlined" | "raised" | "filled"; // Default appearance for all cards
+}
+```
+
+**Provides:** Base styling, elevation effects, responsive behavior, and content projection areas for sub-components
+
+**Usage Example:**
+
+```tsx
+import { MatCard } from "@angular/material/card";
+
+function BasicCardExample() {
+  return (
+    <mat-card appearance="raised">
+      <mat-card-header>
+        <mat-card-title>Card Title</mat-card-title>
+        <mat-card-subtitle>Card subtitle</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>
+          This is the main content of the card where you can place any
+          information.
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button>Action 1</button>
+        <button mat-button>Action 2</button>
+      </mat-card-actions>
+    </mat-card>
+  );
+}
+```
+
+### MatCardHeader {Layout Component}
+
+A specialized container for card header content including titles, subtitles, and avatars with proper Material Design spacing and alignment.
+
+**Purpose:** Provides structured layout for card header elements with consistent spacing, typography hierarchy, and avatar positioning according to Material Design specifications.
+
+**Interface:**
+
+```typescript
+interface MatCardHeaderProps {
+  children: React.ReactNode; // Header content including titles, subtitles, and avatars
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Must be used within MatCard for proper styling and layout
+**Parent Requirements:** MatCard container for consistent theming and spacing
+
+**Usage Example:**
+
+```tsx
+<mat-card>
+  <mat-card-header>
+    <div mat-card-avatar class="example-header-image"></div>
+    <mat-card-title>Shiba Inu</mat-card-title>
+    <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+  </mat-card-header>
+</mat-card>
+```
+
+### MatCardTitle {Content Component}
+
+Provides semantic title styling and typography for card headers with proper Material Design typography scale.
+
+**Purpose:** Delivers consistent title styling that follows Material Design typography guidelines while providing semantic HTML structure for accessibility.
+
+**Interface:**
+
+```typescript
+interface MatCardTitleProps {
+  children: React.ReactNode; // Title text content
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Typically used within MatCardHeader for optimal layout
+**Parent Requirements:** MatCard container for theming consistency
+
+**Usage Example:**
+
+```tsx
+<mat-card-header>
+  <mat-card-title>Primary Card Title</mat-card-title>
+</mat-card-header>
+```
+
+### MatCardSubtitle {Content Component}
+
+Provides semantic subtitle styling with appropriate typography and visual hierarchy for secondary header information.
+
+**Purpose:** Offers consistent subtitle styling that complements the card title while maintaining proper visual hierarchy and readability.
+
+**Interface:**
+
+```typescript
+interface MatCardSubtitleProps {
+  children: React.ReactNode; // Subtitle text content
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Typically used within MatCardHeader alongside MatCardTitle
+**Parent Requirements:** MatCard container for consistent styling
+
+**Usage Example:**
+
+```tsx
+<mat-card-header>
+  <mat-card-title>Primary Title</mat-card-title>
+  <mat-card-subtitle>Supporting subtitle information</mat-card-subtitle>
+</mat-card-header>
+```
+
+### MatCardContent {Layout Component}
+
+The primary content area of the card with appropriate padding and typography styling for body content.
+
+**Purpose:** Provides the main content area with consistent padding, typography, and spacing that follows Material Design guidelines for optimal readability.
+
+**Interface:**
+
+```typescript
+interface MatCardContentProps {
+  children: React.ReactNode; // Main card content including text, media, or other components
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Used within MatCard for proper spacing and typography
+**Parent Requirements:** MatCard container for consistent theming
+
+**Usage Example:**
+
+```tsx
+<mat-card>
+  <mat-card-content>
+    <p>
+      The Shiba Inu is the smallest of the six original and distinct spitz
+      breeds of dog from Japan.
+    </p>
+    <p>
+      A small, agile dog that copes very well with mountainous terrain, the
+      Shiba Inu was originally bred for hunting.
+    </p>
+  </mat-card-content>
+</mat-card>
+```
+
+### MatCardActions {Layout Component}
+
+Action area for buttons and interactive elements with proper spacing and alignment options.
+
+**Purpose:** Provides a dedicated area for card actions with consistent spacing, alignment options, and integration with Material Design button components.
+
+**Interface:**
+
+```typescript
+interface MatCardActionsProps {
+  align: "start" | "end"; // Horizontal alignment of actions (default: 'start')
+  children: React.ReactNode; // Action buttons or interactive elements
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Used within MatCard for proper styling and layout
+**Parent Requirements:** MatCard container for consistent theming
+
+**Usage Example:**
+
+```tsx
+<mat-card>
+  <mat-card-actions align="end">
+    <button mat-button>LIKE</button>
+    <button mat-button>SHARE</button>
+  </mat-card-actions>
+</mat-card>
+```
+
+### MatCardFooter {Layout Component}
+
+Footer area for additional information or secondary actions with appropriate styling and spacing.
+
+**Purpose:** Provides a dedicated footer area for supplementary content, metadata, or secondary actions with consistent styling.
+
+**Interface:**
+
+```typescript
+interface MatCardFooterProps {
+  children: React.ReactNode; // Footer content
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Used within MatCard for proper styling
+**Parent Requirements:** MatCard container for consistent theming
+
+**Usage Example:**
+
+```tsx
+<mat-card>
+  <mat-card-footer>
+    <p>Last updated: January 15, 2024</p>
+  </mat-card-footer>
+</mat-card>
+```
+
+### MatCardImage {Media Component}
+
+Image directive for primary card images with responsive sizing and proper aspect ratio handling.
+
+**Purpose:** Provides consistent image styling and responsive behavior for primary card images following Material Design specifications.
+
+**Interface:**
+
+```typescript
+interface MatCardImageProps {
+  src: string; // Image source URL
+  alt: string; // Alternative text for accessibility
+  class?: string; // Additional CSS classes
+}
+```
+
+**Context Dependencies:** Used within MatCard for proper sizing and layout
+**Parent Requirements:** MatCard container for responsive behavior
+
+**Usage Example:**
+
+```tsx
+<mat-card>
+  <img mat-card-image src="shiba.jpg" alt="Photo of a Shiba Inu">
+</mat-card>
+```
+
+### MatCardAvatar {Media Component}
+
+Avatar directive for circular profile images or icons in card headers with appropriate sizing.
+
+**Purpose:** Provides consistent avatar styling for profile images or representative icons in card headers with proper circular cropping and sizing.
+
+**Interface:**
+
+```typescript
+interface MatCardAvatarProps {
+  src?: string; // Avatar image source URL
+  class?: string; // Additional CSS classes for background or styling
+}
+```
+
+**Context Dependencies:** Typically used within MatCardHeader for optimal positioning
+**Parent Requirements:** MatCardHeader for proper layout alignment
+
+**Usage Example:**
+
+```tsx
+<mat-card-header>
+  <div mat-card-avatar class="example-header-image"></div>
+  <mat-card-title>User Name</mat-card-title>
+</mat-card-header>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from "@angular/material/card";
+
+// Minimal card structure
+function BasicCardExample() {
+  return (
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Simple Card</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>Basic card content goes here.</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button>Action</button>
+      </mat-card-actions>
+    </mat-card>
+  );
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Complex card with all features
+@Component({
+  template: `
+    <mat-card appearance="outlined" class="example-card">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>{{ cardData.title }}</mat-card-title>
+        <mat-card-subtitle>{{ cardData.subtitle }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <img mat-card-image [src]="cardData.imageUrl" [alt]="cardData.imageAlt" />
+
+      <mat-card-content>
+        <p>{{ cardData.description }}</p>
+        <mat-chip-set *ngIf="cardData.tags">
+          <mat-chip *ngFor="let tag of cardData.tags" highlighted>{{
+            tag
+          }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="onLike()" [class.liked]="isLiked">
+          <mat-icon>{{ isLiked ? "favorite" : "favorite_border" }}</mat-icon>
+          LIKE
+        </button>
+        <button mat-button (click)="onShare()">
+          <mat-icon>share</mat-icon>
+          SHARE
+        </button>
+        <button
+          mat-button
+          (click)="onBookmark()"
+          [class.bookmarked]="isBookmarked"
+        >
+          <mat-icon>{{
+            isBookmarked ? "bookmark" : "bookmark_border"
+          }}</mat-icon>
+        </button>
+      </mat-card-actions>
+
+      <mat-card-footer>
+        <small>Published {{ cardData.publishDate | date }}</small>
+      </mat-card-footer>
+    </mat-card>
+  `,
+  styles: [
+    `
+      .example-card {
+        max-width: 400px;
+        margin: 16px;
+      }
+
+      .example-header-image {
+        background-image: url("path/to/avatar.jpg");
+        background-size: cover;
+      }
+
+      .liked {
+        color: #f44336;
+      }
+
+      .bookmarked {
+        color: #ff9800;
+      }
+    `,
+  ],
+})
+export class AdvancedCardExample {
+  cardData = {
+    title: "Beautiful Landscape",
+    subtitle: "Nature Photography",
+    description:
+      "A stunning view of mountains and valleys captured during golden hour.",
+    imageUrl: "/assets/landscape.jpg",
+    imageAlt: "Mountain landscape at sunset",
+    tags: ["nature", "photography", "landscape"],
+    publishDate: new Date("2024-01-15"),
+  };
+
+  isLiked = false;
+  isBookmarked = false;
+
+  onLike(): void {
+    this.isLiked = !this.isLiked;
+  }
+
+  onShare(): void {
+    // Share functionality
+  }
+
+  onBookmark(): void {
+    this.isBookmarked = !this.isBookmarked;
+  }
+}
+```
+
+### Common Variations
+
+#### Dashboard Widget Card
+
+```tsx
+// Dashboard metric card with icon and actions
+@Component({
+  template: `
+    <mat-card class="dashboard-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar [color]="metric.color">{{
+          metric.icon
+        }}</mat-icon>
+        <mat-card-title>{{ metric.title }}</mat-card-title>
+        <mat-card-subtitle>{{ metric.subtitle }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="metric-value">{{ metric.value }}</div>
+        <div class="metric-change" [class]="metric.changeClass">
+          <mat-icon>{{ metric.changeIcon }}</mat-icon>
+          {{ metric.change }}
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button (click)="viewDetails()">View Details</button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  styles: [
+    `
+      .dashboard-card {
+        max-width: 300px;
+      }
+
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 16px 0;
+      }
+
+      .metric-change {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+
+      .metric-change.positive {
+        color: #4caf50;
+      }
+
+      .metric-change.negative {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class DashboardCardExample {
+  metric = {
+    title: "Total Sales",
+    subtitle: "This month",
+    value: "$12,450",
+    change: "+15.3%",
+    changeClass: "positive",
+    changeIcon: "trending_up",
+    icon: "attach_money",
+    color: "primary",
+  };
+
+  viewDetails(): void {
+    // Navigate to detailed view
+  }
+}
+```
+
+#### Product Card
+
+```tsx
+// E-commerce product card
+@Component({
+  template: `
+    <mat-card class="product-card">
+      <div class="product-image-container">
+        <img mat-card-image [src]="product.imageUrl" [alt]="product.name">
+        <button mat-fab-button class="favorite-btn" (click)="toggleFavorite()"
+                [class.favorited]="isFavorited">
+          <mat-icon>{{isFavorited ? 'favorite' : 'favorite_border'}}</mat-icon>
+        </button>
+      </div>
+
+      <mat-card-content>
+        <mat-card-title>{{product.name}}</mat-card-title>
+        <mat-card-subtitle>{{product.brand}}</mat-card-subtitle>
+
+        <div class="rating">
+          <mat-icon *ngFor="let star of getStars(product.rating)"
+                    [class.filled]="star">star</mat-icon>
+          <span>({{product.reviewCount}} reviews)</span>
+        </div>
+
+        <div class="price">
+          <span class="current-price">${{product.price}}</span>
+          <span *ngIf="product.originalPrice" class="original-price">
+            ${{product.originalPrice}}
+          </span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="addToCart()" [disabled]="!product.inStock">
+          {{product.inStock ? 'Add to Cart' : 'Out of Stock'}}
+        </button>
+        <button mat-raised-button color="primary" (click)="buyNow()"
+                [disabled]="!product.inStock">
+          Buy Now
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  styles: [`
+    .product-card {
+      max-width: 350px;
+      position: relative;
+    }
+
+    .product-image-container {
+      position: relative;
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .favorite-btn.favorited {
+      color: #f44336;
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .rating mat-icon {
+      color: #ddd;
+      font-size: 18px;
+    }
+
+    .rating mat-icon.filled {
+      color: #ffb400;
+    }
+
+    .price {
+      margin: 12px 0;
+    }
+
+    .current-price {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #4caf50;
+    }
+
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      margin-left: 8px;
+    }
+  `]
+})
+export class ProductCardExample {
+  product = {
+    name: 'Wireless Headphones',
+    brand: 'AudioTech',
+    price: 99.99,
+    originalPrice: 129.99,
+    rating: 4.5,
+    reviewCount: 234,
+    imageUrl: '/assets/headphones.jpg',
+    inStock: true
+  };
+
+  isFavorited = false;
+
+  toggleFavorite(): void {
+    this.isFavorited = !this.isFavorited;
+  }
+
+  addToCart(): void {
+    // Add to cart logic
+  }
+
+  buyNow(): void {
+    // Purchase logic
+  }
+
+  getStars(rating: number): boolean[] {
+    return Array.from({length: 5}, (_, i) => i < Math.floor(rating));
+  }
+}
+```
+
+#### Profile Card
+
+```tsx
+// User profile card with avatar and social actions
+@Component({
+  template: `
+    <mat-card class="profile-card">
+      <mat-card-header>
+        <img mat-card-avatar [src]="user.avatarUrl" [alt]="user.name" />
+        <mat-card-title>{{ user.name }}</mat-card-title>
+        <mat-card-subtitle>{{ user.title }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>{{ user.bio }}</p>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-value">{{ user.followers }}</span>
+            <span class="stat-label">Followers</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ user.following }}</span>
+            <span class="stat-label">Following</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ user.posts }}</span>
+            <span class="stat-label">Posts</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="follow()"
+          [disabled]="isFollowing"
+        >
+          {{ isFollowing ? "Following" : "Follow" }}
+        </button>
+        <button mat-button (click)="message()">Message</button>
+        <button mat-button (click)="viewProfile()">View Profile</button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  styles: [
+    `
+      .profile-card {
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 16px 0;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class ProfileCardExample {
+  user = {
+    name: "Sarah Johnson",
+    title: "UX Designer",
+    bio: "Passionate about creating intuitive user experiences and beautiful interfaces.",
+    avatarUrl: "/assets/avatar.jpg",
+    followers: "1.2k",
+    following: "345",
+    posts: "87",
+  };
+
+  isFollowing = false;
+
+  follow(): void {
+    this.isFollowing = !this.isFollowing;
+  }
+
+  message(): void {
+    // Open messaging interface
+  }
+
+  viewProfile(): void {
+    // Navigate to full profile
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+Card components follow a simple parent-child data flow pattern where the MatCard container provides theming context and the sub-components receive content through projection. Data flows unidirectionally from parent components into card content areas.
+
+### Context Sharing
+
+Cards utilize Angular Material's theming system where the MatCard component provides theming context to all sub-components. This ensures consistent color palettes, typography, and elevation effects throughout the card structure.
+
+### Event Handling
+
+Event handling in card components follows standard Angular patterns where individual action buttons or interactive elements handle their own events. The card container itself does not intercept or modify events, allowing for flexible interaction patterns.
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use cards for related content** - Group information, actions, and media that belong together conceptually to create coherent content units
+- **Maintain consistent card sizes** - Within the same interface, use similar card dimensions and layouts to create visual harmony and improve scannability
+- **Provide clear visual hierarchy** - Use card headers, titles, and content areas appropriately to guide user attention and comprehension
+- **Include meaningful actions** - When using card actions, ensure they are relevant to the card content and provide clear value to users
+
+### Accessibility
+
+- **Semantic structure** - Card sub-components provide proper semantic HTML structure with appropriate heading levels and content organization
+- **Keyboard navigation** - Interactive elements within cards are fully keyboard accessible with proper focus management and tab order
+- **Screen reader support** - Card titles, subtitles, and content are properly structured for screen reader navigation and comprehension
+- **Image accessibility** - Always provide descriptive alt text for card images and avatars to support assistive technologies
+
+### Performance
+
+- **Optimize card rendering** - Use OnPush change detection strategy for cards with static content to improve performance in large lists
+- **Lazy load images** - For cards containing images, implement lazy loading to improve initial page load performance
+- **Virtual scrolling** - When displaying many cards, consider using Angular CDK virtual scrolling to optimize rendering performance
+- **Minimize DOM complexity** - Keep card content structure as simple as possible while maintaining functionality and accessibility
+
+## Common Patterns
+
+### Pattern 1: Content Feed Cards
+
+```tsx
+// Social media or blog post feed cards
+@Component({
+  template: `
+    <div class="feed-container">
+      <mat-card
+        *ngFor="let post of feedPosts; trackBy: trackByPost"
+        class="feed-card"
+      >
+        <mat-card-header>
+          <img
+            mat-card-avatar
+            [src]="post.author.avatar"
+            [alt]="post.author.name"
+          />
+          <mat-card-title>{{ post.author.name }}</mat-card-title>
+          <mat-card-subtitle>{{ post.timestamp | timeAgo }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p>{{ post.content }}</p>
+        </mat-card-content>
+
+        <img
+          *ngIf="post.image"
+          mat-card-image
+          [src]="post.image"
+          [alt]="post.imageAlt"
+        />
+
+        <mat-card-actions>
+          <button
+            mat-button
+            (click)="likePost(post)"
+            [class.liked]="post.isLiked"
+          >
+            <mat-icon>{{
+              post.isLiked ? "favorite" : "favorite_border"
+            }}</mat-icon>
+            {{ post.likes }}
+          </button>
+          <button mat-button (click)="commentPost(post)">
+            <mat-icon>comment</mat-icon>
+            {{ post.comments }}
+          </button>
+          <button mat-button (click)="sharePost(post)">
+            <mat-icon>share</mat-icon>
+            Share
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .feed-container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .feed-card {
+        margin-bottom: 16px;
+      }
+
+      .liked {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class ContentFeedExample {
+  feedPosts = [
+    {
+      id: 1,
+      author: { name: "John Doe", avatar: "/assets/john.jpg" },
+      content: "Just finished an amazing hike in the mountains!",
+      timestamp: new Date("2024-01-15T10:30:00"),
+      image: "/assets/hike.jpg",
+      imageAlt: "Mountain hiking trail",
+      likes: 24,
+      comments: 5,
+      isLiked: false,
+    },
+    // More posts...
+  ];
+
+  trackByPost(index: number, post: any): number {
+    return post.id;
+  }
+
+  likePost(post: any): void {
+    post.isLiked = !post.isLiked;
+    post.likes += post.isLiked ? 1 : -1;
+  }
+
+  commentPost(post: any): void {
+    // Open comment interface
+  }
+
+  sharePost(post: any): void {
+    // Share functionality
+  }
+}
+```
+
+### Pattern 2: Settings Configuration Cards
+
+```tsx
+// Settings sections organized in cards
+@Component({
+  template: `
+    <div class="settings-container">
+      <mat-card *ngFor="let section of settingSections" class="settings-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>{{ section.icon }}</mat-icon>
+          <mat-card-title>{{ section.title }}</mat-card-title>
+          <mat-card-subtitle>{{ section.description }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div *ngFor="let setting of section.settings" class="setting-item">
+            <div class="setting-info">
+              <span class="setting-name">{{ setting.name }}</span>
+              <span class="setting-description">{{ setting.description }}</span>
+            </div>
+
+            <mat-slide-toggle
+              [checked]="setting.enabled"
+              (change)="updateSetting(setting, $event.checked)"
+            >
+            </mat-slide-toggle>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-button (click)="resetSection(section)">Reset</button>
+          <button mat-button (click)="advancedSettings(section)">
+            Advanced
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-container {
+        max-width: 800px;
+      }
+
+      .settings-card {
+        margin-bottom: 24px;
+      }
+
+      .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .setting-item:last-child {
+        border-bottom: none;
+      }
+
+      .setting-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .setting-name {
+        font-weight: 500;
+      }
+
+      .setting-description {
+        font-size: 0.85rem;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class SettingsCardsExample {
+  settingSections = [
+    {
+      title: "Privacy & Security",
+      description: "Control your data and security preferences",
+      icon: "security",
+      settings: [
+        {
+          name: "Two-factor authentication",
+          description: "Add extra security to your account",
+          enabled: true,
+        },
+        {
+          name: "Data sharing",
+          description: "Share usage data to improve our services",
+          enabled: false,
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      description: "Manage how you receive notifications",
+      icon: "notifications",
+      settings: [
+        {
+          name: "Email notifications",
+          description: "Receive updates via email",
+          enabled: true,
+        },
+        {
+          name: "Push notifications",
+          description: "Get notified on your device",
+          enabled: true,
+        },
+      ],
+    },
+  ];
+
+  updateSetting(setting: any, enabled: boolean): void {
+    setting.enabled = enabled;
+    // Save setting change
+  }
+
+  resetSection(section: any): void {
+    // Reset all settings in section to defaults
+  }
+
+  advancedSettings(section: any): void {
+    // Navigate to advanced settings for this section
+  }
+}
+```

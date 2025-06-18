@@ -1,0 +1,1452 @@
+# MiniFabButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate mini floating action button functionality
+
+### When to Use
+
+MiniFabButton components are designed for secondary actions and supporting workflows in compact form factors. Use mini floating action buttons when you need to:
+
+- **Secondary action hierarchy** - Implement important but non-primary actions that support the main workflow without competing with primary FABs for attention
+- **Space-efficient interfaces** - Provide floating actions in constrained layouts, mobile interfaces, or when multiple action buttons are needed without overwhelming the interface
+- **Supporting workflow actions** - Enable quick access to related actions like editing, sharing, favoriting, or secondary creation tasks in the current context
+- **Multi-action scenarios** - Create speed dial patterns or action clusters where multiple related actions need floating presentation with clear visual hierarchy
+- **Mobile-optimized interactions** - Implement thumb-friendly secondary actions positioned for comfortable mobile use without interfering with primary navigation
+- **Contextual quick actions** - Provide context-sensitive actions that appear based on user state, selection, or current view without disrupting the primary action flow
+- **Supplementary creation tasks** - Enable secondary creation actions like duplicate, template-based creation, or variation creation alongside primary creation workflows
+- **Persistent secondary access** - Maintain consistent access to important secondary functions across multiple views or application states
+- **Reduced cognitive load** - Offer smaller visual footprint for actions that users need regularly but shouldn't dominate interface attention
+- **Accessible action alternatives** - Provide alternative action access methods for users who prefer smaller, less prominent interface elements
+
+### Architecture
+
+**No Coupling**: MatMiniFabButton is a standalone component that operates independently without requiring other components or shared context. It extends Angular Material's button foundation with specialized mini floating action button styling, providing a smaller alternative to standard FABs while maintaining all core floating action button behaviors, accessibility features, and Material Design compliance.
+
+### Component Interdependencies
+
+The MiniFabButton component group has no interdependencies - MatMiniFabButton is a self-contained component that:
+
+- Requires no parent components or containers for basic functionality
+- Does not depend on shared context or state management systems
+- Can be used independently as a secondary action element or in combination with other FABs
+- Integrates seamlessly with Angular Material Icons (mat-icon) for visual content
+- Supports all standard floating action button features in a compact form factor
+- Provides automatic elevation, ripple effects, and Material Design animations at smaller scale
+- Includes built-in accessibility features and keyboard navigation support
+- Offers flexible positioning through CSS or Angular layout directives without architectural constraints
+
+## Components
+
+### MatMiniFabButton {Standalone Component}
+
+A compact floating action button component that provides secondary action interfaces with elevated, circular design and Material Design animations, optimized for supporting workflows and space-efficient layouts while maintaining accessibility and visual hierarchy.
+
+**Purpose:** Delivers a smaller, less prominent floating action button with full Material Design styling, including circular design, elevation shadows, ripple effects, and icon support, specifically designed for secondary actions and space-constrained interfaces.
+
+**Interface:**
+
+```typescript
+interface MatMiniFabButtonProps {
+  children: React.ReactNode; // Icon content, typically mat-icon elements for visual action representation
+  color?: "primary" | "accent" | "warn" | string | null; // Material Design color theme for visual hierarchy
+  disabled?: boolean; // Disables button interaction and applies disabled styling
+  disableRipple?: boolean; // Disables the Material Design ripple effect animation
+  disabledInteractive?: boolean; // Allows interaction while maintaining disabled appearance for accessibility
+  ariaLabel?: string; // Accessible label describing the secondary action (essential for icon-only buttons)
+  ariaDescribedBy?: string; // References elements that provide additional action description
+  tabIndex?: number; // Tab order for keyboard navigation (default: 0)
+  type?: "button" | "submit" | "reset"; // Button type for form interactions and semantic behavior
+  id?: string; // Unique identifier for the button element
+  class?: string; // CSS classes for additional styling, positioning, and responsive behavior
+  routerLink?: string; // Angular Router navigation path for navigation-based secondary actions
+  routerLinkActive?: string; // CSS class applied when route is active for navigation context
+  href?: string; // URL for anchor-based navigation (when used as anchor element)
+  target?: string; // Target window/frame for anchor navigation
+  rel?: string; // Relationship attributes for anchor elements
+  form?: string; // Associates button with a form element by ID for form-related secondary actions
+  formAction?: string; // Overrides form action URL for submit mini FABs
+  formMethod?: string; // Overrides form method for submit mini FABs
+  formNoValidate?: boolean; // Bypasses form validation for submit mini FABs
+  title?: string; // Tooltip text displayed on hover for action clarification
+  role?: string; // ARIA role override (default: "button")
+  "data-*"?: string; // Custom data attributes for analytics, testing, or application-specific metadata
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatMiniFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
+function BasicMiniFabButtonExample() {
+  return (
+    <button
+      mat-mini-fab
+      color="accent"
+      (click)="performSecondaryAction()"
+      aria-label="Edit item"
+      title="Edit this item"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatMiniFabButton } from "@angular/material/button";
+import { MatIcon } from "@angular/material/icon";
+
+// Simple mini floating action button for secondary actions
+@Component({
+  template: `
+    <button
+      mat-mini-fab
+      color="accent"
+      (click)="editItem()"
+      aria-label="Edit current item"
+      title="Edit this item"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      button[mat-mini-fab] {
+        position: fixed;
+        bottom: 88px; /* Position above primary FAB */
+        right: 16px;
+        z-index: 999; /* Below primary FAB z-index */
+      }
+    `,
+  ],
+})
+class BasicMiniFabComponent {
+  editItem() {
+    console.log("Secondary edit action triggered");
+  }
+}
+```
+
+### Advanced Usage
+
+```tsx
+// Multiple mini FABs with state management, animations, and contextual behavior
+@Component({
+  template: `
+    <div class="mini-fab-cluster">
+      <!-- Edit mini FAB with conditional visibility -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="editCurrentItem()"
+        [disabled]="!canEdit || isEditing"
+        [class.fab-visible]="showEditButton"
+        aria-label="Edit selected item"
+        title="Edit the currently selected item"
+        [@fadeInOut]="editButtonState"
+      >
+        <mat-icon>{{ isEditing ? "hourglass_empty" : "edit" }}</mat-icon>
+      </button>
+
+      <!-- Share mini FAB with dynamic icon -->
+      <button
+        mat-mini-fab
+        color="accent"
+        (click)="shareCurrentItem()"
+        [disabled]="!selectedItem"
+        aria-label="Share selected item"
+        title="Share this item with others"
+        class="share-mini-fab"
+      >
+        <mat-icon>{{ isSharing ? "sync" : "share" }}</mat-icon>
+      </button>
+
+      <!-- Delete mini FAB with confirmation state -->
+      <button
+        mat-mini-fab
+        color="warn"
+        (click)="deleteCurrentItem()"
+        [disabled]="!canDelete"
+        [class.delete-confirm]="showDeleteConfirmation"
+        aria-label="Delete selected item"
+        title="Delete this item permanently"
+        [@deleteAnimation]="deleteState"
+      >
+        <mat-icon>{{ showDeleteConfirmation ? "check" : "delete" }}</mat-icon>
+      </button>
+
+      <!-- Navigation mini FAB with router integration -->
+      <a
+        mat-mini-fab
+        routerLink="/details/{{ selectedItem?.id }}"
+        routerLinkActive="active-mini-fab"
+        color="primary"
+        [class.nav-disabled]="!selectedItem"
+        aria-label="View item details"
+        title="Navigate to detailed view"
+      >
+        <mat-icon>visibility</mat-icon>
+      </a>
+
+      <!-- Toggle favorite mini FAB with state indication -->
+      <button
+        mat-mini-fab
+        [color]="isFavorite ? 'warn' : 'primary'"
+        (click)="toggleFavorite()"
+        [disabled]="!selectedItem"
+        aria-label="{{ isFavorite ? 'Remove from' : 'Add to' }} favorites"
+        [title]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+        [@favoriteAnimation]="favoriteState"
+      >
+        <mat-icon>{{ isFavorite ? "favorite" : "favorite_border" }}</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .mini-fab-cluster {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+      }
+
+      .fab-visible {
+        opacity: 1;
+        transform: scale(1);
+        transition: all 0.3s ease;
+      }
+
+      .fab-visible:not(.fab-visible) {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      .share-mini-fab {
+        margin-bottom: 8px;
+      }
+
+      .delete-confirm {
+        background-color: #f44336 !important;
+        transform: scale(1.1);
+      }
+
+      .active-mini-fab {
+        background-color: #673ab7;
+      }
+
+      .nav-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      @media (max-width: 768px) {
+        .mini-fab-cluster {
+          bottom: 88px; /* Account for mobile navigation */
+          right: 12px;
+          gap: 10px;
+        }
+      }
+    `,
+  ],
+  animations: [
+    trigger("fadeInOut", [
+      state("visible", style({ opacity: 1, transform: "scale(1)" })),
+      state("hidden", style({ opacity: 0, transform: "scale(0.8)" })),
+      transition("visible => hidden", animate("200ms ease-in")),
+      transition("hidden => visible", animate("300ms ease-out")),
+    ]),
+    trigger("deleteAnimation", [
+      state("normal", style({ transform: "scale(1)" })),
+      state("confirm", style({ transform: "scale(1.1)" })),
+      transition("normal => confirm", animate("200ms ease-out")),
+      transition("confirm => normal", animate("200ms ease-in")),
+    ]),
+    trigger("favoriteAnimation", [
+      transition("* => *", [
+        style({ transform: "scale(0.8)" }),
+        animate("150ms ease-out", style({ transform: "scale(1.2)" })),
+        animate("100ms ease-in", style({ transform: "scale(1)" })),
+      ]),
+    ]),
+  ],
+})
+class AdvancedMiniFabComponent {
+  selectedItem: any = null;
+  canEdit = true;
+  canDelete = true;
+  isEditing = false;
+  isSharing = false;
+  isFavorite = false;
+  showEditButton = true;
+  showDeleteConfirmation = false;
+  editButtonState = "visible";
+  deleteState = "normal";
+  favoriteState = "normal";
+
+  editCurrentItem() {
+    if (!this.canEdit || this.isEditing) return;
+
+    this.isEditing = true;
+    this.editButtonState = "visible";
+
+    // Simulate edit operation
+    setTimeout(() => {
+      this.isEditing = false;
+      // Navigate to edit view or open edit dialog
+    }, 2000);
+  }
+
+  shareCurrentItem() {
+    if (!this.selectedItem) return;
+
+    this.isSharing = true;
+
+    // Simulate share operation
+    setTimeout(() => {
+      this.isSharing = false;
+      // Open share dialog or show share options
+    }, 1000);
+  }
+
+  deleteCurrentItem() {
+    if (!this.canDelete) return;
+
+    if (!this.showDeleteConfirmation) {
+      this.showDeleteConfirmation = true;
+      this.deleteState = "confirm";
+
+      // Reset confirmation after timeout
+      setTimeout(() => {
+        this.showDeleteConfirmation = false;
+        this.deleteState = "normal";
+      }, 3000);
+    } else {
+      // Perform actual deletion
+      this.performDeletion();
+    }
+  }
+
+  toggleFavorite() {
+    if (!this.selectedItem) return;
+
+    this.isFavorite = !this.isFavorite;
+    this.favoriteState = this.isFavorite ? "favorited" : "unfavorited";
+
+    // Update favorite status in backend
+    this.updateFavoriteStatus();
+  }
+
+  private performDeletion() {
+    // Actual deletion logic
+    this.showDeleteConfirmation = false;
+    this.deleteState = "normal";
+  }
+
+  private updateFavoriteStatus() {
+    // Backend favorite update logic
+  }
+}
+```
+
+### Common Variations
+
+**Speed Dial Support Pattern:**
+
+```tsx
+// Mini FABs as part of a speed dial expanding from main FAB
+@Component({
+  template: `
+    <div class="speed-dial-container" [class.speed-dial-open]="isSpeedDialOpen">
+      <!-- Main trigger FAB -->
+      <button
+        mat-fab
+        color="primary"
+        (click)="toggleSpeedDial()"
+        [attr.aria-label]="
+          isSpeedDialOpen ? 'Close actions menu' : 'Open actions menu'
+        "
+        [attr.aria-expanded]="isSpeedDialOpen"
+        class="main-speed-dial-fab"
+      >
+        <mat-icon [@rotateIcon]="isSpeedDialOpen ? 'rotated' : 'normal'">
+          {{ isSpeedDialOpen ? "close" : "more_vert" }}
+        </mat-icon>
+      </button>
+
+      <!-- Speed dial mini FABs -->
+      <div class="speed-dial-actions" [@speedDialAnimation]="speedDialState">
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickEdit()"
+          aria-label="Quick edit"
+          title="Quick edit current item"
+          class="speed-dial-mini-fab"
+          [@fabSlideIn]="'action1'"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickShare()"
+          aria-label="Quick share"
+          title="Share current item"
+          class="speed-dial-mini-fab"
+          [@fabSlideIn]="'action2'"
+        >
+          <mat-icon>share</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="warn"
+          (click)="quickDelete()"
+          aria-label="Quick delete"
+          title="Delete current item"
+          class="speed-dial-mini-fab"
+          [@fabSlideIn]="'action3'"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="primary"
+          (click)="quickDuplicate()"
+          aria-label="Duplicate item"
+          title="Create a copy of this item"
+          class="speed-dial-mini-fab"
+          [@fabSlideIn]="'action4'"
+        >
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .speed-dial-container {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+
+      .main-speed-dial-fab {
+        position: relative;
+        z-index: 2;
+      }
+
+      .speed-dial-actions {
+        position: absolute;
+        bottom: 72px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+      }
+
+      .speed-dial-open .speed-dial-actions {
+        pointer-events: auto;
+      }
+
+      .speed-dial-mini-fab {
+        transform: scale(0);
+        transition: transform 0.3s ease;
+      }
+
+      .speed-dial-open .speed-dial-mini-fab {
+        transform: scale(1);
+      }
+
+      .speed-dial-open .speed-dial-mini-fab:nth-child(1) {
+        transition-delay: 0.1s;
+      }
+
+      .speed-dial-open .speed-dial-mini-fab:nth-child(2) {
+        transition-delay: 0.15s;
+      }
+
+      .speed-dial-open .speed-dial-mini-fab:nth-child(3) {
+        transition-delay: 0.2s;
+      }
+
+      .speed-dial-open .speed-dial-mini-fab:nth-child(4) {
+        transition-delay: 0.25s;
+      }
+    `,
+  ],
+  animations: [
+    trigger("speedDialAnimation", [
+      state(
+        "closed",
+        style({
+          opacity: 0,
+          transform: "translateY(20px)",
+        }),
+      ),
+      state(
+        "open",
+        style({
+          opacity: 1,
+          transform: "translateY(0)",
+        }),
+      ),
+      transition("closed => open", animate("300ms ease-out")),
+      transition("open => closed", animate("200ms ease-in")),
+    ]),
+    trigger("rotateIcon", [
+      state("normal", style({ transform: "rotate(0deg)" })),
+      state("rotated", style({ transform: "rotate(45deg)" })),
+      transition("normal => rotated", animate("200ms ease-in-out")),
+      transition("rotated => normal", animate("200ms ease-in-out")),
+    ]),
+    trigger("fabSlideIn", [
+      transition(":enter", [
+        style({ opacity: 0, transform: "scale(0) translateY(20px)" }),
+        animate(
+          "{{ delay }}ms ease-out",
+          style({ opacity: 1, transform: "scale(1) translateY(0)" }),
+        ),
+      ]),
+    ]),
+  ],
+})
+class SpeedDialMiniFabExample {
+  isSpeedDialOpen = false;
+  speedDialState = "closed";
+
+  toggleSpeedDial() {
+    this.isSpeedDialOpen = !this.isSpeedDialOpen;
+    this.speedDialState = this.isSpeedDialOpen ? "open" : "closed";
+  }
+
+  quickEdit() {
+    this.closeSpeedDial();
+    // Quick edit implementation
+  }
+
+  quickShare() {
+    this.closeSpeedDial();
+    // Quick share implementation
+  }
+
+  quickDelete() {
+    this.closeSpeedDial();
+    // Quick delete implementation
+  }
+
+  quickDuplicate() {
+    this.closeSpeedDial();
+    // Quick duplicate implementation
+  }
+
+  private closeSpeedDial() {
+    this.isSpeedDialOpen = false;
+    this.speedDialState = "closed";
+  }
+}
+```
+
+**Context-Sensitive Mini FAB Pattern:**
+
+```tsx
+// Mini FABs that appear/disappear based on content context
+@Component({
+  template: `
+    <div class="context-mini-fabs">
+      <!-- Edit mini FAB - appears on item hover/selection -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="editSelectedItem()"
+        [class.context-visible]="hasSelection && canEdit"
+        aria-label="Edit selected item"
+        title="Edit the selected item"
+        [@contextFabAnimation]="editFabState"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <!-- Bookmark mini FAB - appears on content scroll -->
+      <button
+        mat-mini-fab
+        color="accent"
+        (click)="bookmarkCurrentPosition()"
+        [class.scroll-visible]="showScrollActions"
+        aria-label="Bookmark current position"
+        title="Bookmark this position"
+        [@scrollFabAnimation]="bookmarkFabState"
+      >
+        <mat-icon>bookmark_add</mat-icon>
+      </button>
+
+      <!-- Back to top mini FAB - appears when scrolled down -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="scrollToTop()"
+        [class.back-to-top-visible]="showBackToTop"
+        aria-label="Scroll to top"
+        title="Return to top of page"
+        [@backToTopAnimation]="backToTopState"
+      >
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+
+      <!-- Context menu mini FAB - appears with content interaction -->
+      <button
+        mat-mini-fab
+        color="accent"
+        (click)="openContextMenu($event)"
+        [class.context-menu-visible]="showContextMenu"
+        aria-label="Open context menu"
+        title="Show additional options"
+        [@contextMenuAnimation]="contextMenuState"
+      >
+        <mat-icon>more_horiz</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .context-mini-fabs {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+      }
+
+      .context-visible,
+      .scroll-visible,
+      .back-to-top-visible,
+      .context-menu-visible {
+        opacity: 1;
+        transform: scale(1) translateX(0);
+        pointer-events: auto;
+      }
+
+      .context-mini-fabs button {
+        opacity: 0;
+        transform: scale(0.8) translateX(20px);
+        pointer-events: none;
+        transition: all 0.3s ease;
+      }
+
+      .back-to-top-visible {
+        position: fixed;
+        bottom: 140px;
+        right: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .context-mini-fabs {
+          bottom: 88px;
+          right: 12px;
+          gap: 10px;
+        }
+      }
+    `,
+  ],
+  animations: [
+    trigger("contextFabAnimation", [
+      state("hidden", style({ opacity: 0, transform: "scale(0.8)" })),
+      state("visible", style({ opacity: 1, transform: "scale(1)" })),
+      transition("hidden => visible", animate("300ms ease-out")),
+      transition("visible => hidden", animate("200ms ease-in")),
+    ]),
+    trigger("scrollFabAnimation", [
+      transition(":enter", [
+        style({ opacity: 0, transform: "translateY(20px)" }),
+        animate(
+          "300ms ease-out",
+          style({ opacity: 1, transform: "translateY(0)" }),
+        ),
+      ]),
+      transition(":leave", [
+        animate(
+          "200ms ease-in",
+          style({ opacity: 0, transform: "translateY(20px)" }),
+        ),
+      ]),
+    ]),
+    trigger("backToTopAnimation", [
+      state(
+        "hidden",
+        style({ opacity: 0, transform: "scale(0) rotate(-180deg)" }),
+      ),
+      state(
+        "visible",
+        style({ opacity: 1, transform: "scale(1) rotate(0deg)" }),
+      ),
+      transition("hidden => visible", animate("400ms ease-out")),
+      transition("visible => hidden", animate("300ms ease-in")),
+    ]),
+    trigger("contextMenuAnimation", [
+      transition("* => *", [
+        style({ transform: "scale(0.9) rotate(-90deg)" }),
+        animate(
+          "250ms ease-out",
+          style({ transform: "scale(1) rotate(0deg)" }),
+        ),
+      ]),
+    ]),
+  ],
+})
+class ContextSensitiveMiniFabExample implements OnInit, OnDestroy {
+  hasSelection = false;
+  canEdit = true;
+  showScrollActions = false;
+  showBackToTop = false;
+  showContextMenu = false;
+  editFabState = "hidden";
+  bookmarkFabState = "hidden";
+  backToTopState = "hidden";
+  contextMenuState = "hidden";
+
+  private scrollSubscription: Subscription;
+  private selectionSubscription: Subscription;
+
+  ngOnInit() {
+    this.setupScrollListeners();
+    this.setupSelectionListeners();
+  }
+
+  ngOnDestroy() {
+    this.scrollSubscription?.unsubscribe();
+    this.selectionSubscription?.unsubscribe();
+  }
+
+  private setupScrollListeners() {
+    this.scrollSubscription = fromEvent(window, "scroll")
+      .pipe(throttleTime(100))
+      .subscribe(() => {
+        const scrollY = window.scrollY;
+
+        // Show back to top after scrolling 300px
+        this.showBackToTop = scrollY > 300;
+        this.backToTopState = this.showBackToTop ? "visible" : "hidden";
+
+        // Show scroll actions during active scrolling
+        this.showScrollActions = scrollY > 100;
+        this.bookmarkFabState = this.showScrollActions ? "visible" : "hidden";
+      });
+  }
+
+  private setupSelectionListeners() {
+    // Listen to selection changes from parent or service
+    this.selectionSubscription = this.selectionService.selection$.subscribe(
+      (selection) => {
+        this.hasSelection = selection.length > 0;
+        this.editFabState =
+          this.hasSelection && this.canEdit ? "visible" : "hidden";
+        this.showContextMenu = this.hasSelection;
+        this.contextMenuState = this.showContextMenu ? "visible" : "hidden";
+      },
+    );
+  }
+
+  editSelectedItem() {
+    if (this.hasSelection && this.canEdit) {
+      // Edit implementation
+    }
+  }
+
+  bookmarkCurrentPosition() {
+    const currentPosition = window.scrollY;
+    // Bookmark implementation
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  openContextMenu(event: Event) {
+    event.preventDefault();
+    // Context menu implementation
+  }
+}
+```
+
+**Responsive Mini FAB Cluster Pattern:**
+
+```tsx
+// Mini FABs that adapt to different screen sizes and orientations
+@Component({
+  template: `
+    <div
+      class="responsive-mini-fab-cluster"
+      [class.mobile-layout]="isMobile"
+      [class.tablet-layout]="isTablet"
+      [class.desktop-layout]="isDesktop"
+    >
+      <!-- Primary action mini FAB -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="primaryAction()"
+        aria-label="Primary action"
+        title="Perform primary action"
+        class="primary-mini-fab"
+      >
+        <mat-icon>star</mat-icon>
+      </button>
+
+      <!-- Secondary action mini FABs -->
+      <div class="secondary-mini-fabs" [class.collapsed]="isCollapsed">
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="secondaryAction1()"
+          aria-label="Share"
+          title="Share this content"
+          [class.hidden-mobile]="isMobile && isCollapsed"
+        >
+          <mat-icon>share</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="secondaryAction2()"
+          aria-label="Download"
+          title="Download this content"
+          [class.hidden-mobile]="isMobile && isCollapsed"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="warn"
+          (click)="secondaryAction3()"
+          aria-label="Delete"
+          title="Delete this content"
+          [class.hidden-mobile]="isMobile && isCollapsed"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <!-- Collapse/expand toggle for mobile -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="toggleCollapse()"
+        [class.mobile-only]="!isMobile"
+        aria-label="{{ isCollapsed ? 'Show' : 'Hide' }} more actions"
+        title="{{ isCollapsed ? 'Show' : 'Hide' }} additional actions"
+        class="collapse-toggle"
+      >
+        <mat-icon>{{ isCollapsed ? "expand_less" : "expand_more" }}</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .responsive-mini-fab-cluster {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+        transition: all 0.3s ease;
+      }
+
+      /* Desktop layout - vertical stack */
+      .desktop-layout {
+        flex-direction: column;
+        right: 16px;
+      }
+
+      /* Tablet layout - horizontal at bottom */
+      .tablet-layout {
+        flex-direction: row;
+        bottom: 16px;
+        right: 50%;
+        transform: translateX(50%);
+        gap: 16px;
+      }
+
+      /* Mobile layout - minimal with collapse */
+      .mobile-layout {
+        flex-direction: column;
+        bottom: 88px; /* Account for mobile nav */
+        right: 12px;
+        gap: 8px;
+      }
+
+      .secondary-mini-fabs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .tablet-layout .secondary-mini-fabs {
+        flex-direction: row;
+        gap: 12px;
+      }
+
+      .hidden-mobile {
+        opacity: 0;
+        transform: scale(0);
+        pointer-events: none;
+        transition: all 0.3s ease;
+      }
+
+      .mobile-only {
+        display: none;
+      }
+
+      .mobile-layout .mobile-only {
+        display: block;
+      }
+
+      .collapsed .secondary-mini-fabs button {
+        opacity: 0;
+        transform: scale(0);
+        pointer-events: none;
+      }
+
+      @media (max-width: 768px) {
+        .responsive-mini-fab-cluster {
+          bottom: 88px;
+          right: 12px;
+        }
+      }
+
+      @media (orientation: landscape) and (max-width: 768px) {
+        .responsive-mini-fab-cluster {
+          flex-direction: row;
+          bottom: 16px;
+          right: 16px;
+          gap: 10px;
+        }
+
+        .secondary-mini-fabs {
+          flex-direction: row;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
+})
+class ResponsiveMiniFabClusterExample implements OnInit, OnDestroy {
+  isMobile = false;
+  isTablet = false;
+  isDesktop = false;
+  isCollapsed = true;
+
+  private breakpointObserver = inject(BreakpointObserver);
+  private breakpointSubscription: Subscription;
+
+  ngOnInit() {
+    this.breakpointSubscription = this.breakpointObserver
+      .observe([Breakpoints.Mobile, Breakpoints.Tablet, Breakpoints.Desktop])
+      .subscribe((result) => {
+        this.isMobile = result.breakpoints[Breakpoints.Mobile];
+        this.isTablet = result.breakpoints[Breakpoints.Tablet];
+        this.isDesktop = result.breakpoints[Breakpoints.Desktop];
+
+        // Auto-expand on larger screens
+        if (!this.isMobile) {
+          this.isCollapsed = false;
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.breakpointSubscription?.unsubscribe();
+  }
+
+  toggleCollapse() {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
+  primaryAction() {
+    // Primary action implementation
+  }
+
+  secondaryAction1() {
+    // Share implementation
+  }
+
+  secondaryAction2() {
+    // Download implementation
+  }
+
+  secondaryAction3() {
+    // Delete implementation
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Maintain clear hierarchy** - Use mini FABs for secondary actions while reserving standard FABs for primary actions to establish proper visual hierarchy
+- **Limit quantity per view** - Avoid overwhelming users with too many mini FABs; typically use 2-4 mini FABs maximum per screen or context
+- **Ensure adequate spacing** - Maintain sufficient spacing between mini FABs and other interface elements to prevent accidental activation
+- **Choose appropriate colors** - Use accent colors for most mini FABs, primary for important secondary actions, and warn sparingly for destructive actions
+- **Position strategically** - Place mini FABs where they're easily accessible but don't interfere with primary content or navigation
+- **Group related actions** - Cluster related mini FABs together while maintaining clear visual separation from unrelated actions
+- **Consider mobile ergonomics** - Position mini FABs within comfortable thumb reach and account for mobile navigation elements
+
+### Accessibility
+
+- **Provide descriptive labels** - Always include clear aria-label attributes that specifically describe each mini FAB's action and context
+- **Ensure adequate contrast** - Use Material Design color tokens to maintain WCAG compliance for contrast ratios against backgrounds
+- **Support keyboard navigation** - Ensure mini FABs are reachable via keyboard with proper focus indicators and logical tab order
+- **Implement focus management** - Handle focus appropriately when mini FABs trigger state changes, dialogs, or navigation actions
+- **Size for touch targets** - Maintain minimum 44px touch targets even for mini FABs to ensure accessibility compliance
+- **Provide alternative access** - Consider offering alternative ways to access mini FAB functionality through menus or other interface elements
+- **Announce state changes** - Use ARIA live regions to announce dynamic state changes or action completion feedback
+
+### Performance
+
+- **Optimize icon assets** - Use optimized SVG icons or icon fonts to minimize loading impact for frequently displayed mini FABs
+- **Implement efficient animations** - Use CSS transforms and opacity for smooth mini FAB animations while avoiding layout-triggering properties
+- **Debounce rapid interactions** - Prevent multiple rapid clicks on mini FABs that could trigger expensive operations or API calls
+- **Lazy load complex functionality** - Consider lazy loading complex mini FAB interactions until user interaction or visibility requirements are met
+- **Manage event listeners** - Properly dispose of scroll listeners, resize observers, and other event subscriptions to prevent memory leaks
+- **Optimize rendering cycles** - Use OnPush change detection strategy and immutable data patterns for components with multiple mini FABs
+
+## Common Patterns
+
+### Pattern 1: Secondary Action Support
+
+```tsx
+// Mini FABs that provide supporting actions for primary content workflows
+@Component({
+  template: `
+    <div class="content-area">
+      <!-- Main content area -->
+      <div class="primary-content">
+        <!-- Primary content here -->
+      </div>
+
+      <!-- Supporting action mini FABs -->
+      <div class="support-actions">
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickSave()"
+          [disabled]="!hasChanges"
+          aria-label="Quick save changes"
+          title="Save current changes"
+          [@saveAnimation]="saveState"
+        >
+          <mat-icon>{{ isSaving ? "sync" : "save" }}</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="primary"
+          (click)="togglePreview()"
+          [class.preview-active]="isPreviewMode"
+          aria-label="{{ isPreviewMode ? 'Exit' : 'Enter' }} preview mode"
+          title="{{ isPreviewMode ? 'Exit' : 'Enter' }} preview"
+        >
+          <mat-icon>{{ isPreviewMode ? "edit" : "visibility" }}</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="showVersionHistory()"
+          aria-label="View version history"
+          title="Show document version history"
+        >
+          <mat-icon>history</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="warn"
+          (click)="resetChanges()"
+          [disabled]="!hasChanges"
+          aria-label="Reset all changes"
+          title="Reset to last saved version"
+        >
+          <mat-icon>restore</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .content-area {
+        position: relative;
+        min-height: 100vh;
+      }
+
+      .support-actions {
+        position: fixed;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+      }
+
+      .preview-active {
+        background-color: #4caf50 !important;
+      }
+
+      @media (max-width: 768px) {
+        .support-actions {
+          bottom: 88px;
+          top: auto;
+          transform: none;
+          right: 12px;
+          flex-direction: row;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
+  animations: [
+    trigger("saveAnimation", [
+      state("idle", style({ transform: "scale(1)" })),
+      state("saving", style({ transform: "scale(0.95)" })),
+      state("saved", style({ transform: "scale(1.1)" })),
+      transition("idle => saving", animate("150ms ease-in")),
+      transition("saving => saved", animate("200ms ease-out")),
+      transition("saved => idle", animate("300ms ease-in-out")),
+    ]),
+  ],
+})
+class SecondaryActionSupportExample {
+  hasChanges = false;
+  isSaving = false;
+  isPreviewMode = false;
+  saveState = "idle";
+
+  async quickSave() {
+    if (!this.hasChanges || this.isSaving) return;
+
+    this.isSaving = true;
+    this.saveState = "saving";
+
+    try {
+      await this.saveChanges();
+      this.saveState = "saved";
+      this.hasChanges = false;
+
+      setTimeout(() => {
+        this.saveState = "idle";
+      }, 1000);
+    } catch (error) {
+      this.handleSaveError(error);
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  togglePreview() {
+    this.isPreviewMode = !this.isPreviewMode;
+    // Toggle preview implementation
+  }
+
+  showVersionHistory() {
+    // Open version history dialog or panel
+  }
+
+  resetChanges() {
+    if (this.hasChanges) {
+      // Reset to last saved state
+      this.hasChanges = false;
+    }
+  }
+
+  private async saveChanges(): Promise<void> {
+    // Actual save implementation
+    return new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+
+  private handleSaveError(error: any): void {
+    this.saveState = "idle";
+    // Error handling implementation
+  }
+}
+```
+
+### Pattern 2: Quick Action Cluster
+
+```tsx
+// Clustered mini FABs for rapid task completion and workflow acceleration
+@Component({
+  template: `
+    <div class="quick-action-cluster" [class.cluster-expanded]="isExpanded">
+      <!-- Cluster trigger -->
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="toggleCluster()"
+        [attr.aria-label]="
+          isExpanded ? 'Collapse quick actions' : 'Expand quick actions'
+        "
+        [attr.aria-expanded]="isExpanded"
+        title="Toggle quick actions"
+        class="cluster-trigger"
+        [@triggerAnimation]="triggerState"
+      >
+        <mat-icon>{{ isExpanded ? "close" : "flash_on" }}</mat-icon>
+      </button>
+
+      <!-- Quick action mini FABs -->
+      <div class="cluster-actions" [@clusterAnimation]="clusterState">
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickAdd()"
+          aria-label="Quick add item"
+          title="Add new item quickly"
+          class="cluster-action"
+          [@actionSlide]="'action1'"
+        >
+          <mat-icon>add_circle</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickSearch()"
+          aria-label="Quick search"
+          title="Open quick search"
+          class="cluster-action"
+          [@actionSlide]="'action2'"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickFilter()"
+          aria-label="Quick filter"
+          title="Apply quick filters"
+          class="cluster-action"
+          [@actionSlide]="'action3'"
+        >
+          <mat-icon>filter_list</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="accent"
+          (click)="quickExport()"
+          aria-label="Quick export"
+          title="Export current view"
+          class="cluster-action"
+          [@actionSlide]="'action4'"
+        >
+          <mat-icon>file_download</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          color="warn"
+          (click)="quickClear()"
+          aria-label="Quick clear"
+          title="Clear current selection"
+          class="cluster-action"
+          [@actionSlide]="'action5'"
+        >
+          <mat-icon>clear_all</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .quick-action-cluster {
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        z-index: 999;
+      }
+
+      .cluster-trigger {
+        position: relative;
+        z-index: 2;
+      }
+
+      .cluster-actions {
+        position: absolute;
+        bottom: 0;
+        left: 56px; /* Position to the right of trigger */
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+      }
+
+      .cluster-expanded .cluster-actions {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .cluster-action {
+        transform: scale(0.8) translateX(-20px);
+        transition: all 0.3s ease;
+      }
+
+      .cluster-expanded .cluster-action {
+        transform: scale(1) translateX(0);
+      }
+
+      .cluster-expanded .cluster-action:nth-child(1) {
+        transition-delay: 0.1s;
+      }
+
+      .cluster-expanded .cluster-action:nth-child(2) {
+        transition-delay: 0.15s;
+      }
+
+      .cluster-expanded .cluster-action:nth-child(3) {
+        transition-delay: 0.2s;
+      }
+
+      .cluster-expanded .cluster-action:nth-child(4) {
+        transition-delay: 0.25s;
+      }
+
+      .cluster-expanded .cluster-action:nth-child(5) {
+        transition-delay: 0.3s;
+      }
+
+      @media (max-width: 768px) {
+        .quick-action-cluster {
+          bottom: 88px;
+          left: 12px;
+        }
+
+        .cluster-actions {
+          flex-direction: column;
+          left: 0;
+          bottom: 56px;
+        }
+
+        .cluster-action {
+          transform: scale(0.8) translateY(20px);
+        }
+
+        .cluster-expanded .cluster-action {
+          transform: scale(1) translateY(0);
+        }
+      }
+    `,
+  ],
+  animations: [
+    trigger("triggerAnimation", [
+      state("collapsed", style({ transform: "scale(1) rotate(0deg)" })),
+      state("expanded", style({ transform: "scale(1.1) rotate(45deg)" })),
+      transition("collapsed => expanded", animate("300ms ease-out")),
+      transition("expanded => collapsed", animate("200ms ease-in")),
+    ]),
+    trigger("clusterAnimation", [
+      state("closed", style({ opacity: 0, transform: "scale(0.8)" })),
+      state("open", style({ opacity: 1, transform: "scale(1)" })),
+      transition("closed => open", animate("300ms ease-out")),
+      transition("open => closed", animate("200ms ease-in")),
+    ]),
+    trigger("actionSlide", [
+      transition(":enter", [
+        style({ opacity: 0, transform: "scale(0) translateX(-30px)" }),
+        animate(
+          "300ms {{ delay }}ms ease-out",
+          style({ opacity: 1, transform: "scale(1) translateX(0)" }),
+        ),
+      ]),
+      transition(":leave", [
+        animate(
+          "200ms ease-in",
+          style({ opacity: 0, transform: "scale(0) translateX(-30px)" }),
+        ),
+      ]),
+    ]),
+  ],
+})
+class QuickActionClusterExample {
+  isExpanded = false;
+  triggerState = "collapsed";
+  clusterState = "closed";
+
+  toggleCluster() {
+    this.isExpanded = !this.isExpanded;
+    this.triggerState = this.isExpanded ? "expanded" : "collapsed";
+    this.clusterState = this.isExpanded ? "open" : "closed";
+  }
+
+  quickAdd() {
+    this.performQuickAction("add");
+  }
+
+  quickSearch() {
+    this.performQuickAction("search");
+  }
+
+  quickFilter() {
+    this.performQuickAction("filter");
+  }
+
+  quickExport() {
+    this.performQuickAction("export");
+  }
+
+  quickClear() {
+    this.performQuickAction("clear");
+  }
+
+  private performQuickAction(action: string) {
+    // Collapse cluster after action
+    this.toggleCluster();
+
+    // Perform the specific action
+    switch (action) {
+      case "add":
+        // Quick add implementation
+        break;
+      case "search":
+        // Quick search implementation
+        break;
+      case "filter":
+        // Quick filter implementation
+        break;
+      case "export":
+        // Quick export implementation
+        break;
+      case "clear":
+        // Quick clear implementation
+        break;
+    }
+  }
+}
+```

@@ -1,0 +1,969 @@
+---
+
+# Toolbar Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate toolbar functionality. The Toolbar component group provides a foundational structure for creating application headers, navigation bars, and action toolbars with consistent styling and responsive behavior across Material Design applications.
+
+### When to Use
+
+- **Application Headers**: Create primary navigation and branding areas at the top of applications
+- **Action Bars**: Build contextual toolbars with actions relevant to the current view or selection
+- **Navigation Bars**: Implement secondary navigation with links, breadcrumbs, or tabs
+- **Page Headers**: Structure page-level headers with titles, subtitles, and primary actions
+- **Mobile App Bars**: Create mobile-friendly headers with proper touch targets and responsive design
+- **Status Bars**: Display application status, notifications, or system information
+- **Search Bars**: Implement search interfaces with integrated input fields and action buttons
+- **Modal Headers**: Structure headers for dialogs, bottom sheets, or side panels
+
+### Architecture
+
+**Moderate Coupling**: The Toolbar component group consists of a primary container component (MatToolbar) that can optionally contain MatToolbarRow components for organized content layout. While MatToolbarRow is designed to work with MatToolbar, it's not strictly required, allowing for flexible content organization.
+
+### Component Interdependencies
+
+The Toolbar components form a moderately coupled system with the following relationships:
+
+- **MatToolbar**: Primary container that provides the foundational styling, theming, and layout structure
+- **MatToolbarRow**: Optional content organization component that helps structure complex toolbars with multiple rows of content
+- **Content Projection**: Both components support flexible content projection, allowing any Angular components or HTML elements to be placed within them
+- **Responsive Behavior**: Components work together to provide responsive design patterns for different screen sizes
+- **Theme Integration**: Both components inherit and apply Material Design theming consistently
+
+## Components
+
+### MatToolbar {Primary Component}
+
+**Purpose:** The primary container component that provides the foundational structure for application toolbars, headers, and navigation bars with built-in Material Design styling and responsive behavior.
+
+**Interface:**
+
+```typescript
+class MatToolbar implements AfterViewInit {
+  // Theme color for the toolbar (M2 themes only)
+  // Supported values: 'primary', 'accent', 'warn', or custom color
+  color?: string | null;
+
+  // Reference to all projected toolbar row elements
+  _toolbarRows: QueryList<MatToolbarRow>;
+
+  // Element reference for DOM manipulation and styling
+  protected _elementRef: ElementRef<any>;
+
+  // Lifecycle hook called after view initialization
+  ngAfterViewInit(): void;
+
+  // Internal method to validate toolbar structure
+  private _checkToolbarMixedModes(): void;
+}
+```
+
+**Dependencies:** None (standalone component)
+**Provides:** Foundational toolbar structure, theming context, and responsive layout for content and optional toolbar rows
+
+**Usage Example:**
+
+```typescript
+import { MatToolbarModule } from "@angular/material/toolbar";
+
+@Component({
+  template: `
+    <mat-toolbar color="primary">
+      <span>My Application</span>
+      <span class="toolbar-spacer"></span>
+      <button mat-icon-button>
+        <mat-icon>menu</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .toolbar-spacer {
+        flex: 1 1 auto;
+      }
+    `,
+  ],
+})
+export class AppHeaderComponent {
+  // Component logic here
+}
+```
+
+### MatToolbarRow {Content Organization Component}
+
+**Purpose:** Optional component for organizing toolbar content into distinct rows, enabling complex multi-row toolbar layouts with proper spacing and alignment.
+
+**Interface:**
+
+```typescript
+class MatToolbarRow {
+  // Directive declaration for template usage
+  // Applied as mat-toolbar-row element or attribute
+  // Provides consistent spacing and alignment within toolbar
+}
+```
+
+**Context Dependencies:** Designed to work within MatToolbar but can be used independently
+**Parent Requirements:** Typically used within MatToolbar for optimal styling and behavior
+**Usage Pattern:** Multiple toolbar rows can be used to create layered toolbar designs
+
+**Usage Example:**
+
+```typescript
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span>Application Title</span>
+    <span class="toolbar-spacer"></span>
+    <button mat-icon-button>
+      <mat-icon>account_circle</mat-icon>
+    </button>
+  </mat-toolbar-row>
+
+  <mat-toolbar-row>
+    <nav>
+      <a mat-button routerLink="/home">Home</a>
+      <a mat-button routerLink="/products">Products</a>
+      <a mat-button routerLink="/about">About</a>
+    </nav>
+  </mat-toolbar-row>
+</mat-toolbar>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+// Simple application header
+@Component({
+  selector: "app-basic-toolbar",
+  template: `
+    <mat-toolbar color="primary">
+      <mat-icon>menu</mat-icon>
+      <span>My App</span>
+      <span class="spacer"></span>
+      <button mat-icon-button>
+        <mat-icon>search</mat-icon>
+      </button>
+      <button mat-icon-button>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .spacer {
+        flex: 1 1 auto;
+      }
+    `,
+  ],
+})
+export class BasicToolbarComponent {}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex multi-row toolbar with navigation and actions
+@Component({
+  selector: "app-advanced-toolbar",
+  template: `
+    <mat-toolbar color="primary">
+      <!-- Main navigation row -->
+      <mat-toolbar-row>
+        <button mat-icon-button (click)="toggleSidenav()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <span class="app-title">
+          <img src="assets/logo.svg" alt="Logo" class="logo" />
+          {{ applicationTitle }}
+        </span>
+
+        <span class="spacer"></span>
+
+        <!-- User actions -->
+        <button mat-icon-button [matMenuTriggerFor]="userMenu">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>person</mat-icon>
+            Profile
+          </button>
+          <button mat-menu-item>
+            <mat-icon>settings</mat-icon>
+            Settings
+          </button>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>exit_to_app</mat-icon>
+            Logout
+          </button>
+        </mat-menu>
+      </mat-toolbar-row>
+
+      <!-- Secondary navigation row -->
+      <mat-toolbar-row *ngIf="showSecondaryNav">
+        <nav class="secondary-nav">
+          <a
+            mat-button
+            *ngFor="let link of navigationLinks"
+            [routerLink]="link.path"
+            routerLinkActive="active-link"
+          >
+            <mat-icon *ngIf="link.icon">{{ link.icon }}</mat-icon>
+            {{ link.label }}
+          </a>
+        </nav>
+
+        <span class="spacer"></span>
+
+        <!-- Search functionality -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            placeholder="Search..."
+            [(ngModel)]="searchTerm"
+            (keyup.enter)="performSearch()"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            *ngIf="searchTerm"
+            (click)="clearSearch()"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+        </mat-form-field>
+      </mat-toolbar-row>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .spacer {
+        flex: 1 1 auto;
+      }
+
+      .app-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .logo {
+        height: 32px;
+        width: auto;
+      }
+
+      .secondary-nav {
+        display: flex;
+        gap: 8px;
+      }
+
+      .active-link {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .search-field {
+        width: 300px;
+      }
+
+      .search-field .mat-form-field-wrapper {
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 768px) {
+        .search-field {
+          width: 200px;
+        }
+
+        .secondary-nav {
+          display: none;
+        }
+      }
+    `,
+  ],
+})
+export class AdvancedToolbarComponent implements OnInit {
+  applicationTitle = "Dashboard";
+  showSecondaryNav = true;
+  searchTerm = "";
+
+  navigationLinks = [
+    { path: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { path: "/analytics", label: "Analytics", icon: "analytics" },
+    { path: "/reports", label: "Reports", icon: "assessment" },
+    { path: "/settings", label: "Settings", icon: "settings" },
+  ];
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    // Initialize component
+  }
+
+  toggleSidenav() {
+    // Toggle side navigation
+  }
+
+  performSearch() {
+    if (this.searchTerm.trim()) {
+      this.router.navigate(["/search"], {
+        queryParams: { q: this.searchTerm },
+      });
+    }
+  }
+
+  clearSearch() {
+    this.searchTerm = "";
+  }
+
+  logout() {
+    // Logout logic
+  }
+}
+```
+
+### Common Variations
+
+#### Fixed Toolbar
+
+```typescript
+// Toolbar that stays fixed at the top of the viewport
+@Component({
+  template: `
+    <mat-toolbar color="primary" class="fixed-toolbar">
+      <span>Fixed Header</span>
+    </mat-toolbar>
+
+    <div class="content-with-fixed-toolbar">
+      <!-- Main content -->
+    </div>
+  `,
+  styles: [
+    `
+      .fixed-toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+      }
+
+      .content-with-fixed-toolbar {
+        margin-top: 64px; /* Height of mat-toolbar */
+      }
+
+      @media (max-width: 599px) {
+        .content-with-fixed-toolbar {
+          margin-top: 56px; /* Height of mat-toolbar on mobile */
+        }
+      }
+    `,
+  ],
+})
+export class FixedToolbarComponent {}
+```
+
+#### Dense Toolbar
+
+```typescript
+// Compact toolbar for dense layouts
+@Component({
+  template: `
+    <mat-toolbar color="accent" class="dense-toolbar">
+      <mat-icon>folder</mat-icon>
+      <span>Compact Mode</span>
+      <span class="spacer"></span>
+      <button mat-icon-button>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .dense-toolbar {
+        min-height: 48px;
+        height: 48px;
+      }
+    `,
+  ],
+})
+export class DenseToolbarComponent {}
+```
+
+#### Contextual Action Toolbar
+
+```typescript
+// Toolbar that appears when items are selected
+@Component({
+  template: `
+    <mat-toolbar
+      *ngIf="selectedItems.length > 0"
+      color="accent"
+      class="contextual-toolbar"
+      [@slideInOut]
+    >
+      <button mat-icon-button (click)="clearSelection()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <span>{{ selectedItems.length }} selected</span>
+
+      <span class="spacer"></span>
+
+      <button mat-icon-button (click)="deleteSelected()">
+        <mat-icon>delete</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="shareSelected()">
+        <mat-icon>share</mat-icon>
+      </button>
+
+      <button mat-icon-button [matMenuTriggerFor]="moreMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #moreMenu="matMenu">
+        <button mat-menu-item (click)="downloadSelected()">
+          <mat-icon>download</mat-icon>
+          Download
+        </button>
+        <button mat-menu-item (click)="archiveSelected()">
+          <mat-icon>archive</mat-icon>
+          Archive
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+  `,
+  animations: [
+    trigger("slideInOut", [
+      transition(":enter", [
+        style({ transform: "translateY(-100%)" }),
+        animate("200ms ease-in", style({ transform: "translateY(0%)" })),
+      ]),
+      transition(":leave", [
+        animate("200ms ease-out", style({ transform: "translateY(-100%)" })),
+      ]),
+    ]),
+  ],
+})
+export class ContextualToolbarComponent {
+  selectedItems: any[] = [];
+
+  clearSelection() {
+    this.selectedItems = [];
+  }
+
+  deleteSelected() {
+    // Delete logic
+  }
+
+  shareSelected() {
+    // Share logic
+  }
+
+  downloadSelected() {
+    // Download logic
+  }
+
+  archiveSelected() {
+    // Archive logic
+  }
+}
+```
+
+#### Mobile-Responsive Toolbar
+
+```typescript
+// Toolbar that adapts to mobile devices
+@Component({
+  template: `
+    <mat-toolbar color="primary" class="responsive-toolbar">
+      <button mat-icon-button *ngIf="isMobile" (click)="toggleMobileMenu()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="app-title">
+        <img *ngIf="!isMobile" src="assets/logo-full.svg" alt="Logo" />
+        <img *ngIf="isMobile" src="assets/logo-icon.svg" alt="Logo" />
+        <span *ngIf="!isMobile">{{ fullTitle }}</span>
+      </span>
+
+      <span class="spacer"></span>
+
+      <!-- Desktop navigation -->
+      <nav *ngIf="!isMobile" class="desktop-nav">
+        <a mat-button *ngFor="let item of navItems" [routerLink]="item.path">
+          {{ item.label }}
+        </a>
+      </nav>
+
+      <!-- Mobile actions -->
+      <ng-container *ngIf="isMobile">
+        <button mat-icon-button (click)="openSearch()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </ng-container>
+
+      <!-- Desktop actions -->
+      <ng-container *ngIf="!isMobile">
+        <mat-form-field appearance="outline" class="search-field">
+          <input matInput placeholder="Search..." />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <button mat-icon-button>
+          <mat-icon>notifications</mat-icon>
+        </button>
+      </ng-container>
+
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .responsive-toolbar {
+        padding: 0 16px;
+      }
+
+      .app-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .desktop-nav {
+        display: flex;
+        gap: 8px;
+      }
+
+      .search-field {
+        width: 250px;
+        margin-right: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .responsive-toolbar {
+          padding: 0 8px;
+        }
+
+        .search-field {
+          display: none;
+        }
+      }
+    `,
+  ],
+})
+export class ResponsiveToolbarComponent implements OnInit, OnDestroy {
+  isMobile = false;
+  fullTitle = "My Application";
+
+  navItems = [
+    { path: "/home", label: "Home" },
+    { path: "/products", label: "Products" },
+    { path: "/about", label: "About" },
+  ];
+
+  private breakpointObserver = inject(BreakpointObserver);
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    this.breakpointObserver
+      .observe([Breakpoints.Small, Breakpoints.XSmall])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        this.isMobile = result.matches;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  toggleMobileMenu() {
+    // Toggle mobile menu logic
+  }
+
+  openSearch() {
+    // Open mobile search overlay
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Content Projection**: MatToolbar projects any content placed within its tags, providing flexible content organization
+2. **Row Organization**: MatToolbarRow components structure content into distinct visual rows within the toolbar
+3. **Theme Inheritance**: Color and theme properties flow from MatToolbar to child components automatically
+4. **Responsive Behavior**: Both components respond to viewport changes and apply appropriate styling
+
+### Context Sharing
+
+- **Theme Context**: MatToolbar provides theming context that affects all projected content
+- **Layout Context**: The toolbar establishes a flex layout context that child components can utilize
+- **Spacing Context**: MatToolbarRow components inherit consistent spacing and alignment from the parent toolbar
+
+### Event Handling
+
+- **User Interactions**: Click, focus, and keyboard events on toolbar content bubble up normally through the DOM
+- **Navigation Events**: Router navigation and menu interactions work seamlessly within toolbar components
+- **Responsive Events**: Breakpoint changes can be handled to adjust toolbar content dynamically
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Keep content focused**: Limit toolbar content to essential navigation and actions to avoid cluttering the interface
+- **Maintain consistent hierarchy**: Use clear visual hierarchy with primary actions more prominent than secondary ones
+- **Implement responsive design**: Ensure toolbars work well across all device sizes with appropriate content adaptation
+- **Follow Material Design principles**: Stick to recommended spacing, typography, and interaction patterns for consistency
+- **Optimize for touch**: Ensure interactive elements meet minimum touch target sizes (44px) for mobile users
+
+### Accessibility
+
+- **Keyboard navigation**: Ensure all interactive elements in the toolbar are keyboard accessible with proper tab order
+- **Screen reader support**: Use proper semantic HTML and ARIA labels for toolbar actions and navigation elements
+- **Color contrast**: Maintain sufficient color contrast between toolbar background and content, especially for text and icons
+- **Focus indicators**: Provide clear visual focus indicators for keyboard navigation within toolbar elements
+- **Responsive text**: Ensure text remains readable when users increase font sizes or zoom levels
+
+### Performance
+
+- **Minimize DOM updates**: Avoid frequent changes to toolbar content that could trigger layout recalculations
+- **Optimize images**: Use appropriately sized and optimized images for logos and icons in toolbars
+- **Lazy load content**: Consider lazy loading of non-critical toolbar features like search suggestions or user menus
+- **Cache navigation data**: Cache navigation links and user data to avoid repeated API calls when rendering toolbars
+
+## Common Patterns
+
+### Pattern 1: Application Shell Toolbar
+
+```typescript
+// Main application toolbar with consistent branding and navigation
+@Component({
+  selector: "app-shell-toolbar",
+  template: `
+    <mat-toolbar color="primary" class="app-shell-toolbar">
+      <!-- Branding section -->
+      <div class="branding">
+        <img src="assets/logo.svg" alt="Company Logo" class="logo" />
+        <span class="app-name">{{ applicationName }}</span>
+      </div>
+
+      <span class="spacer"></span>
+
+      <!-- Global navigation -->
+      <nav class="global-nav" *ngIf="!isMobile">
+        <a
+          mat-button
+          *ngFor="let item of globalNavItems"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+        >
+          {{ item.label }}
+        </a>
+      </nav>
+
+      <!-- Global actions -->
+      <div class="global-actions">
+        <button
+          mat-icon-button
+          (click)="toggleNotifications()"
+          [class.has-notifications]="hasNotifications"
+        >
+          <mat-icon>notifications</mat-icon>
+        </button>
+
+        <button mat-icon-button [matMenuTriggerFor]="profileMenu">
+          <img
+            [src]="userProfileImage"
+            [alt]="userName"
+            class="profile-avatar"
+          />
+        </button>
+
+        <mat-menu #profileMenu="matMenu">
+          <div class="profile-header">
+            <div class="profile-info">
+              <strong>{{ userName }}</strong>
+              <small>{{ userEmail }}</small>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item routerLink="/profile">
+            <mat-icon>person</mat-icon>
+            My Profile
+          </button>
+          <button mat-menu-item routerLink="/settings">
+            <mat-icon>settings</mat-icon>
+            Settings
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="signOut()">
+            <mat-icon>exit_to_app</mat-icon>
+            Sign Out
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .app-shell-toolbar {
+        padding: 0 24px;
+        height: 64px;
+      }
+
+      .branding {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo {
+        height: 32px;
+        width: auto;
+      }
+
+      .app-name {
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .global-nav {
+        display: flex;
+        gap: 8px;
+      }
+
+      .global-nav .active {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .global-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .profile-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+
+      .has-notifications::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #f44336;
+      }
+
+      .profile-header {
+        padding: 16px;
+      }
+
+      .profile-info strong {
+        display: block;
+      }
+
+      .profile-info small {
+        color: rgba(0, 0, 0, 0.6);
+      }
+    `,
+  ],
+})
+export class AppShellToolbarComponent {
+  applicationName = "My Application";
+  userName = "John Doe";
+  userEmail = "john@example.com";
+  userProfileImage = "assets/default-avatar.svg";
+  hasNotifications = true;
+  isMobile = false;
+
+  globalNavItems = [
+    { path: "/dashboard", label: "Dashboard" },
+    { path: "/projects", label: "Projects" },
+    { path: "/reports", label: "Reports" },
+  ];
+
+  toggleNotifications() {
+    // Handle notifications toggle
+  }
+
+  signOut() {
+    // Handle sign out
+  }
+}
+```
+
+### Pattern 2: Page-Level Action Toolbar
+
+```typescript
+// Contextual toolbar for specific page actions
+@Component({
+  selector: "app-page-toolbar",
+  template: `
+    <mat-toolbar class="page-toolbar">
+      <!-- Page title section -->
+      <div class="page-title-section">
+        <button mat-icon-button *ngIf="showBackButton" (click)="navigateBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+
+        <div class="title-info">
+          <h1 class="page-title">{{ pageTitle }}</h1>
+          <p class="page-subtitle" *ngIf="pageSubtitle">
+            {{ pageSubtitle }}
+          </p>
+        </div>
+      </div>
+
+      <span class="spacer"></span>
+
+      <!-- Page actions -->
+      <div class="page-actions">
+        <button
+          mat-stroked-button
+          *ngFor="let action of secondaryActions"
+          (click)="executeAction(action)"
+          [disabled]="action.disabled"
+        >
+          <mat-icon *ngIf="action.icon">{{ action.icon }}</mat-icon>
+          {{ action.label }}
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="primaryAction"
+          (click)="executeAction(primaryAction)"
+          [disabled]="primaryAction.disabled"
+        >
+          <mat-icon *ngIf="primaryAction.icon">{{
+            primaryAction.icon
+          }}</mat-icon>
+          {{ primaryAction.label }}
+        </button>
+
+        <button
+          mat-icon-button
+          *ngIf="moreActions.length > 0"
+          [matMenuTriggerFor]="moreMenu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #moreMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let action of moreActions"
+            (click)="executeAction(action)"
+            [disabled]="action.disabled"
+          >
+            <mat-icon *ngIf="action.icon">{{ action.icon }}</mat-icon>
+            {{ action.label }}
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar>
+  `,
+  styles: [
+    `
+      .page-toolbar {
+        background-color: transparent;
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      }
+
+      .page-title-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .title-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 400;
+        line-height: 1.2;
+      }
+
+      .page-subtitle {
+        margin: 4px 0 0 0;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+      }
+
+      .page-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      @media (max-width: 768px) {
+        .page-toolbar {
+          padding: 12px 16px;
+        }
+
+        .page-title {
+          font-size: 20px;
+        }
+
+        .page-actions button:not(.mat-icon-button) span {
+          display: none;
+        }
+      }
+    `,
+  ],
+})
+export class PageToolbarComponent {
+  @Input() pageTitle: string = "";
+  @Input() pageSubtitle?: string;
+  @Input() showBackButton: boolean = false;
+  @Input() primaryAction?: ToolbarAction;
+  @Input() secondaryActions: ToolbarAction[] = [];
+  @Input() moreActions: ToolbarAction[] = [];
+
+  navigateBack() {
+    // Handle back navigation
+  }
+
+  executeAction(action: ToolbarAction) {
+    if (action.handler) {
+      action.handler();
+    }
+  }
+}
+
+interface ToolbarAction {
+  id: string;
+  label: string;
+  icon?: string;
+  disabled?: boolean;
+  handler?: () => void;
+}
+```

@@ -1,0 +1,1006 @@
+---
+
+# Stepper Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate step-by-step workflow components with required hierarchical structure. The Stepper component group provides a comprehensive solution for creating guided workflows, multi-step forms, and sequential navigation patterns with built-in accessibility and theming support.
+
+### When to Use
+
+- **Multi-step Forms**: When you need to break complex forms into manageable steps with validation
+- **Guided Workflows**: For onboarding processes, setup wizards, or tutorial flows
+- **Sequential Data Entry**: When data collection must follow a specific order or depends on previous steps
+- **Progress Indication**: To show users their progress through a long process
+- **Conditional Navigation**: When next steps depend on completion or validation of previous steps
+- **Mobile-Friendly Workflows**: For responsive step-by-step experiences that work across devices
+
+### Architecture
+
+**Critical/Strong Coupling**: The Stepper component group requires strict hierarchical relationships and shared context between components. All components must work together in a specific structure to form a functional stepper workflow.
+
+### Component Interdependencies
+
+The Stepper components form a tightly coupled system with specific requirements:
+
+- **MatStepper**: Root container that orchestrates the entire stepper workflow and navigation logic
+- **MatStep**: Individual step components that contain step content and validation logic
+- **MatStepHeader**: Visual representation of step status, automatically generated from step metadata
+- **MatStepLabel**: Optional template for custom step labels and descriptions
+- **MatStepContent**: Template for lazy-loaded step content to improve performance
+- **Navigation Components**: MatStepperNext and MatStepperPrevious for step navigation controls
+- **MatStepperIcon**: Custom icon templates for different step states (optional, completed, error)
+
+## Components
+
+### MatStepper {Primary Component}
+
+**Purpose:** The root container component that orchestrates the entire stepper workflow, manages step navigation, validation state, and provides context for all child components.
+
+**Interface:**
+
+```typescript
+class MatStepper extends CdkStepper {
+  // Steps that belong to the current stepper
+  readonly steps: QueryList<MatStep>;
+
+  // Whether ripples should be disabled for step headers
+  disableRipple: boolean;
+
+  // Theme color for all steps in stepper (M2 themes only)
+  color: ThemePalette;
+
+  // Label position in horizontal orientation
+  labelPosition: "bottom" | "end";
+
+  // Header position in horizontal orientation
+  headerPosition: "top" | "bottom";
+
+  // Animation duration for step transitions
+  animationDuration: string;
+
+  // Event emitted when step transition animation completes
+  readonly animationDone: EventEmitter<void>;
+
+  // Custom icon overrides for step states
+  _iconOverrides: Record<string, TemplateRef<MatStepperIconContext>>;
+
+  // Current selected step index (inherited from CdkStepper)
+  selectedIndex: number;
+
+  // Whether stepper is linear (inherited from CdkStepper)
+  linear: boolean;
+
+  // Step orientation: horizontal or vertical (inherited from CdkStepper)
+  orientation: StepperOrientation;
+}
+```
+
+**Dependencies:** None (root component)
+**Provides:** Step navigation context, validation coordination, animation state for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatStepperModule } from "@angular/material/stepper";
+
+@Component({
+  template: `
+    <mat-stepper orientation="horizontal" [linear]="true">
+      <mat-step label="Step 1">
+        <p>Step 1 content</p>
+        <div>
+          <button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+      <mat-step label="Step 2">
+        <p>Step 2 content</p>
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class StepperExample {
+  // Component logic here
+}
+```
+
+### MatStep {Step Container Component}
+
+**Purpose:** Individual step component that contains step content, manages step state, validation logic, and integrates with form controls for data validation.
+
+**Interface:**
+
+```typescript
+class MatStep extends CdkStep implements ErrorStateMatcher {
+  // Custom step label template
+  stepLabel: MatStepLabel;
+
+  // Theme color for this specific step (M2 themes only)
+  color: ThemePalette;
+
+  // Lazy-loaded content template
+  _lazyContent: MatStepContent;
+
+  // Currently attached portal for lazy content
+  _portal: TemplatePortal;
+
+  // Step label text (inherited from CdkStep)
+  label: string;
+
+  // Form control associated with step (inherited from CdkStep)
+  stepControl: AbstractControl;
+
+  // Whether step is optional (inherited from CdkStep)
+  optional: boolean;
+
+  // Whether step is completed (inherited from CdkStep)
+  completed: boolean;
+
+  // Whether step is editable after completion (inherited from CdkStep)
+  editable: boolean;
+
+  // Custom error state matcher
+  isErrorState(
+    control: AbstractControl | null,
+    form: FormGroupDirective | NgForm | null,
+  ): boolean;
+}
+```
+
+**Context Dependencies:** Step context and navigation state from parent MatStepper
+**Parent Requirements:** Must be direct child of MatStepper
+**Children Support:** Can contain MatStepLabel and MatStepContent templates
+
+**Usage Example:**
+
+```typescript
+<mat-stepper>
+  <mat-step
+    label="Personal Info"
+    [stepControl]="personalInfoForm"
+    [optional]="false"
+    [completed]="personalInfoForm.valid">
+
+    <!-- Step content -->
+    <form [formGroup]="personalInfoForm">
+      <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+      </mat-form-field>
+    </form>
+
+    <!-- Navigation buttons -->
+    <div>
+      <button matStepperNext [disabled]="!personalInfoForm.valid">Next</button>
+    </div>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepHeader {Step Header Component}
+
+**Purpose:** Visual representation of step status that automatically displays step state, labels, and navigation affordances. Generated automatically by the stepper.
+
+**Interface:**
+
+```typescript
+class MatStepHeader extends CdkStepHeader {
+  // Current step state (number, edit, done, error)
+  state: StepState;
+
+  // Step label content (text or template)
+  label: MatStepLabel | string;
+
+  // Error message to display for invalid steps
+  errorMessage: string;
+
+  // Custom icon overrides for different states
+  iconOverrides: { [key: string]: TemplateRef<MatStepperIconContext> };
+
+  // Step index in the stepper
+  index: number;
+
+  // Whether this step is currently selected
+  selected: boolean;
+
+  // Whether this step is currently active
+  active: boolean;
+
+  // Whether this step is optional
+  optional: boolean;
+
+  // Whether ripple effects are disabled
+  disableRipple: boolean;
+
+  // Theme color for the header (M2 themes only)
+  color: ThemePalette;
+
+  // Focus the step header
+  focus(origin?: FocusOrigin, options?: FocusOptions): void;
+}
+```
+
+**Context Dependencies:** Step metadata and navigation state from parent MatStepper
+**Parent Requirements:** Generated automatically within MatStepper
+
+**Usage Example:**
+
+```typescript
+// Step headers are automatically generated - no direct usage required
+// Customization happens through step properties and icon overrides
+<mat-stepper>
+  <mat-step label="Step 1" state="done">
+    <!-- Content -->
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepLabel {Custom Label Template}
+
+**Purpose:** Template directive for providing custom step label content with rich formatting, icons, or dynamic content beyond simple text labels.
+
+**Interface:**
+
+```typescript
+class MatStepLabel extends CdkStepLabel {
+  // Template reference for custom label content
+  template: TemplateRef<any>;
+
+  // Context available in template:
+  // - Step index
+  // - Step state
+  // - Step properties
+}
+```
+
+**Context Dependencies:** Step context from parent MatStep
+**Parent Requirements:** Must be within MatStep as content child
+
+**Usage Example:**
+
+```typescript
+<mat-stepper>
+  <mat-step>
+    <ng-template matStepLabel>
+      <mat-icon>person</mat-icon>
+      <span>Personal Information</span>
+      <mat-chip [color]="stepForm.valid ? 'primary' : 'warn'">
+        {{stepForm.valid ? 'Complete' : 'Required'}}
+      </mat-chip>
+    </ng-template>
+
+    <!-- Step content -->
+    <p>Step content here</p>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepContent {Lazy Content Template}
+
+**Purpose:** Template directive for lazy-loading step content to improve initial page performance by only rendering step content when the step becomes active.
+
+**Interface:**
+
+```typescript
+class MatStepContent {
+  // Template reference for lazy-loaded content
+  _template: TemplateRef<any>;
+
+  // Content is rendered only when step becomes active
+  // Improves performance for steppers with heavy content
+}
+```
+
+**Context Dependencies:** Step lifecycle from parent MatStep
+**Parent Requirements:** Must be within MatStep as content child
+
+**Usage Example:**
+
+```typescript
+<mat-stepper>
+  <mat-step label="Heavy Content Step">
+    <ng-template matStepContent>
+      <!-- This content is only rendered when step becomes active -->
+      <app-heavy-component [data]="heavyData"></app-heavy-component>
+      <mat-table [dataSource]="largeDataset">
+        <!-- Table content -->
+      </mat-table>
+    </ng-template>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepperNext {Navigation Component}
+
+**Purpose:** Directive for buttons that navigate to the next step in the stepper workflow, with automatic integration to stepper navigation logic.
+
+**Interface:**
+
+```typescript
+class MatStepperNext extends CdkStepperNext {
+  // Automatically handles click events to move to next step
+  // Respects linear mode and validation constraints
+  // Can be disabled based on step validation state
+  // Inherited behavior:
+  // - Triggers stepper.next() on click
+  // - Integrates with linear stepper validation
+  // - Can be applied to any button element
+}
+```
+
+**Context Dependencies:** Navigation context from ancestor MatStepper
+**Parent Requirements:** Must be within MatStepper component tree
+
+**Usage Example:**
+
+```typescript
+<mat-stepper [linear]="true">
+  <mat-step [stepControl]="firstFormGroup">
+    <form [formGroup]="firstFormGroup">
+      <!-- Form fields -->
+    </form>
+    <div>
+      <button
+        mat-raised-button
+        matStepperNext
+        [disabled]="!firstFormGroup.valid">
+        Next Step
+      </button>
+    </div>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepperPrevious {Navigation Component}
+
+**Purpose:** Directive for buttons that navigate to the previous step in the stepper workflow, enabling backward navigation through completed steps.
+
+**Interface:**
+
+```typescript
+class MatStepperPrevious extends CdkStepperPrevious {
+  // Automatically handles click events to move to previous step
+  // Always enabled unless on first step
+  // Maintains completed state of steps when navigating backwards
+  // Inherited behavior:
+  // - Triggers stepper.previous() on click
+  // - Automatically disabled on first step
+  // - Can be applied to any button element
+}
+```
+
+**Context Dependencies:** Navigation context from ancestor MatStepper
+**Parent Requirements:** Must be within MatStepper component tree
+
+**Usage Example:**
+
+```typescript
+<mat-stepper>
+  <mat-step label="Step 2">
+    <!-- Step content -->
+    <div>
+      <button mat-button matStepperPrevious>
+        <mat-icon>arrow_back</mat-icon>
+        Previous
+      </button>
+      <button mat-raised-button matStepperNext>
+        Next
+      </button>
+    </div>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepperIcon {Custom Icon Template}
+
+**Purpose:** Template directive for customizing step header icons based on step state, providing branded or contextual icons for different step states.
+
+**Interface:**
+
+```typescript
+class MatStepperIcon {
+  // Template reference for custom icon content
+  templateRef: TemplateRef<MatStepperIconContext>;
+
+  // Step state this icon template applies to
+  name: StepState; // 'number' | 'edit' | 'done' | 'error'
+
+  // Context available in template
+  interface MatStepperIconContext {
+    index: number;    // Step index
+    active: boolean;  // Whether step is active
+    optional: boolean; // Whether step is optional
+  }
+}
+```
+
+**Context Dependencies:** Step state context from MatStepper
+**Parent Requirements:** Must be content child of MatStepper
+
+**Usage Example:**
+
+```typescript
+<mat-stepper>
+  <!-- Custom icon for completed steps -->
+  <ng-template matStepperIcon="done" let-index="index">
+    <mat-icon color="primary">check_circle</mat-icon>
+  </ng-template>
+
+  <!-- Custom icon for error steps -->
+  <ng-template matStepperIcon="error" let-index="index">
+    <mat-icon color="warn">error</mat-icon>
+  </ng-template>
+
+  <!-- Custom icon for number state -->
+  <ng-template matStepperIcon="number" let-index="index">
+    <span class="custom-step-number">{{index + 1}}</span>
+  </ng-template>
+
+  <mat-step label="Step 1">Content 1</mat-step>
+  <mat-step label="Step 2">Content 2</mat-step>
+</mat-stepper>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatStepperModule } from "@angular/material/stepper";
+import { ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-basic-stepper",
+  template: `
+    <mat-stepper orientation="horizontal" [linear]="false">
+      <mat-step label="Step 1">
+        <p>Welcome to our multi-step process!</p>
+        <div>
+          <button mat-raised-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Step 2" [optional]="true">
+        <p>This step is optional.</p>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-raised-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Step 3">
+        <p>Final step - you're done!</p>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-raised-button color="primary">Finish</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class BasicStepperComponent {}
+```
+
+### Advanced Usage with Forms and Validation
+
+```typescript
+import { MatStepperModule } from "@angular/material/stepper";
+import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
+
+@Component({
+  selector: "app-form-stepper",
+  template: `
+    <mat-stepper orientation="vertical" [linear]="true" #stepper>
+      <!-- Personal Information Step -->
+      <mat-step
+        label="Personal Information"
+        [stepControl]="personalInfoForm"
+        [completed]="personalInfoForm.valid"
+      >
+        <ng-template matStepLabel>
+          <mat-icon>person</mat-icon>
+          Personal Information
+        </ng-template>
+
+        <form [formGroup]="personalInfoForm">
+          <mat-form-field>
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" required />
+            <mat-error
+              *ngIf="personalInfoForm.get('firstName')?.hasError('required')"
+            >
+              First name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" required />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" required />
+          </mat-form-field>
+        </form>
+
+        <div>
+          <button
+            mat-raised-button
+            matStepperNext
+            [disabled]="!personalInfoForm.valid"
+          >
+            Next
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- Address Information Step -->
+      <mat-step label="Address" [stepControl]="addressForm" [optional]="true">
+        <form [formGroup]="addressForm">
+          <mat-form-field>
+            <mat-label>Street Address</mat-label>
+            <input matInput formControlName="street" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>State</mat-label>
+            <mat-select formControlName="state">
+              <mat-option value="CA">California</mat-option>
+              <mat-option value="NY">New York</mat-option>
+              <mat-option value="TX">Texas</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-raised-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+
+      <!-- Review and Submit Step -->
+      <mat-step label="Review & Submit">
+        <ng-template matStepContent>
+          <!-- Lazy-loaded review content -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Review Your Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="review-section">
+                <h4>Personal Information</h4>
+                <p><strong>Name:</strong> {{ getFullName() }}</p>
+                <p>
+                  <strong>Email:</strong>
+                  {{ personalInfoForm.get("email")?.value }}
+                </p>
+              </div>
+
+              <div
+                class="review-section"
+                *ngIf="addressForm.get('street')?.value"
+              >
+                <h4>Address</h4>
+                <p>{{ getFullAddress() }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <div class="action-buttons">
+            <button mat-button matStepperPrevious>Back</button>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="submitForm()"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? "Submitting..." : "Submit" }}
+            </button>
+          </div>
+        </ng-template>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class FormStepperComponent implements OnInit {
+  personalInfoForm!: FormGroup;
+  addressForm!: FormGroup;
+  isSubmitting = false;
+
+  constructor(private formBuilder: FormBuilder) {}
+
+  ngOnInit() {
+    this.personalInfoForm = this.formBuilder.group({
+      firstName: ["", Validators.required],
+      lastName: ["", Validators.required],
+      email: ["", [Validators.required, Validators.email]],
+    });
+
+    this.addressForm = this.formBuilder.group({
+      street: [""],
+      city: [""],
+      state: [""],
+    });
+  }
+
+  getFullName(): string {
+    const firstName = this.personalInfoForm.get("firstName")?.value;
+    const lastName = this.personalInfoForm.get("lastName")?.value;
+    return `${firstName} ${lastName}`;
+  }
+
+  getFullAddress(): string {
+    const street = this.addressForm.get("street")?.value;
+    const city = this.addressForm.get("city")?.value;
+    const state = this.addressForm.get("state")?.value;
+    return `${street}, ${city}, ${state}`;
+  }
+
+  submitForm() {
+    this.isSubmitting = true;
+    // Submit logic here
+    setTimeout(() => {
+      this.isSubmitting = false;
+      // Handle success
+    }, 2000);
+  }
+}
+```
+
+### Common Variations
+
+#### Horizontal Stepper with Custom Icons
+
+```typescript
+@Component({
+  template: `
+    <mat-stepper
+      orientation="horizontal"
+      labelPosition="bottom"
+      headerPosition="top"
+      [linear]="true"
+    >
+      <!-- Custom icons for different states -->
+      <ng-template matStepperIcon="done">
+        <mat-icon>check_circle</mat-icon>
+      </ng-template>
+
+      <ng-template matStepperIcon="error">
+        <mat-icon>error</mat-icon>
+      </ng-template>
+
+      <ng-template matStepperIcon="number" let-index="index">
+        <div class="custom-step-icon">
+          {{ index + 1 }}
+        </div>
+      </ng-template>
+
+      <mat-step label="Configuration" [stepControl]="configForm">
+        <form [formGroup]="configForm">
+          <!-- Configuration fields -->
+        </form>
+        <div>
+          <button matStepperNext [disabled]="!configForm.valid">
+            Continue
+          </button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Validation" [stepControl]="validationForm">
+        <form [formGroup]="validationForm">
+          <!-- Validation fields -->
+        </form>
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button matStepperNext [disabled]="!validationForm.valid">
+            Continue
+          </button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Complete">
+        <p>Setup complete!</p>
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button mat-raised-button color="primary">Finish</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class CustomIconStepperComponent {}
+```
+
+#### Vertical Stepper with Conditional Steps
+
+```typescript
+@Component({
+  template: `
+    <mat-stepper
+      orientation="vertical"
+      [linear]="false"
+      (selectionChange)="onStepChange($event)"
+    >
+      <mat-step label="Account Type">
+        <mat-radio-group
+          [(ngModel)]="accountType"
+          (change)="updateVisibleSteps()"
+        >
+          <mat-radio-button value="personal">Personal Account</mat-radio-button>
+          <mat-radio-button value="business">Business Account</mat-radio-button>
+        </mat-radio-group>
+        <div>
+          <button matStepperNext [disabled]="!accountType">Next</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Personal Details" *ngIf="accountType === 'personal'">
+        <!-- Personal account fields -->
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Business Details" *ngIf="accountType === 'business'">
+        <!-- Business account fields -->
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Verification">
+        <!-- Verification step for both account types -->
+        <div>
+          <button matStepperPrevious>Back</button>
+          <button mat-raised-button color="primary">Complete</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class ConditionalStepperComponent {
+  accountType: string | null = null;
+
+  updateVisibleSteps() {
+    // Logic to handle conditional step visibility
+  }
+
+  onStepChange(event: StepperSelectionEvent) {
+    // Handle step changes
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **MatStepper** manages overall workflow state and navigation
+2. **MatStep** components register themselves with the parent stepper
+3. **Step validation** flows from individual forms to step completion state
+4. **Navigation events** bubble up from buttons to stepper navigation logic
+5. **Step headers** reflect current state based on step completion and validation
+6. **Content rendering** is managed through lazy loading and step activation
+
+### Context Sharing
+
+- **Stepper Context**: MatStepper provides navigation state, current step index, and linear mode configuration
+- **Step Context**: Each MatStep provides validation state, completion status, and content to its children
+- **Navigation Context**: Navigation buttons inherit stepper navigation methods and constraints
+- **Icon Context**: Custom icon templates receive step state and index information
+
+### Event Handling
+
+- **Step Selection**: Clicking step headers or using navigation buttons triggers step changes
+- **Validation Events**: Form validation state changes automatically update step completion
+- **Animation Events**: Step transitions emit events when animations complete
+- **Custom Events**: Steps can emit custom events that parent components can handle
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use linear mode for critical workflows**: Enable linear stepper for processes that require sequential completion
+- **Implement proper validation**: Connect Angular reactive forms to steps for automatic validation state management
+- **Provide clear navigation**: Always include both next and previous buttons where appropriate
+- **Use lazy loading for heavy content**: Implement MatStepContent for steps with complex or data-heavy components
+- **Design for mobile**: Consider vertical orientation and shorter labels for mobile experiences
+
+### Accessibility
+
+- **Keyboard navigation**: Built-in support for arrow key navigation between step headers
+- **Screen reader support**: Step headers announce state changes and provide context about step progress
+- **Focus management**: Proper focus handling when navigating between steps and step content
+- **ARIA attributes**: Automatic ARIA labeling for step relationships and current state
+- **Color accessibility**: Don't rely solely on color to indicate step state; use icons and text as well
+
+### Performance
+
+- **Lazy loading**: Use MatStepContent for steps that contain heavy components or large datasets
+- **Form optimization**: Use reactive forms with proper validation strategies to avoid unnecessary change detection
+- **Animation control**: Adjust animation duration based on content complexity and user preferences
+- **Memory management**: Properly unsubscribe from observables and clean up resources in step components
+
+## Common Patterns
+
+### Pattern 1: Wizard-Style Form
+
+```typescript
+// Multi-step form with progress saving and validation
+@Component({
+  template: `
+    <mat-stepper [linear]="true" (selectionChange)="saveProgress($event)">
+      <mat-step
+        *ngFor="let step of formSteps; let i = index"
+        [label]="step.label"
+        [stepControl]="step.formGroup"
+        [optional]="step.optional">
+
+        <form [formGroup]="step.formGroup">
+          <ng-container [ngSwitch]="step.type">
+            <!-- Dynamic form content based on step type -->
+            <div *ngSwitchCase="'text'">
+              <mat-form-field *ngFor="let field of step.fields">
+                <mat-label>{{field.label}}</mat-label>
+                <input matInput [formControlName]="field.name">
+              </mat-form-field>
+            </div>
+
+            <div *ngSwitchCase="'selection'">
+              <mat-radio-group [formControlName]="step.fields[0].name">
+                <mat-radio-button
+                  *ngFor="let option of step.options"
+                  [value]="option.value">
+                  {{option.label}}
+                </mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </ng-container>
+        </form>
+
+        <div>
+          <button mat-button matStepperPrevious>Previous</button>
+          <button
+            mat-raised-button
+            matStepperNext
+            [disabled]="!step.formGroup.valid">
+            {{i === formSteps.length - 1 ? 'Complete' : 'Next'}}
+          </button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `
+})
+export class WizardFormComponent {
+  formSteps = [
+    {
+      label: 'Personal Info',
+      type: 'text',
+      formGroup: this.fb.group({...}),
+      fields: [...],
+      optional: false
+    },
+    // More steps...
+  ];
+
+  saveProgress(event: StepperSelectionEvent) {
+    // Save current progress to local storage or backend
+    localStorage.setItem('wizardProgress', JSON.stringify({
+      currentStep: event.selectedIndex,
+      formData: this.getFormData()
+    }));
+  }
+}
+```
+
+### Pattern 2: Onboarding Flow with Dynamic Content
+
+```typescript
+// Onboarding stepper with role-based step content
+@Component({
+  template: `
+    <mat-stepper
+      orientation="horizontal"
+      [linear]="false"
+      animationDuration="300ms"
+    >
+      <!-- Custom icons for onboarding theme -->
+      <ng-template matStepperIcon="done">
+        <mat-icon>check_circle_outline</mat-icon>
+      </ng-template>
+
+      <ng-template matStepperIcon="number" let-index="index">
+        <div class="onboarding-step-icon">
+          <mat-icon>{{ getStepIcon(index) }}</mat-icon>
+        </div>
+      </ng-template>
+
+      <mat-step label="Welcome">
+        <div class="onboarding-content">
+          <h2>Welcome to Our Platform!</h2>
+          <p>Let's get you set up in just a few steps.</p>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getProgressPercentage()"
+          >
+          </mat-progress-bar>
+        </div>
+        <div>
+          <button mat-raised-button matStepperNext color="primary">
+            Get Started
+          </button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Profile Setup">
+        <ng-template matStepContent>
+          <!-- Lazy-loaded profile setup -->
+          <app-profile-setup (profileComplete)="onProfileComplete($event)">
+          </app-profile-setup>
+        </ng-template>
+      </mat-step>
+
+      <mat-step label="Preferences" [optional]="true">
+        <ng-template matStepContent>
+          <app-preferences-setup
+            [userRole]="userProfile.role"
+            (preferencesChange)="updatePreferences($event)"
+          >
+          </app-preferences-setup>
+        </ng-template>
+      </mat-step>
+
+      <mat-step label="Complete">
+        <div class="completion-content">
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <h2>You're All Set!</h2>
+          <p>Your account has been configured successfully.</p>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="completeOnboarding()"
+          >
+            Start Using the Platform
+          </button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class OnboardingStepperComponent {
+  userProfile: any = {};
+
+  getStepIcon(index: number): string {
+    const icons = ["person", "settings", "tune", "rocket_launch"];
+    return icons[index] || "circle";
+  }
+
+  getProgressPercentage(): number {
+    // Calculate based on completed steps
+    return (this.completedSteps / this.totalSteps) * 100;
+  }
+
+  onProfileComplete(profile: any) {
+    this.userProfile = profile;
+    // Auto-advance to next step
+  }
+
+  completeOnboarding() {
+    // Finish onboarding and navigate to main app
+  }
+}
+```

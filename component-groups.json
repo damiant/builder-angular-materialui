@@ -1,1 +1,333 @@
-[]
+[
+  {
+    "name": "Table",
+    "description": "Use this component group to generate components that handle tabular data with required hierarchical structure",
+    "components": [
+      "MatTable",
+      "MatHeaderCell",
+      "MatFooterCell",
+      "MatCell",
+      "MatHeaderRow",
+      "MatFooterRow",
+      "MatRow",
+      "MatColumnDef",
+      "MatHeaderCellDef",
+      "MatFooterCellDef",
+      "MatCellDef",
+      "MatHeaderRowDef",
+      "MatFooterRowDef",
+      "MatRowDef",
+      "MatNoDataRow",
+      "MatTextColumn"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/table/index.d.ts"]
+  },
+  {
+    "name": "Stepper",
+    "description": "Use this component group to generate step-by-step workflow components with required hierarchical structure",
+    "components": [
+      "MatStepper",
+      "MatStep",
+      "MatStepHeader",
+      "MatStepLabel",
+      "MatStepContent",
+      "MatStepperNext",
+      "MatStepperPrevious",
+      "MatStepperIcon"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/stepper/index.d.ts"]
+  },
+  {
+    "name": "Tabs",
+    "description": "Use this component group to generate tab navigation components with required hierarchical structure",
+    "components": [
+      "MatTabGroup",
+      "MatTab",
+      "MatTabHeader",
+      "MatTabBody",
+      "MatTabContent",
+      "MatTabLabel",
+      "MatTabLabelWrapper",
+      "MatTabBodyPortal",
+      "MatInkBar"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/tabs/index.d.ts"]
+  },
+  {
+    "name": "TabNavigation",
+    "description": "Use this component group to generate navigation tab components with required hierarchical structure",
+    "components": ["MatTabNav", "MatTabLink", "MatTabNavPanel"],
+    "relevantFiles": ["node_modules/@angular/material/tabs/index.d.ts"]
+  },
+  {
+    "name": "Expansion",
+    "description": "Use this component group to generate expandable accordion components with required hierarchical structure",
+    "components": [
+      "MatAccordion",
+      "MatExpansionPanel",
+      "MatExpansionPanelHeader",
+      "MatExpansionPanelTitle",
+      "MatExpansionPanelDescription",
+      "MatExpansionPanelContent",
+      "MatExpansionPanelActionRow"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/expansion/index.d.ts"]
+  },
+  {
+    "name": "FormField",
+    "description": "Use this component group to generate form field components with required context sharing",
+    "components": [
+      "MatFormField",
+      "MatLabel",
+      "MatError",
+      "MatHint",
+      "MatPrefix",
+      "MatSuffix"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/form-field/index.d.ts"]
+  },
+  {
+    "name": "SelectionList",
+    "description": "Use this component group to generate selection list components with required interdependency",
+    "components": ["MatSelectionList", "MatListOption"],
+    "relevantFiles": ["node_modules/@angular/material/list/index.d.ts"]
+  },
+  {
+    "name": "List",
+    "description": "Use this component to generate basic list functionality",
+    "components": ["MatList"],
+    "relevantFiles": ["node_modules/@angular/material/list/index.d.ts"]
+  },
+  {
+    "name": "ActionList",
+    "description": "Use this component to generate action list functionality",
+    "components": ["MatActionList"],
+    "relevantFiles": ["node_modules/@angular/material/list/index.d.ts"]
+  },
+  {
+    "name": "NavList",
+    "description": "Use this component to generate navigation list functionality",
+    "components": ["MatNavList"],
+    "relevantFiles": ["node_modules/@angular/material/list/index.d.ts"]
+  },
+  {
+    "name": "ListItem",
+    "description": "Use this component group to generate list item components with optional sub-components",
+    "components": [
+      "MatListItem",
+      "MatListItemTitle",
+      "MatListItemLine",
+      "MatListItemMeta",
+      "MatListItemAvatar",
+      "MatListItemIcon"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/list/index.d.ts"]
+  },
+  {
+    "name": "Select",
+    "description": "Use this component group to generate select dropdown components with options",
+    "components": ["MatSelect", "MatOption", "MatOptgroup"],
+    "relevantFiles": [
+      "node_modules/@angular/material/select/index.d.ts",
+      "node_modules/@angular/material/core/option/index.d.ts"
+    ]
+  },
+  {
+    "name": "Button",
+    "description": "Use this component to generate button functionality",
+    "components": ["MatButton"],
+    "relevantFiles": ["node_modules/@angular/material/button/index.d.ts"]
+  },
+  {
+    "name": "IconButton",
+    "description": "Use this component to generate icon button functionality",
+    "components": ["MatIconButton"],
+    "relevantFiles": ["node_modules/@angular/material/button/index.d.ts"]
+  },
+  {
+    "name": "FabButton",
+    "description": "Use this component to generate floating action button functionality",
+    "components": ["MatFabButton"],
+    "relevantFiles": ["node_modules/@angular/material/button/index.d.ts"]
+  },
+  {
+    "name": "MiniFabButton",
+    "description": "Use this component to generate mini floating action button functionality",
+    "components": ["MatMiniFabButton"],
+    "relevantFiles": ["node_modules/@angular/material/button/index.d.ts"]
+  },
+  {
+    "name": "ButtonToggle",
+    "description": "Use this component group to generate button toggle functionality with group support",
+    "components": ["MatButtonToggle", "MatButtonToggleGroup"],
+    "relevantFiles": ["node_modules/@angular/material/button-toggle/index.d.ts"]
+  },
+  {
+    "name": "Card",
+    "description": "Use this component to generate card functionality",
+    "components": ["MatCard"],
+    "relevantFiles": ["node_modules/@angular/material/card/index.d.ts"]
+  },
+  {
+    "name": "Checkbox",
+    "description": "Use this component to generate checkbox functionality",
+    "components": ["MatCheckbox"],
+    "relevantFiles": ["node_modules/@angular/material/checkbox/index.d.ts"]
+  },
+  {
+    "name": "Radio",
+    "description": "Use this component group to generate radio button functionality with group support",
+    "components": ["MatRadioButton", "MatRadioGroup"],
+    "relevantFiles": ["node_modules/@angular/material/radio/index.d.ts"]
+  },
+  {
+    "name": "Input",
+    "description": "Use this component to generate input field functionality",
+    "components": ["MatInput"],
+    "relevantFiles": ["node_modules/@angular/material/input/index.d.ts"]
+  },
+  {
+    "name": "SlideToggle",
+    "description": "Use this component to generate slide toggle functionality",
+    "components": ["MatSlideToggle"],
+    "relevantFiles": ["node_modules/@angular/material/slide-toggle/index.d.ts"]
+  },
+  {
+    "name": "Slider",
+    "description": "Use this component to generate slider functionality",
+    "components": ["MatSlider"],
+    "relevantFiles": ["node_modules/@angular/material/slider/index.d.ts"]
+  },
+  {
+    "name": "ProgressBar",
+    "description": "Use this component to generate progress bar functionality",
+    "components": ["MatProgressBar"],
+    "relevantFiles": ["node_modules/@angular/material/progress-bar/index.d.ts"]
+  },
+  {
+    "name": "ProgressSpinner",
+    "description": "Use this component to generate progress spinner functionality",
+    "components": ["MatProgressSpinner"],
+    "relevantFiles": [
+      "node_modules/@angular/material/progress-spinner/index.d.ts"
+    ]
+  },
+  {
+    "name": "Icon",
+    "description": "Use this component to generate icon functionality",
+    "components": ["MatIcon"],
+    "relevantFiles": ["node_modules/@angular/material/icon/index.d.ts"]
+  },
+  {
+    "name": "Badge",
+    "description": "Use this component to generate badge functionality",
+    "components": ["MatBadge"],
+    "relevantFiles": ["node_modules/@angular/material/badge/index.d.ts"]
+  },
+  {
+    "name": "Divider",
+    "description": "Use this component to generate divider functionality",
+    "components": ["MatDivider"],
+    "relevantFiles": ["node_modules/@angular/material/divider/index.d.ts"]
+  },
+  {
+    "name": "Toolbar",
+    "description": "Use this component to generate toolbar functionality",
+    "components": ["MatToolbar"],
+    "relevantFiles": ["node_modules/@angular/material/toolbar/index.d.ts"]
+  },
+  {
+    "name": "Tooltip",
+    "description": "Use this component to generate tooltip functionality",
+    "components": ["MatTooltip"],
+    "relevantFiles": ["node_modules/@angular/material/tooltip/index.d.ts"]
+  },
+  {
+    "name": "Menu",
+    "description": "Use this component to generate menu functionality",
+    "components": ["MatMenu"],
+    "relevantFiles": ["node_modules/@angular/material/menu/index.d.ts"]
+  },
+  {
+    "name": "Dialog",
+    "description": "Use this component to generate dialog functionality",
+    "components": ["MatDialog"],
+    "relevantFiles": ["node_modules/@angular/material/dialog/index.d.ts"]
+  },
+  {
+    "name": "BottomSheet",
+    "description": "Use this component to generate bottom sheet functionality",
+    "components": ["MatBottomSheet"],
+    "relevantFiles": ["node_modules/@angular/material/bottom-sheet/index.d.ts"]
+  },
+  {
+    "name": "SnackBar",
+    "description": "Use this component to generate snack bar functionality",
+    "components": ["MatSnackBar"],
+    "relevantFiles": ["node_modules/@angular/material/snack-bar/index.d.ts"]
+  },
+  {
+    "name": "Sidenav",
+    "description": "Use this component group to generate sidenav functionality with container support",
+    "components": ["MatSidenav", "MatSidenavContainer"],
+    "relevantFiles": ["node_modules/@angular/material/sidenav/index.d.ts"]
+  },
+  {
+    "name": "Drawer",
+    "description": "Use this component group to generate drawer functionality with container support",
+    "components": ["MatDrawer", "MatDrawerContainer"],
+    "relevantFiles": ["node_modules/@angular/material/sidenav/index.d.ts"]
+  },
+  {
+    "name": "GridList",
+    "description": "Use this component group to generate grid list functionality with tile support",
+    "components": ["MatGridList", "MatGridTile"],
+    "relevantFiles": ["node_modules/@angular/material/grid-list/index.d.ts"]
+  },
+  {
+    "name": "Chips",
+    "description": "Use this component group to generate chips functionality with input support",
+    "components": ["MatChipSet", "MatChip", "MatChipInput"],
+    "relevantFiles": ["node_modules/@angular/material/chips/index.d.ts"]
+  },
+  {
+    "name": "Autocomplete",
+    "description": "Use this component to generate autocomplete functionality",
+    "components": ["MatAutocomplete"],
+    "relevantFiles": ["node_modules/@angular/material/autocomplete/index.d.ts"]
+  },
+  {
+    "name": "Datepicker",
+    "description": "Use this component group to generate datepicker functionality with input and toggle support",
+    "components": [
+      "MatDatepicker",
+      "MatDatepickerInput",
+      "MatDatepickerToggle"
+    ],
+    "relevantFiles": ["node_modules/@angular/material/datepicker/index.d.ts"]
+  },
+  {
+    "name": "Timepicker",
+    "description": "Use this component to generate timepicker functionality",
+    "components": ["MatTimepicker"],
+    "relevantFiles": ["node_modules/@angular/material/timepicker/index.d.ts"]
+  },
+  {
+    "name": "Paginator",
+    "description": "Use this component to generate paginator functionality",
+    "components": ["MatPaginator"],
+    "relevantFiles": ["node_modules/@angular/material/paginator/index.d.ts"]
+  },
+  {
+    "name": "Sort",
+    "description": "Use this component to generate sort functionality",
+    "components": ["MatSort"],
+    "relevantFiles": ["node_modules/@angular/material/sort/index.d.ts"]
+  },
+  {
+    "name": "Tree",
+    "description": "Use this component to generate tree functionality",
+    "components": ["MatTree"],
+    "relevantFiles": ["node_modules/@angular/material/tree/index.d.ts"]
+  }
+]

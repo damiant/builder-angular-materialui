@@ -1,0 +1,1065 @@
+---
+
+# GridList Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate grid list functionality with tile support. The GridList component group provides a comprehensive solution for displaying content in a responsive grid layout with intelligent tile positioning, supporting variable tile sizes and automatic layout calculations.
+
+### When to Use
+
+- **Image Galleries**: Create responsive photo galleries with varying image sizes and aspect ratios
+- **Product Catalogs**: Display products, services, or items in an organized grid format
+- **Dashboard Widgets**: Arrange dashboard components in a flexible grid layout with different sizes
+- **Media Libraries**: Organize videos, documents, or other media in a visually appealing grid
+- **Card Layouts**: Present information cards with consistent spacing and alignment
+- **Portfolio Displays**: Showcase work samples, projects, or case studies in a professional grid
+- **Content Previews**: Display article previews, blog posts, or content summaries in grid format
+
+### Architecture
+
+**Critical/Strong Coupling**: The GridList component group requires strict hierarchical relationships and shared context between components. All tiles must be direct children of the grid list container to ensure proper positioning and responsive behavior.
+
+### Component Interdependencies
+
+The GridList components form a tightly coupled system with specific requirements:
+
+- **MatGridList**: Root container that manages grid layout, column calculations, and tile positioning algorithm
+- **MatGridTile**: Individual tile components that specify their size requirements (rowspan, colspan)
+- **Tile Layout Algorithm**: Automatic positioning system that places tiles optimally based on available space
+- **Responsive Calculations**: Dynamic column and row sizing based on container dimensions and configuration
+- **Shared Context**: Grid configuration (columns, gutter size, row height) affects all child tiles
+
+## Components
+
+### MatGridList {Primary Component}
+
+**Purpose:** The root container component that manages the grid layout, calculates tile positions, and provides responsive grid behavior with configurable columns, row heights, and gutters.
+
+**Interface:**
+
+```typescript
+interface MatGridListProps {
+  children: React.ReactNode; // Required MatGridTile components
+  cols: number; // Number of columns in the grid (required)
+  gutterSize?: string; // Space between tiles (default: '1px')
+  rowHeight?: string | number; // Height configuration for rows (default: '1:1')
+}
+
+// Row height options:
+// - Fixed height: '100px', '5rem'
+// - Aspect ratio: '4:3', '16:9', '1:1'
+// - Fit mode: 'fit' (divides available height by number of rows)
+```
+
+**Dependencies:** None (root component)
+**Provides:** Grid layout context, positioning algorithm, responsive calculations for all child tiles
+
+**Usage Example:**
+
+```typescript
+import { MatGridListModule } from "@angular/material/grid-list";
+
+@Component({
+  template: `
+    <mat-grid-list [cols]="4" gutterSize="10px" rowHeight="2:1">
+      <mat-grid-tile>Content 1</mat-grid-tile>
+      <mat-grid-tile>Content 2</mat-grid-tile>
+      <mat-grid-tile [colspan]="2">Wide Content</mat-grid-tile>
+    </mat-grid-list>
+  `,
+})
+export class BasicGridExample {
+  // Component logic
+}
+```
+
+### MatGridTile {Dependent Component}
+
+**Purpose:** Individual grid tile that contains content and specifies its size requirements within the grid, supporting variable spans and automatic positioning.
+
+**Interface:**
+
+```typescript
+interface MatGridTileProps {
+  children: React.ReactNode; // Tile content and optional header/footer
+  rowspan?: number; // Number of rows the tile spans (default: 1)
+  colspan?: number; // Number of columns the tile spans (default: 1)
+}
+
+class MatGridTile {
+  // Current position in grid (set by layout algorithm)
+  _setStyle(property: string, value: any): void;
+
+  // Size properties
+  rowspan: number; // Rows occupied by this tile
+  colspan: number; // Columns occupied by this tile
+}
+```
+
+**Context Dependencies:** Grid layout context from parent MatGridList for positioning and sizing
+**Parent Requirements:** Must be direct child of MatGridList component
+
+**Usage Example:**
+
+```typescript
+<mat-grid-list cols="3" rowHeight="1:1">
+  <!-- Single cell tile -->
+  <mat-grid-tile>
+    <img src="image1.jpg" alt="Image 1">
+  </mat-grid-tile>
+
+  <!-- Tile spanning 2 columns -->
+  <mat-grid-tile [colspan]="2">
+    <div class="large-content">
+      <h3>Featured Content</h3>
+      <p>This tile takes up two columns</p>
+    </div>
+  </mat-grid-tile>
+
+  <!-- Tile spanning 2 rows -->
+  <mat-grid-tile [rowspan]="2">
+    <div class="tall-content">
+      <h3>Tall Content</h3>
+      <p>This tile spans two rows</p>
+    </div>
+  </mat-grid-tile>
+
+  <!-- Large tile spanning multiple rows and columns -->
+  <mat-grid-tile [colspan]="2" [rowspan]="2">
+    <div class="hero-content">
+      <h2>Hero Section</h2>
+      <p>Large featured content area</p>
+    </div>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatGridListModule } from "@angular/material/grid-list";
+
+// Minimal grid with equal-sized tiles
+@Component({
+  selector: "app-basic-grid",
+  template: `
+    <mat-grid-list cols="4" rowHeight="1:1">
+      <mat-grid-tile *ngFor="let item of items">
+        <div class="tile-content">
+          <h4>{{ item.title }}</h4>
+          <p>{{ item.description }}</p>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .tile-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+        padding: 16px;
+      }
+    `,
+  ],
+})
+export class BasicGridComponent {
+  items = [
+    { title: "Item 1", description: "Description 1" },
+    { title: "Item 2", description: "Description 2" },
+    { title: "Item 3", description: "Description 3" },
+    { title: "Item 4", description: "Description 4" },
+  ];
+}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex grid with variable tile sizes and responsive behavior
+@Component({
+  selector: "app-advanced-grid",
+  template: `
+    <mat-grid-list
+      [cols]="gridCols"
+      [gutterSize]="gutterSize"
+      [rowHeight]="rowHeight"
+    >
+      <!-- Hero tile taking up prime real estate -->
+      <mat-grid-tile
+        [colspan]="heroTile.colspan"
+        [rowspan]="heroTile.rowspan"
+        class="hero-tile"
+      >
+        <div class="hero-content">
+          <img [src]="heroTile.image" [alt]="heroTile.title" />
+          <div class="hero-overlay">
+            <h2>{{ heroTile.title }}</h2>
+            <p>{{ heroTile.subtitle }}</p>
+            <button mat-raised-button color="primary">
+              {{ heroTile.action }}
+            </button>
+          </div>
+        </div>
+      </mat-grid-tile>
+
+      <!-- Standard content tiles with dynamic sizing -->
+      <mat-grid-tile
+        *ngFor="let tile of contentTiles; trackBy: trackByTileId"
+        [colspan]="tile.colspan || 1"
+        [rowspan]="tile.rowspan || 1"
+        [ngClass]="'tile-' + tile.type"
+      >
+        <!-- Image tiles -->
+        <div *ngIf="tile.type === 'image'" class="image-tile">
+          <img [src]="tile.content.url" [alt]="tile.content.alt" />
+          <div class="image-overlay">
+            <span>{{ tile.content.caption }}</span>
+          </div>
+        </div>
+
+        <!-- Text content tiles -->
+        <div *ngIf="tile.type === 'text'" class="text-tile">
+          <mat-icon>{{ tile.content.icon }}</mat-icon>
+          <h4>{{ tile.content.title }}</h4>
+          <p>{{ tile.content.body }}</p>
+          <button mat-button color="accent">Learn More</button>
+        </div>
+
+        <!-- Chart/widget tiles -->
+        <div *ngIf="tile.type === 'widget'" class="widget-tile">
+          <div class="widget-header">
+            <h5>{{ tile.content.title }}</h5>
+            <mat-icon class="widget-icon">{{ tile.content.icon }}</mat-icon>
+          </div>
+          <div class="widget-content">
+            <!-- Chart component or other widget content -->
+            <ng-container [ngSwitch]="tile.content.widgetType">
+              <app-chart
+                *ngSwitchCase="'chart'"
+                [data]="tile.content.data"
+              ></app-chart>
+              <app-stats
+                *ngSwitchCase="'stats'"
+                [stats]="tile.content.stats"
+              ></app-stats>
+            </ng-container>
+          </div>
+        </div>
+      </mat-grid-tile>
+
+      <!-- Call-to-action tile -->
+      <mat-grid-tile [colspan]="ctaTile.colspan" class="cta-tile">
+        <div class="cta-content">
+          <mat-icon class="cta-icon">{{ ctaTile.icon }}</mat-icon>
+          <h3>{{ ctaTile.title }}</h3>
+          <p>{{ ctaTile.message }}</p>
+          <button mat-raised-button color="primary" (click)="onCtaClick()">
+            {{ ctaTile.buttonText }}
+          </button>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .hero-tile {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .hero-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        color: white;
+        padding: 24px;
+      }
+
+      .image-tile {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .image-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .text-tile,
+      .widget-tile,
+      .cta-tile {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+        height: 100%;
+      }
+
+      .widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+    `,
+  ],
+})
+export class AdvancedGridComponent implements OnInit, OnDestroy {
+  // Responsive grid configuration
+  gridCols = 4;
+  gutterSize = "10px";
+  rowHeight = "200px";
+
+  // Hero tile configuration
+  heroTile = {
+    title: "Featured Content",
+    subtitle: "Discover our latest offerings",
+    action: "Explore Now",
+    image: "assets/hero-image.jpg",
+    colspan: 2,
+    rowspan: 2,
+  };
+
+  // Dynamic content tiles
+  contentTiles: GridTileData[] = [];
+
+  // Call-to-action tile
+  ctaTile = {
+    icon: "contact_support",
+    title: "Need Help?",
+    message: "Get in touch with our support team",
+    buttonText: "Contact Us",
+    colspan: 2,
+  };
+
+  private breakpointObserver = inject(BreakpointObserver);
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    this.loadTileData();
+    this.setupResponsiveGrid();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupResponsiveGrid() {
+    this.breakpointObserver
+      .observe([
+        Breakpoints.XSmall,
+        Breakpoints.Small,
+        Breakpoints.Medium,
+        Breakpoints.Large,
+      ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        if (result.matches) {
+          if (result.breakpoints[Breakpoints.XSmall]) {
+            this.gridCols = 1;
+            this.heroTile.colspan = 1;
+            this.heroTile.rowspan = 1;
+            this.ctaTile.colspan = 1;
+            this.rowHeight = "250px";
+          } else if (result.breakpoints[Breakpoints.Small]) {
+            this.gridCols = 2;
+            this.heroTile.colspan = 2;
+            this.heroTile.rowspan = 1;
+            this.ctaTile.colspan = 2;
+            this.rowHeight = "200px";
+          } else if (result.breakpoints[Breakpoints.Medium]) {
+            this.gridCols = 3;
+            this.heroTile.colspan = 2;
+            this.heroTile.rowspan = 2;
+            this.ctaTile.colspan = 1;
+            this.rowHeight = "180px";
+          } else {
+            this.gridCols = 4;
+            this.heroTile.colspan = 2;
+            this.heroTile.rowspan = 2;
+            this.ctaTile.colspan = 2;
+            this.rowHeight = "200px";
+          }
+        }
+      });
+  }
+
+  private loadTileData() {
+    // Load dynamic tile content
+    this.contentTiles = [
+      {
+        id: 1,
+        type: "image",
+        content: {
+          url: "assets/gallery-1.jpg",
+          alt: "Gallery Image 1",
+          caption: "Beautiful Landscape",
+        },
+      },
+      {
+        id: 2,
+        type: "text",
+        content: {
+          icon: "star",
+          title: "Premium Service",
+          body: "Experience our top-tier service offerings with 24/7 support.",
+        },
+      },
+      {
+        id: 3,
+        type: "widget",
+        colspan: 2,
+        content: {
+          title: "Performance Metrics",
+          icon: "analytics",
+          widgetType: "chart",
+          data: this.getChartData(),
+        },
+      },
+      // More tiles...
+    ];
+  }
+
+  trackByTileId(index: number, tile: GridTileData): number {
+    return tile.id;
+  }
+
+  onCtaClick() {
+    // Handle call-to-action
+    console.log("CTA clicked");
+  }
+
+  private getChartData() {
+    // Return chart data
+    return {
+      /* chart configuration */
+    };
+  }
+}
+
+interface GridTileData {
+  id: number;
+  type: "image" | "text" | "widget";
+  colspan?: number;
+  rowspan?: number;
+  content: any;
+}
+```
+
+### Common Variations
+
+#### Responsive Image Gallery
+
+```typescript
+@Component({
+  template: `
+    <mat-grid-list [cols]="getScreenCols()" gutterSize="4px" rowHeight="1:1">
+      <mat-grid-tile
+        *ngFor="let image of images; let i = index"
+        [colspan]="getImageColspan(i)"
+        [rowspan]="getImageRowspan(i)"
+      >
+        <img
+          [src]="image.url"
+          [alt]="image.alt"
+          (click)="openImageModal(image)"
+          class="gallery-image"
+        />
+
+        <div class="image-overlay">
+          <span>{{ image.title }}</span>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .gallery-image:hover {
+        transform: scale(1.05);
+      }
+    `,
+  ],
+})
+export class ImageGalleryComponent {
+  images = [
+    { url: "image1.jpg", alt: "Description 1", title: "Photo 1" },
+    // More images...
+  ];
+
+  getScreenCols(): number {
+    const width = window.innerWidth;
+    if (width < 600) return 2;
+    if (width < 960) return 3;
+    if (width < 1280) return 4;
+    return 5;
+  }
+
+  getImageColspan(index: number): number {
+    // Make every 5th image larger
+    return (index + 1) % 5 === 0 ? 2 : 1;
+  }
+
+  getImageRowspan(index: number): number {
+    // Make every 5th image taller
+    return (index + 1) % 5 === 0 ? 2 : 1;
+  }
+}
+```
+
+#### Dashboard Widget Grid
+
+```typescript
+@Component({
+  template: `
+    <mat-grid-list cols="12" gutterSize="16px" rowHeight="100px">
+      <!-- Full-width header -->
+      <mat-grid-tile colspan="12" rowspan="1" class="header-tile">
+        <h1>Dashboard Overview</h1>
+      </mat-grid-tile>
+
+      <!-- Key metrics -->
+      <mat-grid-tile
+        *ngFor="let metric of keyMetrics"
+        [colspan]="3"
+        rowspan="2"
+        class="metric-tile"
+      >
+        <div class="metric-content">
+          <mat-icon [color]="metric.iconColor">{{ metric.icon }}</mat-icon>
+          <h3>{{ metric.value }}</h3>
+          <p>{{ metric.label }}</p>
+          <span [class]="'trend-' + metric.trend" class="trend-indicator">
+            {{ metric.change }}
+          </span>
+        </div>
+      </mat-grid-tile>
+
+      <!-- Main chart -->
+      <mat-grid-tile colspan="8" rowspan="4" class="chart-tile">
+        <div class="chart-container">
+          <h4>Performance Over Time</h4>
+          <app-line-chart [data]="chartData"></app-line-chart>
+        </div>
+      </mat-grid-tile>
+
+      <!-- Activity feed -->
+      <mat-grid-tile colspan="4" rowspan="4" class="activity-tile">
+        <div class="activity-feed">
+          <h4>Recent Activity</h4>
+          <mat-list>
+            <mat-list-item *ngFor="let activity of recentActivity">
+              <mat-icon matListItemIcon>{{ activity.icon }}</mat-icon>
+              <div matListItemTitle>{{ activity.title }}</div>
+              <div matListItemLine>{{ activity.time }}</div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+})
+export class DashboardGridComponent {
+  keyMetrics = [
+    {
+      icon: "trending_up",
+      iconColor: "primary",
+      value: "12,345",
+      label: "Total Sales",
+      trend: "up",
+      change: "+5.2%",
+    },
+    // More metrics...
+  ];
+}
+```
+
+#### Fixed Height Grid
+
+```typescript
+@Component({
+  template: `
+    <!-- Fixed 150px tall rows -->
+    <mat-grid-list cols="3" rowHeight="150px" gutterSize="10px">
+      <mat-grid-tile *ngFor="let card of cards">
+        <mat-card class="tile-card">
+          <mat-card-header>
+            <mat-card-title>{{ card.title }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ card.content }}</p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button>VIEW</button>
+          </mat-card-actions>
+        </mat-card>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+})
+export class FixedHeightGridComponent {
+  cards = [
+    { title: "Card 1", content: "Some content here" },
+    // More cards...
+  ];
+}
+```
+
+#### Fit Mode Grid
+
+```typescript
+@Component({
+  template: `
+    <!-- Rows fit available container height -->
+    <div class="grid-container" style="height: 400px;">
+      <mat-grid-list cols="2" rowHeight="fit" gutterSize="8px">
+        <mat-grid-tile>
+          <div class="full-height-content">Content 1</div>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <div class="full-height-content">Content 2</div>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <div class="full-height-content">Content 3</div>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <div class="full-height-content">Content 4</div>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  `,
+})
+export class FitModeGridComponent {}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **MatGridList** receives configuration (cols, gutterSize, rowHeight) and calculates layout parameters
+2. **TileCoordinator** algorithm processes all MatGridTile children to determine optimal positioning
+3. **Positioning System** assigns specific (row, col) coordinates to each tile based on its size requirements
+4. **Style Application** applies calculated positions and dimensions to tile elements in the DOM
+5. **Responsive Updates** recalculate layout when configuration changes or container resizes
+
+### Context Sharing
+
+- **Grid Configuration**: MatGridList provides layout context (columns, gutters, row sizing) to all tiles
+- **Positioning Algorithm**: Shared tile coordinator manages placement to avoid overlaps and optimize space usage
+- **Style Coordination**: Grid container manages overall styling while tiles handle their individual content styles
+
+### Event Handling
+
+- **Layout Recalculation**: Automatic recalculation when tiles are added, removed, or resized
+- **Responsive Changes**: Grid responds to container size changes and configuration updates
+- **Tile Interactions**: Individual tiles can handle user interactions (clicks, hover) independently
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Define appropriate column count**: Choose column numbers that work well across different screen sizes (typically 2-6 for responsive design)
+- **Use consistent tile sizes**: Maintain visual harmony by limiting the variety of tile sizes and following a clear sizing strategy
+- **Optimize for content type**: Match row height configuration to your content - use aspect ratios for images, fixed heights for text content
+- **Plan responsive behavior**: Consider how your grid will adapt to different screen sizes and adjust column counts accordingly
+
+### Accessibility
+
+- **Semantic content structure**: Ensure tile content uses proper heading hierarchy and semantic HTML elements
+- **Keyboard navigation**: Provide keyboard navigation for interactive elements within tiles
+- **Screen reader support**: Use proper alt text for images and descriptive content for complex tiles
+- **Focus management**: Implement logical tab order for interactive tiles and maintain focus visibility
+
+### Performance
+
+- **Optimize large grids**: Use virtual scrolling or pagination for grids with many tiles to maintain performance
+- **Lazy load images**: Implement lazy loading for image-heavy grids to improve initial load times
+- **TrackBy functions**: Use trackBy functions with \*ngFor to optimize Angular's change detection for dynamic tiles
+- **Efficient positioning**: The built-in positioning algorithm is optimized, but avoid frequent configuration changes during animations
+
+## Common Patterns
+
+### Pattern 1: Masonry-Style Photo Grid
+
+```typescript
+// Pinterest-style photo grid with variable image sizes
+@Component({
+  template: `
+    <mat-grid-list [cols]="4" gutterSize="8px" rowHeight="200px">
+      <mat-grid-tile
+        *ngFor="let photo of photos; trackBy: trackByPhotoId"
+        [rowspan]="getPhotoRowspan(photo)"
+        class="photo-tile"
+      >
+        <div class="photo-container">
+          <img
+            [src]="photo.thumbnailUrl"
+            [alt]="photo.title"
+            (click)="openLightbox(photo)"
+            loading="lazy"
+          />
+
+          <div class="photo-overlay">
+            <div class="photo-info">
+              <h4>{{ photo.title }}</h4>
+              <p>{{ photo.photographer }}</p>
+            </div>
+            <div class="photo-actions">
+              <button mat-icon-button (click)="likePhoto(photo)">
+                <mat-icon [color]="photo.liked ? 'accent' : ''"
+                  >favorite</mat-icon
+                >
+              </button>
+              <button mat-icon-button (click)="sharePhoto(photo)">
+                <mat-icon>share</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .photo-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+
+      .photo-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .photo-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+        padding: 16px;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .photo-tile:hover .photo-overlay {
+        transform: translateY(0);
+      }
+
+      .photo-tile:hover img {
+        transform: scale(1.1);
+      }
+    `,
+  ],
+})
+export class PhotoGridComponent {
+  photos: Photo[] = [];
+
+  getPhotoRowspan(photo: Photo): number {
+    // Calculate rowspan based on image aspect ratio
+    const aspectRatio = photo.width / photo.height;
+    if (aspectRatio > 1.5) return 1; // Wide images
+    if (aspectRatio < 0.75) return 3; // Tall images
+    return 2; // Square-ish images
+  }
+
+  trackByPhotoId(index: number, photo: Photo): string {
+    return photo.id;
+  }
+}
+```
+
+### Pattern 2: Adaptive Content Cards
+
+```typescript
+// Content grid that adapts tile sizes based on content type
+@Component({
+  template: `
+    <mat-grid-list [cols]="6" gutterSize="12px" rowHeight="120px">
+      <mat-grid-tile
+        *ngFor="let item of contentItems"
+        [colspan]="getItemColspan(item)"
+        [rowspan]="getItemRowspan(item)"
+        [ngClass]="'content-' + item.type"
+      >
+        <!-- Featured article -->
+        <div *ngIf="item.type === 'featured'" class="featured-article">
+          <img [src]="item.imageUrl" [alt]="item.title" />
+          <div class="article-content">
+            <span class="article-category">{{ item.category }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.excerpt }}</p>
+            <div class="article-meta">
+              <span>{{ item.publishDate | date }}</span>
+              <span>{{ item.readTime }} min read</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Standard article -->
+        <div *ngIf="item.type === 'article'" class="standard-article">
+          <h4>{{ item.title }}</h4>
+          <p>{{ item.excerpt }}</p>
+          <span class="read-more">Read more →</span>
+        </div>
+
+        <!-- Quick stat -->
+        <div *ngIf="item.type === 'stat'" class="stat-card">
+          <div class="stat-value">{{ item.value }}</div>
+          <div class="stat-label">{{ item.label }}</div>
+          <div class="stat-change" [ngClass]="item.trend">
+            {{ item.change }}
+          </div>
+        </div>
+
+        <!-- Call to action -->
+        <div *ngIf="item.type === 'cta'" class="cta-card">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <h4>{{ item.title }}</h4>
+          <button mat-raised-button color="primary">
+            {{ item.buttonText }}
+          </button>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+})
+export class AdaptiveContentGridComponent {
+  contentItems: ContentItem[] = [
+    {
+      type: "featured",
+      title: "Main Story",
+      imageUrl: "featured.jpg",
+      excerpt: "Lorem ipsum...",
+      category: "Technology",
+      publishDate: new Date(),
+      readTime: 5,
+    },
+    // More items...
+  ];
+
+  getItemColspan(item: ContentItem): number {
+    switch (item.type) {
+      case "featured":
+        return 4; // Takes most of the width
+      case "article":
+        return 2; // Medium size
+      case "stat":
+        return 1; // Small squares
+      case "cta":
+        return 3; // Medium-large
+      default:
+        return 1;
+    }
+  }
+
+  getItemRowspan(item: ContentItem): number {
+    switch (item.type) {
+      case "featured":
+        return 3; // Tall featured content
+      case "article":
+        return 2; // Medium height
+      case "stat":
+        return 1; // Single row
+      case "cta":
+        return 2; // Medium height
+      default:
+        return 1;
+    }
+  }
+}
+```
+
+### Pattern 3: Responsive Product Showcase
+
+```typescript
+// E-commerce product grid with responsive behavior
+@Component({
+  template: `
+    <mat-grid-list
+      [cols]="responsiveCols"
+      [gutterSize]="responsiveGutter"
+      rowHeight="1:1.2">
+
+      <mat-grid-tile
+        *ngFor="let product of products"
+        [colspan]="getProductColspan(product)"
+        class="product-tile">
+
+        <mat-card class="product-card">
+          <div class="product-image-container">
+            <img
+              [src]="product.imageUrl"
+              [alt]="product.name"
+              class="product-image">
+
+            <div class="product-badges">
+              <span *ngIf="product.isNew" class="badge new">NEW</span>
+              <span *ngIf="product.onSale" class="badge sale">SALE</span>
+            </div>
+
+            <div class="quick-actions">
+              <button mat-icon-button (click)="quickView(product)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button (click)="addToWishlist(product)">
+                <mat-icon>favorite_border</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <mat-card-content class="product-info">
+            <h4 class="product-name">{{ product.name }}</h4>
+            <p class="product-brand">{{ product.brand }}</p>
+
+            <div class="product-rating">
+              <mat-icon
+                *ngFor="let star of getStarArray(product.rating)"
+                class="star">star</mat-icon>
+              <span class="rating-count">({{ product.reviewCount }})</span>
+            </div>
+
+            <div class="product-price">
+              <span
+                *ngIf="product.originalPrice && product.originalPrice !== product.price"
+                class="original-price">
+                ${{ product.originalPrice }}
+              </span>
+              <span class="current-price">${{ product.price }}</span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="addToCart(product)"
+              [disabled]="!product.inStock">
+              {{ product.inStock ? 'Add to Cart' : 'Out of Stock' }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [`
+    .product-card {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-image-container {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .product-tile:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .quick-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-tile:hover .quick-actions {
+      opacity: 1;
+    }
+  `]
+})
+export class ProductShowcaseComponent implements OnInit {
+  products: Product[] = [];
+  responsiveCols = 4;
+  responsiveGutter = '16px';
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.updateResponsiveSettings();
+  }
+
+  ngOnInit() {
+    this.updateResponsiveSettings();
+  }
+
+  private updateResponsiveSettings() {
+    const width = window.innerWidth;
+    if (width < 600) {
+      this.responsiveCols = 2;
+      this.responsiveGutter = '8px';
+    } else if (width < 960) {
+      this.responsiveCols = 3;
+      this.responsiveGutter = '12px';
+    } else if (width < 1280) {
+      this.responsiveCols = 4;
+      this.responsiveGutter = '16px';
+    } else {
+      this.responsiveCols = 5;
+      this.responsiveGutter = '20px';
+    }
+  }
+
+  getProductColspan(product: Product): number {
+    // Featured products take more space
+    return product.featured ? 2 : 1;
+  }
+
+  getStarArray(rating: number): number[] {
+    return Array(Math.floor(rating)).fill(0);
+  }
+}
+```

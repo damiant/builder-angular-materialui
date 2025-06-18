@@ -1,0 +1,860 @@
+---
+
+# Table Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle tabular data with required hierarchical structure. The Table component group provides a comprehensive solution for displaying structured data with built-in support for sorting, filtering, pagination, and accessibility features.
+
+### When to Use
+
+- **Data Display**: When you need to present structured data in rows and columns
+- **Large Datasets**: For handling datasets that require sorting, filtering, or pagination
+- **Interactive Tables**: When users need to interact with tabular data (selection, editing, actions)
+- **Responsive Data Views**: For creating tables that adapt to different screen sizes
+- **Accessibility-First Tables**: When semantic table structure and screen reader support are critical
+- **Integration with Forms**: For displaying form data or managing collections of form inputs
+
+### Architecture
+
+**Critical/Strong Coupling**: The Table component group requires strict hierarchical relationships and shared context between components. All components must work together in a specific structure to form a functional table.
+
+### Component Interdependencies
+
+The Table components form a tightly coupled system with specific requirements:
+
+- **MatTable**: Root container that provides the table context and data binding
+- **Column Definitions**: MatColumnDef defines the structure and behavior of table columns
+- **Cell Definitions**: MatCellDef, MatHeaderCellDef, MatFooterCellDef define templates for different cell types
+- **Row Definitions**: MatRowDef, MatHeaderRowDef, MatFooterRowDef define templates for different row types
+- **Rendered Components**: MatCell, MatHeaderCell, MatFooterCell, MatRow, MatHeaderRow, MatFooterRow are automatically generated from definitions
+- **Special Components**: MatNoDataRow for empty states, MatTextColumn for simple text columns
+
+## Components
+
+### MatTable {Primary Component}
+
+**Purpose:** The root container component that orchestrates the entire table structure, manages data binding, and provides context for all child components.
+
+**Interface:**
+
+```typescript
+class MatTable<T> extends CdkTable<T> {
+  // Data source for the table
+  dataSource: MatTableDataSource<T> | T[] | Observable<T[]>;
+
+  // Columns to display
+  displayedColumns: string[];
+
+  // Tracking function for performance optimization
+  trackBy?: TrackByFunction<T>;
+
+  // Multiselect functionality
+  multiTemplateDataRows?: boolean;
+
+  // Recycle rows for better performance
+  recycleRows?: boolean;
+}
+
+interface MatTableDataSource<T> {
+  data: T[];
+  filter: string;
+  sort: MatSort | null;
+  paginator: MatPaginator | null;
+  filteredData: T[];
+  sortingDataAccessor: (data: T, sortHeaderId: string) => string | number;
+  sortData: (data: T[], sort: MatSort) => T[];
+  filterPredicate: (data: T, filter: string) => boolean;
+}
+```
+
+**Dependencies:** None (root component)
+**Provides:** Table context, data management, column coordination for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatTableModule } from "@angular/material/table";
+
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource" [displayedColumns]="displayedColumns">
+      <!-- Column and row definitions go here -->
+    </mat-table>
+  `,
+})
+export class TableExample {
+  displayedColumns = ["name", "email", "actions"];
+  dataSource = new MatTableDataSource([
+    { name: "John", email: "john@example.com" },
+    { name: "Jane", email: "jane@example.com" },
+  ]);
+}
+```
+
+### MatColumnDef {Column Structure Component}
+
+**Purpose:** Defines the structure and behavior of a table column, serving as a container for cell definitions and providing column identification.
+
+**Interface:**
+
+```typescript
+class MatColumnDef extends CdkColumnDef {
+  // Unique identifier for the column
+  name: string; // Set via matColumnDef directive
+
+  // Whether the column should be sticky
+  sticky?: boolean;
+
+  // CSS classes applied to the column
+  cssClass?: string | string[];
+}
+```
+
+**Context Dependencies:** Must be used within MatTable
+**Parent Requirements:** MatTable container
+**Children Requirements:** Must contain MatCellDef, optionally MatHeaderCellDef and MatFooterCellDef
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatTable
+<mat-table>
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+  </ng-container>
+</mat-table>
+```
+
+### MatCellDef {Data Cell Template}
+
+**Purpose:** Defines the template for data cells in a column, specifying how data should be rendered in table body rows.
+
+**Interface:**
+
+```typescript
+class MatCellDef extends CdkCellDef {
+  // Template reference for the cell content
+  template: TemplateRef<any>;
+
+  // Context variables available in template
+  // $implicit: row data
+  // index: row index
+  // count: total row count
+  // first: boolean for first row
+  // last: boolean for last row
+  // even: boolean for even rows
+  // odd: boolean for odd rows
+}
+```
+
+**Context Dependencies:** Column context from parent MatColumnDef
+**Parent Requirements:** Must be within ng-container with matColumnDef
+
+**Usage Example:**
+
+```typescript
+<ng-container matColumnDef="name">
+  <mat-cell *matCellDef="let element; let i = index">
+    <span class="cell-content">{{element.name}} (#{{i + 1}})</span>
+  </mat-cell>
+</ng-container>
+```
+
+### MatHeaderCellDef {Header Cell Template}
+
+**Purpose:** Defines the template for header cells in a column, typically used for column titles and sorting controls.
+
+**Interface:**
+
+```typescript
+class MatHeaderCellDef extends CdkHeaderCellDef {
+  // Template reference for the header cell content
+  template: TemplateRef<any>;
+
+  // Context variables available in template
+  // $implicit: column definition
+}
+```
+
+**Context Dependencies:** Column context from parent MatColumnDef
+**Parent Requirements:** Must be within ng-container with matColumnDef
+
+**Usage Example:**
+
+```typescript
+<ng-container matColumnDef="name">
+  <mat-header-cell *matHeaderCellDef mat-sort-header>
+    Name
+  </mat-header-cell>
+  <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+</ng-container>
+```
+
+### MatFooterCellDef {Footer Cell Template}
+
+**Purpose:** Defines the template for footer cells in a column, commonly used for totals, summaries, or additional actions.
+
+**Interface:**
+
+```typescript
+class MatFooterCellDef extends CdkFooterCellDef {
+  // Template reference for the footer cell content
+  template: TemplateRef<any>;
+
+  // Context variables available in template
+  // $implicit: column definition
+}
+```
+
+**Context Dependencies:** Column context from parent MatColumnDef
+**Parent Requirements:** Must be within ng-container with matColumnDef
+
+**Usage Example:**
+
+```typescript
+<ng-container matColumnDef="total">
+  <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+  <mat-cell *matCellDef="let element">{{element.amount}}</mat-cell>
+  <mat-footer-cell *matFooterCellDef>{{getTotal()}}</mat-footer-cell>
+</ng-container>
+```
+
+### MatRowDef {Data Row Template}
+
+**Purpose:** Defines the template and configuration for data rows, specifying which columns to display and conditional rendering logic.
+
+**Interface:**
+
+```typescript
+class MatRowDef<T> extends CdkRowDef<T> {
+  // Columns to display in this row type
+  columns: string[];
+
+  // Conditional function to determine when this row template is used
+  when?: (index: number, rowData: T) => boolean;
+}
+```
+
+**Context Dependencies:** Table context from MatTable
+**Parent Requirements:** Must be within MatTable
+
+**Usage Example:**
+
+```typescript
+<mat-table>
+  <!-- Column definitions -->
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+  <!-- Conditional row for special data -->
+  <mat-row *matRowDef="let row; columns: specialColumns; when: isSpecialRow"></mat-row>
+</mat-table>
+```
+
+### MatHeaderRowDef {Header Row Template}
+
+**Purpose:** Defines the template for header rows, specifying which header cells to display and whether the header should be sticky.
+
+**Interface:**
+
+```typescript
+class MatHeaderRowDef extends CdkHeaderRowDef {
+  // Columns to display in the header
+  columns: string[];
+
+  // Whether the header row should stick to the top
+  sticky?: boolean;
+}
+```
+
+**Context Dependencies:** Table context from MatTable
+**Parent Requirements:** Must be within MatTable
+
+**Usage Example:**
+
+```typescript
+<mat-table>
+  <!-- Column definitions -->
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+```
+
+### MatFooterRowDef {Footer Row Template}
+
+**Purpose:** Defines the template for footer rows, commonly used for totals, pagination controls, or summary information.
+
+**Interface:**
+
+```typescript
+class MatFooterRowDef extends CdkFooterRowDef {
+  // Columns to display in the footer
+  columns: string[];
+
+  // Whether the footer row should stick to the bottom
+  sticky?: boolean;
+}
+```
+
+**Context Dependencies:** Table context from MatTable
+**Parent Requirements:** Must be within MatTable
+
+**Usage Example:**
+
+```typescript
+<mat-table>
+  <!-- Column definitions -->
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></mat-footer-row>
+</mat-table>
+```
+
+### MatCell, MatHeaderCell, MatFooterCell {Rendered Cell Components}
+
+**Purpose:** These components are automatically generated from their corresponding definition components and represent the actual rendered cells in the DOM.
+
+**Interface:**
+
+```typescript
+class MatCell extends CdkCell {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered content from MatCellDef template
+}
+
+class MatHeaderCell extends CdkHeaderCell {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered content from MatHeaderCellDef template
+}
+
+class MatFooterCell extends CdkFooterCell {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered content from MatFooterCellDef template
+}
+```
+
+**Context Dependencies:** Generated automatically by the table system
+**Parent Requirements:** Generated within appropriate row components
+
+### MatRow, MatHeaderRow, MatFooterRow {Rendered Row Components}
+
+**Purpose:** These components are automatically generated from their corresponding definition components and represent the actual rendered rows in the DOM.
+
+**Interface:**
+
+```typescript
+class MatRow extends CdkRow {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered cells from the row definition
+}
+
+class MatHeaderRow extends CdkHeaderRow {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered header cells
+}
+
+class MatFooterRow extends CdkFooterRow {
+  // Automatically inherits styling and behavior from CDK
+  // Contains the rendered footer cells
+}
+```
+
+**Context Dependencies:** Generated automatically by the table system
+**Parent Requirements:** Generated within MatTable
+
+### MatNoDataRow {Empty State Component}
+
+**Purpose:** Provides a template for displaying content when the table has no data to show, improving user experience for empty states.
+
+**Interface:**
+
+```typescript
+class MatNoDataRow extends CdkNoDataRow {
+  // Template that is displayed when dataSource is empty
+  template: TemplateRef<any>;
+
+  // CSS class applied to the no-data row
+  _contentClassName: string;
+}
+```
+
+**Context Dependencies:** Table context from MatTable
+**Parent Requirements:** Must be within MatTable
+
+**Usage Example:**
+
+```typescript
+<mat-table [dataSource]="dataSource">
+  <!-- Column definitions and rows -->
+
+  <mat-no-data-row>
+    <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
+      No data available
+    </td>
+  </mat-no-data-row>
+</mat-table>
+```
+
+### MatTextColumn {Simple Text Column}
+
+**Purpose:** A simplified component for creating text-only columns without the need for manual column definition templates.
+
+**Interface:**
+
+```typescript
+class MatTextColumn<T> extends CdkTextColumn<T> {
+  // Column name and data property accessor
+  name: string;
+
+  // Header text (defaults to name if not provided)
+  headerText?: string;
+
+  // Function to access data property
+  dataAccessor?: (data: T, name: string) => string;
+
+  // Text justification
+  justify?: "start" | "end" | "center";
+}
+```
+
+**Context Dependencies:** Table context from MatTable
+**Parent Requirements:** Must be within MatTable
+
+**Usage Example:**
+
+```typescript
+<mat-table [dataSource]="dataSource">
+  <mat-text-column name="name" headerText="Full Name"></mat-text-column>
+  <mat-text-column name="email" headerText="Email Address"></mat-text-column>
+
+  <mat-header-row *matHeaderRowDef="['name', 'email']"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: ['name', 'email'];"></mat-row>
+</mat-table>
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatTableModule } from "@angular/material/table";
+
+@Component({
+  selector: "app-basic-table",
+  template: `
+    <mat-table [dataSource]="dataSource">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.email }}</mat-cell>
+      </ng-container>
+
+      <!-- Header and Row Templates -->
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+  `,
+})
+export class BasicTableComponent {
+  displayedColumns = ["name", "email"];
+  dataSource = new MatTableDataSource([
+    { name: "John Doe", email: "john@example.com" },
+    { name: "Jane Smith", email: "jane@example.com" },
+  ]);
+}
+```
+
+### Advanced Usage with Sorting and Pagination
+
+```typescript
+import { MatTableModule } from "@angular/material/table";
+import { MatSortModule } from "@angular/material/sort";
+import { MatPaginatorModule } from "@angular/material/paginator";
+
+@Component({
+  selector: "app-advanced-table",
+  template: `
+    <mat-table [dataSource]="dataSource" matSort>
+      <!-- Sortable Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Name</mat-header-cell
+        >
+        <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+        <mat-footer-cell *matFooterCellDef
+          >Total: {{ dataSource.data.length }}</mat-footer-cell
+        >
+      </ng-container>
+
+      <!-- Email Column with Filter -->
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef>
+          Email
+          <mat-form-field>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder="Filter emails"
+            />
+          </mat-form-field>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.email }}</mat-cell>
+        <mat-footer-cell *matFooterCellDef
+          >Filtered: {{ dataSource.filteredData.length }}</mat-footer-cell
+        >
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button mat-icon-button (click)="editElement(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteElement(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+
+      <!-- Templates -->
+      <mat-header-row
+        *matHeaderRowDef="displayedColumns; sticky: true"
+      ></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      <mat-footer-row
+        *matFooterRowDef="displayedColumns; sticky: true"
+      ></mat-footer-row>
+
+      <!-- No Data State -->
+      <mat-no-data-row>
+        <td [attr.colspan]="displayedColumns.length" class="no-data">
+          No records found
+        </td>
+      </mat-no-data-row>
+    </mat-table>
+
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+    ></mat-paginator>
+  `,
+})
+export class AdvancedTableComponent implements OnInit, AfterViewInit {
+  displayedColumns = ["name", "email", "actions"];
+  dataSource = new MatTableDataSource<User>([]);
+
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngOnInit() {
+    this.dataSource.data = this.userData;
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+}
+```
+
+### Common Variations
+
+#### Expandable Rows
+
+```typescript
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource" multiTemplateDataRows>
+      <!-- Regular columns -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Expanded detail column -->
+      <ng-container matColumnDef="expandedDetail">
+        <mat-cell
+          *matCellDef="let element"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div *ngIf="expandedElement === element" class="expanded-detail">
+            <!-- Nested content or table -->
+            <p>{{ element.details }}</p>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let element; columns: displayedColumns"
+        (click)="toggleExpand(element)"
+        [class.expanded-row]="expandedElement === element"
+      >
+      </mat-row>
+      <mat-row
+        *matRowDef="let row; columns: ['expandedDetail']"
+        class="detail-row"
+      >
+      </mat-row>
+    </mat-table>
+  `,
+})
+export class ExpandableTableComponent {
+  expandedElement: any | null = null;
+
+  toggleExpand(element: any) {
+    this.expandedElement = this.expandedElement === element ? null : element;
+  }
+}
+```
+
+#### Selection Table
+
+```typescript
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource">
+      <!-- Selection Column -->
+      <ng-container matColumnDef="select">
+        <mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="$event ? toggleAllRows() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+          >
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+          >
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Data columns -->
+      <!-- ... other column definitions ... -->
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        (click)="selection.toggle(row)"
+      >
+      </mat-row>
+    </mat-table>
+  `,
+})
+export class SelectionTableComponent {
+  selection = new SelectionModel<any>(true, []);
+  displayedColumns = ["select", "name", "email"];
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  toggleAllRows() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+    this.selection.select(...this.dataSource.data);
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **MatTable** receives data through `dataSource` property
+2. **MatTableDataSource** processes data (filtering, sorting, pagination)
+3. **Column definitions** (MatColumnDef) define structure and templates
+4. **Row definitions** specify which columns to render and when
+5. **Cell and row components** are automatically generated from templates
+6. **User interactions** flow back through event handlers to update data
+
+### Context Sharing
+
+- **Table Context**: MatTable provides context about columns, data, and rendering state
+- **Column Context**: MatColumnDef provides column-specific context to its cell definitions
+- **Data Context**: Each row provides access to row data, index, and state information
+- **Selection Context**: Shared selection state when using selection features
+
+### Event Handling
+
+- **Row Events**: Click, hover, and focus events bubble up from rows to parent components
+- **Cell Events**: Individual cell interactions can be handled at the cell level
+- **Data Events**: Changes to dataSource automatically trigger re-rendering
+- **Sort/Filter Events**: Integration with MatSort and filter inputs update the data view
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Define clear column structure**: Always use MatColumnDef with unique names for each column
+- **Leverage MatTableDataSource**: Use the built-in data source for automatic sorting, filtering, and pagination
+- **Implement proper loading states**: Show progress indicators while data is being loaded
+- **Optimize performance**: Use trackBy functions for large datasets and consider virtual scrolling
+- **Maintain responsive design**: Consider horizontal scrolling or column hiding for mobile devices
+
+### Accessibility
+
+- **Semantic structure**: Table automatically provides proper table semantics with thead, tbody, and tfoot
+- **Keyboard navigation**: Built-in keyboard navigation support for rows and interactive elements
+- **Screen reader support**: Column headers are properly associated with cell content
+- **Focus management**: Proper focus handling for interactive elements within cells
+- **Sort announcements**: When using MatSort, changes are announced to screen readers
+
+### Performance
+
+- **Virtual scrolling**: Use CDK virtual scrolling for tables with thousands of rows
+- **TrackBy functions**: Implement trackBy to optimize Angular's change detection
+- **Lazy loading**: Load data in chunks for better initial performance
+- **Debounce filters**: Debounce filter inputs to avoid excessive filtering operations
+- **Recycle rows**: Use the recycleRows feature for tables with frequent data changes
+
+## Common Patterns
+
+### Pattern 1: Master-Detail Table
+
+```typescript
+// Table with expandable rows showing detailed information
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource" multiTemplateDataRows>
+      <!-- Summary columns -->
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+      </ng-container>
+
+      <!-- Expandable detail -->
+      <ng-container matColumnDef="expandedDetail">
+        <mat-cell
+          *matCellDef="let element"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div *ngIf="expandedElement === element" class="detail-container">
+            <!-- Detailed view with additional data -->
+            <mat-table [dataSource]="element.details">
+              <!-- Nested table structure -->
+            </mat-table>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let element; columns: displayedColumns"
+        (click)="expandedElement = expandedElement === element ? null : element"
+      >
+      </mat-row>
+      <mat-row
+        *matRowDef="let row; columns: ['expandedDetail']"
+        class="detail-row"
+      ></mat-row>
+    </mat-table>
+  `,
+})
+export class MasterDetailTableComponent {
+  expandedElement: any | null = null;
+}
+```
+
+### Pattern 2: Editable Table
+
+```typescript
+// Table with inline editing capabilities
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-form-field *ngIf="editingElement === element; else displayName">
+            <input
+              matInput
+              [(ngModel)]="element.name"
+              (keyup.enter)="saveElement(element)"
+            />
+          </mat-form-field>
+          <ng-template #displayName>
+            <span (dblclick)="startEdit(element)">{{ element.name }}</span>
+          </ng-template>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button
+            *ngIf="editingElement !== element"
+            mat-icon-button
+            (click)="startEdit(element)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            *ngIf="editingElement === element"
+            mat-icon-button
+            (click)="saveElement(element)"
+          >
+            <mat-icon>save</mat-icon>
+          </button>
+          <button
+            *ngIf="editingElement === element"
+            mat-icon-button
+            (click)="cancelEdit()"
+          >
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+  `,
+})
+export class EditableTableComponent {
+  editingElement: any | null = null;
+  originalValue: any;
+
+  startEdit(element: any) {
+    this.originalValue = { ...element };
+    this.editingElement = element;
+  }
+
+  saveElement(element: any) {
+    // Save logic here
+    this.editingElement = null;
+  }
+
+  cancelEdit() {
+    if (this.editingElement && this.originalValue) {
+      Object.assign(this.editingElement, this.originalValue);
+    }
+    this.editingElement = null;
+  }
+}
+```

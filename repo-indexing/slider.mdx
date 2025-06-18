@@ -1,0 +1,799 @@
+# Slider Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate slider functionality
+
+### When to Use
+
+Slider components provide an intuitive way for users to select values from a continuous or discrete range. Use them when you need to:
+
+- **Numeric input ranges** - Allow users to select values between defined minimum and maximum bounds for settings like volume, brightness, or price filters
+- **Range selection** - Enable users to select start and end values for ranges like date ranges, price ranges, or time periods
+- **Continuous adjustments** - Provide smooth value adjustments for settings that don't have discrete steps like audio levels or visual properties
+- **Discrete value selection** - Allow selection from specific intervals or steps for values like ratings, quantity selection, or percentage increments
+- **Filter controls** - Create range filters for search results, product catalogs, or data visualization with minimum and maximum constraints
+- **Form input alternatives** - Replace traditional numeric inputs when visual feedback and range context improve user experience
+- **Media controls** - Control playback position, volume levels, or timeline scrubbing in audio/video applications
+- **Settings and preferences** - Adjust application settings like notification frequency, auto-save intervals, or performance parameters
+- **Data visualization controls** - Allow users to filter data ranges, adjust chart time periods, or modify visualization parameters
+- **Accessibility-friendly input** - Provide keyboard and screen reader accessible numeric input with clear value feedback
+- **Mobile-optimized controls** - Offer touch-friendly value selection that works well on mobile devices with finger interaction
+- **Progressive disclosure** - Show acceptable value ranges visually while allowing precise selection within those bounds
+
+### Architecture
+
+**No Coupling**: The Slider component is a standalone form control that implements Material Design slider patterns. It works independently but integrates seamlessly with Angular Material's FormField component for enhanced functionality and consistent styling.
+
+### Component Interdependencies
+
+The Slider component demonstrates no coupling as it is a standalone component that:
+
+- **Direct application**: Can be used independently with its own styling, validation, and state management
+- **FormField integration**: Optionally works within `mat-form-field` for enhanced styling, labeling, and error handling
+- **Form integration**: Seamlessly integrates with Angular Reactive Forms and Template-driven Forms through ControlValueAccessor
+- **Accessibility enhancement**: Automatically handles ARIA attributes, keyboard navigation, and screen reader compatibility
+
+## Components
+
+### MatSlider {Standalone Component}
+
+A Material Design slider component that enables users to select numeric values from a continuous or discrete range with smooth animations, accessibility features, and comprehensive form integration.
+
+**Purpose:** Provides an intuitive range selection interface for numeric values with Material Design styling, accessibility support, keyboard navigation, and seamless integration with Angular forms and validation systems.
+
+**Interface:**
+
+```typescript
+interface MatSlider {
+  // Range Configuration
+  min: number; // The minimum value that the slider can have (default: 0)
+  max: number; // The maximum value that the slider can have (default: 100)
+  step: number; // The amount that slider values can increment or decrement by (default: 1)
+  value: number; // Current value of the slider (for single-point sliders)
+
+  // Visual Display
+  discrete: boolean; // Whether the slider displays a numeric value label upon pressing the thumb
+  showTickMarks: boolean; // Whether the slider displays tick marks along the slider track
+  displayWith: (value: number) => string; // Function to format value display in thumb label
+
+  // Styling and Theme
+  color: ThemePalette; // Theme color for M2 themes (primary, accent, warn)
+  disableRipple: boolean; // Whether ripples are disabled in the slider
+
+  // State Management
+  disabled: boolean; // Whether the slider is disabled
+  readonly: boolean; // Whether the slider is read-only
+
+  // Accessibility
+  tabIndex: number; // Tab index for keyboard navigation
+
+  // Internal Properties (docs-private)
+  _isRange: boolean; // Whether the slider is a range slider
+  _isRtl: boolean; // Whether the slider is in RTL layout
+  _hasAnimation: boolean; // Whether animations are enabled
+  _noopAnimations: boolean; // Whether animations have been disabled
+}
+
+interface MatSliderThumb {
+  // Core Properties
+  value: number; // Current value of this slider thumb
+  thumbPosition: _MatThumb; // Indicates whether this is START or END thumb
+  translateX: number; // Current translateX position in pixels
+  fillPercentage: number; // Percentage of track filled by this thumb
+
+  // State Properties
+  disabled: boolean; // Whether this thumb is disabled
+  _isActive: boolean; // Whether the thumb is currently being pressed
+  _isFocused: boolean; // Whether the thumb is currently focused
+
+  // Events
+  valueChange: EventEmitter<number>; // Emitted when thumb value changes
+  dragStart: EventEmitter<MatSliderDragEvent>; // Emitted when drag starts
+  dragEnd: EventEmitter<MatSliderDragEvent>; // Emitted when drag ends
+
+  // Methods
+  focus(): void; // Programmatically focus the thumb
+  blur(): void; // Remove focus from the thumb
+}
+
+interface MatSliderDragEvent {
+  source: MatSliderThumb; // The thumb that was interacted with
+  parent: MatSlider; // The slider that was interacted with
+  value: number; // The current value of the slider
+}
+
+interface MatSliderChange {
+  source: MatSliderThumb; // The thumb that was interacted with
+  parent: MatSlider; // The slider that was interacted with
+  value: number; // The new value of the source slider
+}
+
+enum _MatThumb {
+  START = 1, // Start thumb for range sliders
+  END = 2, // End thumb for range sliders
+}
+
+enum _MatTickMark {
+  ACTIVE = 0, // Active tick marks (within selected range)
+  INACTIVE = 1, // Inactive tick marks (outside selected range)
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatSliderModule } from '@angular/material/slider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+// Basic single-value slider
+function BasicSliderExample() {
+  return (
+    <mat-slider
+      min="0"
+      max="100"
+      value="50"
+      step="1"
+      (input)="onSliderInput($event)"
+      (change)="onSliderChange($event)">
+      <input matSliderThumb />
+    </mat-slider>
+  );
+}
+
+// Discrete slider with tick marks and value display
+function DiscreteSliderExample() {
+  return (
+    <mat-slider
+      min="0"
+      max="10"
+      step="1"
+      discrete="true"
+      showTickMarks="true"
+      [displayWith]="formatLabel">
+      <input matSliderThumb value="5" />
+    </mat-slider>
+  );
+}
+
+// Range slider with start and end values
+function RangeSliderExample() {
+  return (
+    <mat-slider min="0" max="100">
+      <input matSliderStartThumb value="25" />
+      <input matSliderEndThumb value="75" />
+    </mat-slider>
+  );
+}
+
+// Slider with FormField integration
+function FormFieldSliderExample() {
+  return (
+    <mat-form-field>
+      <mat-label>Volume Level</mat-label>
+      <mat-slider min="0" max="100" step="5" color="primary">
+        <input matSliderThumb formControlName="volume" />
+      </mat-slider>
+      <mat-hint>Adjust the volume level</mat-hint>
+    </mat-form-field>
+  );
+}
+```
+
+## Integration Patterns
+
+### Basic Value Selection
+
+```tsx
+import { MatSliderModule } from '@angular/material/slider';
+
+// Simple numeric value selection
+function BasicValueSelection() {
+  const [sliderValue, setSliderValue] = useState(50);
+
+  return (
+    <div class="value-selector">
+      <label for="brightness-slider">Brightness: {sliderValue}%</label>
+      <mat-slider
+        id="brightness-slider"
+        min="0"
+        max="100"
+        step="5"
+        color="primary"
+        (input)="onBrightnessChange($event)">
+        <input matSliderThumb [(ngModel)]="sliderValue" />
+      </mat-slider>
+    </div>
+  );
+}
+```
+
+### Reactive Forms Integration
+
+```tsx
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+// Integration with Angular Reactive Forms
+function ReactiveFormSliderExample() {
+  const settingsForm = new FormGroup({
+    volume: new FormControl(50, [Validators.min(0), Validators.max(100)]),
+    brightness: new FormControl(75, [Validators.min(0), Validators.max(100)]),
+    contrast: new FormControl(50, [Validators.min(0), Validators.max(100)]),
+    priceRange: new FormGroup({
+      min: new FormControl(100, [Validators.min(0)]),
+      max: new FormControl(500, [Validators.max(1000)])
+    })
+  });
+
+  return (
+    <form [formGroup]="settingsForm">
+      <div class="settings-section">
+        <h3>Audio & Visual Settings</h3>
+
+        <mat-form-field>
+          <mat-label>Volume</mat-label>
+          <mat-slider min="0" max="100" step="5" discrete="true">
+            <input matSliderThumb formControlName="volume" />
+          </mat-slider>
+          <mat-hint>Adjust system volume</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Brightness</mat-label>
+          <mat-slider min="0" max="100" step="1" showTickMarks="true">
+            <input matSliderThumb formControlName="brightness" />
+          </mat-slider>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Contrast</mat-label>
+          <mat-slider min="0" max="100" step="1" color="accent">
+            <input matSliderThumb formControlName="contrast" />
+          </mat-slider>
+        </mat-form-field>
+      </div>
+
+      <div class="range-section">
+        <h3>Price Range Filter</h3>
+
+        <mat-slider min="0" max="1000" step="10" formGroupName="priceRange">
+          <input matSliderStartThumb formControlName="min" />
+          <input matSliderEndThumb formControlName="max" />
+        </mat-slider>
+
+        <div class="range-display">
+          Price: ${{settingsForm.get('priceRange.min')?.value}} -
+                 ${{settingsForm.get('priceRange.max')?.value}}
+        </div>
+      </div>
+    </form>
+  );
+}
+```
+
+### Advanced Range Selection
+
+```tsx
+// Complex range slider with custom formatting and validation
+function AdvancedRangeSliderExample() {
+  const dateRangeForm = new FormGroup({
+    startDate: new FormControl(0),
+    endDate: new FormControl(365)
+  });
+
+  const formatDayLabel = (value: number): string => {
+    const date = new Date();
+    date.setDate(date.getDate() + value);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div class="date-range-selector">
+      <mat-form-field>
+        <mat-label>Date Range Selection</mat-label>
+        <mat-slider
+          min="0"
+          max="365"
+          step="1"
+          discrete="true"
+          [displayWith]="formatDayLabel"
+          showTickMarks="false"
+          color="primary">
+          <input
+            matSliderStartThumb
+            formControlName="startDate"
+            (dragStart)="onDragStart($event)"
+            (dragEnd)="onDragEnd($event)" />
+          <input
+            matSliderEndThumb
+            formControlName="endDate"
+            (valueChange)="onEndDateChange($event)" />
+        </mat-slider>
+        <mat-hint>
+          Selected range: {{formatDayLabel(dateRangeForm.get('startDate')?.value)}} -
+                          {{formatDayLabel(dateRangeForm.get('endDate')?.value)}}
+        </mat-hint>
+        <mat-error *ngIf="dateRangeForm.invalid">
+          Please select a valid date range
+        </mat-error>
+      </mat-form-field>
+    </div>
+  );
+}
+```
+
+## Common Patterns
+
+### Pattern 1: Settings Panel with Multiple Sliders
+
+```tsx
+// Recommended pattern for settings pages with multiple related sliders
+// Group related sliders with clear labels and immediate visual feedback
+<div class="settings-panel">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Display Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="setting-group">
+        <mat-form-field>
+          <mat-label>Brightness: {{brightnessValue}}%</mat-label>
+          <mat-slider
+            min="0"
+            max="100"
+            step="1"
+            color="primary"
+            (input)="onBrightnessChange($event)">
+            <input matSliderThumb [(ngModel)]="brightnessValue" />
+          </mat-slider>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Contrast: {{contrastValue}}%</mat-label>
+          <mat-slider
+            min="0"
+            max="100"
+            step="1"
+            color="primary"
+            showTickMarks="true">
+            <input matSliderThumb [(ngModel)]="contrastValue" />
+          </mat-slider>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Saturation: {{saturationValue}}%</mat-label>
+          <mat-slider
+            min="0"
+            max="200"
+            step="5"
+            color="accent"
+            discrete="true">
+            <input matSliderThumb [(ngModel)]="saturationValue" />
+          </mat-slider>
+        </mat-form-field>
+      </div>
+
+      <div class="preview-section">
+        <div
+          class="display-preview"
+          [style.filter]="getDisplayFilter()">
+          Preview
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+```
+
+### Pattern 2: Filter Controls with Range Sliders
+
+```tsx
+// Pattern for search and filter interfaces using range sliders
+<div class="filter-controls">
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Price Range</mat-panel-title>
+      <mat-panel-description>
+        ${{priceFilter.min}} - ${{priceFilter.max}}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div class="price-range-filter">
+      <mat-slider
+        min="0"
+        max="1000"
+        step="25"
+        discrete="true"
+        [displayWith]="formatPrice">
+        <input
+          matSliderStartThumb
+          [(ngModel)]="priceFilter.min"
+          (valueChange)="onPriceFilterChange()" />
+        <input
+          matSliderEndThumb
+          [(ngModel)]="priceFilter.max"
+          (valueChange)="onPriceFilterChange()" />
+      </mat-slider>
+
+      <div class="range-inputs">
+        <mat-form-field>
+          <mat-label>Min Price</mat-label>
+          <input matInput type="number" [(ngModel)]="priceFilter.min" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Max Price</mat-label>
+          <input matInput type="number" [(ngModel)]="priceFilter.max" />
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Rating</mat-panel-title>
+      <mat-panel-description>
+        {{ratingFilter}}+ stars
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div class="rating-filter">
+      <mat-slider
+        min="1"
+        max="5"
+        step="0.5"
+        discrete="true"
+        showTickMarks="true"
+        [displayWith]="formatRating">
+        <input
+          matSliderThumb
+          [(ngModel)]="ratingFilter"
+          (valueChange)="onRatingFilterChange()" />
+      </mat-slider>
+    </div>
+  </mat-expansion-panel>
+</div>
+```
+
+### Pattern 3: Media Player Timeline Control
+
+```tsx
+// Pattern for media controls with timeline scrubbing
+<div class="media-player-controls">
+  <div class="timeline-container">
+    <span class="time-display">{{formatTime(currentTime)}}</span>
+
+    <mat-slider
+      class="timeline-slider"
+      min="0"
+      [max]="duration"
+      step="0.1"
+      [disabled]="!mediaLoaded"
+      (input)="onTimelineChange($event)"
+      (dragStart)="onTimelineDragStart()"
+      (dragEnd)="onTimelineDragEnd()">
+      <input matSliderThumb [(ngModel)]="currentTime" />
+    </mat-slider>
+
+    <span class="time-display">{{formatTime(duration)}}</span>
+  </div>
+
+  <div class="volume-container">
+    <mat-icon>{{volumeIcon}}</mat-icon>
+    <mat-slider
+      class="volume-slider"
+      min="0"
+      max="100"
+      step="1"
+      [displayWith]="formatVolume"
+      (input)="onVolumeChange($event)">
+      <input matSliderThumb [(ngModel)]="volume" />
+    </mat-slider>
+  </div>
+</div>
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for continuous ranges**: Reserve sliders for selecting values from continuous or large discrete ranges rather than small sets of options
+- **Provide visual feedback**: Show current values through labels, tooltips, or immediate visual changes in the interface
+- **Consider step increments**: Choose appropriate step values that match user expectations and use case precision requirements
+- **Include value displays**: Always show the current value in a readable format, especially for discrete sliders
+- **Respect platform conventions**: Follow Material Design patterns for slider behavior, styling, and interaction feedback
+
+### Accessibility
+
+- **Keyboard navigation**: Sliders automatically support keyboard navigation with arrow keys, Page Up/Down, Home, and End
+- **Screen reader support**: Current values and changes are automatically announced to assistive technologies
+- **Focus indicators**: Clear focus indicators help keyboard users understand current selection state
+- **ARIA attributes**: Use proper labeling through mat-label or aria-label for screen reader users
+- **Value format**: Provide clear value formatting that's meaningful to screen reader users
+
+### Performance
+
+- **Debounce frequent updates**: For sliders that trigger expensive operations, implement debouncing to avoid performance issues
+- **Optimize change handlers**: Use efficient change detection strategies and avoid heavy computations in slider event handlers
+- **Handle async operations**: Implement proper loading states when slider changes require server communication
+- **Memory management**: Properly unsubscribe from slider events and clean up resources in component destruction
+
+### Form Integration
+
+- **Reactive Forms recommended**: Use Angular Reactive Forms for better control over validation, form state, and value management
+- **Validation handling**: Implement appropriate validation for slider ranges and provide clear error feedback
+- **Default values**: Set sensible default values that represent safe or commonly used options
+- **Change detection**: Use OnPush change detection strategy when possible to optimize performance with many sliders
+- **State synchronization**: Ensure slider values remain synchronized with underlying data models and form controls
+
+## Common Use Cases
+
+### Application Preferences
+
+```tsx
+// User preference settings with immediate effect and persistence
+<form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
+  <div class="preferences-section">
+    <h3>Interface Settings</h3>
+
+    <mat-form-field>
+      <mat-label>Font Size: {{fontSize}}px</mat-label>
+      <mat-slider
+        min="12"
+        max="24"
+        step="1"
+        discrete="true"
+        showTickMarks="true"
+        (input)="onFontSizeChange($event)">
+        <input matSliderThumb formControlName="fontSize" />
+      </mat-slider>
+      <mat-hint>Adjust text size throughout the application</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Animation Speed: {{animationSpeed}}%</mat-label>
+      <mat-slider
+        min="50"
+        max="200"
+        step="25"
+        discrete="true"
+        [displayWith]="formatSpeed"
+        (input)="onAnimationSpeedChange($event)">
+        <input matSliderThumb formControlName="animationSpeed" />
+      </mat-slider>
+      <mat-hint>Control interface animation speed</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Auto-save Interval: {{autoSaveInterval}} minutes</mat-label>
+      <mat-slider
+        min="1"
+        max="30"
+        step="1"
+        discrete="true"
+        (input)="onAutoSaveIntervalChange($event)">
+        <input matSliderThumb formControlName="autoSaveInterval" />
+      </mat-slider>
+      <mat-hint>How often to automatically save your work</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div class="preferences-actions">
+    <button mat-button type="button" (click)="resetToDefaults()">
+      Reset to Defaults
+    </button>
+    <button mat-raised-button color="primary" type="submit">
+      Save Preferences
+    </button>
+  </div>
+</form>
+```
+
+### Data Analysis Dashboard
+
+```tsx
+// Dashboard with interactive data filtering and visualization controls
+<div class="dashboard-controls">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Data Filter Controls</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field>
+          <mat-label>Date Range</mat-label>
+          <mat-slider
+            min="0"
+            [max]="maxDays"
+            step="1"
+            [displayWith]="formatDateRange">
+            <input
+              matSliderStartThumb
+              [(ngModel)]="dateRange.start"
+              (valueChange)="onDateRangeChange()" />
+            <input
+              matSliderEndThumb
+              [(ngModel)]="dateRange.end"
+              (valueChange)="onDateRangeChange()" />
+          </mat-slider>
+          <mat-hint>
+            {{formatDate(dateRange.start)}} to {{formatDate(dateRange.end)}}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-row">
+        <mat-form-field>
+          <mat-label>Value Range</mat-label>
+          <mat-slider
+            [min]="dataMinValue"
+            [max]="dataMaxValue"
+            [step]="dataStep"
+            discrete="true"
+            (input)="onValueRangeChange($event)">
+            <input
+              matSliderStartThumb
+              [(ngModel)]="valueRange.min" />
+            <input
+              matSliderEndThumb
+              [(ngModel)]="valueRange.max" />
+          </mat-slider>
+          <mat-hint>
+            Filter data between {{valueRange.min}} and {{valueRange.max}}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-row">
+        <mat-form-field>
+          <mat-label>Sample Size: {{sampleSize}}%</mat-label>
+          <mat-slider
+            min="1"
+            max="100"
+            step="5"
+            discrete="true"
+            showTickMarks="true"
+            (input)="onSampleSizeChange($event)">
+            <input matSliderThumb [(ngModel)]="sampleSize" />
+          </mat-slider>
+          <mat-hint>Percentage of data to include in analysis</mat-hint>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="dashboard-content">
+  <div class="chart-container" *ngIf="filteredData">
+    <!-- Chart components using filtered data -->
+  </div>
+
+  <div class="statistics-panel">
+    <mat-card>
+      <mat-card-content>
+        <div class="stat-item">
+          <span class="stat-label">Data Points:</span>
+          <span class="stat-value">{{filteredData.length}}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Date Range:</span>
+          <span class="stat-value">{{getDateRangeString()}}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Value Range:</span>
+          <span class="stat-value">{{getValueRangeString()}}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+```
+
+### E-commerce Product Filtering
+
+```tsx
+// Product catalog with comprehensive filtering using sliders
+<div class="product-filters">
+  <mat-accordion>
+    <mat-expansion-panel expanded="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Price</mat-panel-title>
+        <mat-panel-description>
+          ${{priceRange.min}} - ${{priceRange.max}}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="price-filter">
+        <mat-slider
+          min="0"
+          max="2000"
+          step="50"
+          discrete="true"
+          [displayWith]="formatPrice">
+          <input
+            matSliderStartThumb
+            [(ngModel)]="priceRange.min"
+            (valueChange)="applyFilters()" />
+          <input
+            matSliderEndThumb
+            [(ngModel)]="priceRange.max"
+            (valueChange)="applyFilters()" />
+        </mat-slider>
+      </div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Customer Rating</mat-panel-title>
+        <mat-panel-description>
+          {{minRating}}+ stars
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="rating-filter">
+        <mat-slider
+          min="1"
+          max="5"
+          step="0.5"
+          discrete="true"
+          showTickMarks="true"
+          [displayWith]="formatRating">
+          <input
+            matSliderThumb
+            [(ngModel)]="minRating"
+            (valueChange)="applyFilters()" />
+        </mat-slider>
+      </div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Discount</mat-panel-title>
+        <mat-panel-description>
+          {{minDiscount}}%+ off
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="discount-filter">
+        <mat-slider
+          min="0"
+          max="80"
+          step="10"
+          discrete="true"
+          showTickMarks="true"
+          [displayWith]="formatDiscount">
+          <input
+            matSliderThumb
+            [(ngModel)]="minDiscount"
+            (valueChange)="applyFilters()" />
+        </mat-slider>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <div class="filter-actions">
+    <button mat-button (click)="clearAllFilters()">
+      Clear All
+    </button>
+    <button mat-raised-button color="primary" (click)="applyFilters()">
+      Apply Filters
+    </button>
+  </div>
+</div>
+
+<div class="products-grid">
+  <div class="results-summary">
+    Showing {{filteredProducts.length}} of {{totalProducts}} products
+  </div>
+
+  <div class="product-list">
+    <mat-card *ngFor="let product of filteredProducts" class="product-card">
+      <!-- Product content -->
+    </mat-card>
+  </div>
+</div>
+```

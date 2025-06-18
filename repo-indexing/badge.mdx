@@ -1,0 +1,346 @@
+# Badge Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate badge functionality
+
+### When to Use
+
+Badges are ideal for:
+
+- **Notification indicators** - Display unread message counts, notifications, or alerts
+- **Status indicators** - Show item status, completion states, or priority levels
+- **Metadata display** - Present additional context like item counts, ratings, or categories
+- **Visual enhancement** - Add small informational overlays to buttons, icons, or list items
+- **User attention** - Draw focus to important updates or new content
+
+### Architecture
+
+**No Coupling**: Badge is a standalone directive component that can be applied to any host element to overlay informational content.
+
+### Component Interdependencies
+
+Badge operates as an independent directive with no required parent-child relationships or shared context dependencies.
+
+## Components
+
+### MatBadge {Standalone Component}
+
+**Purpose:** A directive that creates a small overlay badge on any host element to display supplementary information like counts, status, or labels.
+
+**Interface:**
+
+```typescript
+interface MatBadgeProps {
+  // Content
+  content: string | number | undefined | null; // Text or number to display in the badge
+  description: string; // Aria description for accessibility
+
+  // Positioning
+  position:
+    | "above after"
+    | "above before"
+    | "below before"
+    | "below after"
+    | "before"
+    | "after"
+    | "above"
+    | "below"; // Badge position relative to host
+  overlap: boolean; // Whether badge overlaps the host element
+
+  // Styling
+  color: "primary" | "accent" | "warn"; // Theme color (M2 themes only)
+  size: "small" | "medium" | "large"; // Badge size
+
+  // State
+  hidden: boolean; // Whether the badge is visible
+  disabled: boolean; // Whether the badge is disabled
+}
+```
+
+**Usage Example:**
+
+```tsx
+import { MatBadgeModule } from "@angular/material/badge";
+
+@Component({
+  template: `
+    <!-- Basic notification badge -->
+    <button matBadge="4" matBadgeColor="warn">Messages</button>
+
+    <!-- Positioned badge with description -->
+    <mat-icon
+      matBadge="12"
+      matBadgePosition="above after"
+      matBadgeDescription="12 new notifications"
+    >
+      notifications
+    </mat-icon>
+
+    <!-- Dynamic content badge -->
+    <span
+      [matBadge]="unreadCount"
+      [matBadgeHidden]="unreadCount === 0"
+      matBadgeColor="primary"
+    >
+      Inbox
+    </span>
+  `,
+})
+export class ExampleComponent {
+  unreadCount = 5;
+}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```tsx
+import { MatBadgeModule } from '@angular/material/badge';
+
+// Simple text badge
+<button matBadge="New">Click me</button>
+
+// Numeric badge
+<mat-icon matBadge="5">star</mat-icon>
+
+// Dynamic badge content
+<span [matBadge]="badgeContent">Item</span>
+```
+
+### Advanced Configuration
+
+```tsx
+// Comprehensive badge with all options
+<div
+  [matBadge]="notificationCount"
+  matBadgePosition="above after"
+  matBadgeColor="warn"
+  matBadgeSize="small"
+  [matBadgeOverlap]="true"
+  [matBadgeHidden]="notificationCount === 0"
+  [matBadgeDisabled]="isDisabled"
+  matBadgeDescription="Unread notifications">
+  Notifications
+</div>
+```
+
+### Common Variations
+
+#### Notification Badges
+
+```tsx
+// Email notification
+<mat-icon
+  [matBadge]="emailCount"
+  [matBadgeHidden]="emailCount === 0"
+  matBadgeColor="primary"
+  matBadgeDescription="Unread emails">
+  email
+</mat-icon>
+
+// Alert notification
+<button
+  matBadge="!"
+  matBadgeColor="warn"
+  matBadgeSize="small"
+  matBadgeDescription="Alert">
+  System Status
+</button>
+```
+
+#### Status Badges
+
+```tsx
+// Online status
+<img
+  src="avatar.jpg"
+  matBadge="●"
+  matBadgeColor="accent"
+  matBadgePosition="below after"
+  matBadgeDescription="Online">
+
+// Completion status
+<mat-card
+  matBadge="✓"
+  matBadgeColor="primary"
+  matBadgeDescription="Completed">
+  Task Item
+</mat-card>
+```
+
+#### Count Badges
+
+```tsx
+// Shopping cart
+<mat-icon
+  [matBadge]="cartItems"
+  [matBadgeHidden]="cartItems === 0"
+  matBadgeDescription="Items in cart">
+  shopping_cart
+</mat-icon>
+
+// Large count with abbreviated display
+<button
+  [matBadge]="formatCount(totalItems)"
+  matBadgeDescription="Total items">
+  View All
+</button>
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Keep content concise** - Use short text, numbers, or simple symbols for optimal readability
+- **Provide descriptions** - Always include `matBadgeDescription` for screen reader accessibility
+- **Consider positioning** - Choose badge positions that don't obstruct important host content
+- **Use appropriate colors** - Leverage theme colors to convey meaning (warn for alerts, primary for info)
+- **Handle dynamic content** - Use `matBadgeHidden` to show/hide badges based on state
+- **Format large numbers** - Consider abbreviating large counts (99+ instead of 142) for visual clarity
+
+### Accessibility
+
+- **ARIA descriptions** - The `matBadgeDescription` provides accessible context via `aria-describedby`
+- **Screen reader support** - Badge content is announced along with the host element
+- **Interactive elements** - When applied to focusable elements, badges are included in the accessible name
+- **Color contrast** - Ensure sufficient contrast between badge and background colors
+- **Focus indicators** - Host element focus states remain visible and functional
+
+### Performance
+
+- **Conditional rendering** - Use `matBadgeHidden` instead of structural directives to avoid DOM manipulation
+- **Static content** - When possible, use static strings instead of dynamic binding for better performance
+- **Change detection** - Badge updates efficiently respond to content changes without full re-renders
+
+## Common Patterns
+
+### Pattern 1: Notification System
+
+```tsx
+@Component({
+  template: `
+    <mat-toolbar>
+      <button
+        [matBadge]="notificationCount"
+        [matBadgeHidden]="notificationCount === 0"
+        matBadgeColor="warn"
+        matBadgeDescription="{{ notificationCount }} unread notifications"
+        (click)="openNotifications()"
+      >
+        <mat-icon>notifications</mat-icon>
+      </button>
+    </mat-toolbar>
+  `,
+})
+export class NotificationButtonComponent {
+  notificationCount$ = this.notificationService.unreadCount$;
+
+  get notificationCount() {
+    return this.notificationCount$ | async || 0;
+  }
+}
+```
+
+### Pattern 2: Shopping Cart Badge
+
+```tsx
+@Component({
+  template: `
+    <button
+      [matBadge]="itemCount > 99 ? '99+' : itemCount"
+      [matBadgeHidden]="itemCount === 0"
+      matBadgeColor="primary"
+      [matBadgeDescription]="itemCount + ' items in cart'"
+      (click)="openCart()"
+    >
+      <mat-icon>shopping_cart</mat-icon>
+      Cart
+    </button>
+  `,
+})
+export class CartButtonComponent {
+  itemCount$ = this.cartService.itemCount$;
+
+  get itemCount() {
+    return this.itemCount$ | async || 0;
+  }
+}
+```
+
+### Pattern 3: Status Indicator
+
+```tsx
+@Component({
+  template: `
+    <mat-list>
+      <mat-list-item *ngFor="let user of users">
+        <img
+          matListItemAvatar
+          [src]="user.avatar"
+          [matBadge]="user.isOnline ? '●' : ''"
+          [matBadgeColor]="user.isOnline ? 'accent' : 'warn'"
+          matBadgePosition="below after"
+          [matBadgeDescription]="user.isOnline ? 'Online' : 'Offline'"
+        />
+        <span matListItemTitle>{{ user.name }}</span>
+        <span matListItemLine>{{ user.status }}</span>
+      </mat-list-item>
+    </mat-list>
+  `,
+})
+export class UserListComponent {
+  users: User[] = [];
+}
+```
+
+### Pattern 4: Dynamic Badge with State Management
+
+```tsx
+@Component({
+  template: `
+    <mat-tab-group>
+      <mat-tab [label]="getTabLabel('inbox')" [disabled]="isLoading">
+        <ng-template mat-tab-label>
+          <span
+            [matBadge]="inboxCount"
+            [matBadgeHidden]="inboxCount === 0"
+            matBadgeColor="primary"
+            matBadgeSize="small"
+          >
+            Inbox
+          </span>
+        </ng-template>
+        <!-- Inbox content -->
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span
+            [matBadge]="draftCount"
+            [matBadgeHidden]="draftCount === 0"
+            matBadgeColor="accent"
+          >
+            Drafts
+          </span>
+        </ng-template>
+        <!-- Drafts content -->
+      </mat-tab>
+    </mat-tab-group>
+  `,
+})
+export class EmailTabsComponent {
+  inboxCount$ = this.emailService.inboxCount$;
+  draftCount$ = this.emailService.draftCount$;
+
+  get inboxCount() {
+    return this.inboxCount$ | async || 0;
+  }
+  get draftCount() {
+    return this.draftCount$ | async || 0;
+  }
+}
+```
