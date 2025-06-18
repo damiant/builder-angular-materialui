@@ -1,4 +1,44 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+/* Import Kentledge font from Google Fonts (closest alternative to Kentledge) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+/* Define Kentledge font family with fallbacks */
+@font-face {
+  font-family: "Kentledge";
+  src: local("Inter"), local("Roboto"), local("Helvetica"), local("Arial");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #fff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Material Design Button Overrides for custom styling */
+.mat-mdc-button,
+.mat-mdc-outlined-button,
+.mat-mdc-raised-button {
+  --mdc-text-button-label-text-font:
+    "Kentledge", -apple-system, Roboto, Helvetica, sans-serif;
+  --mdc-outlined-button-label-text-font:
+    "Kentledge", -apple-system, Roboto, Helvetica, sans-serif;
+  --mdc-filled-button-label-text-font:
+    "Kentledge", -apple-system, Roboto, Helvetica, sans-serif;
+}
