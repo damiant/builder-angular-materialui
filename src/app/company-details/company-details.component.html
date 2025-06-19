@@ -1,0 +1,427 @@
+<div class="company-details-container">
+  <form [formGroup]="companyDetailsForm" (ngSubmit)="onSubmit()">
+    <div class="left-column">
+      <!-- General Information Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">General Info</mat-card-title>
+        </mat-card-header>
+        <mat-card-content formGroupName="generalInfo">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>* Company Type</mat-label>
+            <input matInput formControlName="companyType" readonly />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>* Company Name</mat-label>
+            <input matInput formControlName="companyName" readonly />
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* Street Address 1</mat-label>
+              <input matInput formControlName="streetAddress1" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Street Address 2</mat-label>
+              <input matInput formControlName="streetAddress2" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* Country</mat-label>
+              <mat-select formControlName="country">
+                <mat-option *ngFor="let country of countries" [value]="country">
+                  {{ country }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* State</mat-label>
+              <mat-select formControlName="state">
+                <mat-option *ngFor="let state of states" [value]="state">
+                  {{ state }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* City</mat-label>
+              <input matInput formControlName="city" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="quarter-width">
+              <mat-label>* Zip</mat-label>
+              <input matInput formControlName="zip" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* Requested By</mat-label>
+              <input matInput formControlName="requestedBy" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* Request Date</mat-label>
+              <input
+                matInput
+                [matDatepicker]="requestDatePicker"
+                formControlName="requestDate"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="requestDatePicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #requestDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>* Geographic Location</mat-label>
+            <mat-select formControlName="geographicLocation">
+              <mat-option value="location1">Location 1</mat-option>
+              <mat-option value="location2">Location 2</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="info-block">
+            <div class="info-label">Job Code</div>
+            <div class="info-value">
+              Actelion Pharmaceuticals US, Inc. - Unbillable
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Purchasing Contact Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title"
+            >Purchasing Contact</mat-card-title
+          >
+        </mat-card-header>
+        <mat-card-content formGroupName="purchasingContact">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Purchasing Contact First Name</mat-label>
+            <input matInput formControlName="firstName" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Purchasing Contact Last Name</mat-label>
+            <input matInput formControlName="lastName" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Purchasing Contact Phone</mat-label>
+            <input matInput formControlName="phone" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Purchasing Contact Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Term and History Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title"
+            >Term and History</mat-card-title
+          >
+        </mat-card-header>
+        <mat-card-content formGroupName="termAndHistory">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* Start Date</mat-label>
+              <input
+                matInput
+                [matDatepicker]="startDatePicker"
+                formControlName="startDate"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="startDatePicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>* End Date</mat-label>
+              <input
+                matInput
+                [matDatepicker]="endDatePicker"
+                formControlName="endDate"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="endDatePicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #endDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Agreement Term</mat-label>
+            <input matInput formControlName="agreementTerm" readonly />
+            <mat-hint
+              >Autocalculate based on date selections from Start Date and End
+              Date</mat-hint
+            >
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contract History</mat-label>
+            <input matInput formControlName="contractHistory" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contract History Comments</mat-label>
+            <textarea
+              matInput
+              formControlName="contractHistoryComments"
+              rows="3"
+            ></textarea>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- NDA Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">NDA</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="upload-section">
+            <input
+              type="file"
+              #ndaFileInput
+              (change)="onFileSelected($event, 'NDA')"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              style="display: none"
+            />
+            <button
+              mat-button
+              type="button"
+              class="upload-button"
+              (click)="ndaFileInput.click()"
+            >
+              <mat-icon>upload</mat-icon>
+              Upload NDA
+            </button>
+            <div class="file-info">
+              <div class="file-types">
+                Files supported: pdf, doc, docx, xls, xslx
+              </div>
+              <div class="file-size">Max size: 5 MB</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="right-column">
+      <!-- Partnerships Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">Partnerships</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chip-section">
+            <div class="chip-label">Partnering with Another Agency</div>
+            <div class="chip-options">
+              <mat-chip-set>
+                <mat-chip
+                  [class.selected]="partneringWithAgency"
+                  (click)="onPartnershipChange(true)"
+                >
+                  Yes
+                </mat-chip>
+                <mat-chip
+                  [class.selected]="!partneringWithAgency"
+                  (click)="onPartnershipChange(false)"
+                >
+                  <mat-icon>close</mat-icon>
+                  No
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Services and Exclusions Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title"
+            >Services and Exclusions</mat-card-title
+          >
+        </mat-card-header>
+        <mat-card-content formGroupName="servicesAndExclusions">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Services</mat-label>
+            <mat-select formControlName="services">
+              <mat-option *ngFor="let service of services" [value]="service">
+                {{ service }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Audience</mat-label>
+            <mat-select formControlName="audience">
+              <mat-option *ngFor="let audience of audiences" [value]="audience">
+                {{ audience }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Year Type</mat-label>
+            <mat-select formControlName="yearType">
+              <mat-option *ngFor="let type of yearTypes" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="toggle-section">
+            <mat-slide-toggle formControlName="exclusions"
+              >Exclusions</mat-slide-toggle
+            >
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Policies Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">Policies</mat-card-title>
+        </mat-card-header>
+        <mat-card-content formGroupName="policies">
+          <div class="toggle-section">
+            <mat-slide-toggle formControlName="conflictPolicyInMSA"
+              >Conflict Policy in MSA</mat-slide-toggle
+            >
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Other Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">Other</mat-card-title>
+        </mat-card-header>
+        <mat-card-content formGroupName="other">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Relationships</mat-label>
+            <mat-select formControlName="relationships">
+              <mat-option
+                *ngFor="let relationship of relationships"
+                [value]="relationship"
+              >
+                {{ relationship }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sales Tax ID</mat-label>
+            <input matInput formControlName="salesTaxId" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Leveraging Group</mat-label>
+            <mat-select formControlName="leveragingGroup">
+              <mat-option
+                *ngFor="let group of leveragingGroups"
+                [value]="group"
+              >
+                {{ group }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="toggle-section">
+            <mat-slide-toggle formControlName="otaClient"
+              >OTA Client</mat-slide-toggle
+            >
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- DSA Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">DSA</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="upload-section">
+            <input
+              type="file"
+              #dsaFileInput
+              (change)="onFileSelected($event, 'DSA')"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              style="display: none"
+            />
+            <button
+              mat-button
+              type="button"
+              class="upload-button"
+              (click)="dsaFileInput.click()"
+            >
+              <mat-icon>upload</mat-icon>
+              Upload DSA
+            </button>
+            <div class="file-info">
+              <div class="file-types">
+                Files supported: pdf, doc, docx, xls, xslx
+              </div>
+              <div class="file-size">Max size: 5 MB</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Documents Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title class="section-title">Document(s)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="upload-section">
+            <input
+              type="file"
+              #documentsFileInput
+              (change)="onFileSelected($event, 'Documents')"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              multiple
+              style="display: none"
+            />
+            <button
+              mat-button
+              type="button"
+              class="upload-button"
+              (click)="documentsFileInput.click()"
+            >
+              <mat-icon>upload</mat-icon>
+              Upload Document(s)
+            </button>
+            <div class="file-info">
+              <div class="file-types">
+                Files supported: pdf, doc, docx, xls, xslx
+              </div>
+              <div class="file-size">Max size: 5 MB</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </form>
+</div>

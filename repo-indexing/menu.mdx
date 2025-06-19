@@ -1,0 +1,1617 @@
+---
+title: Menu Components
+---
+
+# Menu Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle contextual menus with required hierarchical structure. The Menu component group provides a comprehensive solution for creating dropdown menus, context menus, and navigation overlays with Material Design styling, keyboard navigation, and accessibility features for enhanced user interaction.
+
+### When to Use
+
+- **Contextual Actions**: When you need to provide actions or options that are relevant to a specific element or context
+- **Navigation Menus**: For dropdown navigation menus in headers, sidebars, or navigation bars
+- **Options Lists**: When presenting a list of choices or commands that appear on demand
+- **Space-Efficient Interfaces**: In compact layouts where you need to hide less frequently used actions
+- **Multi-Level Navigation**: For hierarchical menu structures with submenu support
+- **Mobile-Friendly Interactions**: For touch interfaces where space is limited and context is important
+- **Toolbar Actions**: In toolbars or action bars where secondary actions need to be grouped
+- **Filter and Sort Options**: For data tables or lists where users need filtering or sorting controls
+
+### Architecture
+
+**Critical/Strong Coupling**: The Menu component group follows a required hierarchical structure where components must be used together in specific relationships. The architecture is built around:
+
+- **Required trigger-menu relationship**: `matMenuTriggerFor` directive must reference a `mat-menu` component
+- **Shared overlay context**: Menu and trigger share positioning, animation, and focus management state
+- **Parent-child menu hierarchies**: Nested menus with proper keyboard navigation and focus handling
+
+### Component Interdependencies
+
+The Menu component group requires specific component relationships for proper functionality:
+
+- **`mat-menu`** → Root menu panel container that defines the overlay content and behavior (required component)
+- **`matMenuTriggerFor`** → Directive applied to trigger elements that opens and manages menu state (required directive)
+- **`mat-menu-item`** → Individual menu items with proper styling and keyboard navigation (child of `mat-menu`)
+- **`ng-template[matMenuContent]`** → Lazy-loaded menu content for performance optimization (optional child of `mat-menu`)
+
+## Components
+
+### MatMenu {Primary Menu Component}
+
+The main menu panel component that serves as the overlay container for menu items and content.
+
+**Purpose:** Provides the popup menu panel with positioning, animation, keyboard navigation, and accessibility features for contextual actions and navigation.
+
+**Interface:**
+
+```typescript
+interface MatMenuProps {
+  xPosition?: "before" | "after"; // Horizontal position relative to trigger (default: 'after')
+  yPosition?: "above" | "below"; // Vertical position relative to trigger (default: 'below')
+  overlapTrigger?: boolean; // Whether menu should overlap the trigger element (default: false)
+  hasBackdrop?: boolean; // Whether to show a backdrop behind the menu (default: true)
+  backdropClass?: string; // CSS class to apply to the backdrop
+  panelClass?: string | string[]; // CSS classes to apply to the menu panel
+  ariaLabel?: string; // Accessible label for the menu
+  ariaLabelledby?: string; // ID of element that labels the menu
+  ariaDescribedby?: string; // ID of element that describes the menu
+  closed?: EventEmitter<void | "click" | "keydown" | "tab">; // Event when menu closes
+}
+```
+
+**Dependencies:** Requires Angular Material's menu module and overlay service
+**Provides:** Menu panel context, positioning, and state management for menu items and triggers
+
+**Usage Example:**
+
+```typescript
+import { MatMenuModule } from "@angular/material/menu";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-basic-menu",
+  template: `
+    <button mat-button [matMenuTriggerFor]="basicMenu">
+      <mat-icon>more_vert</mat-icon>
+      Menu
+    </button>
+
+    <mat-menu
+      #basicMenu="matMenu"
+      [xPosition]="'before'"
+      [yPosition]="'below'"
+      [overlapTrigger]="false"
+      (closed)="onMenuClosed($event)"
+    >
+      <button mat-menu-item>
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+      <button mat-menu-item disabled>
+        <mat-icon>help</mat-icon>
+        <span>Help</span>
+      </button>
+    </mat-menu>
+  `,
+  imports: [MatMenuModule, MatButtonModule, MatIconModule],
+})
+export class BasicMenuComponent {
+  onMenuClosed(reason: void | "click" | "keydown" | "tab"): void {
+    console.log("Menu closed:", reason);
+  }
+}
+```
+
+### MatMenuTrigger {Required Trigger Directive}
+
+Directive that transforms any element into a menu trigger, managing menu opening, positioning, and focus.
+
+**Purpose:** Converts elements into interactive menu triggers with click/keyboard activation, overlay positioning, and proper focus management.
+
+**Interface:**
+
+```typescript
+interface MatMenuTriggerProps {
+  matMenuTriggerFor: MatMenu; // Reference to the menu component to open (required)
+  menuData?: any; // Data to pass to lazy-loaded menu content
+  restoreFocus?: boolean; // Whether to restore focus to trigger when menu closes (default: true)
+  menuOpened?: EventEmitter<void>; // Event when menu is opened
+  menuClosed?: EventEmitter<void>; // Event when menu is closed
+}
+```
+
+**Context Dependencies:** Must reference a `mat-menu` component via `matMenuTriggerFor`
+**Parent Requirements:** Can be applied to any clickable element (button, div, etc.)
+**Provides:** Menu activation, positioning calculations, and focus management
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <!-- Button trigger -->
+    <button
+      mat-raised-button
+      [matMenuTriggerFor]="actionMenu"
+      [menuData]="{ userId: currentUser.id }"
+      (menuOpened)="onMenuOpened()"
+      (menuClosed)="onMenuClosed()"
+    >
+      Actions
+    </button>
+
+    <!-- Icon trigger -->
+    <mat-icon [matMenuTriggerFor]="contextMenu" class="context-trigger">
+      more_horiz
+    </mat-icon>
+
+    <!-- Custom element trigger -->
+    <div
+      class="custom-trigger"
+      [matMenuTriggerFor]="customMenu"
+      [restoreFocus]="false"
+    >
+      <span>Custom Trigger</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </div>
+
+    <mat-menu #actionMenu="matMenu">
+      <button mat-menu-item>Edit</button>
+      <button mat-menu-item>Delete</button>
+    </mat-menu>
+
+    <mat-menu #contextMenu="matMenu">
+      <button mat-menu-item>Copy</button>
+      <button mat-menu-item>Paste</button>
+    </mat-menu>
+
+    <mat-menu #customMenu="matMenu">
+      <button mat-menu-item>Option 1</button>
+      <button mat-menu-item>Option 2</button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .context-trigger {
+        cursor: pointer;
+        user-select: none;
+      }
+      .custom-trigger {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    `,
+  ],
+})
+export class MenuTriggersComponent {
+  currentUser = { id: 123 };
+
+  onMenuOpened(): void {
+    console.log("Menu opened");
+  }
+
+  onMenuClosed(): void {
+    console.log("Menu closed");
+  }
+}
+```
+
+### MatMenuItem {Menu Item Component}
+
+Individual menu item component with proper styling, keyboard navigation, and accessibility features.
+
+**Purpose:** Provides interactive menu items with Material Design styling, hover states, ripple effects, and keyboard navigation support.
+
+**Interface:**
+
+```typescript
+interface MatMenuItemProps {
+  role?: "menuitem" | "menuitemradio" | "menuitemcheckbox"; // ARIA role (default: 'menuitem')
+  disabled?: boolean; // Whether the menu item is disabled (default: false)
+  disableRipple?: boolean; // Whether to disable ripple effects (default: false)
+}
+```
+
+**Context Dependencies:** Must be used within `mat-menu` component
+**Parent Requirements:** Required parent is `mat-menu`
+**Provides:** Interactive menu item with proper keyboard navigation and accessibility
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <button mat-button [matMenuTriggerFor]="itemsMenu">Menu Items</button>
+
+    <mat-menu #itemsMenu="matMenu">
+      <!-- Basic menu item -->
+      <button mat-menu-item (click)="performAction('basic')">
+        Basic Action
+      </button>
+
+      <!-- Menu item with icon -->
+      <button mat-menu-item (click)="performAction('icon')">
+        <mat-icon>star</mat-icon>
+        <span>With Icon</span>
+      </button>
+
+      <!-- Disabled menu item -->
+      <button mat-menu-item [disabled]="true">
+        <mat-icon>block</mat-icon>
+        <span>Disabled Item</span>
+      </button>
+
+      <!-- Menu item with custom role -->
+      <button
+        mat-menu-item
+        role="menuitemcheckbox"
+        [attr.aria-checked]="isChecked"
+        (click)="toggleCheck()"
+      >
+        <mat-icon>{{
+          isChecked ? "check_box" : "check_box_outline_blank"
+        }}</mat-icon>
+        <span>Toggle Option</span>
+      </button>
+
+      <!-- Menu item without ripple -->
+      <button
+        mat-menu-item
+        [disableRipple]="true"
+        (click)="performAction('no-ripple')"
+      >
+        <mat-icon>touch_app</mat-icon>
+        <span>No Ripple</span>
+      </button>
+
+      <!-- Nested content -->
+      <button mat-menu-item>
+        <div class="menu-item-content">
+          <div class="item-title">Complex Item</div>
+          <div class="item-subtitle">With subtitle</div>
+        </div>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .menu-item-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .item-title {
+        font-weight: 500;
+      }
+      .item-subtitle {
+        font-size: 0.875em;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    `,
+  ],
+})
+export class MenuItemsComponent {
+  isChecked = false;
+
+  performAction(action: string): void {
+    console.log("Performing action:", action);
+  }
+
+  toggleCheck(): void {
+    this.isChecked = !this.isChecked;
+  }
+}
+```
+
+### MatMenuContent {Lazy Content Directive}
+
+Directive for lazy-loading menu content to improve performance when menus contain heavy or dynamic content.
+
+**Purpose:** Enables lazy loading of menu content, improving initial render performance and allowing dynamic content generation when the menu opens.
+
+**Interface:**
+
+```typescript
+interface MatMenuContentProps {
+  // Template-based directive - content provided through ng-template
+  // Receives context data passed from menuData on the trigger
+}
+```
+
+**Context Dependencies:** Must be used within `mat-menu` as `ng-template[matMenuContent]`
+**Parent Requirements:** Required parent is `mat-menu`
+**Provides:** Lazy-loaded content with access to dynamic data from the trigger
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <button
+      mat-button
+      [matMenuTriggerFor]="lazyMenu"
+      [menuData]="{ user: currentUser, items: userActions }"
+    >
+      User Menu
+    </button>
+
+    <mat-menu #lazyMenu="matMenu">
+      <ng-template matMenuContent let-user="user" let-items="items">
+        <!-- User info header -->
+        <div class="menu-header">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ user.name }}</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Dynamic menu items -->
+        <button
+          mat-menu-item
+          *ngFor="let action of items"
+          (click)="executeUserAction(action, user)"
+        >
+          <mat-icon>{{ action.icon }}</mat-icon>
+          <span>{{ action.label }}</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <!-- Dynamic content based on user permissions -->
+        <ng-container *ngIf="user.isAdmin">
+          <button mat-menu-item (click)="openAdminPanel()">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Admin Panel</span>
+          </button>
+        </ng-container>
+
+        <button mat-menu-item (click)="logout(user)">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Logout</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .menu-header {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        margin-bottom: 8px;
+      }
+      .menu-header mat-icon {
+        margin-right: 12px;
+      }
+    `,
+  ],
+})
+export class LazyMenuComponent {
+  currentUser = {
+    id: 1,
+    name: "John Doe",
+    isAdmin: true,
+  };
+
+  userActions = [
+    { icon: "person", label: "Profile", action: "profile" },
+    { icon: "settings", label: "Settings", action: "settings" },
+    { icon: "help", label: "Help", action: "help" },
+  ];
+
+  executeUserAction(action: any, user: any): void {
+    console.log("Executing action:", action.action, "for user:", user.name);
+  }
+
+  openAdminPanel(): void {
+    console.log("Opening admin panel");
+  }
+
+  logout(user: any): void {
+    console.log("Logging out user:", user.name);
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Menu with Actions
+
+```typescript
+import { MatMenuModule } from "@angular/material/menu";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatDividerModule } from "@angular/material/divider";
+
+@Component({
+  selector: "app-basic-menu",
+  template: `
+    <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #actionsMenu="matMenu" [yPosition]="'below'">
+      <button mat-menu-item (click)="edit()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+
+      <button mat-menu-item (click)="share()">
+        <mat-icon>share</mat-icon>
+        <span>Share</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="delete()" class="text-warn">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .text-warn {
+        color: #f44336;
+      }
+    `,
+  ],
+  imports: [MatMenuModule, MatButtonModule, MatIconModule, MatDividerModule],
+})
+export class BasicMenuComponent {
+  edit(): void {
+    console.log("Edit action");
+  }
+
+  share(): void {
+    console.log("Share action");
+  }
+
+  delete(): void {
+    console.log("Delete action");
+  }
+}
+```
+
+### Advanced Nested Menu System
+
+```typescript
+@Component({
+  selector: "app-nested-menu",
+  template: `
+    <button mat-button [matMenuTriggerFor]="rootMenu">Navigation Menu</button>
+
+    <!-- Root menu -->
+    <mat-menu #rootMenu="matMenu" [overlapTrigger]="false">
+      <button mat-menu-item [matMenuTriggerFor]="productsMenu">
+        <mat-icon>shopping_cart</mat-icon>
+        <span>Products</span>
+        <mat-icon class="submenu-icon">chevron_right</mat-icon>
+      </button>
+
+      <button mat-menu-item [matMenuTriggerFor]="servicesMenu">
+        <mat-icon>build</mat-icon>
+        <span>Services</span>
+        <mat-icon class="submenu-icon">chevron_right</mat-icon>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('about')">
+        <mat-icon>info</mat-icon>
+        <span>About</span>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('contact')">
+        <mat-icon>contact_mail</mat-icon>
+        <span>Contact</span>
+      </button>
+    </mat-menu>
+
+    <!-- Products submenu -->
+    <mat-menu #productsMenu="matMenu" [overlapTrigger]="false">
+      <button mat-menu-item [matMenuTriggerFor]="electronicsMenu">
+        <mat-icon>devices</mat-icon>
+        <span>Electronics</span>
+        <mat-icon class="submenu-icon">chevron_right</mat-icon>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('products/clothing')">
+        <mat-icon>checkroom</mat-icon>
+        <span>Clothing</span>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('products/books')">
+        <mat-icon>book</mat-icon>
+        <span>Books</span>
+      </button>
+    </mat-menu>
+
+    <!-- Electronics submenu -->
+    <mat-menu #electronicsMenu="matMenu">
+      <button mat-menu-item (click)="navigateTo('products/electronics/phones')">
+        <mat-icon>phone_android</mat-icon>
+        <span>Phones</span>
+      </button>
+
+      <button
+        mat-menu-item
+        (click)="navigateTo('products/electronics/laptops')"
+      >
+        <mat-icon>laptop</mat-icon>
+        <span>Laptops</span>
+      </button>
+
+      <button
+        mat-menu-item
+        (click)="navigateTo('products/electronics/tablets')"
+      >
+        <mat-icon>tablet</mat-icon>
+        <span>Tablets</span>
+      </button>
+    </mat-menu>
+
+    <!-- Services submenu -->
+    <mat-menu #servicesMenu="matMenu">
+      <button mat-menu-item (click)="navigateTo('services/consulting')">
+        <mat-icon>psychology</mat-icon>
+        <span>Consulting</span>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('services/support')">
+        <mat-icon>support</mat-icon>
+        <span>Support</span>
+      </button>
+
+      <button mat-menu-item (click)="navigateTo('services/training')">
+        <mat-icon>school</mat-icon>
+        <span>Training</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .submenu-icon {
+        margin-left: auto;
+        color: rgba(0, 0, 0, 0.54);
+      }
+    `,
+  ],
+  imports: [MatMenuModule, MatButtonModule, MatIconModule],
+})
+export class NestedMenuComponent {
+  navigateTo(route: string): void {
+    console.log("Navigating to:", route);
+    // Implement navigation logic
+  }
+}
+```
+
+### Common Variations
+
+#### Context Menu with Dynamic Content
+
+```typescript
+@Component({
+  template: `
+    <div
+      class="content-area"
+      (contextmenu)="openContextMenu($event)"
+      #contentArea
+    >
+      Right-click anywhere in this area
+    </div>
+
+    <mat-menu #contextMenu="matMenu">
+      <ng-template matMenuContent let-x="x" let-y="y">
+        <div class="context-info">Position: {{ x }}, {{ y }}</div>
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item (click)="copy()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy</span>
+        </button>
+
+        <button mat-menu-item (click)="paste()">
+          <mat-icon>content_paste</mat-icon>
+          <span>Paste</span>
+        </button>
+
+        <button mat-menu-item (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          <span>Refresh</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .content-area {
+        width: 400px;
+        height: 300px;
+        border: 2px dashed #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: default;
+      }
+      .context-info {
+        padding: 8px 16px;
+        font-size: 0.875em;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    `,
+  ],
+})
+export class ContextMenuComponent {
+  @ViewChild("contextMenu") contextMenu!: MatMenu;
+  @ViewChild(MatMenuTrigger) contextMenuTrigger!: MatMenuTrigger;
+
+  openContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+
+    // Position the menu at cursor location
+    this.contextMenuTrigger.menuData = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+
+    // Manually trigger the menu
+    this.contextMenuTrigger.openMenu();
+  }
+
+  copy(): void {
+    console.log("Copy action");
+  }
+
+  paste(): void {
+    console.log("Paste action");
+  }
+
+  refresh(): void {
+    console.log("Refresh action");
+  }
+}
+```
+
+#### Data Table Row Actions Menu
+
+```typescript
+@Component({
+  template: `
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.email }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="rowMenu"
+            [menuData]="{ user: row }"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+
+    <mat-menu #rowMenu="matMenu">
+      <ng-template matMenuContent let-user="user">
+        <button mat-menu-item (click)="viewUser(user)">
+          <mat-icon>visibility</mat-icon>
+          <span>View Details</span>
+        </button>
+
+        <button mat-menu-item (click)="editUser(user)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+
+        <button
+          mat-menu-item
+          (click)="toggleUserStatus(user)"
+          [class.text-success]="!user.active"
+          [class.text-warn]="user.active"
+        >
+          <mat-icon>{{ user.active ? "block" : "check_circle" }}</mat-icon>
+          <span>{{ user.active ? "Deactivate" : "Activate" }}</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item (click)="deleteUser(user)" class="text-warn">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .text-success {
+        color: #4caf50;
+      }
+      .text-warn {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class DataTableMenuComponent {
+  displayedColumns = ["name", "email", "actions"];
+  dataSource = [
+    { id: 1, name: "John Doe", email: "john@example.com", active: true },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", active: false },
+    { id: 3, name: "Bob Johnson", email: "bob@example.com", active: true },
+  ];
+
+  viewUser(user: any): void {
+    console.log("Viewing user:", user);
+  }
+
+  editUser(user: any): void {
+    console.log("Editing user:", user);
+  }
+
+  toggleUserStatus(user: any): void {
+    user.active = !user.active;
+    console.log("Toggled user status:", user);
+  }
+
+  deleteUser(user: any): void {
+    console.log("Deleting user:", user);
+    this.dataSource = this.dataSource.filter((u) => u.id !== user.id);
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Trigger ��� Menu**: The `matMenuTriggerFor` directive manages menu opening/closing and passes `menuData` to lazy content
+2. **Menu → Items**: The menu panel provides keyboard navigation context and focus management to menu items
+3. **Items → User Actions**: Menu items emit click events that bubble up to parent component handlers
+4. **Menu → Events**: Menu emits lifecycle events (opened, closed) for parent component integration
+
+### Context Sharing
+
+- **Overlay Context**: Menu and trigger share positioning calculations, backdrop handling, and z-index management
+- **Focus Context**: Menu manages focus order and keyboard navigation between menu items
+- **Animation Context**: Menu panel coordinates enter/exit animations with trigger state
+- **Data Context**: Lazy content templates receive dynamic data passed from trigger's `menuData` property
+
+### Event Handling
+
+- **Menu Activation**: Trigger elements (click, keyboard) bubble through the trigger directive to open/close menus
+- **Item Selection**: Menu item clicks automatically close the menu and can trigger custom actions
+- **Keyboard Navigation**: Arrow keys, Enter, Escape are handled by the menu panel for accessibility
+- **Focus Management**: Menu automatically manages focus between trigger and menu items for screen readers
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use semantic trigger elements**: Apply `matMenuTriggerFor` to buttons or other focusable elements for proper accessibility
+- **Provide clear menu item labels**: Use descriptive text and appropriate icons to make menu actions clear to users
+- **Group related actions logically**: Use dividers to separate different types of actions within menus
+- **Consider menu positioning**: Set appropriate `xPosition` and `yPosition` based on trigger location and available screen space
+- **Implement proper error handling**: Handle cases where menu items might be unavailable or restricted for certain users
+
+### Accessibility
+
+- **ARIA relationships**: Menus automatically provide proper ARIA attributes and roles for screen reader support
+- **Keyboard navigation**: Full keyboard support with arrow keys, Enter/Space activation, and Escape to close
+- **Focus management**: Focus is properly managed between trigger and menu items, returning to trigger on close
+- **Screen reader announcements**: Menu state changes and item selection are properly announced
+- **High contrast support**: Menus work correctly with high contrast themes and respect user color preferences
+
+### Performance
+
+- **Lazy loading**: Use `ng-template[matMenuContent]` for menus with expensive content or dynamic data
+- **Virtual scrolling**: For menus with many items, consider limiting visible items or implementing virtual scrolling
+- **Menu caching**: Avoid recreating menu content on every open by using proper Angular change detection strategies
+- **Backdrop optimization**: Set `hasBackdrop` to `false` for nested menus to reduce overlay complexity
+- **Memory management**: Properly unsubscribe from menu events in component lifecycle to prevent memory leaks
+
+## Common Patterns
+
+### Pattern 1: Application Header Menu
+
+```typescript
+@Component({
+  template: `
+    <mat-toolbar color="primary">
+      <span>My Application</span>
+
+      <span class="spacer"></span>
+
+      <!-- User menu -->
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+        <mat-icon>account_circle</mat-icon>
+        <span>{{ currentUser.name }}</span>
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+
+      <!-- Notifications menu -->
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="notificationsMenu"
+        class="notification-button"
+      >
+        <mat-icon
+          [matBadge]="unreadCount"
+          [matBadgeHidden]="unreadCount === 0"
+          matBadgeColor="warn"
+        >
+          notifications
+        </mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <!-- User menu -->
+    <mat-menu #userMenu="matMenu" [xPosition]="'before'">
+      <div class="user-info">
+        <div class="user-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="user-details">
+          <div class="user-name">{{ currentUser.name }}</div>
+          <div class="user-email">{{ currentUser.email }}</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="viewProfile()">
+        <mat-icon>person</mat-icon>
+        <span>My Profile</span>
+      </button>
+
+      <button mat-menu-item (click)="openSettings()">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+
+      <button mat-menu-item (click)="viewBilling()">
+        <mat-icon>payment</mat-icon>
+        <span>Billing</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Sign Out</span>
+      </button>
+    </mat-menu>
+
+    <!-- Notifications menu -->
+    <mat-menu
+      #notificationsMenu="matMenu"
+      [xPosition]="'before'"
+      class="notifications-menu"
+    >
+      <div class="notifications-header">
+        <span>Notifications</span>
+        <button
+          mat-icon-button
+          (click)="markAllAsRead()"
+          *ngIf="unreadCount > 0"
+        >
+          <mat-icon>done_all</mat-icon>
+        </button>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div
+        class="notifications-list"
+        *ngIf="notifications.length > 0; else noNotifications"
+      >
+        <button
+          mat-menu-item
+          *ngFor="let notification of notifications; trackBy: trackNotification"
+          (click)="openNotification(notification)"
+          [class.unread]="!notification.read"
+        >
+          <div class="notification-content">
+            <div class="notification-title">{{ notification.title }}</div>
+            <div class="notification-message">{{ notification.message }}</div>
+            <div class="notification-time">
+              {{ notification.timestamp | date: "short" }}
+            </div>
+          </div>
+          <mat-icon *ngIf="!notification.read" class="unread-indicator"
+            >fiber_manual_record</mat-icon
+          >
+        </button>
+      </div>
+
+      <ng-template #noNotifications>
+        <div class="no-notifications">
+          <mat-icon>notifications_none</mat-icon>
+          <span>No notifications</span>
+        </div>
+      </ng-template>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="viewAllNotifications()" class="view-all">
+        <span>View All Notifications</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .spacer {
+        flex: 1 1 auto;
+      }
+
+      .user-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .user-avatar mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .user-email {
+        font-size: 0.875rem;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .notifications-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        font-weight: 500;
+      }
+
+      .notifications-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .notification-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        min-width: 250px;
+      }
+
+      .notification-title {
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+
+      .notification-message {
+        font-size: 0.75rem;
+        color: rgba(0, 0, 0, 0.6);
+        white-space: normal;
+        line-height: 1.2;
+      }
+
+      .notification-time {
+        font-size: 0.75rem;
+        color: rgba(0, 0, 0, 0.4);
+      }
+
+      .unread {
+        background: rgba(25, 118, 210, 0.04);
+      }
+
+      .unread-indicator {
+        color: #1976d2;
+        font-size: 8px;
+        width: 8px;
+        height: 8px;
+        margin-left: auto;
+      }
+
+      .no-notifications {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 32px;
+        color: rgba(0, 0, 0, 0.6);
+        gap: 8px;
+      }
+
+      .view-all {
+        font-weight: 500;
+        color: #1976d2;
+      }
+    `,
+  ],
+})
+export class HeaderMenuComponent {
+  currentUser = {
+    name: "John Doe",
+    email: "john.doe@example.com",
+  };
+
+  notifications = [
+    {
+      id: 1,
+      title: "New Message",
+      message: "You have received a new message from Sarah",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      read: false,
+    },
+    {
+      id: 2,
+      title: "Task Completed",
+      message: "Your data export task has been completed",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+      read: true,
+    },
+  ];
+
+  get unreadCount(): number {
+    return this.notifications.filter((n) => !n.read).length;
+  }
+
+  trackNotification(index: number, notification: any): number {
+    return notification.id;
+  }
+
+  viewProfile(): void {
+    console.log("Opening profile");
+  }
+
+  openSettings(): void {
+    console.log("Opening settings");
+  }
+
+  viewBilling(): void {
+    console.log("Opening billing");
+  }
+
+  logout(): void {
+    console.log("Logging out");
+  }
+
+  markAllAsRead(): void {
+    this.notifications.forEach((n) => (n.read = true));
+  }
+
+  openNotification(notification: any): void {
+    notification.read = true;
+    console.log("Opening notification:", notification);
+  }
+
+  viewAllNotifications(): void {
+    console.log("Viewing all notifications");
+  }
+}
+```
+
+### Pattern 2: Context-Sensitive Data Grid Menu
+
+```typescript
+@Component({
+  template: `
+    <div class="data-grid-container">
+      <div class="grid-header">
+        <h2>User Management</h2>
+        <button
+          mat-raised-button
+          color="primary"
+          [matMenuTriggerFor]="bulkActionsMenu"
+          [disabled]="selectedUsers.length === 0"
+        >
+          Bulk Actions ({{ selectedUsers.length }})
+        </button>
+      </div>
+
+      <mat-table
+        [dataSource]="users"
+        class="users-table"
+        [trackBy]="trackByUserId"
+      >
+        <!-- Selection column -->
+        <ng-container matColumnDef="select">
+          <mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              (change)="toggleAllUsers($event)"
+              [checked]="allUsersSelected"
+              [indeterminate]="someUsersSelected"
+            >
+            </mat-checkbox>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let user">
+            <mat-checkbox
+              (change)="toggleUser(user, $event)"
+              [checked]="isUserSelected(user)"
+            >
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
+
+        <!-- User info columns -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+          <mat-cell *matCellDef="let user">
+            <div class="user-cell">
+              <mat-icon [class]="'status-' + user.status">person</mat-icon>
+              <span>{{ user.name }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <mat-header-cell *matHeaderCellDef>Role</mat-header-cell>
+          <mat-cell *matCellDef="let user">
+            <mat-chip [color]="getRoleColor(user.role)">
+              {{ user.role }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let user">
+            <span [class]="'status-badge status-' + user.status">
+              {{ user.status | titlecase }}
+            </span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Actions column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+          <mat-cell *matCellDef="let user">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="userActionsMenu"
+              [menuData]="{ user: user, permissions: getUserPermissions(user) }"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.selected-row]="isUserSelected(row)"
+        >
+        </mat-row>
+      </mat-table>
+    </div>
+
+    <!-- Bulk actions menu -->
+    <mat-menu #bulkActionsMenu="matMenu">
+      <button
+        mat-menu-item
+        (click)="bulkActivate()"
+        [disabled]="!canActivateSelected()"
+      >
+        <mat-icon>check_circle</mat-icon>
+        <span>Activate Selected ({{ getActivatableCount() }})</span>
+      </button>
+
+      <button
+        mat-menu-item
+        (click)="bulkDeactivate()"
+        [disabled]="!canDeactivateSelected()"
+      >
+        <mat-icon>cancel</mat-icon>
+        <span>Deactivate Selected ({{ getDeactivatableCount() }})</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="bulkExport()">
+        <mat-icon>download</mat-icon>
+        <span>Export Selected</span>
+      </button>
+
+      <button mat-menu-item (click)="bulkAssignRole()">
+        <mat-icon>person_add</mat-icon>
+        <span>Assign Role</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="bulkDelete()" class="text-warn">
+        <mat-icon>delete</mat-icon>
+        <span>Delete Selected</span>
+      </button>
+    </mat-menu>
+
+    <!-- Individual user actions menu -->
+    <mat-menu #userActionsMenu="matMenu">
+      <ng-template matMenuContent let-user="user" let-permissions="permissions">
+        <!-- Quick status toggle -->
+        <button
+          mat-menu-item
+          (click)="toggleUserStatus(user)"
+          *ngIf="permissions.canChangeStatus"
+        >
+          <mat-icon>{{
+            user.status === "active" ? "pause_circle" : "play_circle"
+          }}</mat-icon>
+          <span>{{
+            user.status === "active" ? "Deactivate" : "Activate"
+          }}</span>
+        </button>
+
+        <!-- Standard actions -->
+        <button mat-menu-item (click)="viewUserDetails(user)">
+          <mat-icon>visibility</mat-icon>
+          <span>View Details</span>
+        </button>
+
+        <button
+          mat-menu-item
+          (click)="editUser(user)"
+          *ngIf="permissions.canEdit"
+        >
+          <mat-icon>edit</mat-icon>
+          <span>Edit User</span>
+        </button>
+
+        <!-- Role-specific actions -->
+        <ng-container *ngIf="user.role === 'admin'">
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="viewAdminLogs(user)">
+            <mat-icon>history</mat-icon>
+            <span>View Admin Logs</span>
+          </button>
+        </ng-container>
+
+        <!-- Advanced actions submenu -->
+        <button
+          mat-menu-item
+          [matMenuTriggerFor]="advancedActionsMenu"
+          *ngIf="permissions.canPerformAdvanced"
+        >
+          <mat-icon>build</mat-icon>
+          <span>Advanced Actions</span>
+          <mat-icon class="submenu-arrow">chevron_right</mat-icon>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <!-- Communication actions -->
+        <button mat-menu-item (click)="sendMessage(user)">
+          <mat-icon>message</mat-icon>
+          <span>Send Message</span>
+        </button>
+
+        <button
+          mat-menu-item
+          (click)="resetPassword(user)"
+          *ngIf="permissions.canResetPassword"
+        >
+          <mat-icon>lock_reset</mat-icon>
+          <span>Reset Password</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <!-- Destructive actions -->
+        <button
+          mat-menu-item
+          (click)="suspendUser(user)"
+          class="text-warn"
+          *ngIf="permissions.canSuspend && user.status !== 'suspended'"
+        >
+          <mat-icon>block</mat-icon>
+          <span>Suspend User</span>
+        </button>
+
+        <button
+          mat-menu-item
+          (click)="deleteUser(user)"
+          class="text-warn"
+          *ngIf="permissions.canDelete"
+        >
+          <mat-icon>delete</mat-icon>
+          <span>Delete User</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+
+    <!-- Advanced actions submenu -->
+    <mat-menu #advancedActionsMenu="matMenu">
+      <ng-template matMenuContent let-user="user">
+        <button mat-menu-item (click)="impersonateUser(user)">
+          <mat-icon>swap_horiz</mat-icon>
+          <span>Impersonate User</span>
+        </button>
+
+        <button mat-menu-item (click)="viewUserSessions(user)">
+          <mat-icon>devices</mat-icon>
+          <span>View Sessions</span>
+        </button>
+
+        <button mat-menu-item (click)="forceLogout(user)">
+          <mat-icon>logout</mat-icon>
+          <span>Force Logout</span>
+        </button>
+
+        <button mat-menu-item (click)="generateApiKey(user)">
+          <mat-icon>vpn_key</mat-icon>
+          <span>Generate API Key</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .data-grid-container {
+        padding: 16px;
+      }
+
+      .grid-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .users-table {
+        width: 100%;
+      }
+
+      .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-active {
+        color: #4caf50;
+      }
+      .status-inactive {
+        color: #f44336;
+      }
+      .status-suspended {
+        color: #ff9800;
+      }
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .status-badge.status-active {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .status-badge.status-inactive {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .status-badge.status-suspended {
+        background: #fff3e0;
+        color: #ef6c00;
+      }
+
+      .selected-row {
+        background: rgba(25, 118, 210, 0.08);
+      }
+
+      .text-warn {
+        color: #f44336;
+      }
+
+      .submenu-arrow {
+        margin-left: auto;
+        color: rgba(0, 0, 0, 0.54);
+      }
+    `,
+  ],
+})
+export class DataGridMenuComponent {
+  displayedColumns = ["select", "name", "role", "status", "actions"];
+  selectedUsers: any[] = [];
+
+  users = [
+    { id: 1, name: "John Doe", role: "admin", status: "active" },
+    { id: 2, name: "Jane Smith", role: "user", status: "active" },
+    { id: 3, name: "Bob Johnson", role: "user", status: "inactive" },
+    { id: 4, name: "Alice Brown", role: "moderator", status: "suspended" },
+  ];
+
+  get allUsersSelected(): boolean {
+    return (
+      this.users.length > 0 && this.selectedUsers.length === this.users.length
+    );
+  }
+
+  get someUsersSelected(): boolean {
+    return (
+      this.selectedUsers.length > 0 &&
+      this.selectedUsers.length < this.users.length
+    );
+  }
+
+  trackByUserId(index: number, user: any): number {
+    return user.id;
+  }
+
+  isUserSelected(user: any): boolean {
+    return this.selectedUsers.some((u) => u.id === user.id);
+  }
+
+  toggleUser(user: any, event: any): void {
+    if (event.checked) {
+      this.selectedUsers.push(user);
+    } else {
+      this.selectedUsers = this.selectedUsers.filter((u) => u.id !== user.id);
+    }
+  }
+
+  toggleAllUsers(event: any): void {
+    if (event.checked) {
+      this.selectedUsers = [...this.users];
+    } else {
+      this.selectedUsers = [];
+    }
+  }
+
+  getRoleColor(role: string): string {
+    const colors = {
+      admin: "warn",
+      moderator: "accent",
+      user: "primary",
+    };
+    return colors[role] || "basic";
+  }
+
+  getUserPermissions(user: any): any {
+    // Simulate permission checking based on current user role and target user
+    return {
+      canEdit: true,
+      canDelete: user.role !== "admin",
+      canChangeStatus: true,
+      canSuspend: user.role !== "admin",
+      canResetPassword: true,
+      canPerformAdvanced: user.role !== "admin",
+    };
+  }
+
+  // Bulk action methods
+  canActivateSelected(): boolean {
+    return this.selectedUsers.some((u) => u.status !== "active");
+  }
+
+  canDeactivateSelected(): boolean {
+    return this.selectedUsers.some((u) => u.status === "active");
+  }
+
+  getActivatableCount(): number {
+    return this.selectedUsers.filter((u) => u.status !== "active").length;
+  }
+
+  getDeactivatableCount(): number {
+    return this.selectedUsers.filter((u) => u.status === "active").length;
+  }
+
+  bulkActivate(): void {
+    console.log("Bulk activating users:", this.selectedUsers);
+  }
+
+  bulkDeactivate(): void {
+    console.log("Bulk deactivating users:", this.selectedUsers);
+  }
+
+  bulkExport(): void {
+    console.log("Exporting users:", this.selectedUsers);
+  }
+
+  bulkAssignRole(): void {
+    console.log("Assigning role to users:", this.selectedUsers);
+  }
+
+  bulkDelete(): void {
+    console.log("Bulk deleting users:", this.selectedUsers);
+  }
+
+  // Individual user action methods
+  toggleUserStatus(user: any): void {
+    user.status = user.status === "active" ? "inactive" : "active";
+    console.log("Toggled user status:", user);
+  }
+
+  viewUserDetails(user: any): void {
+    console.log("Viewing details for:", user);
+  }
+
+  editUser(user: any): void {
+    console.log("Editing user:", user);
+  }
+
+  viewAdminLogs(user: any): void {
+    console.log("Viewing admin logs for:", user);
+  }
+
+  sendMessage(user: any): void {
+    console.log("Sending message to:", user);
+  }
+
+  resetPassword(user: any): void {
+    console.log("Resetting password for:", user);
+  }
+
+  suspendUser(user: any): void {
+    console.log("Suspending user:", user);
+  }
+
+  deleteUser(user: any): void {
+    console.log("Deleting user:", user);
+  }
+
+  // Advanced action methods
+  impersonateUser(user: any): void {
+    console.log("Impersonating user:", user);
+  }
+
+  viewUserSessions(user: any): void {
+    console.log("Viewing sessions for:", user);
+  }
+
+  forceLogout(user: any): void {
+    console.log("Forcing logout for:", user);
+  }
+
+  generateApiKey(user: any): void {
+    console.log("Generating API key for:", user);
+  }
+}
+```

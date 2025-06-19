@@ -1,0 +1,1713 @@
+---
+title: BottomSheet Components
+---
+
+# BottomSheet Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate bottom sheet functionality. The BottomSheet component provides Material Design styled modal panels that slide up from the bottom of the screen to display contextual content, actions, or detailed information without navigating away from the current page. It follows Material Design 3 specifications for bottom sheets, offering consistent animations, accessibility features, and flexible content presentation for mobile-first and responsive design patterns.
+
+### When to Use
+
+- **Contextual Actions**: When you need to provide actions related to the current screen content without full page navigation
+- **Mobile Navigation**: For mobile-optimized navigation menus and option lists that slide up from the bottom
+- **Content Previews**: When displaying detailed information or previews that complement the main content
+- **Form Input**: For collecting user input in a focused overlay without losing current page context
+- **Settings and Options**: When providing quick access to settings, filters, or configuration options
+- **Share and Export**: For sharing content or export options that need immediate access
+- **Image and Media Viewers**: When displaying media content with associated controls and information
+- **Quick Actions**: For providing quick actions on list items or cards without full dialog overhead
+- **Confirmation Flows**: When requiring user confirmation for actions in a less intrusive manner than dialogs
+- **Progressive Disclosure**: For revealing additional information or options progressively as users interact with content
+
+### Architecture
+
+**No Coupling**: The BottomSheet component is a standalone service-based component that operates independently without requiring other components. It provides:
+
+- **Service-based instantiation**: Complete bottom sheet implementation accessible through injectable service
+- **Overlay management**: Automatic positioning, backdrop handling, and lifecycle management
+- **Flexible content**: Support for both component-based and template-based content
+- **Global accessibility**: Consistent behavior and styling across the entire application
+- **Independent operation**: No dependencies on parent or child components for basic functionality
+
+## Components
+
+### MatBottomSheet {Service Component}
+
+A versatile service component that creates and manages bottom sheet overlays with Material Design animations, backdrop handling, and comprehensive configuration options for various content presentation scenarios.
+
+**Purpose:** Injectable service that creates modal bottom sheet overlays with Material Design styling, proper accessibility features, responsive behavior, and support for both simple content and complex interactive components.
+
+**Interface:**
+
+```typescript
+interface MatBottomSheet {
+  // Content presentation methods
+  open<T, D = any, R = any>(
+    component: ComponentType<T>,
+    config?: MatBottomSheetConfig<D>,
+  ): MatBottomSheetRef<T, R>;
+  open<T, D = any, R = any>(
+    template: TemplateRef<T>,
+    config?: MatBottomSheetConfig<D>,
+  ): MatBottomSheetRef<T, R>;
+
+  // Management methods
+  dismiss<R = any>(result?: R): void;
+  ngOnDestroy(): void;
+}
+
+interface MatBottomSheetConfig<D = any> {
+  // Content and Data
+  data?: D | null; // Data to inject into the bottom sheet content
+  viewContainerRef?: ViewContainerRef; // Container for dependency injection context
+
+  // Styling and Layout
+  panelClass?: string | string[]; // Custom CSS classes for styling
+  backdropClass?: string; // Custom class for the backdrop
+  height?: string; // Fixed height for the bottom sheet
+  minHeight?: number | string; // Minimum height (number assumes pixels)
+  maxHeight?: number | string; // Maximum height (number assumes pixels)
+
+  // Behavior Configuration
+  hasBackdrop?: boolean; // Whether to show backdrop (default: true)
+  disableClose?: boolean; // Prevent closing via backdrop click or escape
+  closeOnNavigation?: boolean; // Auto-close on navigation changes
+  restoreFocus?: boolean; // Restore focus to trigger element on close
+  scrollStrategy?: ScrollStrategy; // How to handle scrolling while open
+
+  // Accessibility
+  ariaLabel?: string | null; // Accessible label for screen readers
+  ariaModal?: boolean; // Whether to set aria-modal attribute
+  autoFocus?: AutoFocusTarget | string | boolean; // Focus management on open
+
+  // Layout Direction
+  direction?: Direction; // Text direction for RTL support
+}
+
+interface MatBottomSheetRef<T = any, R = any> {
+  // Component access
+  instance: T; // Reference to the content component instance
+  componentRef: ComponentRef<T> | null; // Component reference (null for templates)
+  containerInstance: MatBottomSheetContainer; // Container component reference
+
+  // State management
+  disableClose: boolean | undefined; // Whether closing is disabled
+
+  // Lifecycle methods
+  dismiss(result?: R): void; // Programmatically close the bottom sheet
+
+  // Event observables
+  afterDismissed(): Observable<R | undefined>; // Fires when closed with optional result
+  afterOpened(): Observable<void>; // Fires when open and animations complete
+  backdropClick(): Observable<MouseEvent>; // Fires when backdrop is clicked
+  keydownEvents(): Observable<KeyboardEvent>; // Keyboard events targeted at overlay
+}
+
+type AutoFocusTarget = "dialog" | "first-tabbable" | "first-heading";
+```
+
+**Usage Example:**
+
+```typescript
+import {
+  MatBottomSheet,
+  MatBottomSheetModule,
+} from "@angular/material/bottom-sheet";
+import { Component, inject } from "@angular/core";
+
+@Component({
+  selector: "app-bottom-sheet-examples",
+  template: `
+    <!-- Bottom sheet trigger examples -->
+    <div class="bottom-sheet-examples">
+      <button
+        mat-raised-button
+        (click)="openSimpleBottomSheet()"
+        color="primary"
+      >
+        Open Simple Bottom Sheet
+      </button>
+
+      <button mat-raised-button (click)="openActionSheet()" color="accent">
+        Open Action Sheet
+      </button>
+
+      <button mat-raised-button (click)="openListBottomSheet()">
+        Open List Bottom Sheet
+      </button>
+
+      <button mat-raised-button (click)="openFormBottomSheet()">
+        Open Form Bottom Sheet
+      </button>
+
+      <button mat-raised-button (click)="openCustomBottomSheet()">
+        Open Custom Bottom Sheet
+      </button>
+
+      <button mat-raised-button (click)="openPersistentBottomSheet()">
+        Open Persistent Bottom Sheet
+      </button>
+    </div>
+
+    <!-- Content with bottom sheet context -->
+    <div class="content-section">
+      <h3>Content Section</h3>
+      <mat-card *ngFor="let item of items" class="content-card">
+        <mat-card-header>
+          <mat-card-title>{{ item.title }}</mat-card-title>
+          <mat-card-subtitle>{{ item.subtitle }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ item.description }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="openItemActions(item)">Actions</button>
+          <button mat-button (click)="openItemDetails(item)">Details</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .bottom-sheet-examples {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .content-section {
+        margin-top: 24px;
+      }
+
+      .content-card {
+        margin-bottom: 16px;
+        max-width: 400px;
+      }
+    `,
+  ],
+  imports: [MatBottomSheetModule, MatButtonModule, MatCardModule],
+})
+export class BottomSheetExamplesComponent {
+  private bottomSheet = inject(MatBottomSheet);
+
+  items = [
+    {
+      id: 1,
+      title: "First Item",
+      subtitle: "Sample subtitle",
+      description: "This is a sample description for the first item.",
+    },
+    {
+      id: 2,
+      title: "Second Item",
+      subtitle: "Another subtitle",
+      description: "This is a sample description for the second item.",
+    },
+    {
+      id: 3,
+      title: "Third Item",
+      subtitle: "More content",
+      description: "This is a sample description for the third item.",
+    },
+  ];
+
+  openSimpleBottomSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(SimpleBottomSheetComponent, {
+      data: { message: "Hello from bottom sheet!" },
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((result) => {
+      console.log("Bottom sheet dismissed with result:", result);
+    });
+  }
+
+  openActionSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(ActionSheetComponent, {
+      data: {
+        title: "Choose Action",
+        actions: [
+          { icon: "share", label: "Share", action: "share" },
+          { icon: "download", label: "Download", action: "download" },
+          { icon: "delete", label: "Delete", action: "delete", color: "warn" },
+          { icon: "edit", label: "Edit", action: "edit" },
+        ],
+      },
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((action) => {
+      if (action) {
+        this.handleAction(action);
+      }
+    });
+  }
+
+  openListBottomSheet(): void {
+    this.bottomSheet.open(ListBottomSheetComponent, {
+      data: {
+        title: "Select Option",
+        options: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
+      },
+      maxHeight: "60vh",
+    });
+  }
+
+  openFormBottomSheet(): void {
+    const bottomSheetRef = this.bottomSheet.open(FormBottomSheetComponent, {
+      data: { title: "Quick Form" },
+      disableClose: true,
+      restoreFocus: true,
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((formData) => {
+      if (formData) {
+        console.log("Form submitted with data:", formData);
+      }
+    });
+  }
+
+  openCustomBottomSheet(): void {
+    this.bottomSheet.open(CustomBottomSheetComponent, {
+      panelClass: ["custom-bottom-sheet", "elevated"],
+      backdropClass: "custom-backdrop",
+      height: "400px",
+      data: {
+        title: "Custom Styled Bottom Sheet",
+        content: "This bottom sheet has custom styling applied.",
+      },
+    });
+  }
+
+  openPersistentBottomSheet(): void {
+    this.bottomSheet.open(PersistentBottomSheetComponent, {
+      disableClose: true,
+      hasBackdrop: true,
+      data: {
+        message: "This bottom sheet can only be closed using the close button.",
+      },
+    });
+  }
+
+  openItemActions(item: any): void {
+    const bottomSheetRef = this.bottomSheet.open(
+      ItemActionsBottomSheetComponent,
+      {
+        data: { item },
+      },
+    );
+
+    bottomSheetRef.afterDismissed().subscribe((action) => {
+      if (action) {
+        this.handleItemAction(action, item);
+      }
+    });
+  }
+
+  openItemDetails(item: any): void {
+    this.bottomSheet.open(ItemDetailsBottomSheetComponent, {
+      data: { item },
+      maxHeight: "80vh",
+    });
+  }
+
+  private handleAction(action: string): void {
+    console.log("Action selected:", action);
+    // Implement action handling logic
+  }
+
+  private handleItemAction(action: string, item: any): void {
+    console.log("Item action:", action, "for item:", item);
+    // Implement item-specific action handling
+  }
+}
+```
+
+**Simple Bottom Sheet Component:**
+
+```typescript
+import { Component, Inject } from "@angular/core";
+import {
+  MatBottomSheetRef,
+  MAT_BOTTOM_SHEET_DATA,
+} from "@angular/material/bottom-sheet";
+
+@Component({
+  selector: "app-simple-bottom-sheet",
+  template: `
+    <div class="simple-bottom-sheet">
+      <h3>Simple Bottom Sheet</h3>
+      <p>{{ data.message }}</p>
+      <div class="actions">
+        <button mat-raised-button (click)="close('confirmed')" color="primary">
+          Confirm
+        </button>
+        <button mat-button (click)="close()">Cancel</button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .simple-bottom-sheet {
+        padding: 24px;
+        text-align: center;
+      }
+
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
+    `,
+  ],
+  imports: [MatButtonModule],
+})
+export class SimpleBottomSheetComponent {
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<SimpleBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+  ) {}
+
+  close(result?: any): void {
+    this.bottomSheetRef.dismiss(result);
+  }
+}
+```
+
+**Action Sheet Component:**
+
+```typescript
+import { Component, Inject } from "@angular/core";
+import {
+  MatBottomSheetRef,
+  MAT_BOTTOM_SHEET_DATA,
+} from "@angular/material/bottom-sheet";
+
+@Component({
+  selector: "app-action-sheet",
+  template: `
+    <div class="action-sheet">
+      <h3 class="action-sheet-title">{{ data.title }}</h3>
+      <mat-list class="action-list">
+        <mat-list-item
+          *ngFor="let action of data.actions"
+          (click)="selectAction(action.action)"
+          class="action-item"
+        >
+          <mat-icon matListItemIcon [color]="action.color">{{
+            action.icon
+          }}</mat-icon>
+          <span matListItemTitle>{{ action.label }}</span>
+        </mat-list-item>
+      </mat-list>
+
+      <div class="cancel-section">
+        <button mat-button (click)="cancel()" class="cancel-button">
+          Cancel
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .action-sheet {
+        padding: 0;
+      }
+
+      .action-sheet-title {
+        padding: 16px 24px 8px;
+        margin: 0;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .action-list {
+        padding: 0;
+      }
+
+      .action-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .action-item:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+
+      .cancel-section {
+        padding: 8px 16px 16px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        margin-top: 8px;
+      }
+
+      .cancel-button {
+        width: 100%;
+      }
+    `,
+  ],
+  imports: [MatListModule, MatIconModule, MatButtonModule],
+})
+export class ActionSheetComponent {
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<ActionSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+  ) {}
+
+  selectAction(action: string): void {
+    this.bottomSheetRef.dismiss(action);
+  }
+
+  cancel(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Action Sheet
+
+```typescript
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { Component, inject } from "@angular/core";
+
+// Basic action sheet for contextual actions
+@Component({
+  selector: "app-basic-action-sheet",
+  template: `
+    <div class="content-grid">
+      <mat-card *ngFor="let item of items" class="item-card">
+        <mat-card-header>
+          <mat-card-title>{{ item.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ item.description }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-icon-button (click)="openActions(item)">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .item-card {
+        height: fit-content;
+      }
+    `,
+  ],
+  imports: [MatCardModule, MatButtonModule, MatIconModule],
+})
+export class BasicActionSheetComponent {
+  private bottomSheet = inject(MatBottomSheet);
+
+  items = [
+    { id: 1, title: "Document 1", description: "First document description" },
+    { id: 2, title: "Document 2", description: "Second document description" },
+    { id: 3, title: "Document 3", description: "Third document description" },
+  ];
+
+  openActions(item: any): void {
+    const bottomSheetRef = this.bottomSheet.open(QuickActionsComponent, {
+      data: {
+        item,
+        actions: [
+          { icon: "edit", label: "Edit", value: "edit" },
+          { icon: "share", label: "Share", value: "share" },
+          { icon: "download", label: "Download", value: "download" },
+          { icon: "delete", label: "Delete", value: "delete", color: "warn" },
+        ],
+      },
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((action) => {
+      if (action) {
+        this.handleItemAction(action, item);
+      }
+    });
+  }
+
+  private handleItemAction(action: string, item: any): void {
+    switch (action) {
+      case "edit":
+        console.log("Editing item:", item);
+        break;
+      case "share":
+        console.log("Sharing item:", item);
+        break;
+      case "download":
+        console.log("Downloading item:", item);
+        break;
+      case "delete":
+        console.log("Deleting item:", item);
+        break;
+    }
+  }
+}
+
+// Quick actions component
+@Component({
+  selector: "app-quick-actions",
+  template: `
+    <div class="quick-actions">
+      <div class="header">
+        <h3>{{ data.item.title }}</h3>
+        <p class="subtitle">Choose an action</p>
+      </div>
+
+      <mat-nav-list>
+        <mat-list-item
+          *ngFor="let action of data.actions"
+          (click)="selectAction(action.value)"
+          button
+        >
+          <mat-icon matListItemIcon [color]="action.color">{{
+            action.icon
+          }}</mat-icon>
+          <span matListItemTitle>{{ action.label }}</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  `,
+  styles: [
+    `
+      .quick-actions {
+        padding: 0;
+      }
+
+      .header {
+        padding: 20px 24px 8px;
+        background-color: #f5f5f5;
+      }
+
+      .header h3 {
+        margin: 0 0 4px 0;
+        font-weight: 500;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+      }
+    `,
+  ],
+  imports: [MatListModule, MatIconModule],
+})
+export class QuickActionsComponent {
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<QuickActionsComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+  ) {}
+
+  selectAction(action: string): void {
+    this.bottomSheetRef.dismiss(action);
+  }
+}
+```
+
+### Advanced Form Bottom Sheet
+
+```typescript
+import { Component, inject, Inject } from "@angular/core";
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from "@angular/forms";
+import {
+  MatBottomSheet,
+  MatBottomSheetRef,
+  MAT_BOTTOM_SHEET_DATA,
+} from "@angular/material/bottom-sheet";
+
+// Form bottom sheet component
+@Component({
+  selector: "app-form-bottom-sheet",
+  template: `
+    <div class="form-bottom-sheet">
+      <div class="form-header">
+        <h2>{{ data.title || "Form" }}</h2>
+        <button mat-icon-button (click)="dismiss()" [disabled]="isSubmitting">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="contactForm"
+        (ngSubmit)="onSubmit()"
+        class="form-content"
+      >
+        <div class="form-fields">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              formControlName="name"
+              placeholder="Enter your name"
+            />
+            <mat-error *ngIf="contactForm.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="Enter email address"
+            />
+            <mat-error *ngIf="contactForm.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="contactForm.get('email')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone</mat-label>
+            <input
+              matInput
+              type="tel"
+              formControlName="phone"
+              placeholder="Enter phone number"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Subject</mat-label>
+            <mat-select formControlName="subject">
+              <mat-option value="general">General Inquiry</mat-option>
+              <mat-option value="support">Support Request</mat-option>
+              <mat-option value="feedback">Feedback</mat-option>
+              <mat-option value="bug">Bug Report</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea
+              matInput
+              formControlName="message"
+              rows="4"
+              placeholder="Enter your message"
+            ></textarea>
+            <mat-error *ngIf="contactForm.get('message')?.hasError('required')">
+              Message is required
+            </mat-error>
+            <mat-error
+              *ngIf="contactForm.get('message')?.hasError('minlength')"
+            >
+              Message must be at least 10 characters
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-button
+            (click)="dismiss()"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="contactForm.invalid || isSubmitting"
+          >
+            {{ isSubmitting ? "Submitting..." : "Submit" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .form-bottom-sheet {
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        flex-shrink: 0;
+      }
+
+      .form-header h2 {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .form-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .form-fields {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .form-actions {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 600px) {
+        .form-fields {
+          padding: 16px;
+        }
+
+        .form-actions {
+          padding: 12px 16px;
+        }
+      }
+    `,
+  ],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
+})
+export class FormBottomSheetComponent {
+  contactForm: FormGroup;
+  isSubmitting = false;
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<FormBottomSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+    private fb: FormBuilder,
+  ) {
+    this.contactForm = this.fb.group({
+      name: [data.contact?.name || "", [Validators.required]],
+      email: [
+        data.contact?.email || "",
+        [Validators.required, Validators.email],
+      ],
+      phone: [data.contact?.phone || ""],
+      subject: [data.contact?.subject || "general", [Validators.required]],
+      message: [
+        data.contact?.message || "",
+        [Validators.required, Validators.minLength(10)],
+      ],
+    });
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.contactForm.valid && !this.isSubmitting) {
+      this.isSubmitting = true;
+
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        this.bottomSheetRef.dismiss({
+          action: "submit",
+          formData: this.contactForm.value,
+        });
+      } catch (error) {
+        console.error("Form submission error:", error);
+        this.isSubmitting = false;
+      }
+    }
+  }
+
+  dismiss(): void {
+    if (this.contactForm.dirty && !this.isSubmitting) {
+      // Could show confirmation dialog here
+      if (
+        confirm("You have unsaved changes. Are you sure you want to close?")
+      ) {
+        this.bottomSheetRef.dismiss();
+      }
+    } else {
+      this.bottomSheetRef.dismiss();
+    }
+  }
+}
+
+// Parent component usage
+@Component({
+  selector: "app-form-bottom-sheet-example",
+  template: `
+    <div class="contact-section">
+      <h2>Contact Us</h2>
+      <p>Get in touch with our team</p>
+
+      <button mat-raised-button color="primary" (click)="openContactForm()">
+        <mat-icon>mail</mat-icon>
+        Contact Form
+      </button>
+
+      <button mat-button (click)="openContactFormWithData()">
+        Edit Contact
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .contact-section {
+        padding: 24px;
+        text-align: center;
+      }
+
+      .contact-section button {
+        margin: 8px;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule],
+})
+export class FormBottomSheetExampleComponent {
+  private bottomSheet = inject(MatBottomSheet);
+
+  openContactForm(): void {
+    const bottomSheetRef = this.bottomSheet.open(FormBottomSheetComponent, {
+      data: { title: "Contact Us" },
+      disableClose: true,
+      restoreFocus: true,
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((result) => {
+      if (result?.action === "submit") {
+        console.log("Form submitted:", result.formData);
+        // Handle form submission
+        this.handleFormSubmission(result.formData);
+      }
+    });
+  }
+
+  openContactFormWithData(): void {
+    const existingContact = {
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "+1234567890",
+      subject: "support",
+      message: "I need help with...",
+    };
+
+    this.bottomSheet.open(FormBottomSheetComponent, {
+      data: {
+        title: "Edit Contact",
+        contact: existingContact,
+      },
+      disableClose: true,
+    });
+  }
+
+  private handleFormSubmission(formData: any): void {
+    // Process form submission
+    console.log("Processing contact form:", formData);
+    // Show success message, send to API, etc.
+  }
+}
+```
+
+### Common Variations
+
+#### Mobile-First Navigation Bottom Sheet
+
+```typescript
+@Component({
+  selector: "app-mobile-navigation",
+  template: `
+    <div class="mobile-nav-sheet">
+      <div class="nav-header">
+        <h3>Navigation</h3>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <mat-nav-list class="nav-menu">
+        <mat-list-item
+          *ngFor="let item of navigationItems"
+          (click)="navigate(item.route)"
+          button
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+          <mat-icon matListItemIcon *ngIf="item.badge" class="badge-icon">
+            notifications
+          </mat-icon>
+        </mat-list-item>
+
+        <mat-divider></mat-divider>
+
+        <mat-list-item (click)="openSettings()" button>
+          <mat-icon matListItemIcon>settings</mat-icon>
+          <span matListItemTitle>Settings</span>
+        </mat-list-item>
+
+        <mat-list-item (click)="logout()" button>
+          <mat-icon matListItemIcon>exit_to_app</mat-icon>
+          <span matListItemTitle>Logout</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  `,
+  styles: [
+    `
+      .mobile-nav-sheet {
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .nav-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        background-color: #f5f5f5;
+      }
+
+      .nav-header h3 {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .nav-menu {
+        padding: 0;
+      }
+
+      .badge-icon {
+        color: #ff9800;
+        font-size: 18px;
+      }
+    `,
+  ],
+  imports: [MatListModule, MatIconModule, MatButtonModule, MatDividerModule],
+})
+export class MobileNavigationComponent {
+  navigationItems = [
+    { icon: "home", label: "Home", route: "/home" },
+    { icon: "dashboard", label: "Dashboard", route: "/dashboard" },
+    { icon: "people", label: "Contacts", route: "/contacts" },
+    { icon: "folder", label: "Projects", route: "/projects" },
+    {
+      icon: "notifications",
+      label: "Notifications",
+      route: "/notifications",
+      badge: true,
+    },
+  ];
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<MobileNavigationComponent>,
+    private router: Router,
+  ) {}
+
+  navigate(route: string): void {
+    this.router.navigate([route]);
+    this.close();
+  }
+
+  openSettings(): void {
+    this.close();
+    // Open settings
+  }
+
+  logout(): void {
+    this.close();
+    // Handle logout
+  }
+
+  close(): void {
+    this.bottomSheetRef.dismiss();
+  }
+}
+```
+
+#### Filter and Sort Bottom Sheet
+
+```typescript
+@Component({
+  selector: "app-filter-sort-sheet",
+  template: `
+    <div class="filter-sort-sheet">
+      <div class="sheet-header">
+        <h3>Filter & Sort</h3>
+        <button mat-button color="primary" (click)="clearAll()">
+          Clear All
+        </button>
+      </div>
+
+      <div class="sheet-content">
+        <!-- Sort Section -->
+        <div class="section">
+          <h4>Sort By</h4>
+          <mat-radio-group [(ngModel)]="sortBy" class="sort-options">
+            <mat-radio-button
+              *ngFor="let option of sortOptions"
+              [value]="option.value"
+            >
+              {{ option.label }}
+            </mat-radio-button>
+          </mat-radio-group>
+
+          <mat-radio-group [(ngModel)]="sortDirection" class="sort-direction">
+            <mat-radio-button value="asc">Ascending</mat-radio-button>
+            <mat-radio-button value="desc">Descending</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Filter Section -->
+        <mat-divider></mat-divider>
+
+        <div class="section">
+          <h4>Filter</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Category</mat-label>
+            <mat-select [(ngModel)]="selectedCategories" multiple>
+              <mat-option
+                *ngFor="let category of categories"
+                [value]="category"
+              >
+                {{ category }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="selectedStatus">
+              <mat-option value="">All</mat-option>
+              <mat-option *ngFor="let status of statusOptions" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="price-range">
+            <h5>Price Range</h5>
+            <mat-slider
+              min="0"
+              max="1000"
+              step="10"
+              [(ngModel)]="priceRange"
+              discrete
+              showTickMarks
+            >
+            </mat-slider>
+            <div class="price-labels">
+              <span>$0</span>
+              <span>${{ priceRange }}</span>
+              <span>$1000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-actions">
+        <button mat-button (click)="cancel()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="apply()">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .filter-sort-sheet {
+        display: flex;
+        flex-direction: column;
+        max-height: 80vh;
+      }
+
+      .sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+      }
+
+      .sheet-header h3 {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .sheet-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0;
+      }
+
+      .section {
+        padding: 20px 24px;
+      }
+
+      .section h4 {
+        margin: 0 0 16px 0;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      .section h5 {
+        margin: 16px 0 8px 0;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      .sort-options,
+      .sort-direction {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .full-width {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      .price-range {
+        margin-top: 16px;
+      }
+
+      .price-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .sheet-actions {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+    `,
+  ],
+  imports: [
+    MatRadioModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatSliderModule,
+    MatButtonModule,
+    MatDividerModule,
+    FormsModule,
+  ],
+})
+export class FilterSortSheetComponent {
+  sortBy = "name";
+  sortDirection = "asc";
+  selectedCategories: string[] = [];
+  selectedStatus = "";
+  priceRange = 500;
+
+  sortOptions = [
+    { value: "name", label: "Name" },
+    { value: "date", label: "Date Created" },
+    { value: "price", label: "Price" },
+    { value: "popularity", label: "Popularity" },
+  ];
+
+  categories = ["Electronics", "Clothing", "Books", "Home & Garden", "Sports"];
+  statusOptions = ["Available", "Out of Stock", "On Sale", "New"];
+
+  constructor(
+    private bottomSheetRef: MatBottomSheetRef<FilterSortSheetComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+  ) {
+    // Initialize with passed filter data
+    if (data.filters) {
+      this.sortBy = data.filters.sortBy || this.sortBy;
+      this.sortDirection = data.filters.sortDirection || this.sortDirection;
+      this.selectedCategories = data.filters.categories || [];
+      this.selectedStatus = data.filters.status || "";
+      this.priceRange = data.filters.priceRange || this.priceRange;
+    }
+  }
+
+  apply(): void {
+    this.bottomSheetRef.dismiss({
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      categories: this.selectedCategories,
+      status: this.selectedStatus,
+      priceRange: this.priceRange,
+    });
+  }
+
+  cancel(): void {
+    this.bottomSheetRef.dismiss();
+  }
+
+  clearAll(): void {
+    this.sortBy = "name";
+    this.sortDirection = "asc";
+    this.selectedCategories = [];
+    this.selectedStatus = "";
+    this.priceRange = 500;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Design for mobile-first**: Bottom sheets are primarily mobile interaction patterns, ensure they work well on small screens
+- **Keep content focused**: Limit bottom sheet content to essential information and actions to maintain clarity
+- **Provide clear escape paths**: Always include obvious ways to close the bottom sheet (close button, backdrop click, or swipe gesture)
+- **Use appropriate heights**: Set reasonable min/max heights to ensure content is accessible without overwhelming the screen
+- **Handle keyboard interactions**: Ensure proper focus management and keyboard navigation within bottom sheet content
+- **Consider content hierarchy**: Use clear visual hierarchy with headers, sections, and actions to guide user attention
+
+### Accessibility
+
+- **Focus management**: Ensure focus moves to the bottom sheet when opened and returns appropriately when closed
+- **Keyboard navigation**: Support Tab navigation within the bottom sheet and Escape key for closing
+- **Screen reader support**: Use proper ARIA labels and roles to announce bottom sheet content and purpose
+- **High contrast support**: Ensure sufficient color contrast for all text and interactive elements
+- **Touch targets**: Maintain adequate touch target sizes (minimum 44px) for mobile interactions
+- **Backdrop behavior**: Clearly communicate backdrop click behavior and provide alternative close methods
+
+### Performance
+
+- **Lazy load content**: Consider lazy loading complex bottom sheet components to improve initial app performance
+- **Optimize animations**: Use CSS transforms and GPU-accelerated properties for smooth slide animations
+- **Memory management**: Properly clean up subscriptions and event listeners when bottom sheet is dismissed
+- **Content virtualization**: For long lists in bottom sheets, implement virtual scrolling to maintain performance
+- **Debounce interactions**: Prevent rapid successive bottom sheet openings that could impact performance
+- **Minimize DOM manipulation**: Keep bottom sheet content lightweight and avoid expensive DOM operations
+
+## Common Patterns
+
+### Pattern 1: Reusable Bottom Sheet Service
+
+```typescript
+import { Injectable, inject, TemplateRef, Type } from "@angular/core";
+import {
+  MatBottomSheet,
+  MatBottomSheetRef,
+} from "@angular/material/bottom-sheet";
+import { Observable } from "rxjs";
+
+export interface BottomSheetConfig<T = any> {
+  title?: string;
+  data?: T;
+  height?: string;
+  maxHeight?: string;
+  disableClose?: boolean;
+  panelClass?: string | string[];
+}
+
+@Injectable({
+  providedIn: "root",
+})
+export class BottomSheetService {
+  private bottomSheet = inject(MatBottomSheet);
+
+  open<T, R = any>(
+    component: Type<any>,
+    config?: BottomSheetConfig<T>,
+  ): Observable<R> {
+    const bottomSheetRef = this.bottomSheet.open(component, {
+      data: {
+        title: config?.title,
+        ...config?.data,
+      },
+      height: config?.height,
+      maxHeight: config?.maxHeight || "90vh",
+      disableClose: config?.disableClose || false,
+      panelClass: config?.panelClass || [],
+      restoreFocus: true,
+    });
+
+    return bottomSheetRef.afterDismissed();
+  }
+
+  // Specialized bottom sheet methods
+  openActionSheet(actions: any[], title?: string): Observable<string> {
+    return this.open(ActionSheetComponent, {
+      title,
+      data: { actions },
+    });
+  }
+
+  openConfirmation(
+    message: string,
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+  ): Observable<boolean> {
+    return this.open(ConfirmationSheetComponent, {
+      data: { message, confirmText, cancelText },
+    });
+  }
+
+  openForm<T>(
+    formComponent: Type<any>,
+    initialData?: T,
+    title?: string,
+  ): Observable<T> {
+    return this.open(formComponent, {
+      title,
+      data: { formData: initialData },
+      disableClose: true,
+    });
+  }
+
+  openFilter(currentFilters?: any): Observable<any> {
+    return this.open(FilterSortSheetComponent, {
+      title: "Filter & Sort",
+      data: { filters: currentFilters },
+      maxHeight: "80vh",
+    });
+  }
+
+  openImageGallery(images: string[], selectedIndex = 0): Observable<void> {
+    return this.open(ImageGallerySheetComponent, {
+      data: { images, selectedIndex },
+      height: "100vh",
+      panelClass: ["full-screen-sheet"],
+    });
+  }
+
+  dismiss(): void {
+    this.bottomSheet.dismiss();
+  }
+}
+
+// Usage examples
+@Component({
+  selector: "app-bottom-sheet-service-demo",
+  template: `
+    <div class="demo-buttons">
+      <button mat-raised-button (click)="showActions()" color="primary">
+        Show Actions
+      </button>
+
+      <button mat-raised-button (click)="showConfirmation()">
+        Show Confirmation
+      </button>
+
+      <button mat-raised-button (click)="openContactForm()">Open Form</button>
+
+      <button mat-raised-button (click)="showFilters()">Show Filters</button>
+    </div>
+  `,
+  styles: [
+    `
+      .demo-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+    `,
+  ],
+})
+export class BottomSheetServiceDemoComponent {
+  private bottomSheetService = inject(BottomSheetService);
+
+  showActions(): void {
+    const actions = [
+      { icon: "edit", label: "Edit", value: "edit" },
+      { icon: "share", label: "Share", value: "share" },
+      { icon: "delete", label: "Delete", value: "delete" },
+    ];
+
+    this.bottomSheetService
+      .openActionSheet(actions, "Choose Action")
+      .subscribe((result) => {
+        if (result) {
+          console.log("Action selected:", result);
+        }
+      });
+  }
+
+  showConfirmation(): void {
+    this.bottomSheetService
+      .openConfirmation(
+        "Are you sure you want to delete this item?",
+        "Delete",
+        "Cancel",
+      )
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          console.log("Item deleted");
+        }
+      });
+  }
+
+  openContactForm(): void {
+    this.bottomSheetService
+      .openForm(
+        FormBottomSheetComponent,
+        { name: "", email: "", message: "" },
+        "Contact Form",
+      )
+      .subscribe((formData) => {
+        if (formData) {
+          console.log("Form submitted:", formData);
+        }
+      });
+  }
+
+  showFilters(): void {
+    const currentFilters = {
+      sortBy: "name",
+      categories: ["Electronics"],
+      priceRange: 300,
+    };
+
+    this.bottomSheetService.openFilter(currentFilters).subscribe((filters) => {
+      if (filters) {
+        console.log("Filters applied:", filters);
+      }
+    });
+  }
+}
+```
+
+### Pattern 2: Responsive Bottom Sheet with Breakpoint Handling
+
+```typescript
+import { Injectable, inject } from "@angular/core";
+import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { MatDialog } from "@angular/material/dialog";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+
+@Injectable({
+  providedIn: "root",
+})
+export class ResponsiveSheetService {
+  private bottomSheet = inject(MatBottomSheet);
+  private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  private isMobile$ = this.breakpointObserver
+    .observe([Breakpoints.Handset, Breakpoints.Small])
+    .pipe(map((result) => result.matches));
+
+  openResponsive<T, R = any>(component: any, config?: any): Observable<R> {
+    return new Observable((observer) => {
+      this.isMobile$
+        .subscribe((isMobile) => {
+          if (isMobile) {
+            // Use bottom sheet for mobile
+            const bottomSheetRef = this.bottomSheet.open(component, {
+              ...config,
+              panelClass: [...(config?.panelClass || []), "mobile-sheet"],
+            });
+
+            bottomSheetRef.afterDismissed().subscribe((result) => {
+              observer.next(result);
+              observer.complete();
+            });
+          } else {
+            // Use dialog for desktop
+            const dialogRef = this.dialog.open(component, {
+              ...config,
+              width: config?.width || "500px",
+              maxWidth: "90vw",
+              panelClass: [...(config?.panelClass || []), "desktop-dialog"],
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+              observer.next(result);
+              observer.complete();
+            });
+          }
+        })
+        .unsubscribe();
+    });
+  }
+
+  // Specialized responsive methods
+  openResponsiveActionSheet(actions: any[]): Observable<string> {
+    return this.openResponsive(ActionSheetComponent, {
+      data: { actions },
+      panelClass: ["action-sheet"],
+    });
+  }
+
+  openResponsiveForm(formComponent: any, data?: any): Observable<any> {
+    return this.openResponsive(formComponent, {
+      data,
+      disableClose: true,
+      panelClass: ["form-container"],
+    });
+  }
+
+  openResponsiveImageViewer(images: string[], index = 0): Observable<void> {
+    return this.isMobile$.pipe(
+      map((isMobile) => {
+        if (isMobile) {
+          return this.bottomSheet.open(ImageViewerSheetComponent, {
+            data: { images, index },
+            panelClass: ["image-viewer-sheet"],
+            height: "100vh",
+          });
+        } else {
+          return this.dialog.open(ImageViewerDialogComponent, {
+            data: { images, index },
+            panelClass: ["image-viewer-dialog"],
+            width: "80vw",
+            height: "80vh",
+            maxWidth: "1200px",
+            maxHeight: "800px",
+          });
+        }
+      }),
+    );
+  }
+}
+
+// Responsive component that adapts to container
+@Component({
+  selector: "app-responsive-content-sheet",
+  template: `
+    <div class="responsive-content" [ngClass]="containerClass">
+      <div class="content-header">
+        <h2>{{ title }}</h2>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="content-body">
+        <ng-content></ng-content>
+      </div>
+
+      <div class="content-actions" *ngIf="showActions">
+        <ng-content select="[slot=actions]"></ng-content>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .responsive-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        flex-shrink: 0;
+      }
+
+      .content-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+
+      .content-actions {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        flex-shrink: 0;
+      }
+
+      /* Mobile-specific styles */
+      .responsive-content.mobile {
+        min-height: 60vh;
+        max-height: 90vh;
+      }
+
+      .responsive-content.mobile .content-body {
+        padding: 16px;
+      }
+
+      /* Desktop-specific styles */
+      .responsive-content.desktop {
+        min-width: 400px;
+        min-height: 300px;
+      }
+    `,
+  ],
+  imports: [MatIconModule, MatButtonModule, CommonModule],
+})
+export class ResponsiveContentSheetComponent implements OnInit {
+  @Input() title = "";
+  @Input() showActions = true;
+  @Input() containerType: "mobile" | "desktop" = "mobile";
+
+  containerClass = "";
+
+  ngOnInit(): void {
+    this.containerClass = this.containerType;
+  }
+
+  close(): void {
+    // This would be handled by the service
+  }
+}
+
+// Usage example
+@Component({
+  template: `
+    <button mat-raised-button (click)="openResponsiveSheet()">
+      Open Responsive Sheet
+    </button>
+  `,
+})
+export class ResponsiveSheetExampleComponent {
+  private responsiveSheetService = inject(ResponsiveSheetService);
+
+  openResponsiveSheet(): void {
+    this.responsiveSheetService
+      .openResponsive(MyContentComponent, {
+        data: { title: "Responsive Content" },
+      })
+      .subscribe((result) => {
+        console.log("Sheet closed with result:", result);
+      });
+  }
+}
+```

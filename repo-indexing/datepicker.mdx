@@ -1,0 +1,789 @@
+---
+title: Datepicker Components
+---
+
+# Datepicker Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate date picker functionality with Material Design styling. The Datepicker component group provides a comprehensive solution for date selection through a rich calendar interface, with support for single dates, date ranges, form integration, and accessibility features.
+
+### When to Use
+
+- **Date Selection**: When users need to select specific dates through an intuitive calendar interface
+- **Form Integration**: For forms requiring date input with visual date selection capabilities
+- **Date Ranges**: When users need to select start and end dates for periods, bookings, or filtering
+- **Accessibility**: When date selection needs to be accessible through keyboard navigation and screen readers
+- **Localization**: For applications requiring date formats and calendar displays in different locales
+- **Validation**: When date inputs need validation against minimum/maximum dates or custom date filters
+
+### Architecture
+
+**Moderate Coupling**: The Datepicker component group follows an optional hierarchical structure where the main datepicker can work standalone or be enhanced with additional components:
+
+- **Core functionality**: `mat-datepicker` provides the basic date picking functionality
+- **Input integration**: `matDatepicker` directive connects input fields to the datepicker
+- **Toggle enhancement**: `mat-datepicker-toggle` provides an optional trigger button
+- **Range functionality**: `mat-date-range-input` and related components extend functionality for date ranges
+- **Customization**: Optional custom icons and headers can be provided for enhanced user experience
+
+### Component Interdependencies
+
+The Datepicker component group supports flexible composition patterns:
+
+- **`mat-datepicker`** → Core datepicker component that manages calendar display and date selection
+- **`matDatepicker` directive** → Connects input fields to the datepicker for form integration
+- **`mat-datepicker-toggle`** → Optional button component that opens the datepicker (enhances user experience)
+- **Date Range Components** → `mat-date-range-input`, `matStartDate`, `matEndDate` work together for range selection
+- **Customization Components** → `mat-datepicker-toggle-icon` allows custom toggle icons
+
+## Components
+
+### MatDatepicker {Primary Component}
+
+The main datepicker component that provides calendar functionality and date selection interface.
+
+**Purpose:** Serves as the core calendar component, manages date selection, handles form integration, and provides the foundation for Material Design datepicker styling.
+
+**Interface:**
+
+```typescript
+interface MatDatepickerProps {
+  startAt?: D; // Date to open the calendar to initially
+  startView?: "month" | "year" | "multi-year"; // Initial calendar view
+  color?: ThemePalette; // Theme color for the datepicker
+  touchUi?: boolean; // Whether to use touch-friendly UI (dialog vs dropdown)
+  disabled?: boolean; // Whether the datepicker is disabled
+  xPosition?: "start" | "end"; // Horizontal position preference
+  yPosition?: "above" | "below"; // Vertical position preference
+  restoreFocus?: boolean; // Whether to restore focus when closed
+  panelClass?: string | string[]; // CSS classes for the popup panel
+  opened?: boolean; // Whether the datepicker is currently open
+  calendarHeaderComponent?: ComponentType<any>; // Custom header component
+  dateClass?: (date: D, view: string) => string | string[]; // Custom CSS classes for dates
+}
+```
+
+**Dependencies:** Requires Angular Material's datepicker module and date adapter
+**Provides:** Calendar interface, date selection, and popup management for input fields
+
+**Usage Example:**
+
+```typescript
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatNativeDateModule } from "@angular/material/core";
+
+@Component({
+  selector: "app-datepicker-example",
+  template: `
+    <mat-form-field>
+      <mat-label>Choose a date</mat-label>
+      <input matInput [matDatepicker]="picker" />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  `,
+  imports: [
+    MatDatepickerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatNativeDateModule,
+  ],
+})
+export class DatepickerExampleComponent {}
+```
+
+### MatDatepickerInput {Input Integration}
+
+Directive that connects input fields to a datepicker for seamless form integration.
+
+**Purpose:** Provides two-way data binding between input fields and the datepicker, handles validation, and manages user input parsing.
+
+**Interface:**
+
+```typescript
+interface MatDatepickerInputProps {
+  matDatepicker: MatDatepickerPanel; // Reference to the associated datepicker
+  min?: D; // Minimum selectable date
+  max?: D; // Maximum selectable date
+  matDatepickerFilter?: (date: D) => boolean; // Function to filter selectable dates
+  value?: D; // Current selected date value
+  disabled?: boolean; // Whether the input is disabled
+  // Inherits standard input properties and form control integration
+}
+```
+
+**Context Dependencies:** Must be applied to an input element within a form field
+**Parent Requirements:** Typically used within `mat-form-field` for proper styling
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Event Date</mat-label>
+  <input
+    matInput
+    [matDatepicker]="eventPicker"
+    [min]="minDate"
+    [max]="maxDate"
+    [matDatepickerFilter]="dateFilter"
+    [(ngModel)]="selectedDate"
+  />
+  <mat-datepicker #eventPicker startView="year"></mat-datepicker>
+</mat-form-field>
+```
+
+### MatDatepickerToggle {Toggle Button}
+
+Optional button component that provides a visual trigger to open the datepicker.
+
+**Purpose:** Enhances user experience by providing a clear, accessible button to open the datepicker calendar.
+
+**Interface:**
+
+```typescript
+interface MatDatepickerToggleProps {
+  for: MatDatepickerPanel; // Reference to the datepicker to control (aliased as 'datepicker')
+  tabIndex?: number; // Tab index for keyboard navigation
+  ariaLabel?: string; // Accessibility label for screen readers
+  disabled?: boolean; // Whether the toggle button is disabled
+  disableRipple?: boolean; // Whether to disable ripple effects
+}
+```
+
+**Context Dependencies:** Must reference a datepicker instance
+**Parent Requirements:** Typically used as suffix within `mat-form-field`
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Select Date</mat-label>
+  <input matInput [matDatepicker]="picker" />
+  <mat-datepicker-toggle matSuffix [for]="picker">
+    <mat-icon matDatepickerToggleIcon>calendar_month</mat-icon>
+  </mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
+```
+
+### MatDatepickerToggleIcon {Custom Toggle Icon}
+
+Directive for customizing the icon displayed in the datepicker toggle button.
+
+**Purpose:** Allows customization of the toggle button icon while maintaining accessibility and functionality.
+
+**Interface:**
+
+```typescript
+interface MatDatepickerToggleIconProps {
+  // Applied as directive to mat-icon elements
+  // No direct props - uses content projection
+}
+```
+
+**Context Dependencies:** Must be used within `mat-datepicker-toggle`
+**Parent Requirements:** Applied to `mat-icon` elements within the toggle
+
+**Usage Example:**
+
+```html
+<mat-datepicker-toggle matSuffix [for]="picker">
+  <mat-icon matDatepickerToggleIcon>event</mat-icon>
+</mat-datepicker-toggle>
+```
+
+### MatDateRangeInput {Date Range Container}
+
+Container component for date range selection with start and end date inputs.
+
+**Purpose:** Provides a unified interface for selecting date ranges with validation and accessibility features.
+
+**Interface:**
+
+```typescript
+interface MatDateRangeInputProps {
+  rangePicker: MatDateRangePicker; // Reference to the associated range picker
+  separator?: string; // Visual separator between start and end inputs
+  comparisonStart?: D; // Start of comparison range for highlighting
+  comparisonEnd?: D; // End of comparison range for highlighting
+  // Implements MatFormFieldControl for proper form field integration
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field`
+**Parent Requirements:** Required parent is `mat-form-field`
+**Provides:** Container context for start and end date inputs
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Enter a date range</mat-label>
+  <mat-date-range-input [rangePicker]="rangePicker">
+    <input matStartDate placeholder="Start date" />
+    <input matEndDate placeholder="End date" />
+  </mat-date-range-input>
+  <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+  <mat-date-range-picker #rangePicker></mat-date-range-picker>
+</mat-form-field>
+```
+
+### MatStartDate {Range Start Input}
+
+Input directive for the start date in a date range selection.
+
+**Purpose:** Provides specialized input handling for the start date of a range with appropriate validation.
+
+**Interface:**
+
+```typescript
+interface MatStartDateProps {
+  // Applied as directive to input elements
+  // Inherits from MatDateRangeInputPartBase
+  errorStateMatcher?: ErrorStateMatcher; // Custom error state matching
+  // Automatically validates that start date is before end date
+}
+```
+
+**Context Dependencies:** Must be used within `mat-date-range-input`
+**Parent Requirements:** Required parent is `mat-date-range-input`
+
+### MatEndDate {Range End Input}
+
+Input directive for the end date in a date range selection.
+
+**Purpose:** Provides specialized input handling for the end date of a range with appropriate validation.
+
+**Interface:**
+
+```typescript
+interface MatEndDateProps {
+  // Applied as directive to input elements
+  // Inherits from MatDateRangeInputPartBase
+  errorStateMatcher?: ErrorStateMatcher; // Custom error state matching
+  // Automatically validates that end date is after start date
+}
+```
+
+**Context Dependencies:** Must be used within `mat-date-range-input`
+**Parent Requirements:** Required parent is `mat-date-range-input`
+
+### MatDateRangePicker {Range Picker}
+
+Specialized datepicker component for date range selection.
+
+**Purpose:** Provides calendar interface specifically designed for selecting date ranges with range highlighting.
+
+**Interface:**
+
+```typescript
+interface MatDateRangePickerProps {
+  // Inherits from MatDatepickerBase with DateRange<D> selection model
+  // All standard datepicker props apply
+  // Automatically handles range selection logic and validation
+}
+```
+
+**Context Dependencies:** Typically associated with `mat-date-range-input`
+**Parent Requirements:** None - can be used independently
+
+## Integration Patterns
+
+### Basic Single Date Selection
+
+```typescript
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatNativeDateModule } from "@angular/material/core";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-basic-datepicker",
+  template: `
+    <mat-form-field>
+      <mat-label>Choose a date</mat-label>
+      <input matInput [matDatepicker]="picker" [formControl]="dateControl" />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  `,
+  imports: [
+    MatDatepickerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatNativeDateModule,
+    ReactiveFormsModule,
+  ],
+})
+export class BasicDatepickerComponent {
+  dateControl = new FormControl(new Date());
+}
+```
+
+### Advanced Single Date with Validation
+
+```typescript
+@Component({
+  selector: "app-validated-datepicker",
+  template: `
+    <mat-form-field>
+      <mat-label>Select Event Date</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        [formControl]="eventDateControl"
+        [min]="minDate"
+        [max]="maxDate"
+        [matDatepickerFilter]="dateFilter"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker">
+        <mat-icon matDatepickerToggleIcon>event</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker
+        #picker
+        startView="month"
+        touchUi="false"
+      ></mat-datepicker>
+      <mat-error *ngIf="eventDateControl.hasError('matDatepickerParse')">
+        Invalid date format
+      </mat-error>
+      <mat-error *ngIf="eventDateControl.hasError('matDatepickerMin')">
+        Date is too early
+      </mat-error>
+      <mat-error *ngIf="eventDateControl.hasError('matDatepickerMax')">
+        Date is too late
+      </mat-error>
+      <mat-error *ngIf="eventDateControl.hasError('matDatepickerFilter')">
+        Date is not available
+      </mat-error>
+    </mat-form-field>
+  `,
+  imports: [
+    MatDatepickerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatNativeDateModule,
+    ReactiveFormsModule,
+    MatIconModule,
+  ],
+})
+export class ValidatedDatepickerComponent {
+  minDate = new Date();
+  maxDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // One year from now
+
+  eventDateControl = new FormControl(null, [
+    // Custom validators can be added here
+  ]);
+
+  // Filter out weekends
+  dateFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+    const day = date.getDay();
+    return day !== 0 && day !== 6; // Sunday = 0, Saturday = 6
+  };
+}
+```
+
+### Date Range Selection
+
+```typescript
+@Component({
+  selector: "app-date-range",
+  template: `
+    <mat-form-field>
+      <mat-label>Enter a date range</mat-label>
+      <mat-date-range-input [rangePicker]="rangePicker" [formGroup]="rangeForm">
+        <input matStartDate formControlName="start" placeholder="Start date" />
+        <input matEndDate formControlName="end" placeholder="End date" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="rangePicker"
+      ></mat-datepicker-toggle>
+      <mat-date-range-picker #rangePicker></mat-date-range-picker>
+
+      <mat-error
+        *ngIf="rangeForm.controls['start'].hasError('matStartDateInvalid')"
+      >
+        Invalid start date
+      </mat-error>
+      <mat-error
+        *ngIf="rangeForm.controls['end'].hasError('matEndDateInvalid')"
+      >
+        Invalid end date
+      </mat-error>
+    </mat-form-field>
+
+    <div
+      *ngIf="rangeForm.valid && rangeForm.value.start && rangeForm.value.end"
+    >
+      <p>Selected range:</p>
+      <p>Start: {{ rangeForm.value.start | date }}</p>
+      <p>End: {{ rangeForm.value.end | date }}</p>
+      <p>
+        Days:
+        {{ getDaysDifference(rangeForm.value.start, rangeForm.value.end) }}
+      </p>
+    </div>
+  `,
+  imports: [
+    MatDatepickerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatNativeDateModule,
+    ReactiveFormsModule,
+  ],
+})
+export class DateRangeComponent {
+  rangeForm = this.formBuilder.group({
+    start: [null],
+    end: [null],
+  });
+
+  constructor(private formBuilder: FormBuilder) {}
+
+  getDaysDifference(start: Date, end: Date): number {
+    const timeDiff = end.getTime() - start.getTime();
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  }
+}
+```
+
+### Common Variations
+
+#### Touch UI for Mobile
+
+```html
+<mat-form-field>
+  <mat-label>Mobile-friendly Date</mat-label>
+  <input matInput [matDatepicker]="mobilePicker" />
+  <mat-datepicker-toggle matSuffix [for]="mobilePicker"></mat-datepicker-toggle>
+  <mat-datepicker #mobilePicker touchUi="true"></mat-datepicker>
+</mat-form-field>
+```
+
+#### Custom Date Classes
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Date with Custom Styling</mat-label>
+      <input matInput [matDatepicker]="styledPicker" />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="styledPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #styledPicker [dateClass]="dateClass"></mat-datepicker>
+    </mat-form-field>
+  `,
+  styles: [
+    `
+      .special-date {
+        background-color: #ffd54f;
+        border-radius: 50%;
+      }
+      .weekend-date {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class StyledDatepickerComponent {
+  dateClass = (date: Date): string => {
+    const day = date.getDay();
+
+    // Highlight weekends
+    if (day === 0 || day === 6) {
+      return "weekend-date";
+    }
+
+    // Highlight special dates (e.g., holidays)
+    if (this.isSpecialDate(date)) {
+      return "special-date";
+    }
+
+    return "";
+  };
+
+  private isSpecialDate(date: Date): boolean {
+    // Custom logic to determine special dates
+    return date.getDate() === 25 && date.getMonth() === 11; // Christmas
+  }
+}
+```
+
+#### Custom Header Component
+
+```typescript
+@Component({
+  selector: "app-custom-header",
+  template: `
+    <div class="custom-header">
+      <button mat-icon-button (click)="previousClicked()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="header-text">{{ periodLabel }}</span>
+      <button mat-icon-button (click)="nextClicked()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .custom-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5em;
+      }
+      .header-text {
+        font-weight: 500;
+      }
+    `,
+  ],
+})
+export class CustomHeaderComponent {
+  constructor(
+    @Inject(forwardRef(() => MatCalendar))
+    private calendar: MatCalendar<Date>,
+    private dateAdapter: DateAdapter<Date>,
+  ) {}
+
+  get periodLabel(): string {
+    return this.dateAdapter.format(this.calendar.activeDate, "MMMM YYYY");
+  }
+
+  previousClicked(): void {
+    this.calendar.previousClicked();
+  }
+
+  nextClicked(): void {
+    this.calendar.nextClicked();
+  }
+}
+
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Custom Header Date</mat-label>
+      <input matInput [matDatepicker]="customPicker" />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="customPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker
+        #customPicker
+        [calendarHeaderComponent]="customHeaderComponent"
+      ></mat-datepicker>
+    </mat-form-field>
+  `,
+})
+export class CustomHeaderDatepickerComponent {
+  customHeaderComponent = CustomHeaderComponent;
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Input → Datepicker**: Input fields communicate value changes to the datepicker through the directive
+2. **Datepicker → Calendar**: The datepicker manages the calendar display and date selection state
+3. **Calendar → Input**: Selected dates flow back to the input field through the selection model
+4. **Toggle → Datepicker**: Toggle buttons trigger the opening and closing of the datepicker popup
+
+### Context Sharing
+
+- **Selection Model**: Shared between datepicker and input for two-way data binding
+- **Validation Context**: Date constraints and filters are shared across the datepicker ecosystem
+- **Accessibility Context**: ARIA labels and relationships are managed across components
+- **Theme Context**: Color and styling themes are applied consistently across all components
+
+### Event Handling
+
+- **Selection Events**: Date selection in the calendar triggers value updates in the input
+- **Validation Events**: Input validation errors are reflected in the datepicker state
+- **Focus Events**: Focus management between input, toggle, and calendar components
+- **Keyboard Events**: Keyboard navigation within the calendar and between components
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always provide labels**: Use `mat-label` within `mat-form-field` for accessibility
+- **Include validation**: Implement proper min/max dates and custom date filters when appropriate
+- **Use appropriate input types**: Choose between single date, date range, or custom implementations based on user needs
+- **Consider mobile experience**: Use `touchUi` for mobile-friendly date selection
+- **Provide clear error messages**: Implement specific error messages for different validation scenarios
+
+### Accessibility
+
+- **ARIA relationships**: Components automatically provide proper ARIA labels and relationships
+- **Keyboard navigation**: Full keyboard support for calendar navigation and date selection
+- **Screen reader support**: Date selection and validation messages are announced to screen readers
+- **Focus management**: Focus is properly managed when opening/closing the datepicker
+- **High contrast support**: Components work well with high contrast themes
+
+### Performance
+
+- **Date adapter optimization**: Use appropriate date adapters for your locale and format needs
+- **Large date ranges**: Consider virtual scrolling for very large date ranges
+- **Form integration**: Use reactive forms for better performance with complex validation
+- **Bundle optimization**: Import only the required datepicker modules
+- **Change detection**: Use OnPush change detection strategy when possible
+
+## Common Patterns
+
+### Pattern 1: Form with Multiple Date Fields
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="eventForm">
+      <mat-form-field>
+        <mat-label>Event Start Date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="startPicker"
+          formControlName="startDate"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="startPicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Event End Date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="endPicker"
+          formControlName="endDate"
+          [min]="eventForm.value.startDate"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="endPicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Registration Deadline</mat-label>
+        <input
+          matInput
+          [matDatepicker]="deadlinePicker"
+          formControlName="deadline"
+          [max]="eventForm.value.startDate"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="deadlinePicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #deadlinePicker></mat-datepicker>
+      </mat-form-field>
+    </form>
+  `,
+})
+export class EventFormComponent {
+  eventForm = this.formBuilder.group({
+    startDate: [null, Validators.required],
+    endDate: [null, Validators.required],
+    deadline: [null, Validators.required],
+  });
+
+  constructor(private formBuilder: FormBuilder) {}
+}
+```
+
+### Pattern 2: Filtering and Date Constraints
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Business Day Selection</mat-label>
+      <input
+        matInput
+        [matDatepicker]="businessPicker"
+        [formControl]="businessDateControl"
+        [min]="minBusinessDate"
+        [max]="maxBusinessDate"
+        [matDatepickerFilter]="businessDayFilter"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="businessPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker
+        #businessPicker
+        [dateClass]="businessDateClass"
+      ></mat-datepicker>
+
+      <mat-error *ngIf="businessDateControl.hasError('matDatepickerFilter')">
+        Please select a business day (Monday-Friday)
+      </mat-error>
+    </mat-form-field>
+  `,
+  styles: [
+    `
+      .business-day {
+        background-color: #e8f5e8;
+      }
+      .weekend {
+        background-color: #ffebee;
+        color: #666;
+      }
+      .holiday {
+        background-color: #fff3e0;
+        text-decoration: line-through;
+      }
+    `,
+  ],
+})
+export class BusinessDayPickerComponent {
+  minBusinessDate = new Date();
+  maxBusinessDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
+
+  businessDateControl = new FormControl();
+
+  // List of holidays (simplified example)
+  holidays = [
+    new Date(2024, 11, 25), // Christmas
+    new Date(2024, 0, 1), // New Year's Day
+    // Add more holidays as needed
+  ];
+
+  businessDayFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+
+    const day = date.getDay();
+    const isWeekend = day === 0 || day === 6;
+    const isHoliday = this.holidays.some(
+      (holiday) => holiday.toDateString() === date.toDateString(),
+    );
+
+    return !isWeekend && !isHoliday;
+  };
+
+  businessDateClass = (date: Date): string => {
+    const day = date.getDay();
+    const isWeekend = day === 0 || day === 6;
+    const isHoliday = this.holidays.some(
+      (holiday) => holiday.toDateString() === date.toDateString(),
+    );
+
+    if (isHoliday) return "holiday";
+    if (isWeekend) return "weekend";
+    return "business-day";
+  };
+}
+```

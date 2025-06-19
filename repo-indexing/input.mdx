@@ -1,0 +1,1224 @@
+---
+title: Input Component
+---
+
+# Input Component
+
+## Overview
+
+### Purpose
+
+Use this component to generate text input functionality. The MatInput component provides Material Design styled text inputs, textareas, and native select elements that integrate seamlessly with Angular Material's form field system for consistent user input experiences.
+
+### When to Use
+
+- **Text Input Collection**: When you need to collect single-line text input from users (names, emails, search queries)
+- **Multiline Text Entry**: For textarea inputs when users need to provide longer text content (comments, descriptions, messages)
+- **Native Select Integration**: When using native HTML select elements that need Material Design styling
+- **Form Integration**: As the primary input component within Angular Material form fields for consistent styling
+- **Data Entry Forms**: In registration forms, contact forms, settings panels, or any data collection interface
+- **Search Interfaces**: For search bars, filter inputs, or autocomplete functionality
+- **User Profiles**: In profile editing forms, account settings, or personal information collection
+- **Content Management**: For content creation interfaces, blog post forms, or administrative panels
+
+### Architecture
+
+**No Coupling**: The MatInput component is a standalone directive that can be used independently. While it integrates well with Angular Material's form field system, it can function on its own and doesn't require specific parent components or hierarchical structures.
+
+## Components
+
+### MatInput {Standalone Input Component}
+
+A directive that applies Material Design styling and behavior to native HTML input, textarea, and select elements.
+
+**Purpose:** Transforms native form controls into Material Design inputs with consistent styling, validation integration, and accessibility support while maintaining all native HTML functionality.
+
+**Interface:**
+
+```typescript
+interface MatInputProps {
+  // Core Input Properties
+  value?: any; // The input value
+  placeholder?: string; // Placeholder text when input is empty
+  disabled?: boolean; // Whether the input is disabled
+  readonly?: boolean; // Whether the input is read-only
+  required?: boolean; // Whether the input is required for form validation
+
+  // Identification and Naming
+  id?: string; // Unique identifier for the input element
+  name?: string; // Name attribute for form submission
+
+  // Input Behavior
+  type?: string; // HTML input type (text, email, password, number, etc.)
+  disabledInteractive?: boolean; // Whether disabled inputs remain interactive
+
+  // Accessibility
+  userAriaDescribedBy?: string; // Space-separated list of element IDs for aria-describedby
+
+  // Validation and Error Handling
+  errorStateMatcher?: ErrorStateMatcher; // Custom error state matching logic
+  errorState?: boolean; // Whether the input is in an error state
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+
+@Component({
+  selector: "app-input-example",
+  template: `
+    <!-- Basic text input -->
+    <mat-form-field appearance="outline">
+      <mat-label>Username</mat-label>
+      <input matInput placeholder="Enter your username" />
+    </mat-form-field>
+
+    <!-- Email input with validation -->
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [formControl]="emailControl" />
+      <mat-error *ngIf="emailControl.hasError('email')">
+        Please enter a valid email address
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Password input -->
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input matInput type="password" />
+    </mat-form-field>
+
+    <!-- Textarea for longer text -->
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput rows="4" placeholder="Enter description"></textarea>
+    </mat-form-field>
+
+    <!-- Number input -->
+    <mat-form-field appearance="outline">
+      <mat-label>Age</mat-label>
+      <input matInput type="number" min="0" max="120" />
+    </mat-form-field>
+  `,
+  imports: [MatInputModule, MatFormFieldModule, ReactiveFormsModule],
+})
+export class InputExampleComponent {
+  emailControl = new FormControl("", [Validators.email]);
+}
+```
+
+## Integration Patterns
+
+### Basic Text Input
+
+```typescript
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+
+@Component({
+  selector: "app-basic-input",
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Full Name</mat-label>
+      <input
+        matInput
+        placeholder="Enter your full name"
+        [(ngModel)]="fullName"
+      />
+    </mat-form-field>
+  `,
+  imports: [MatInputModule, MatFormFieldModule, FormsModule],
+})
+export class BasicInputComponent {
+  fullName = "";
+}
+```
+
+### Advanced Form Input with Reactive Forms
+
+```typescript
+import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { MatButtonModule } from "@angular/material/button";
+
+@Component({
+  selector: "app-advanced-input",
+  template: `
+    <form [formGroup]="userForm" class="user-form">
+      <!-- Text input with validation -->
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input
+          matInput
+          formControlName="firstName"
+          placeholder="Enter your first name"
+        />
+        <mat-error *ngIf="userForm.get('firstName')?.hasError('required')">
+          First name is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('firstName')?.hasError('minlength')">
+          First name must be at least 2 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Email input with custom validation -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="user@example.com"
+        />
+        <mat-hint>We'll never share your email</mat-hint>
+        <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password input with visibility toggle -->
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          type="button"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePassword"
+        >
+          <mat-icon>{{
+            hidePassword ? "visibility" : "visibility_off"
+          }}</mat-icon>
+        </button>
+        <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+          Password is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+          Password must be at least 8 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Phone number with formatting -->
+      <mat-form-field appearance="outline">
+        <mat-label>Phone Number</mat-label>
+        <span matPrefix>+1 </span>
+        <input
+          matInput
+          type="tel"
+          formControlName="phone"
+          placeholder="(555) 123-4567"
+        />
+        <mat-icon matSuffix>phone</mat-icon>
+        <mat-error *ngIf="userForm.get('phone')?.hasError('required')">
+          Phone number is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('phone')?.hasError('pattern')">
+          Please enter a valid phone number
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Textarea for longer content -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Bio</mat-label>
+        <textarea
+          matInput
+          formControlName="bio"
+          rows="4"
+          placeholder="Tell us about yourself"
+          maxlength="500"
+        ></textarea>
+        <mat-hint align="end">{{ getBioLength() }}/500</mat-hint>
+        <mat-error *ngIf="userForm.get('bio')?.hasError('maxlength')">
+          Bio cannot exceed 500 characters
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Number input with validation -->
+      <mat-form-field appearance="outline">
+        <mat-label>Age</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="age"
+          min="13"
+          max="120"
+          placeholder="Enter your age"
+        />
+        <span matSuffix>years</span>
+        <mat-error *ngIf="userForm.get('age')?.hasError('required')">
+          Age is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('age')?.hasError('min')">
+          Must be at least 13 years old
+        </mat-error>
+        <mat-error *ngIf="userForm.get('age')?.hasError('max')">
+          Must be under 120 years old
+        </mat-error>
+      </mat-form-field>
+
+      <!-- URL input -->
+      <mat-form-field appearance="outline">
+        <mat-label>Website</mat-label>
+        <input
+          matInput
+          type="url"
+          formControlName="website"
+          placeholder="https://example.com"
+        />
+        <mat-icon matPrefix>link</mat-icon>
+        <mat-error *ngIf="userForm.get('website')?.hasError('pattern')">
+          Please enter a valid URL
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Date input -->
+      <mat-form-field appearance="outline">
+        <mat-label>Birth Date</mat-label>
+        <input matInput type="date" formControlName="birthDate" [max]="today" />
+        <mat-icon matSuffix>calendar_today</mat-icon>
+        <mat-error *ngIf="userForm.get('birthDate')?.hasError('required')">
+          Birth date is required
+        </mat-error>
+      </mat-form-field>
+    </form>
+  `,
+  styles: [
+    `
+      .user-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .full-width {
+        width: 100%;
+      }
+    `,
+  ],
+  imports: [
+    ReactiveFormsModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
+})
+export class AdvancedInputComponent {
+  hidePassword = true;
+  today = new Date().toISOString().split("T")[0];
+
+  userForm = this.fb.group({
+    firstName: [
+      "",
+      [Validators.required, Validators.minLength(2), Validators.maxLength(50)],
+    ],
+    email: ["", [Validators.required, Validators.email]],
+    password: [
+      "",
+      [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/),
+      ],
+    ],
+    phone: [
+      "",
+      [Validators.required, Validators.pattern(/^\(\d{3}\) \d{3}-\d{4}$/)],
+    ],
+    bio: ["", [Validators.maxLength(500)]],
+    age: ["", [Validators.required, Validators.min(13), Validators.max(120)]],
+    website: [
+      "",
+      [
+        Validators.pattern(
+          /^https?:\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?$/,
+        ),
+      ],
+    ],
+    birthDate: ["", [Validators.required]],
+  });
+
+  constructor(private fb: FormBuilder) {}
+
+  getBioLength(): number {
+    return this.userForm.get("bio")?.value?.length || 0;
+  }
+}
+```
+
+### Common Variations
+
+#### Search Input with Clear Functionality
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="searchQuery"
+        placeholder="Search products, articles, or users"
+        (input)="onSearchChange()"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        *ngIf="searchQuery"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
+      <mat-hint>{{ searchResults.length }} results found</mat-hint>
+    </mat-form-field>
+  `,
+})
+export class SearchInputComponent {
+  searchQuery = "";
+  searchResults: any[] = [];
+
+  onSearchChange(): void {
+    // Implement search logic
+    this.searchResults = this.performSearch(this.searchQuery);
+  }
+
+  clearSearch(): void {
+    this.searchQuery = "";
+    this.searchResults = [];
+  }
+
+  performSearch(query: string): any[] {
+    // Mock search implementation
+    return [];
+  }
+}
+```
+
+#### Currency Input with Formatting
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Price</mat-label>
+      <span matPrefix>$ </span>
+      <input
+        matInput
+        type="number"
+        [(ngModel)]="price"
+        placeholder="0.00"
+        step="0.01"
+        min="0"
+        (blur)="formatCurrency()"
+      />
+      <span matSuffix>USD</span>
+      <mat-hint>Enter amount in US dollars</mat-hint>
+    </mat-form-field>
+  `,
+})
+export class CurrencyInputComponent {
+  price: number | null = null;
+
+  formatCurrency(): void {
+    if (this.price !== null) {
+      this.price = Math.round(this.price * 100) / 100;
+    }
+  }
+}
+```
+
+#### File Path Input with Validation
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>File Path</mat-label>
+      <mat-icon matPrefix>folder</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="filePath"
+        placeholder="/path/to/file.txt"
+        [class.error]="!isValidPath"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="browseFiles()"
+        aria-label="Browse files"
+      >
+        <mat-icon>folder_open</mat-icon>
+      </button>
+      <mat-hint *ngIf="isValidPath">Valid file path</mat-hint>
+      <mat-error *ngIf="!isValidPath && filePath">
+        Invalid file path format
+      </mat-error>
+    </mat-form-field>
+  `,
+})
+export class FilePathInputComponent {
+  filePath = "";
+
+  get isValidPath(): boolean {
+    return !this.filePath || /^[\/\\]?[\w\-. \/\\]+$/.test(this.filePath);
+  }
+
+  browseFiles(): void {
+    // Implement file browser logic
+    console.log("Opening file browser");
+  }
+}
+```
+
+#### Readonly Input for Display
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>User ID</mat-label>
+      <input matInput readonly [value]="userId" placeholder="Auto-generated" />
+      <mat-icon matSuffix>content_copy</mat-icon>
+      <mat-hint>This ID is automatically generated</mat-hint>
+    </mat-form-field>
+  `,
+})
+export class ReadonlyInputComponent {
+  userId = "user_12345";
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always wrap with mat-form-field**: Use MatInput within `mat-form-field` for consistent Material Design styling and enhanced functionality
+- **Provide clear labels**: Always include descriptive `mat-label` components that clearly indicate the expected input
+- **Use appropriate input types**: Leverage HTML5 input types (email, tel, url, number) for better user experience and native validation
+- **Implement proper validation**: Use reactive forms with validators to provide immediate feedback on input validity
+- **Include helpful hints**: Use `mat-hint` to guide users on expected input format or requirements
+
+### Accessibility
+
+- **Label association**: MatInput automatically associates labels with form controls for screen reader compatibility
+- **ARIA support**: The directive provides proper ARIA attributes for enhanced accessibility
+- **Error announcements**: Validation errors are properly announced to screen readers when they appear
+- **Keyboard navigation**: All input functionality is accessible via keyboard navigation
+- **Focus management**: Proper focus indicators and focus management for users navigating with keyboard
+
+### Performance
+
+- **Efficient validation**: Use reactive forms for optimal validation performance and minimal re-renders
+- **Debounced search**: For search inputs, implement debouncing to reduce API calls and improve performance
+- **Lazy validation**: Consider implementing lazy validation for expensive validation operations
+- **Change detection**: Use OnPush change detection strategy where appropriate for better performance
+- **Input formatters**: Implement input formatters for real-time value formatting without affecting performance
+
+## Common Patterns
+
+### Pattern 1: User Registration Form
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="registrationForm" class="registration-form">
+      <h2>Create Your Account</h2>
+
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <h3>Personal Information</h3>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>First Name</mat-label>
+            <input
+              matInput
+              formControlName="firstName"
+              placeholder="Enter your first name"
+            />
+            <mat-error
+              *ngIf="registrationForm.get('firstName')?.hasError('required')"
+            >
+              First name is required
+            </mat-error>
+            <mat-error
+              *ngIf="registrationForm.get('firstName')?.hasError('minlength')"
+            >
+              Must be at least 2 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Last Name</mat-label>
+            <input
+              matInput
+              formControlName="lastName"
+              placeholder="Enter your last name"
+            />
+            <mat-error
+              *ngIf="registrationForm.get('lastName')?.hasError('required')"
+            >
+              Last name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="your@email.com"
+          />
+          <mat-hint>We'll use this for account verification</mat-hint>
+          <mat-error
+            *ngIf="registrationForm.get('email')?.hasError('required')"
+          >
+            Email address is required
+          </mat-error>
+          <mat-error *ngIf="registrationForm.get('email')?.hasError('email')">
+            Please enter a valid email address
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone Number</mat-label>
+          <span matPrefix>+1 </span>
+          <input
+            matInput
+            type="tel"
+            formControlName="phone"
+            placeholder="(555) 123-4567"
+          />
+          <mat-icon matSuffix>phone</mat-icon>
+          <mat-hint>For account security and notifications</mat-hint>
+          <mat-error
+            *ngIf="registrationForm.get('phone')?.hasError('required')"
+          >
+            Phone number is required
+          </mat-error>
+          <mat-error *ngIf="registrationForm.get('phone')?.hasError('pattern')">
+            Please enter a valid US phone number
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Security Section -->
+      <div class="form-section">
+        <h3>Account Security</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input
+            matInput
+            formControlName="username"
+            placeholder="Choose a unique username"
+          />
+          <mat-hint>This will be your public display name</mat-hint>
+          <mat-error
+            *ngIf="registrationForm.get('username')?.hasError('required')"
+          >
+            Username is required
+          </mat-error>
+          <mat-error
+            *ngIf="registrationForm.get('username')?.hasError('minlength')"
+          >
+            Username must be at least 3 characters
+          </mat-error>
+          <mat-error
+            *ngIf="registrationForm.get('username')?.hasError('pattern')"
+          >
+            Username can only contain letters, numbers, and underscores
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Create a strong password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword = !hidePassword"
+            type="button"
+          >
+            <mat-icon>{{
+              hidePassword ? "visibility" : "visibility_off"
+            }}</mat-icon>
+          </button>
+          <mat-hint
+            >Must contain uppercase, lowercase, number, and special
+            character</mat-hint
+          >
+          <mat-error
+            *ngIf="registrationForm.get('password')?.hasError('required')"
+          >
+            Password is required
+          </mat-error>
+          <mat-error
+            *ngIf="registrationForm.get('password')?.hasError('minlength')"
+          >
+            Password must be at least 8 characters
+          </mat-error>
+          <mat-error
+            *ngIf="registrationForm.get('password')?.hasError('pattern')"
+          >
+            Password must meet complexity requirements
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+          />
+          <mat-error
+            *ngIf="
+              registrationForm.get('confirmPassword')?.hasError('required')
+            "
+          >
+            Password confirmation is required
+          </mat-error>
+          <mat-error
+            *ngIf="
+              registrationForm.get('confirmPassword')?.hasError('mismatch')
+            "
+          >
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Additional Information Section -->
+      <div class="form-section">
+        <h3>Additional Information</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company (Optional)</mat-label>
+          <mat-icon matPrefix>business</mat-icon>
+          <input
+            matInput
+            formControlName="company"
+            placeholder="Your company name"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Job Title (Optional)</mat-label>
+          <input
+            matInput
+            formControlName="jobTitle"
+            placeholder="Your role or position"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>How did you hear about us?</mat-label>
+          <textarea
+            matInput
+            formControlName="referral"
+            rows="3"
+            placeholder="Tell us how you discovered our service"
+            maxlength="500"
+          ></textarea>
+          <mat-hint align="end">{{ getReferralLength() }}/500</mat-hint>
+        </mat-form-field>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .registration-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .form-section {
+        margin-bottom: 32px;
+      }
+      .form-section h3 {
+        margin-bottom: 16px;
+        color: #333;
+      }
+      .form-row {
+        display: flex;
+        gap: 16px;
+      }
+      .form-row mat-form-field {
+        flex: 1;
+      }
+      .full-width {
+        width: 100%;
+      }
+      mat-form-field {
+        margin-bottom: 16px;
+      }
+    `,
+  ],
+})
+export class UserRegistrationComponent {
+  hidePassword = true;
+
+  registrationForm = new FormGroup(
+    {
+      firstName: new FormControl("", [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50),
+      ]),
+      lastName: new FormControl("", [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50),
+      ]),
+      email: new FormControl("", [Validators.required, Validators.email]),
+      phone: new FormControl("", [
+        Validators.required,
+        Validators.pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
+      ]),
+      username: new FormControl("", [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(20),
+        Validators.pattern(/^[a-zA-Z0-9_]+$/),
+      ]),
+      password: new FormControl("", [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+        ),
+      ]),
+      confirmPassword: new FormControl("", [Validators.required]),
+      company: new FormControl(""),
+      jobTitle: new FormControl(""),
+      referral: new FormControl("", [Validators.maxLength(500)]),
+    },
+    { validators: this.passwordMatchValidator },
+  );
+
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get("password");
+    const confirmPassword = control.get("confirmPassword");
+
+    if (password?.value !== confirmPassword?.value) {
+      confirmPassword?.setErrors({ mismatch: true });
+      return { mismatch: true };
+    }
+
+    return null;
+  }
+
+  getReferralLength(): number {
+    return this.registrationForm.get("referral")?.value?.length || 0;
+  }
+}
+```
+
+### Pattern 2: Advanced Search and Filter Form
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="searchForm" class="search-form">
+      <div class="search-header">
+        <h2>Advanced Search</h2>
+        <button type="button" mat-button (click)="resetForm()">
+          Reset All
+        </button>
+      </div>
+
+      <!-- Main Search -->
+      <div class="search-main">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search Query</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            formControlName="query"
+            placeholder="Enter keywords, phrases, or terms"
+            (input)="onSearchChange()"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            *ngIf="searchForm.get('query')?.value"
+            (click)="clearSearch()"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+          <mat-hint>{{ searchResults.length }} results found</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <h3>Filters</h3>
+
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Date From</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="dateFrom"
+              [max]="searchForm.get('dateTo')?.value || today"
+            />
+            <mat-icon matSuffix>calendar_today</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date To</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="dateTo"
+              [min]="searchForm.get('dateFrom')?.value"
+              [max]="today"
+            />
+            <mat-icon matSuffix>calendar_today</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Minimum Price</mat-label>
+            <span matPrefix>$ </span>
+            <input
+              matInput
+              type="number"
+              formControlName="minPrice"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+            <mat-error *ngIf="searchForm.get('minPrice')?.hasError('min')">
+              Price must be positive
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Maximum Price</mat-label>
+            <span matPrefix>$ </span>
+            <input
+              matInput
+              type="number"
+              formControlName="maxPrice"
+              placeholder="1000.00"
+              [min]="searchForm.get('minPrice')?.value || 0"
+              step="0.01"
+            />
+            <mat-error *ngIf="searchForm.hasError('priceRange')">
+              Maximum price must be greater than minimum price
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Location</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <input
+              matInput
+              formControlName="location"
+              placeholder="City, State, or ZIP code"
+              [matAutocomplete]="locationAuto"
+            />
+            <mat-autocomplete #locationAuto="matAutocomplete">
+              <mat-option
+                *ngFor="let location of filteredLocations | async"
+                [value]="location"
+              >
+                {{ location }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Radius</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="radius"
+              placeholder="25"
+              min="1"
+              max="500"
+            />
+            <span matSuffix>miles</span>
+            <mat-hint>Search radius from location</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="tags-field">
+            <mat-label>Tags</mat-label>
+            <mat-icon matPrefix>label</mat-icon>
+            <input
+              matInput
+              formControlName="tags"
+              placeholder="Enter comma-separated tags"
+              (keydown.enter)="addTag($event)"
+            />
+            <mat-hint>Press Enter to add tags, separate with commas</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Advanced Text Filters -->
+        <div class="advanced-text-section">
+          <h4>Advanced Text Search</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Must Contain (AND)</mat-label>
+            <input
+              matInput
+              formControlName="mustContain"
+              placeholder="All of these words must appear"
+            />
+            <mat-hint>All specified words must be present</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Should Contain (OR)</mat-label>
+            <input
+              matInput
+              formControlName="shouldContain"
+              placeholder="Any of these words can appear"
+            />
+            <mat-hint>At least one of these words should be present</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Must Not Contain</mat-label>
+            <input
+              matInput
+              formControlName="mustNotContain"
+              placeholder="None of these words should appear"
+            />
+            <mat-hint>Results will exclude these terms</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Exact Phrase</mat-label>
+            <input
+              matInput
+              formControlName="exactPhrase"
+              placeholder="Find this exact phrase"
+            />
+            <mat-hint>Search for this exact phrase in quotes</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Numeric Range Filters -->
+        <div class="numeric-filters-section">
+          <h4>Numeric Filters</h4>
+
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Minimum Rating</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="minRating"
+                min="1"
+                max="5"
+                step="0.1"
+                placeholder="1.0"
+              />
+              <mat-icon matSuffix>star</mat-icon>
+              <mat-hint>1.0 to 5.0 stars</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Minimum Reviews</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="minReviews"
+                min="0"
+                placeholder="0"
+              />
+              <span matSuffix>reviews</span>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Actions -->
+      <div class="search-actions">
+        <button
+          type="submit"
+          mat-raised-button
+          color="primary"
+          (click)="performSearch()"
+          [disabled]="searchForm.invalid"
+        >
+          Search ({{ searchResults.length }})
+        </button>
+        <button type="button" mat-button (click)="saveSearch()">
+          Save Search
+        </button>
+        <button type="button" mat-button (click)="loadSearch()">
+          Load Saved Search
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .search-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .search-main {
+        margin-bottom: 32px;
+      }
+      .search-field {
+        width: 100%;
+      }
+      .filters-section h3,
+      .advanced-text-section h4,
+      .numeric-filters-section h4 {
+        margin: 24px 0 16px 0;
+        color: #333;
+      }
+      .filter-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .filter-row mat-form-field {
+        flex: 1;
+      }
+      .tags-field {
+        flex: 2;
+      }
+      .full-width {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+      .search-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid #e0e0e0;
+      }
+      .advanced-text-section,
+      .numeric-filters-section {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+    `,
+  ],
+})
+export class AdvancedSearchComponent {
+  today = new Date().toISOString().split("T")[0];
+  searchResults: any[] = [];
+  filteredLocations = new Observable<string[]>();
+
+  searchForm = new FormGroup(
+    {
+      query: new FormControl(""),
+      dateFrom: new FormControl(""),
+      dateTo: new FormControl(""),
+      minPrice: new FormControl("", [Validators.min(0)]),
+      maxPrice: new FormControl(""),
+      location: new FormControl(""),
+      radius: new FormControl("25", [Validators.min(1), Validators.max(500)]),
+      tags: new FormControl(""),
+      mustContain: new FormControl(""),
+      shouldContain: new FormControl(""),
+      mustNotContain: new FormControl(""),
+      exactPhrase: new FormControl(""),
+      minRating: new FormControl("", [Validators.min(1), Validators.max(5)]),
+      minReviews: new FormControl("", [Validators.min(0)]),
+    },
+    { validators: this.priceRangeValidator },
+  );
+
+  priceRangeValidator(control: AbstractControl): ValidationErrors | null {
+    const minPrice = control.get("minPrice")?.value;
+    const maxPrice = control.get("maxPrice")?.value;
+
+    if (minPrice && maxPrice && parseFloat(minPrice) >= parseFloat(maxPrice)) {
+      return { priceRange: true };
+    }
+
+    return null;
+  }
+
+  onSearchChange(): void {
+    // Implement real-time search
+    this.performSearch();
+  }
+
+  clearSearch(): void {
+    this.searchForm.get("query")?.setValue("");
+    this.performSearch();
+  }
+
+  addTag(event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const currentTags = this.searchForm.get("tags")?.value || "";
+    // Add tag logic here
+    event.preventDefault();
+  }
+
+  resetForm(): void {
+    this.searchForm.reset();
+    this.searchResults = [];
+  }
+
+  performSearch(): void {
+    // Implement search logic based on form values
+    console.log("Performing search with filters:", this.searchForm.value);
+  }
+
+  saveSearch(): void {
+    // Save current search parameters
+    console.log("Saving search parameters");
+  }
+
+  loadSearch(): void {
+    // Load saved search parameters
+    console.log("Loading saved search");
+  }
+}
+```

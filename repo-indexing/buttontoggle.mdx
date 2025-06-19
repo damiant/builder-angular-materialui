@@ -1,0 +1,546 @@
+---
+title: ButtonToggle Components
+---
+
+# ButtonToggle Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate button toggle functionality with optional group structure. The ButtonToggle component group provides Material Design styled toggle button functionality that enables users to select one or multiple options from a set of choices. It follows Material Design 3 specifications for selection controls, offering consistent visual styling, proper accessibility features, and flexible selection modes.
+
+### When to Use
+
+- **Single or Multiple Selection**: When users need to select one option from a group (single mode) or multiple options (multiple mode) from a set of choices
+- **Settings and Preferences**: For configuration panels where users can toggle between different settings or options
+- **Filter Controls**: When creating filter interfaces where users can enable/disable multiple filter options
+- **View Mode Selection**: For switching between different display modes (grid/list, chart types, layout options)
+- **Tool Selection**: In editor interfaces where users need to select formatting tools or drawing tools
+- **Toggle States**: When you need buttons that maintain their pressed/unpressed state visually
+- **Form Controls**: As an alternative to checkboxes or radio buttons when you need button-style interaction
+- **Accessibility-First Selection**: When you need properly structured, keyboard-navigable, and screen-reader friendly toggle controls
+- **Grouped Actions**: When related toggle actions should be visually grouped together
+
+### Architecture
+
+**Moderate Coupling**: The ButtonToggle component group follows an optional hierarchical structure where components can enhance each other but also work independently. The architecture provides:
+
+- **Optional parent-child relationships**: `mat-button-toggle-group` serves as an optional container that enhances functionality
+- **Enhanced behavior**: The group provides coordinated selection management and consistent styling
+- **Independent usage**: Individual `mat-button-toggle` components can work standalone without the group
+- **Flexible composition**: Components can be combined for enhanced functionality or used separately for simpler use cases
+
+### Component Interdependencies
+
+The ButtonToggle component group offers flexible composition patterns:
+
+- **`mat-button-toggle-group`** → Optional container that provides coordinated selection management and styling
+- **`mat-button-toggle`** → Individual toggle button that can work standalone or within a group
+- **Selection Coordination** → When grouped, the container manages single/multiple selection modes
+- **Styling Consistency** → Group ensures consistent appearance and spacing across all child toggles
+- **Form Integration** → Group provides enhanced form control interface and validation support
+
+## Components
+
+### MatButtonToggleGroup {Optional Container Component}
+
+The optional container component that coordinates selection management, styling, and form integration for multiple button toggles.
+
+**Purpose:** Serves as an enhancing wrapper that coordinates selection behavior, provides consistent styling, manages form integration, and enables single or multiple selection modes for contained toggle buttons.
+
+**Interface:**
+
+```typescript
+interface MatButtonToggleGroupProps {
+  // Selection Management
+  value?: any | any[]; // Currently selected value(s)
+  multiple?: boolean; // Enable multiple selection mode
+  selected?: MatButtonToggle | MatButtonToggle[]; // Selected toggle reference(s)
+
+  // Form Integration
+  name?: string; // Name attribute for form submission
+  disabled?: boolean; // Whether the entire group is disabled
+
+  // Layout and Styling
+  appearance?: "legacy" | "standard"; // Visual appearance style
+  vertical?: boolean; // Arrange toggles vertically
+
+  // Events
+  change?: (event: MatButtonToggleChange) => void; // Selection change event
+}
+
+interface MatButtonToggleChange {
+  source: MatButtonToggle; // The toggle that changed
+  value: any; // The value of the changed toggle
+}
+```
+
+**Dependencies:** Requires Angular Material's button-toggle module
+**Provides:** Coordinated selection management, consistent styling, and enhanced form integration for child toggles
+
+**Usage Example:**
+
+```typescript
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-button-toggle-group-example",
+  template: `
+    <mat-button-toggle-group
+      [(value)]="selectedValue"
+      (change)="onSelectionChange($event)"
+    >
+      <mat-button-toggle value="option1">Option 1</mat-button-toggle>
+      <mat-button-toggle value="option2">Option 2</mat-button-toggle>
+      <mat-button-toggle value="option3">Option 3</mat-button-toggle>
+    </mat-button-toggle-group>
+  `,
+})
+export class ButtonToggleGroupExample {
+  selectedValue = "option1";
+
+  onSelectionChange(event: MatButtonToggleChange) {
+    console.log("Selected:", event.value);
+  }
+}
+```
+
+### MatButtonToggle {Toggle Button Component}
+
+Individual toggle button component that can work standalone or within a button toggle group, providing toggle functionality with Material Design styling.
+
+**Purpose:** Provides individual toggle button functionality with proper state management, accessibility features, and visual feedback for selection state.
+
+**Interface:**
+
+```typescript
+interface MatButtonToggleProps {
+  // State Management
+  value?: any; // Value associated with this toggle
+  checked?: boolean; // Whether the toggle is selected
+  disabled?: boolean; // Whether the toggle is disabled
+
+  // Styling and Appearance
+  appearance?: "legacy" | "standard"; // Visual appearance style
+  disableRipple?: boolean; // Disable ripple animation effect
+
+  // Accessibility
+  id?: string; // Unique identifier for the toggle
+  ariaLabel?: string; // Accessible label for screen readers
+  ariaLabelledby?: string; // References element that labels this toggle
+
+  // Form Integration
+  name?: string; // Name attribute for form submission
+
+  // Events
+  change?: (event: MatButtonToggleChange) => void; // Toggle state change event
+}
+```
+
+**Context Dependencies:** Optional - can use context from parent `mat-button-toggle-group` for enhanced behavior
+**Parent Requirements:** None - can be used independently or within `mat-button-toggle-group`
+
+**Usage Example:**
+
+```typescript
+// Standalone usage
+@Component({
+  template: `
+    <mat-button-toggle
+      [(checked)]="isToggled"
+      (change)="onToggleChange($event)"
+    >
+      Toggle Me
+    </mat-button-toggle>
+  `,
+})
+export class StandaloneToggleExample {
+  isToggled = false;
+
+  onToggleChange(event: MatButtonToggleChange) {
+    this.isToggled = event.source.checked;
+  }
+}
+
+// Usage within group (enhanced functionality)
+@Component({
+  template: `
+    <mat-button-toggle-group>
+      <mat-button-toggle value="bold">
+        <mat-icon>format_bold</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle value="italic">
+        <mat-icon>format_italic</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  `,
+})
+export class GroupedToggleExample {}
+```
+
+## Integration Patterns
+
+### Basic Single Selection
+
+```typescript
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { Component } from "@angular/core";
+
+// Single selection mode (default)
+@Component({
+  selector: "app-single-selection",
+  template: `
+    <mat-button-toggle-group [(value)]="selectedAlignment">
+      <mat-button-toggle value="left">Left</mat-button-toggle>
+      <mat-button-toggle value="center">Center</mat-button-toggle>
+      <mat-button-toggle value="right">Right</mat-button-toggle>
+    </mat-button-toggle-group>
+  `,
+})
+export class SingleSelectionExample {
+  selectedAlignment = "left";
+}
+```
+
+### Multiple Selection Mode
+
+```typescript
+// Multiple selection mode
+@Component({
+  selector: "app-multiple-selection",
+  template: `
+    <mat-button-toggle-group multiple [(value)]="selectedFontStyles">
+      <mat-button-toggle value="bold">Bold</mat-button-toggle>
+      <mat-button-toggle value="italic">Italic</mat-button-toggle>
+      <mat-button-toggle value="underline">Underline</mat-button-toggle>
+    </mat-button-toggle-group>
+  `,
+})
+export class MultipleSelectionExample {
+  selectedFontStyles: string[] = [];
+}
+```
+
+### Vertical Layout
+
+```typescript
+// Vertical arrangement
+@Component({
+  selector: "app-vertical-layout",
+  template: `
+    <mat-button-toggle-group vertical [(value)]="selectedSize">
+      <mat-button-toggle value="small">Small</mat-button-toggle>
+      <mat-button-toggle value="medium">Medium</mat-button-toggle>
+      <mat-button-toggle value="large">Large</mat-button-toggle>
+    </mat-button-toggle-group>
+  `,
+})
+export class VerticalLayoutExample {
+  selectedSize = "medium";
+}
+```
+
+### Form Integration
+
+```typescript
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-form-integration",
+  template: `
+    <form>
+      <mat-button-toggle-group [formControl]="viewModeControl">
+        <mat-button-toggle value="grid">
+          <mat-icon>grid_view</mat-icon>
+          Grid
+        </mat-button-toggle>
+        <mat-button-toggle value="list">
+          <mat-icon>view_list</mat-icon>
+          List
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </form>
+  `,
+})
+export class FormIntegrationExample {
+  viewModeControl = new FormControl("grid");
+}
+```
+
+### Standalone Toggles
+
+```typescript
+// Individual toggles without group container
+@Component({
+  selector: "app-standalone-toggles",
+  template: `
+    <div class="toolbar">
+      <mat-button-toggle [(checked)]="isBold" (change)="onBoldToggle()">
+        <mat-icon>format_bold</mat-icon>
+      </mat-button-toggle>
+
+      <mat-button-toggle [(checked)]="isItalic" (change)="onItalicToggle()">
+        <mat-icon>format_italic</mat-icon>
+      </mat-button-toggle>
+    </div>
+  `,
+})
+export class StandaloneTogglesExample {
+  isBold = false;
+  isItalic = false;
+
+  onBoldToggle() {
+    // Apply bold formatting
+  }
+
+  onItalicToggle() {
+    // Apply italic formatting
+  }
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+**Grouped Toggles:**
+
+- User interactions flow from individual toggles to the group container
+- Group manages selection state and emits unified change events
+- Group coordinates mutual exclusivity (single mode) or multi-selection (multiple mode)
+- Form integration occurs at the group level for coordinated selection
+
+**Standalone Toggles:**
+
+- Each toggle manages its own checked state independently
+- Direct event handling on individual toggle components
+- No coordinated selection behavior between separate toggles
+
+### Context Sharing
+
+**Within Groups:**
+
+- `MatButtonToggleGroup` provides shared context for styling consistency
+- Group coordinates selection behavior across all child toggles
+- Shared appearance, disabled state, and form integration properties
+- Common event handling and value management
+
+**Standalone Context:**
+
+- Individual toggles maintain independent state
+- No shared context or coordinated behavior
+- Direct property binding and event handling per toggle
+
+### Event Handling
+
+**Group-Level Events:**
+
+- `change` event emitted from group when any child toggle changes
+- Event provides reference to the changed toggle and the group's current value
+- Single event handler manages all selection changes within the group
+
+**Individual Toggle Events:**
+
+- `change` event emitted from individual toggles for direct handling
+- Useful for standalone toggles or when specific toggle behavior is needed
+- Event provides reference to the specific toggle that changed
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use groups for related options**: When toggles represent related choices (view modes, formatting options), group them for consistent behavior and styling
+- **Consider selection mode**: Use single selection for mutually exclusive options (alignment) and multiple selection for independent options (formatting styles)
+- **Provide clear visual feedback**: Ensure selected state is clearly visible and distinguishable from unselected state
+- **Use appropriate icons**: Include meaningful icons alongside text labels for better usability and visual recognition
+- **Maintain consistent spacing**: Use the group container to ensure proper spacing and alignment between related toggles
+
+### Accessibility
+
+- **ARIA relationships**: Groups automatically manage ARIA attributes for proper screen reader support
+- **Keyboard navigation**: Arrow keys navigate between toggles within a group, Space/Enter toggles selection
+- **Focus management**: Proper focus indicators and logical tab order within grouped toggles
+- **Screen reader support**: Toggles announce their current state (selected/unselected) and group membership
+- **Label associations**: Use `ariaLabel` or `ariaLabelledby` for toggles without visible text labels
+
+### Performance
+
+- **Efficient change detection**: Groups minimize change detection cycles by managing selection state centrally
+- **Ripple effects**: Consider disabling ripple effects (`disableRipple`) for performance in large lists of toggles
+- **Template optimization**: Use `trackBy` functions when dynamically generating large numbers of toggles
+
+## Common Patterns
+
+### Pattern 1: Text Formatting Toolbar
+
+```typescript
+@Component({
+  selector: "app-text-formatting",
+  template: `
+    <div class="formatting-toolbar">
+      <!-- Text alignment -->
+      <mat-button-toggle-group [(value)]="alignment">
+        <mat-button-toggle value="left">
+          <mat-icon>format_align_left</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="center">
+          <mat-icon>format_align_center</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="right">
+          <mat-icon>format_align_right</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <!-- Text styles (multiple selection) -->
+      <mat-button-toggle-group multiple [(value)]="textStyles">
+        <mat-button-toggle value="bold">
+          <mat-icon>format_bold</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="italic">
+          <mat-icon>format_italic</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="underline">
+          <mat-icon>format_underlined</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  `,
+  styles: [
+    `
+      .formatting-toolbar {
+        display: flex;
+        gap: 16px;
+        padding: 8px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+    `,
+  ],
+})
+export class TextFormattingExample {
+  alignment = "left";
+  textStyles: string[] = [];
+
+  // Apply formatting based on selections
+  get currentFormat() {
+    return {
+      textAlign: this.alignment,
+      fontWeight: this.textStyles.includes("bold") ? "bold" : "normal",
+      fontStyle: this.textStyles.includes("italic") ? "italic" : "normal",
+      textDecoration: this.textStyles.includes("underline")
+        ? "underline"
+        : "none",
+    };
+  }
+}
+```
+
+### Pattern 2: View Mode Switcher
+
+```typescript
+@Component({
+  selector: "app-view-switcher",
+  template: `
+    <div class="view-controls">
+      <mat-button-toggle-group [(value)]="viewMode" (change)="updateLayout()">
+        <mat-button-toggle value="grid">
+          <mat-icon>grid_view</mat-icon>
+          Grid
+        </mat-button-toggle>
+        <mat-button-toggle value="list">
+          <mat-icon>view_list</mat-icon>
+          List
+        </mat-button-toggle>
+        <mat-button-toggle value="card">
+          <mat-icon>view_module</mat-icon>
+          Cards
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <!-- Dynamic content based on view mode -->
+    <div [ngSwitch]="viewMode" class="content-area">
+      <div *ngSwitchCase="'grid'" class="grid-view">
+        <!-- Grid layout content -->
+      </div>
+      <div *ngSwitchCase="'list'" class="list-view">
+        <!-- List layout content -->
+      </div>
+      <div *ngSwitchCase="'card'" class="card-view">
+        <!-- Card layout content -->
+      </div>
+    </div>
+  `,
+})
+export class ViewSwitcherExample {
+  viewMode = "grid";
+
+  updateLayout() {
+    // Trigger layout updates, save preferences, etc.
+    console.log("View mode changed to:", this.viewMode);
+  }
+}
+```
+
+### Pattern 3: Filter Toggle Controls
+
+```typescript
+@Component({
+  selector: "app-filter-controls",
+  template: `
+    <div class="filter-section">
+      <h3>Filter Options</h3>
+
+      <!-- Standalone filter toggles -->
+      <div class="filter-row">
+        <mat-button-toggle
+          [(checked)]="showCompleted"
+          (change)="applyFilters()"
+        >
+          Show Completed
+        </mat-button-toggle>
+
+        <mat-button-toggle [(checked)]="showPending" (change)="applyFilters()">
+          Show Pending
+        </mat-button-toggle>
+
+        <mat-button-toggle [(checked)]="showOverdue" (change)="applyFilters()">
+          Show Overdue
+        </mat-button-toggle>
+      </div>
+
+      <!-- Priority filter group -->
+      <div class="filter-row">
+        <label>Priority:</label>
+        <mat-button-toggle-group [(value)]="priorityFilter">
+          <mat-button-toggle value="all">All</mat-button-toggle>
+          <mat-button-toggle value="high">High</mat-button-toggle>
+          <mat-button-toggle value="medium">Medium</mat-button-toggle>
+          <mat-button-toggle value="low">Low</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+  `,
+})
+export class FilterControlsExample {
+  // Independent filter toggles
+  showCompleted = true;
+  showPending = true;
+  showOverdue = false;
+
+  // Grouped filter selection
+  priorityFilter = "all";
+
+  applyFilters() {
+    // Apply the current filter configuration
+    const filters = {
+      completed: this.showCompleted,
+      pending: this.showPending,
+      overdue: this.showOverdue,
+      priority: this.priorityFilter,
+    };
+    console.log("Applying filters:", filters);
+  }
+}
+```

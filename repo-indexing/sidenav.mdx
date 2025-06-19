@@ -1,0 +1,544 @@
+---
+
+# Sidenav Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate sidenav functionality with optional hierarchical structure for creating responsive navigation drawers that can be positioned on either side of the content area.
+
+### When to Use
+
+- **Mobile-first navigation** - When you need collapsible navigation that works well on mobile devices
+- **Dashboard layouts** - For admin panels, dashboards, or complex applications requiring persistent navigation
+- **Content-rich applications** - When you have extensive navigation options that need to be hidden/shown on demand
+- **Responsive design** - Applications that need different navigation patterns across device sizes
+- **Modal navigation** - When navigation should overlay content or push content aside
+
+### Architecture
+
+**Strong Coupling**: The Sidenav components form a tightly integrated system with required hierarchical relationships and shared context management.
+
+### Component Interdependencies
+
+The Sidenav system requires a specific compositional hierarchy:
+
+- **MatSidenavContainer** serves as the root container providing layout management and backdrop coordination
+- **MatSidenav** components are positioned within the container and communicate state changes
+- **MatSidenavContent** provides the main content area that responds to sidenav state changes
+- Shared context includes drawer state, positioning, and responsive behavior management
+
+## Components
+
+### MatSidenavContainer {Primary Component}
+
+**Purpose:** Root container that manages layout, backdrop, and coordinates multiple sidenav instances
+
+**Interface:**
+
+```typescript
+interface MatSidenavContainer {
+  autosize: boolean; // Whether to automatically resize when drawer size changes
+  hasBackdrop: boolean; // Whether to show backdrop when sidenav is open
+  backdropClick: EventEmitter<void>; // Event when backdrop is clicked
+  start: MatSidenav | null; // The drawer positioned at start (left in LTR)
+  end: MatSidenav | null; // The drawer positioned at end (right in LTR)
+  scrollable: CdkScrollable; // Reference to scrollable content instance
+  open(): void; // Opens all drawers
+  close(): void; // Closes all drawers
+  updateContentMargins(): void; // Recalculates content margins
+}
+```
+
+**Dependencies:** Requires one or more MatSidenav and optionally MatSidenavContent child components
+**Provides:** Layout management, backdrop coordination, content margin calculations, and drawer state synchronization
+
+**Usage Example:**
+
+```typescript
+import { MatSidenavModule } from "@angular/material/sidenav";
+
+@Component({
+  selector: "app-example",
+  template: `
+    <mat-sidenav-container
+      hasBackdrop="true"
+      (backdropClick)="onBackdropClick()"
+    >
+      <mat-sidenav #sidenav mode="side" opened="false">
+        <!-- Navigation content -->
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <!-- Main content -->
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  imports: [MatSidenavModule],
+})
+export class ExampleComponent {
+  onBackdropClick() {
+    console.log("Backdrop clicked");
+  }
+}
+```
+
+### MatSidenav {Dependent Component}
+
+**Purpose:** Navigation drawer that can be positioned on either side of the content with various display modes
+
+**Interface:**
+
+```typescript
+interface MatSidenav {
+  position: "start" | "end"; // Which side the drawer is attached to
+  mode: "over" | "push" | "side"; // How the drawer behaves when opened
+  disableClose: boolean; // Whether drawer can be closed with escape/backdrop
+  autoFocus: AutoFocusTarget | string | boolean; // Focus management when opened
+  opened: boolean; // Whether the drawer is currently open
+  fixedInViewport: boolean; // Whether sidenav is fixed in viewport
+  fixedTopGap: number; // Gap from top when fixed
+  fixedBottomGap: number; // Gap from bottom when fixed
+
+  // Events
+  openedChange: EventEmitter<boolean>; // When open state changes
+  openedStart: Observable<void>; // When opening animation starts
+  closedStart: Observable<void>; // When closing animation starts
+  onPositionChanged: EventEmitter<void>; // When position changes
+
+  // Methods
+  open(openedVia?: FocusOrigin): Promise<MatDrawerToggleResult>;
+  close(): Promise<MatDrawerToggleResult>;
+  toggle(
+    isOpen?: boolean,
+    openedVia?: FocusOrigin,
+  ): Promise<MatDrawerToggleResult>;
+}
+```
+
+**Context Dependencies:** Requires MatSidenavContainer parent for proper positioning and backdrop management
+**Parent Requirements:** Must be used within MatSidenavContainer for layout coordination
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatSidenavContainer
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <mat-sidenav
+        #drawer
+        mode="over"
+        position="start"
+        [opened]="isOpen"
+        (openedChange)="onDrawerToggle($event)"
+        disableClose="false"
+        autoFocus="first-tabbable"
+      >
+        <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard">
+            <mat-icon>dashboard</mat-icon>
+            <span>Dashboard</span>
+          </a>
+          <a mat-list-item routerLink="/profile">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+          </a>
+        </mat-nav-list>
+      </mat-sidenav>
+    </mat-sidenav-container>
+  `,
+})
+export class NavigationComponent {
+  isOpen = false;
+
+  onDrawerToggle(opened: boolean) {
+    this.isOpen = opened;
+  }
+}
+```
+
+### MatSidenavContent {Dependent Component}
+
+**Purpose:** Main content area that automatically adjusts margins and layout based on sidenav state
+
+**Interface:**
+
+```typescript
+interface MatSidenavContent extends CdkScrollable {
+  // Inherits scrollable functionality from CdkScrollable
+  // Automatically manages content positioning based on drawer states
+  // No additional public properties beyond scrollable behavior
+}
+```
+
+**Context Dependencies:** Requires MatSidenavContainer parent for content margin management
+**Parent Requirements:** Must be used within MatSidenavContainer for proper content adjustment
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatSidenavContainer
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <mat-sidenav mode="side" opened="true">
+        <!-- Navigation -->
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <div class="content-padding">
+          <h1>Main Content</h1>
+          <p>This content automatically adjusts when sidenav opens/closes</p>
+          <!-- Scrollable content -->
+        </div>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .content-padding {
+        padding: 20px;
+      }
+    `,
+  ],
+})
+export class ContentComponent {}
+```
+
+## Integration Patterns
+
+### Basic Usage
+
+```typescript
+import { MatSidenavModule } from "@angular/material/sidenav";
+import { MatListModule } from "@angular/material/list";
+import { MatIconModule } from "@angular/material/icon";
+
+// Minimal required structure
+@Component({
+  selector: "app-basic-sidenav",
+  template: `
+    <mat-sidenav-container class="sidenav-container">
+      <mat-sidenav mode="over">
+        <p>Sidenav content</p>
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <p>Main content</p>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .sidenav-container {
+        height: 100vh;
+      }
+    `,
+  ],
+  imports: [MatSidenavModule],
+})
+export class BasicSidenavComponent {}
+```
+
+### Advanced Usage
+
+```typescript
+// Complex usage with all features
+@Component({
+  selector: "app-advanced-sidenav",
+  template: `
+    <mat-sidenav-container
+      class="sidenav-container"
+      [hasBackdrop]="hasBackdrop"
+      (backdropClick)="onBackdropClick()"
+    >
+      <!-- Start sidenav -->
+      <mat-sidenav
+        #startDrawer
+        mode="side"
+        position="start"
+        [opened]="startOpened"
+        [disableClose]="disableClose"
+        (openedChange)="onStartDrawerToggle($event)"
+        fixedInViewport="true"
+        fixedTopGap="64"
+      >
+        <mat-nav-list>
+          <h3 matSubheader>Navigation</h3>
+          <a mat-list-item routerLink="/home">
+            <mat-icon>home</mat-icon>
+            <span>Home</span>
+          </a>
+          <a mat-list-item routerLink="/settings">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </a>
+        </mat-nav-list>
+      </mat-sidenav>
+
+      <!-- End sidenav -->
+      <mat-sidenav
+        #endDrawer
+        mode="over"
+        position="end"
+        [opened]="endOpened"
+        (openedChange)="onEndDrawerToggle($event)"
+      >
+        <div class="drawer-content">
+          <h3>Quick Actions</h3>
+          <button mat-button (click)="performAction()">Action 1</button>
+        </div>
+      </mat-sidenav>
+
+      <!-- Main content -->
+      <mat-sidenav-content>
+        <mat-toolbar color="primary">
+          <button mat-icon-button (click)="startDrawer.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span>My App</span>
+          <span class="spacer"></span>
+          <button mat-icon-button (click)="endDrawer.toggle()">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </mat-toolbar>
+
+        <div class="content">
+          <router-outlet></router-outlet>
+        </div>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .sidenav-container {
+        height: 100vh;
+      }
+      .spacer {
+        flex: 1 1 auto;
+      }
+      .content {
+        padding: 20px;
+      }
+      .drawer-content {
+        padding: 20px;
+        width: 250px;
+      }
+    `,
+  ],
+  imports: [
+    MatSidenavModule,
+    MatToolbarModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
+})
+export class AdvancedSidenavComponent {
+  startOpened = true;
+  endOpened = false;
+  hasBackdrop = false;
+  disableClose = false;
+
+  onStartDrawerToggle(opened: boolean) {
+    this.startOpened = opened;
+  }
+
+  onEndDrawerToggle(opened: boolean) {
+    this.endOpened = opened;
+  }
+
+  onBackdropClick() {
+    console.log("Backdrop clicked");
+  }
+
+  performAction() {
+    console.log("Action performed");
+  }
+}
+```
+
+### Common Variations
+
+#### Responsive Sidenav
+
+```typescript
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <mat-sidenav
+        #drawer
+        [mode]="mobileQuery.matches ? 'over' : 'side'"
+        [opened]="!mobileQuery.matches"
+        [fixedInViewport]="mobileQuery.matches"
+      >
+        <!-- Navigation content -->
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <!-- Main content with responsive toolbar -->
+        <mat-toolbar>
+          <button
+            mat-icon-button
+            *ngIf="mobileQuery.matches"
+            (click)="drawer.toggle()"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span>Responsive App</span>
+        </mat-toolbar>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+})
+export class ResponsiveSidenavComponent {
+  mobileQuery: MediaQueryList;
+
+  constructor(changeDetectorRef: ChangeDetectorRef, media: MediaMatcher) {
+    this.mobileQuery = media.matchMedia("(max-width: 600px)");
+    this.mobileQuery.addListener(() => changeDetectorRef.detectChanges());
+  }
+}
+```
+
+#### Persistent Navigation with Router Integration
+
+```typescript
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <mat-sidenav mode="side" opened="true">
+        <mat-nav-list>
+          <a
+            mat-list-item
+            routerLink="/dashboard"
+            routerLinkActive="active-link"
+          >
+            Dashboard
+          </a>
+          <a mat-list-item routerLink="/users" routerLinkActive="active-link">
+            Users
+          </a>
+        </mat-nav-list>
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <router-outlet></router-outlet>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .active-link {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    `,
+  ],
+})
+export class PersistentNavComponent {}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Container to Sidenav**: Container provides positioning context and backdrop management
+2. **Sidenav to Container**: Sidenav communicates state changes (open/close, position changes)
+3. **Container to Content**: Container calculates and applies margin adjustments to content
+4. **Bidirectional**: All components participate in responsive layout calculations
+
+### Context Sharing
+
+- **Layout Context**: Shared through container for positioning and margin calculations
+- **Backdrop State**: Managed by container, influenced by sidenav mode and open state
+- **Responsive Behavior**: Container coordinates responsive behavior across all child components
+
+### Event Handling
+
+- **Backdrop clicks** bubble up from container to application logic
+- **Drawer toggle events** propagate from sidenav to parent components
+- **Position changes** are broadcast to container for layout recalculation
+
+## Best Practices
+
+### Usage Guidelines
+
+- Always wrap sidenavs in MatSidenavContainer for proper functionality
+- Use `mode="side"` for persistent navigation on larger screens
+- Use `mode="over"` for mobile-friendly overlay navigation
+- Set appropriate `fixedInViewport` and gap properties for apps with fixed headers
+- Implement responsive behavior using Angular CDK's BreakpointObserver
+
+### Accessibility
+
+- Sidenav automatically manages focus trapping when opened
+- Use appropriate ARIA labels for navigation links within sidenavs
+- Ensure keyboard navigation works properly with `autoFocus` configuration
+- Provide alternative navigation methods for users who cannot use the sidenav
+
+### Performance
+
+- Use `trackBy` functions when rendering dynamic navigation lists
+- Consider lazy loading content within sidenavs for better initial load performance
+- Set `autosize` to false unless you specifically need automatic resizing
+- Use OnPush change detection strategy when possible for better performance
+
+## Common Patterns
+
+### Pattern 1: Mobile-First Responsive Navigation
+
+```typescript
+// Responsive navigation that adapts to screen size
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <mat-sidenav
+        #drawer
+        [mode]="isHandset ? 'over' : 'side'"
+        [opened]="!isHandset"
+        [fixedInViewport]="isHandset"
+      >
+        <!-- Navigation items -->
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <mat-toolbar>
+          <button mat-icon-button *ngIf="isHandset" (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span>App Title</span>
+        </mat-toolbar>
+        <!-- Content -->
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+})
+export class ResponsiveNavPattern {
+  isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
+
+  constructor(private breakpointObserver: BreakpointObserver) {}
+}
+```
+
+### Pattern 2: Dual Sidenav Layout
+
+```typescript
+// Layout with navigation on left and auxiliary content on right
+@Component({
+  template: `
+    <mat-sidenav-container>
+      <!-- Main navigation -->
+      <mat-sidenav position="start" mode="side" opened="true">
+        <mat-nav-list><!-- Navigation items --></mat-nav-list>
+      </mat-sidenav>
+
+      <!-- Auxiliary panel -->
+      <mat-sidenav position="end" mode="over">
+        <div class="aux-content"><!-- Quick actions, help, etc --></div>
+      </mat-sidenav>
+
+      <!-- Main content -->
+      <mat-sidenav-content>
+        <!-- Application content -->
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+})
+export class DualSidenavPattern {}
+```

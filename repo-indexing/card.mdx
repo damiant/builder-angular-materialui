@@ -1,0 +1,1149 @@
+---
+title: Card Components
+---
+
+# Card Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle card layout with optional hierarchical content structure. The Card component group provides a comprehensive solution for creating Material Design cards with flexible content organization, supporting various layouts from simple content containers to complex multi-section cards with headers, images, actions, and footers.
+
+### When to Use
+
+- **Content Containers**: When you need to group related information in a visually distinct, elevated container following Material Design principles
+- **Dashboard Widgets**: For creating dashboard cards that display metrics, charts, or summary information with clear visual boundaries
+- **Product Displays**: When showcasing products, articles, or media items with images, titles, descriptions, and action buttons
+- **Information Panels**: For organizing complex information into digestible sections with headers, content areas, and action controls
+- **Profile Cards**: When displaying user profiles, team member information, or contact details in a structured format
+- **Settings Panels**: For grouping related settings or configuration options within distinct card containers
+- **Content Lists**: When creating lists of items that require more visual structure than simple list items
+- **Media Galleries**: For displaying collections of images, videos, or documents with accompanying metadata and actions
+
+### Architecture
+
+**Moderate Coupling**: The Card component group follows an optional hierarchical structure where components work together to enhance functionality but can be used independently. The architecture provides:
+
+- **Optional parent-child relationships**: `mat-card` serves as the primary container with optional specialized child components
+- **Flexible composition**: Child components enhance the card's functionality but are not strictly required
+- **Content organization**: Components work together to create structured layouts while maintaining individual utility
+
+### Component Interdependencies
+
+The Card component group provides flexible composition patterns:
+
+- **`mat-card`** → Primary container that provides Material Design styling and elevation
+- **`mat-card-header`** → Optional header section for titles, subtitles, and avatars (child of `mat-card`)
+- **`mat-card-title`** → Title component (can be used in header or content areas)
+- **`mat-card-subtitle`** → Subtitle component (typically used with title in header)
+- **`mat-card-content`** → Main content area for primary card information (child of `mat-card`)
+- **`mat-card-actions`** → Action buttons section typically placed at bottom (child of `mat-card`)
+- **`mat-card-footer`** → Footer section for additional information (child of `mat-card`)
+- **Image Components** → Various sized image containers that can be placed anywhere in the card
+
+## Components
+
+### MatCard {Primary Container Component}
+
+The foundational component that provides Material Design card styling and serves as the container for all card content.
+
+**Purpose:** Creates a Material Design card container with elevation, rounded corners, and consistent spacing that serves as the foundation for organizing card content.
+
+**Interface:**
+
+```typescript
+interface MatCardProps {
+  appearance?: "raised" | "outlined"; // Visual appearance style (default: "raised")
+  // Content projection - all card content provided through content projection
+}
+```
+
+**Dependencies:** Requires Angular Material's card module
+**Provides:** Material Design card styling, elevation, and layout foundation for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatCardModule } from "@angular/material/card";
+
+@Component({
+  selector: "app-basic-card",
+  template: `
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Card Title</mat-card-title>
+        <mat-card-subtitle>Card Subtitle</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>This is the main content of the card.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button>ACTION 1</button>
+        <button mat-button>ACTION 2</button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  imports: [MatCardModule],
+})
+export class BasicCardComponent {}
+```
+
+### MatCardHeader {Header Section Component}
+
+Component for creating the header section of a card, typically containing titles, subtitles, and avatars.
+
+**Purpose:** Provides a structured header area that automatically handles spacing and alignment for titles, subtitles, and avatar images.
+
+**Interface:**
+
+```typescript
+interface MatCardHeaderProps {
+  // Content projection component - no direct props
+  // Header content provided through content projection
+  // Automatically layouts title, subtitle, and avatar components
+}
+```
+
+**Context Dependencies:** Works best within `mat-card` container
+**Parent Requirements:** Typically used as child of `mat-card`
+**Provides:** Structured layout for header elements with proper Material Design spacing
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <mat-card-header>
+    <div mat-card-avatar class="example-header-image"></div>
+    <mat-card-title>John Doe</mat-card-title>
+    <mat-card-subtitle>Software Engineer</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Card content goes here...</p>
+  </mat-card-content>
+</mat-card>
+```
+
+### MatCardTitle {Title Component}
+
+Component for displaying the primary title of the card with Material Design typography.
+
+**Purpose:** Provides the main title text with appropriate Material Design typography scaling and spacing.
+
+**Interface:**
+
+```typescript
+interface MatCardTitleProps {
+  // Content projection component - no direct props
+  // Title text provided through content projection
+  // Applies Material Design typography styles
+}
+```
+
+**Context Dependencies:** Can be used within `mat-card-header` or directly in `mat-card`
+**Parent Requirements:** Works with any card container
+**Provides:** Proper typography styling and spacing for card titles
+
+**Usage Example:**
+
+```html
+<!-- In header -->
+<mat-card-header>
+  <mat-card-title>Product Name</mat-card-title>
+  <mat-card-subtitle>Category</mat-card-subtitle>
+</mat-card-header>
+
+<!-- In content area -->
+<mat-card-content>
+  <mat-card-title>Section Title</mat-card-title>
+  <p>Section content...</p>
+</mat-card-content>
+```
+
+### MatCardSubtitle {Subtitle Component}
+
+Component for displaying secondary title information with appropriate Material Design styling.
+
+**Purpose:** Provides subtitle text that complements the main title with proper hierarchy and visual distinction.
+
+**Interface:**
+
+```typescript
+interface MatCardSubtitleProps {
+  // Content projection component - no direct props
+  // Subtitle text provided through content projection
+  // Applies Material Design subtitle typography
+}
+```
+
+**Context Dependencies:** Typically used with `mat-card-title` within `mat-card-header`
+**Parent Requirements:** Works best within card containers
+**Provides:** Subtitle typography with proper visual hierarchy
+
+**Usage Example:**
+
+```html
+<mat-card-header>
+  <mat-card-title>Annual Report 2024</mat-card-title>
+  <mat-card-subtitle>Financial Performance Summary</mat-card-subtitle>
+</mat-card-header>
+```
+
+### MatCardContent {Content Area Component}
+
+Component for the main content area of the card with appropriate padding and typography.
+
+**Purpose:** Provides the primary content container with proper Material Design spacing and typography base for card body content.
+
+**Interface:**
+
+```typescript
+interface MatCardContentProps {
+  // Content projection component - no direct props
+  // Content provided through content projection
+  // Applies consistent padding and typography base
+}
+```
+
+**Context Dependencies:** Best used within `mat-card` container
+**Parent Requirements:** Typically child of `mat-card`
+**Provides:** Consistent content area styling with proper padding and typography foundation
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Article Title</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>This is the main content of the article...</p>
+    <ul>
+      <li>Key point 1</li>
+      <li>Key point 2</li>
+      <li>Key point 3</li>
+    </ul>
+  </mat-card-content>
+</mat-card>
+```
+
+### MatCardActions {Actions Section Component}
+
+Component for displaying action buttons and interactive elements, typically at the bottom of the card.
+
+**Purpose:** Provides a dedicated area for action buttons with proper spacing and alignment following Material Design action button patterns.
+
+**Interface:**
+
+```typescript
+interface MatCardActionsProps {
+  align?: "start" | "end"; // Alignment of action buttons (default: start)
+  // Content projection for action buttons and interactive elements
+}
+```
+
+**Context Dependencies:** Best used within `mat-card` container
+**Parent Requirements:** Typically child of `mat-card`
+**Provides:** Structured action area with proper button spacing and alignment
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <mat-card-content>
+    <p>Card content here...</p>
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <button mat-button>CANCEL</button>
+    <button mat-raised-button color="primary">SAVE</button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Left-aligned actions -->
+<mat-card-actions align="start">
+  <button mat-icon-button>
+    <mat-icon>favorite</mat-icon>
+  </button>
+  <button mat-icon-button>
+    <mat-icon>share</mat-icon>
+  </button>
+</mat-card-actions>
+```
+
+### MatCardFooter {Footer Section Component}
+
+Component for displaying footer information at the bottom of the card.
+
+**Purpose:** Provides a footer area for additional information, metadata, or secondary content with appropriate styling.
+
+**Interface:**
+
+```typescript
+interface MatCardFooterProps {
+  // Content projection component - no direct props
+  // Footer content provided through content projection
+  // Applies footer-specific styling and spacing
+}
+```
+
+**Context Dependencies:** Used within `mat-card` container
+**Parent Requirements:** Child of `mat-card`
+**Provides:** Footer styling with proper spacing and visual separation
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <mat-card-content>
+    <p>Main content...</p>
+  </mat-card-content>
+  <mat-card-footer>
+    <p>Last updated: March 15, 2024</p>
+  </mat-card-footer>
+</mat-card>
+```
+
+### MatCardTitleGroup {Title Group Component}
+
+Component for grouping title and subtitle elements within the card header for better layout control.
+
+**Purpose:** Provides structured grouping of title and subtitle elements with consistent spacing and alignment.
+
+**Interface:**
+
+```typescript
+interface MatCardTitleGroupProps {
+  // Content projection component - no direct props
+  // Groups mat-card-title and mat-card-subtitle elements
+  // Provides structured layout for title elements
+}
+```
+
+**Context Dependencies:** Used within `mat-card-header`
+**Parent Requirements:** Child of `mat-card-header`
+**Provides:** Structured title group layout with proper spacing
+
+**Usage Example:**
+
+```html
+<mat-card-header>
+  <div mat-card-avatar class="user-avatar"></div>
+  <mat-card-title-group>
+    <mat-card-title>User Name</mat-card-title>
+    <mat-card-subtitle>Professional Title</mat-card-subtitle>
+  </mat-card-title-group>
+</mat-card-header>
+```
+
+### MatCardImage {Full-Width Image Component}
+
+Component for displaying full-width images within the card, typically at the top.
+
+**Purpose:** Provides a container for full-width images that integrate seamlessly with card layout and maintain proper aspect ratios.
+
+**Interface:**
+
+```typescript
+interface MatCardImageProps {
+  // Applied as directive to img elements
+  // Automatically handles full-width image styling within cards
+  // Maintains proper aspect ratios and responsive behavior
+}
+```
+
+**Context Dependencies:** Used within `mat-card` container
+**Parent Requirements:** Applied to img elements within `mat-card`
+**Provides:** Full-width image styling with proper card integration
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <img mat-card-image src="assets/product-image.jpg" alt="Product Image" />
+  <mat-card-header>
+    <mat-card-title>Product Name</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Product description...</p>
+  </mat-card-content>
+</mat-card>
+```
+
+### MatCardSmImage, MatCardMdImage, MatCardLgImage, MatCardXlImage {Sized Image Components}
+
+Components for displaying images of specific sizes within the card layout.
+
+**Purpose:** Provides image containers with predefined sizes for consistent image display across different card contexts.
+
+**Interface:**
+
+```typescript
+interface MatCardSizedImageProps {
+  // Applied as directives to img elements
+  // mat-card-sm-image: Small image size
+  // mat-card-md-image: Medium image size
+  // mat-card-lg-image: Large image size
+  // mat-card-xl-image: Extra large image size
+}
+```
+
+**Context Dependencies:** Used within `mat-card` container
+**Parent Requirements:** Applied to img elements within `mat-card`
+**Provides:** Consistent image sizing with responsive behavior
+
+**Usage Example:**
+
+```html
+<mat-card>
+  <mat-card-header>
+    <img mat-card-sm-image src="assets/thumbnail.jpg" alt="Thumbnail" />
+    <mat-card-title>Article Title</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <img mat-card-md-image src="assets/content-image.jpg" alt="Content" />
+    <p>Article content...</p>
+  </mat-card-content>
+</mat-card>
+```
+
+### MatCardAvatar {Avatar Image Component}
+
+Component for displaying avatar images within the card header with proper circular styling.
+
+**Purpose:** Provides circular avatar images typically used in card headers for user profiles or entity representations.
+
+**Interface:**
+
+```typescript
+interface MatCardAvatarProps {
+  // Applied as directive to img elements or containers
+  // Automatically applies circular styling and proper sizing
+  // Integrates with card header layout
+}
+```
+
+**Context Dependencies:** Typically used within `mat-card-header`
+**Parent Requirements:** Best used within card header areas
+**Provides:** Circular avatar styling with proper header integration
+
+**Usage Example:**
+
+```html
+<mat-card-header>
+  <div mat-card-avatar class="user-avatar-bg"></div>
+  <mat-card-title>John Smith</mat-card-title>
+  <mat-card-subtitle>Project Manager</mat-card-subtitle>
+</mat-card-header>
+
+<!-- With image -->
+<mat-card-header>
+  <img mat-card-avatar src="assets/user-photo.jpg" alt="User Photo" />
+  <mat-card-title>Jane Doe</mat-card-title>
+  <mat-card-subtitle>Designer</mat-card-subtitle>
+</mat-card-header>
+```
+
+## Integration Patterns
+
+### Basic Content Card
+
+```typescript
+import { MatCardModule } from "@angular/material/card";
+import { MatButtonModule } from "@angular/material/button";
+
+@Component({
+  selector: "app-basic-content-card",
+  template: `
+    <mat-card>
+      <mat-card-content>
+        <mat-card-title>Simple Card</mat-card-title>
+        <p>
+          This is a basic card with just content. Perfect for simple information
+          display or basic content containers.
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button>LEARN MORE</button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  imports: [MatCardModule, MatButtonModule],
+})
+export class BasicContentCardComponent {}
+```
+
+### Advanced Product Card
+
+```typescript
+import { MatCardModule } from "@angular/material/card";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatChipsModule } from "@angular/material/chips";
+
+@Component({
+  selector: "app-product-card",
+  template: `
+    <mat-card class="product-card" appearance="outlined">
+      <img mat-card-image [src]="product.imageUrl" [alt]="product.name" />
+
+      <mat-card-header>
+        <mat-card-title>{{ product.name }}</mat-card-title>
+        <mat-card-subtitle>{{ product.category }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="price-section">
+          <span class="current-price">\${{ product.price }}</span>
+          <span class="original-price" *ngIf="product.originalPrice">
+            \${{ product.originalPrice }}
+          </span>
+        </div>
+
+        <p class="description">{{ product.description }}</p>
+
+        <div class="features">
+          <mat-chip-set>
+            <mat-chip *ngFor="let feature of product.features">
+              {{ feature }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <div class="rating">
+          <mat-icon *ngFor="let star of getStars(product.rating)">
+            {{ star }}
+          </mat-icon>
+          <span class="rating-text"
+            >{{ product.rating }}/5 ({{ product.reviews }} reviews)</span
+          >
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-icon-button (click)="toggleFavorite()">
+          <mat-icon [color]="isFavorite ? 'warn' : 'default'">
+            {{ isFavorite ? "favorite" : "favorite_border" }}
+          </mat-icon>
+        </button>
+        <button mat-icon-button (click)="share()">
+          <mat-icon>share</mat-icon>
+        </button>
+        <button mat-raised-button color="primary" (click)="addToCart()">
+          ADD TO CART
+        </button>
+      </mat-card-actions>
+
+      <mat-card-footer class="product-footer">
+        <div class="stock-info">
+          <span class="stock-status" [class.in-stock]="product.inStock">
+            {{ product.inStock ? "In Stock" : "Out of Stock" }}
+          </span>
+          <span class="shipping-info">Free shipping on orders over $50</span>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  `,
+  styles: [
+    `
+      .product-card {
+        max-width: 350px;
+        margin: 16px;
+      }
+
+      .price-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .current-price {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2e7d32;
+      }
+
+      .original-price {
+        font-size: 16px;
+        text-decoration: line-through;
+        color: #757575;
+      }
+
+      .description {
+        color: #616161;
+        line-height: 1.4;
+        margin-bottom: 16px;
+      }
+
+      .features {
+        margin-bottom: 16px;
+      }
+
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .rating mat-icon {
+        font-size: 16px;
+        height: 16px;
+        width: 16px;
+        color: #ffc107;
+      }
+
+      .rating-text {
+        font-size: 14px;
+        color: #757575;
+        margin-left: 8px;
+      }
+
+      .product-footer {
+        background: #f5f5f5;
+        padding: 12px 16px;
+      }
+
+      .stock-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+      }
+
+      .stock-status {
+        font-weight: 500;
+        color: #d32f2f;
+      }
+
+      .stock-status.in-stock {
+        color: #2e7d32;
+      }
+
+      .shipping-info {
+        color: #757575;
+      }
+    `,
+  ],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatChipsModule],
+})
+export class ProductCardComponent {
+  @Input() product: any;
+
+  isFavorite = false;
+
+  getStars(rating: number): string[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push("star");
+    }
+
+    if (hasHalfStar) {
+      stars.push("star_half");
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push("star_border");
+    }
+
+    return stars;
+  }
+
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+  }
+
+  share(): void {
+    // Implement share functionality
+    console.log("Sharing product:", this.product.name);
+  }
+
+  addToCart(): void {
+    // Implement add to cart functionality
+    console.log("Adding to cart:", this.product.name);
+  }
+}
+```
+
+### Common Variations
+
+#### User Profile Card
+
+```html
+<mat-card class="profile-card">
+  <mat-card-header>
+    <img mat-card-avatar src="assets/user-avatar.jpg" alt="User Avatar" />
+    <mat-card-title>Sarah Johnson</mat-card-title>
+    <mat-card-subtitle>Senior Product Designer</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="contact-info">
+      <div class="info-item">
+        <mat-icon>email</mat-icon>
+        <span>sarah.johnson@example.com</span>
+      </div>
+      <div class="info-item">
+        <mat-icon>phone</mat-icon>
+        <span>+1 (555) 123-4567</span>
+      </div>
+      <div class="info-item">
+        <mat-icon>location_on</mat-icon>
+        <span>San Francisco, CA</span>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-button>MESSAGE</button>
+    <button mat-button>CONNECT</button>
+  </mat-card-actions>
+</mat-card>
+```
+
+#### Dashboard Widget Card
+
+```html
+<mat-card class="dashboard-widget">
+  <mat-card-header>
+    <mat-card-title>Monthly Sales</mat-card-title>
+    <mat-card-subtitle>{{ currentMonth }}</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="metric-display">
+      <div class="primary-metric">
+        <span class="value">$124,567</span>
+        <span class="change positive">+12.5%</span>
+      </div>
+      <div class="secondary-metrics">
+        <div class="metric">
+          <span class="label">Target</span>
+          <span class="value">$120,000</span>
+        </div>
+        <div class="metric">
+          <span class="label">Last Month</span>
+          <span class="value">$110,234</span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-button>VIEW DETAILS</button>
+  </mat-card-actions>
+</mat-card>
+```
+
+#### Settings Panel Card
+
+```html
+<mat-card class="settings-panel">
+  <mat-card-header>
+    <mat-card-title>Notification Settings</mat-card-title>
+    <mat-card-subtitle>Manage your notification preferences</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="setting-group">
+      <mat-checkbox [(ngModel)]="emailNotifications">
+        Email Notifications
+      </mat-checkbox>
+      <p class="setting-description">Receive updates and alerts via email</p>
+    </div>
+
+    <div class="setting-group">
+      <mat-checkbox [(ngModel)]="pushNotifications">
+        Push Notifications
+      </mat-checkbox>
+      <p class="setting-description">
+        Get real-time notifications on your device
+      </p>
+    </div>
+
+    <div class="setting-group">
+      <mat-checkbox [(ngModel)]="smsNotifications">
+        SMS Notifications
+      </mat-checkbox>
+      <p class="setting-description">
+        Receive important alerts via text message
+      </p>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-button>RESET</button>
+    <button mat-raised-button color="primary">SAVE</button>
+  </mat-card-actions>
+</mat-card>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Card Container → Child Components**: The `MatCard` provides styling context and layout foundation for all child components
+2. **Header → Title/Subtitle**: Header component coordinates the layout and spacing of title, subtitle, and avatar elements
+3. **Actions → Buttons**: Actions section manages the layout and alignment of action buttons and interactive elements
+4. **Image Components → Layout**: Image components integrate with card layout to provide responsive image display
+
+### Context Sharing
+
+- **Styling Context**: `MatCard` provides Material Design theme context and appearance settings to all child components
+- **Layout Context**: Card sections (header, content, actions, footer) coordinate spacing and visual hierarchy
+- **Responsive Context**: Card components work together to provide responsive behavior across different screen sizes
+- **Theme Integration**: All components inherit theme colors and typography from the Material Design theme system
+
+### Event Handling
+
+- **Action Events**: Button clicks and interactive elements in actions section handle their own events
+- **Image Events**: Image components can handle loading, error, and interaction events
+- **Content Events**: Interactive content within card content areas manages its own event handling
+- **Card Events**: The card container can handle overall card interactions like hover states or click events
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use appropriate card appearance**: Choose between 'raised' (default) and 'outlined' appearance based on your design system and context
+- **Organize content logically**: Structure content using header, content, and actions sections for consistent user experience
+- **Limit action buttons**: Keep action buttons to a reasonable number (typically 2-3) to avoid overwhelming users
+- **Maintain consistent spacing**: Use card components consistently to maintain proper Material Design spacing and hierarchy
+- **Consider mobile responsiveness**: Ensure cards work well on different screen sizes and consider stacking behavior
+
+### Accessibility
+
+- **Semantic structure**: Cards provide proper semantic structure with appropriate heading hierarchy
+- **Focus management**: Interactive elements within cards support proper keyboard navigation
+- **Image alt text**: Always provide meaningful alt text for images used in cards
+- **Action button labels**: Ensure action buttons have clear, descriptive labels for screen readers
+- **Color contrast**: Maintain sufficient color contrast for text and interactive elements within cards
+
+### Performance
+
+- **Image optimization**: Optimize images used in cards for appropriate sizes and formats
+- **Content loading**: Consider lazy loading for card content in large lists or grids
+- **Action handling**: Implement efficient event handling for card actions to avoid performance issues
+- **Layout optimization**: Use CSS flexbox and grid efficiently for card layouts
+- **Memory management**: Properly handle component lifecycle for cards in dynamic lists
+
+## Common Patterns
+
+### Pattern 1: E-commerce Product Grid
+
+```typescript
+@Component({
+  template: `
+    <div class="product-grid">
+      <mat-card
+        *ngFor="let product of products"
+        class="product-card"
+        appearance="outlined"
+      >
+        <img mat-card-image [src]="product.imageUrl" [alt]="product.name" />
+
+        <mat-card-content>
+          <mat-card-title>{{ product.name }}</mat-card-title>
+          <mat-card-subtitle>{{ product.brand }}</mat-card-subtitle>
+
+          <div class="price-rating">
+            <span class="price">\${{ product.price }}</span>
+            <div class="rating">
+              <mat-icon *ngFor="let star of getStarArray(product.rating)">
+                {{ star }}
+              </mat-icon>
+              <span>({{ product.reviewCount }})</span>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-icon-button (click)="toggleWishlist(product)">
+            <mat-icon [color]="isInWishlist(product) ? 'warn' : 'default'">
+              {{ isInWishlist(product) ? "favorite" : "favorite_border" }}
+            </mat-icon>
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="addToCart(product)"
+            [disabled]="!product.inStock"
+          >
+            {{ product.inStock ? "ADD TO CART" : "OUT OF STOCK" }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .product-card {
+        max-width: 320px;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .product-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .price-rating {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2e7d32;
+      }
+
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        font-size: 12px;
+        color: #757575;
+      }
+
+      .rating mat-icon {
+        font-size: 14px;
+        height: 14px;
+        width: 14px;
+        color: #ffc107;
+      }
+    `,
+  ],
+})
+export class ProductGridComponent {
+  @Input() products: Product[] = [];
+
+  wishlist: Set<string> = new Set();
+
+  getStarArray(rating: number): string[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push("star");
+    }
+
+    if (hasHalfStar) {
+      stars.push("star_half");
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push("star_border");
+    }
+
+    return stars;
+  }
+
+  toggleWishlist(product: Product): void {
+    if (this.wishlist.has(product.id)) {
+      this.wishlist.delete(product.id);
+    } else {
+      this.wishlist.add(product.id);
+    }
+  }
+
+  isInWishlist(product: Product): boolean {
+    return this.wishlist.has(product.id);
+  }
+
+  addToCart(product: Product): void {
+    // Implement add to cart logic
+    console.log("Adding to cart:", product.name);
+  }
+}
+```
+
+### Pattern 2: Team Member Directory
+
+```typescript
+@Component({
+  template: `
+    <div class="team-directory">
+      <h2>Our Team</h2>
+      <div class="team-grid">
+        <mat-card
+          *ngFor="let member of teamMembers"
+          class="member-card"
+          appearance="outlined"
+        >
+          <mat-card-header>
+            <img
+              mat-card-avatar
+              [src]="member.photoUrl"
+              [alt]="member.name + ' photo'"
+              (error)="handleImageError($event)"
+            />
+            <mat-card-title>{{ member.name }}</mat-card-title>
+            <mat-card-subtitle>{{ member.position }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="member-info">
+              <div class="department">
+                <mat-icon>business</mat-icon>
+                <span>{{ member.department }}</span>
+              </div>
+
+              <div class="location">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ member.location }}</span>
+              </div>
+
+              <div class="experience">
+                <mat-icon>work</mat-icon>
+                <span>{{ member.yearsExperience }} years experience</span>
+              </div>
+            </div>
+
+            <div class="skills" *ngIf="member.skills?.length">
+              <h4>Skills</h4>
+              <mat-chip-set>
+                <mat-chip *ngFor="let skill of member.skills.slice(0, 3)">
+                  {{ skill }}
+                </mat-chip>
+                <mat-chip *ngIf="member.skills.length > 3" class="more-skills">
+                  +{{ member.skills.length - 3 }} more
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              mat-icon-button
+              [href]="'mailto:' + member.email"
+              title="Send Email"
+            >
+              <mat-icon>email</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              *ngIf="member.linkedinUrl"
+              [href]="member.linkedinUrl"
+              target="_blank"
+              title="LinkedIn Profile"
+            >
+              <mat-icon>link</mat-icon>
+            </button>
+
+            <button mat-button (click)="viewProfile(member)">
+              VIEW PROFILE
+            </button>
+          </mat-card-actions>
+
+          <mat-card-footer *ngIf="member.quote">
+            <blockquote class="member-quote">"{{ member.quote }}"</blockquote>
+          </mat-card-footer>
+        </mat-card>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .team-directory {
+        padding: 24px;
+      }
+
+      .team-directory h2 {
+        text-align: center;
+        margin-bottom: 32px;
+        color: #333;
+      }
+
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .member-card {
+        transition: box-shadow 0.3s ease;
+      }
+
+      .member-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .member-info {
+        margin: 16px 0;
+      }
+
+      .member-info > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .member-info mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #999;
+      }
+
+      .skills {
+        margin-top: 16px;
+      }
+
+      .skills h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .more-skills {
+        background-color: #f0f0f0 !important;
+        color: #666 !important;
+      }
+
+      .member-quote {
+        font-style: italic;
+        color: #666;
+        margin: 0;
+        padding: 8px 0;
+        border-left: 3px solid #e0e0e0;
+        padding-left: 12px;
+        font-size: 14px;
+      }
+    `,
+  ],
+})
+export class TeamDirectoryComponent {
+  @Input() teamMembers: TeamMember[] = [];
+
+  handleImageError(event: any): void {
+    // Set default avatar image
+    event.target.src = "assets/default-avatar.png";
+  }
+
+  viewProfile(member: TeamMember): void {
+    // Navigate to member profile or open modal
+    console.log("Viewing profile for:", member.name);
+  }
+}
+```

@@ -1,0 +1,1940 @@
+---
+title: MiniFabButton Components
+---
+
+# MiniFabButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate mini floating action button functionality. The MiniFabButton component provides Material Design styled mini floating action buttons (Mini FABs) that enable users to access secondary actions in an application. Mini FABs are smaller, compact circular buttons that float above the UI and represent secondary or supporting actions on a screen, following Material Design 3 specifications for floating elements with proper elevation, accessibility features, and space-efficient design.
+
+### When to Use
+
+- **Secondary Actions**: When you need to provide access to secondary actions that support the primary workflow without competing for attention
+- **Space-Constrained Interfaces**: In compact layouts where full-size FABs would be too prominent or take up excessive space
+- **Toolbar Integration**: For action buttons within toolbars, navigation bars, or compact control panels
+- **Multi-Action Interfaces**: When providing multiple quick actions in a grouped or list format without overwhelming the UI
+- **Edit Mode Actions**: For inline editing controls like save, cancel, or delete actions within content areas
+- **Navigation Controls**: For compact navigation elements like next/previous, up/down, or directional controls
+- **Quick Toggle Actions**: For buttons that toggle states or settings in compact interfaces
+- **Mobile Optimization**: Particularly effective on mobile devices where screen space is limited but actions need to remain accessible
+- **Supporting Workflows**: When complementing primary actions with related but less prominent secondary operations
+- **Dense Information Displays**: In data-heavy interfaces where actions need to be available without disrupting content density
+
+### Architecture
+
+**No Coupling**: The MiniFabButton component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete mini floating action button implementation with all necessary features built-in
+- **Flexible positioning**: Can be positioned anywhere in the UI without dependencies on parent layout components
+- **Consistent elevation**: Maintains proper Material Design elevation and shadow effects regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system while maintaining mini FAB-specific styling
+- **Compact footprint**: Optimized for smaller spaces while maintaining touch accessibility and visual clarity
+
+## Components
+
+### MatMiniFabButton {Standalone Component}
+
+A compact variant of the floating action button designed for secondary actions or when space is constrained, providing all the functionality of a standard FAB in a smaller form factor.
+
+**Purpose:** Creates compact floating action buttons with reduced size for secondary actions, toolbar integration, or space-constrained interfaces while maintaining Material Design styling and accessibility.
+
+**Interface:**
+
+```typescript
+interface MatMiniFabButtonProps {
+  // Appearance and Styling
+  color?: "primary" | "accent" | "warn" | string; // Theme color for the button
+
+  // Interaction States
+  disabled?: boolean; // Whether the button is disabled
+  disableRipple?: boolean; // Whether to disable the ripple effect
+
+  // Interactive Behavior
+  disabledInteractive?: boolean; // Allows interaction even when disabled (for accessibility)
+
+  // Accessibility
+  ariaDisabled?: boolean; // Manual control over aria-disabled state
+  ariaLabel?: string; // Required accessible label for screen readers
+
+  // Focus and Navigation
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Events (inherited from HTMLButtonElement)
+  click?: () => void; // Click event handler
+  focus?: () => void; // Focus event handler
+  blur?: () => void; // Blur event handler
+  mouseenter?: () => void; // Mouse enter event handler
+  mouseleave?: () => void; // Mouse leave event handler
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  selector: "app-mini-fab-examples",
+  template: `
+    <!-- Basic Mini FAB -->
+    <button mat-mini-fab aria-label="Edit item">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <!-- Mini FAB with primary color -->
+    <button mat-mini-fab color="primary" aria-label="Save changes">
+      <mat-icon>save</mat-icon>
+    </button>
+
+    <!-- Mini FAB with tooltip -->
+    <button
+      mat-mini-fab
+      aria-label="Delete item"
+      color="warn"
+      matTooltip="Delete this item"
+      matTooltipPosition="above"
+    >
+      <mat-icon>delete</mat-icon>
+    </button>
+
+    <!-- Disabled Mini FAB -->
+    <button mat-mini-fab [disabled]="true" aria-label="Unavailable action">
+      <mat-icon>block</mat-icon>
+    </button>
+
+    <!-- Mini FAB with click handler -->
+    <button
+      mat-mini-fab
+      (click)="toggleFavorite()"
+      [color]="isFavorite ? 'warn' : 'primary'"
+      [attr.aria-label]="
+        isFavorite ? 'Remove from favorites' : 'Add to favorites'
+      "
+    >
+      <mat-icon>{{ isFavorite ? "favorite" : "favorite_border" }}</mat-icon>
+    </button>
+
+    <!-- Mini FAB without ripple effect -->
+    <button
+      mat-mini-fab
+      [disableRipple]="true"
+      aria-label="Quick action"
+      color="accent"
+    >
+      <mat-icon>bolt</mat-icon>
+    </button>
+
+    <!-- Interactive disabled Mini FAB -->
+    <button
+      mat-mini-fab
+      [disabled]="true"
+      [disabledInteractive]="true"
+      aria-label="Coming soon feature"
+      matTooltip="This feature is coming soon"
+    >
+      <mat-icon>upcoming</mat-icon>
+    </button>
+
+    <!-- Mini FAB group for related actions -->
+    <div class="mini-fab-group" role="group" aria-label="Item actions">
+      <button
+        mat-mini-fab
+        aria-label="Edit item"
+        (click)="editItem()"
+        matTooltip="Edit"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button
+        mat-mini-fab
+        aria-label="Share item"
+        (click)="shareItem()"
+        color="accent"
+        matTooltip="Share"
+      >
+        <mat-icon>share</mat-icon>
+      </button>
+
+      <button
+        mat-mini-fab
+        aria-label="Delete item"
+        (click)="deleteItem()"
+        color="warn"
+        matTooltip="Delete"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .mini-fab-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 16px 0;
+      }
+
+      button[mat-mini-fab] {
+        margin: 4px;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+})
+export class MiniFabExamplesComponent {
+  isFavorite = false;
+
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+    console.log("Favorite toggled:", this.isFavorite);
+  }
+
+  editItem(): void {
+    console.log("Editing item...");
+  }
+
+  shareItem(): void {
+    console.log("Sharing item...");
+  }
+
+  deleteItem(): void {
+    console.log("Deleting item...");
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Mini FAB Usage
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  selector: "app-basic-mini-fab",
+  template: `
+    <div class="content-container">
+      <!-- Content area -->
+      <div class="main-content">
+        <h2>Content Area</h2>
+        <p>Your main content goes here...</p>
+      </div>
+
+      <!-- Simple positioned mini FABs -->
+      <button
+        mat-mini-fab
+        class="edit-fab"
+        aria-label="Edit content"
+        matTooltip="Edit"
+        (click)="editContent()"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button
+        mat-mini-fab
+        class="settings-fab"
+        aria-label="Settings"
+        matTooltip="Settings"
+        color="accent"
+        (click)="openSettings()"
+      >
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .content-container {
+        position: relative;
+        padding: 16px;
+        min-height: 400px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .main-content {
+        margin-bottom: 60px;
+      }
+
+      .edit-fab {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+      }
+
+      .settings-fab {
+        position: absolute;
+        bottom: 16px;
+        right: 72px;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+})
+export class BasicMiniFabComponent {
+  editContent(): void {
+    console.log("Editing content...");
+  }
+
+  openSettings(): void {
+    console.log("Opening settings...");
+  }
+}
+```
+
+### Advanced Mini FAB Implementation
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+
+@Component({
+  selector: "app-advanced-mini-fab",
+  template: `
+    <div class="advanced-container">
+      <!-- Dynamic state mini FABs -->
+      <div class="state-fabs">
+        <!-- Loading state mini FAB -->
+        <button
+          mat-mini-fab
+          [disabled]="isLoading"
+          (click)="performAsyncAction()"
+          class="loading-mini-fab"
+          [attr.aria-label]="isLoading ? 'Saving...' : 'Save'"
+          [matTooltip]="isLoading ? 'Saving changes...' : 'Save changes'"
+        >
+          <mat-spinner *ngIf="isLoading" diameter="16"></mat-spinner>
+          <mat-icon *ngIf="!isLoading">save</mat-icon>
+        </button>
+
+        <!-- Conditional visibility mini FAB -->
+        <button
+          mat-mini-fab
+          *ngIf="hasUnsavedChanges"
+          (click)="discardChanges()"
+          class="discard-mini-fab"
+          color="warn"
+          aria-label="Discard changes"
+          matTooltip="Discard unsaved changes"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+
+        <!-- Toggle state mini FAB -->
+        <button
+          mat-mini-fab
+          (click)="toggleBookmark()"
+          [color]="isBookmarked ? 'warn' : 'primary'"
+          class="bookmark-mini-fab"
+          [attr.aria-label]="isBookmarked ? 'Remove bookmark' : 'Add bookmark'"
+          [matTooltip]="isBookmarked ? 'Remove bookmark' : 'Add bookmark'"
+        >
+          <mat-icon>{{
+            isBookmarked ? "bookmark" : "bookmark_border"
+          }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Toolbar with mini FABs -->
+      <div class="mini-fab-toolbar" role="toolbar" aria-label="Content actions">
+        <button
+          mat-mini-fab
+          *ngFor="let action of toolbarActions; trackBy: trackByActionId"
+          [disabled]="!action.enabled"
+          [color]="action.color"
+          (click)="executeAction(action)"
+          [attr.aria-label]="action.label"
+          [matTooltip]="action.tooltip"
+          class="toolbar-mini-fab"
+        >
+          <mat-icon>{{ action.icon }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Responsive mini FAB group -->
+      <div class="responsive-mini-fabs">
+        <ng-container *ngFor="let fab of responsiveFabs">
+          <button
+            mat-mini-fab
+            *ngIf="shouldShowFab(fab)"
+            [color]="fab.color"
+            (click)="handleFabAction(fab)"
+            [attr.aria-label]="fab.label"
+            [matTooltip]="fab.tooltip"
+            class="responsive-mini-fab"
+          >
+            <mat-icon>{{ fab.icon }}</mat-icon>
+          </button>
+        </ng-container>
+      </div>
+
+      <!-- Context-sensitive mini FABs -->
+      <div class="context-fabs" *ngIf="selectedItems.length > 0">
+        <span class="selection-count">{{ selectedItems.length }} selected</span>
+
+        <button
+          mat-mini-fab
+          (click)="bulkEdit()"
+          aria-label="Edit selected items"
+          matTooltip="Edit selected items"
+          color="primary"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          (click)="bulkDelete()"
+          aria-label="Delete selected items"
+          matTooltip="Delete selected items"
+          color="warn"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          (click)="clearSelection()"
+          aria-label="Clear selection"
+          matTooltip="Clear selection"
+        >
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-container {
+        padding: 16px;
+        position: relative;
+      }
+
+      .state-fabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+
+      .mini-fab-toolbar {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+
+      .responsive-mini-fabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .context-fabs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #e3f2fd;
+        border-radius: 24px;
+        border: 1px solid #2196f3;
+      }
+
+      .selection-count {
+        font-size: 12px;
+        font-weight: 500;
+        color: #1976d2;
+        margin-right: 8px;
+      }
+
+      @media (max-width: 600px) {
+        .mini-fab-toolbar {
+          flex-wrap: wrap;
+        }
+
+        .responsive-mini-fabs {
+          justify-content: center;
+        }
+
+        .context-fabs {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+  ],
+})
+export class AdvancedMiniFabComponent {
+  isLoading = false;
+  hasUnsavedChanges = true;
+  isBookmarked = false;
+  selectedItems: any[] = [];
+
+  toolbarActions = [
+    {
+      id: 1,
+      icon: "copy",
+      label: "Copy",
+      tooltip: "Copy content",
+      enabled: true,
+      color: "primary",
+    },
+    {
+      id: 2,
+      icon: "share",
+      label: "Share",
+      tooltip: "Share content",
+      enabled: true,
+      color: "accent",
+    },
+    {
+      id: 3,
+      icon: "download",
+      label: "Download",
+      tooltip: "Download content",
+      enabled: false,
+      color: "",
+    },
+    {
+      id: 4,
+      icon: "print",
+      label: "Print",
+      tooltip: "Print content",
+      enabled: true,
+      color: "",
+    },
+  ];
+
+  responsiveFabs = [
+    {
+      id: "edit",
+      icon: "edit",
+      label: "Edit",
+      tooltip: "Edit item",
+      color: "primary",
+      showOnMobile: true,
+      showOnDesktop: true,
+    },
+    {
+      id: "info",
+      icon: "info",
+      label: "Info",
+      tooltip: "View information",
+      color: "accent",
+      showOnMobile: false,
+      showOnDesktop: true,
+    },
+    {
+      id: "help",
+      icon: "help",
+      label: "Help",
+      tooltip: "Get help",
+      color: "",
+      showOnMobile: true,
+      showOnDesktop: false,
+    },
+  ];
+
+  async performAsyncAction(): Promise<void> {
+    this.isLoading = true;
+    try {
+      // Simulate async operation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      this.hasUnsavedChanges = false;
+      console.log("Action completed successfully");
+    } catch (error) {
+      console.error("Action failed:", error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  discardChanges(): void {
+    this.hasUnsavedChanges = false;
+    console.log("Changes discarded");
+  }
+
+  toggleBookmark(): void {
+    this.isBookmarked = !this.isBookmarked;
+    console.log("Bookmark toggled:", this.isBookmarked);
+  }
+
+  executeAction(action: any): void {
+    if (action.enabled) {
+      console.log("Executing action:", action.label);
+    }
+  }
+
+  trackByActionId(index: number, action: any): number {
+    return action.id;
+  }
+
+  shouldShowFab(fab: any): boolean {
+    const isMobile = window.innerWidth <= 600;
+    return isMobile ? fab.showOnMobile : fab.showOnDesktop;
+  }
+
+  handleFabAction(fab: any): void {
+    console.log("FAB action:", fab.label);
+  }
+
+  bulkEdit(): void {
+    console.log("Bulk editing", this.selectedItems.length, "items");
+  }
+
+  bulkDelete(): void {
+    console.log("Bulk deleting", this.selectedItems.length, "items");
+    this.selectedItems = [];
+  }
+
+  clearSelection(): void {
+    this.selectedItems = [];
+    console.log("Selection cleared");
+  }
+}
+```
+
+### Common Variations
+
+#### Inline Action Mini FABs
+
+```typescript
+@Component({
+  template: `
+    <div class="inline-actions-container">
+      <!-- List with inline mini FABs -->
+      <div class="item-list">
+        <div
+          *ngFor="let item of items; trackBy: trackByItemId"
+          class="list-item"
+          [class.selected]="item.selected"
+        >
+          <div class="item-content">
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.description }}</p>
+          </div>
+
+          <div class="item-actions">
+            <button
+              mat-mini-fab
+              (click)="editItem(item)"
+              aria-label="Edit {{ item.title }}"
+              matTooltip="Edit"
+              matTooltipPosition="above"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="toggleFavorite(item)"
+              [color]="item.isFavorite ? 'warn' : 'primary'"
+              [attr.aria-label]="
+                item.isFavorite ? 'Remove from favorites' : 'Add to favorites'
+              "
+              matTooltip="{{
+                item.isFavorite ? 'Remove favorite' : 'Add favorite'
+              }}"
+              matTooltipPosition="above"
+            >
+              <mat-icon>{{
+                item.isFavorite ? "favorite" : "favorite_border"
+              }}</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="deleteItem(item)"
+              color="warn"
+              [attr.aria-label]="'Delete ' + item.title"
+              matTooltip="Delete"
+              matTooltipPosition="above"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card with corner mini FABs -->
+      <div class="card-container">
+        <div class="card-with-actions">
+          <div class="card-content">
+            <h3>Content Card</h3>
+            <p>
+              This card has mini FABs positioned in the corner for quick
+              actions.
+            </p>
+          </div>
+
+          <div class="corner-actions">
+            <button
+              mat-mini-fab
+              (click)="editCard()"
+              aria-label="Edit card"
+              matTooltip="Edit card"
+              matTooltipPosition="left"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="shareCard()"
+              color="accent"
+              aria-label="Share card"
+              matTooltip="Share card"
+              matTooltipPosition="left"
+            >
+              <mat-icon>share</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .inline-actions-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      .item-list {
+        margin-bottom: 32px;
+      }
+
+      .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        margin-bottom: 8px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .list-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .list-item.selected {
+        background: #e3f2fd;
+        border: 2px solid #2196f3;
+      }
+
+      .item-content {
+        flex: 1;
+        margin-right: 16px;
+      }
+
+      .item-content h4 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .item-content p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .item-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .card-container {
+        margin-top: 32px;
+      }
+
+      .card-with-actions {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        min-height: 200px;
+      }
+
+      .card-content h3 {
+        margin: 0 0 16px 0;
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .card-content p {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #555;
+      }
+
+      .corner-actions {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        display: flex;
+        gap: 8px;
+      }
+
+      @media (max-width: 600px) {
+        .list-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .item-actions {
+          margin-top: 16px;
+          align-self: flex-end;
+        }
+      }
+    `,
+  ],
+})
+export class InlineActionMiniFabsComponent {
+  items = [
+    {
+      id: 1,
+      title: "First Item",
+      description: "Description of the first item",
+      isFavorite: false,
+      selected: false,
+    },
+    {
+      id: 2,
+      title: "Second Item",
+      description: "Description of the second item",
+      isFavorite: true,
+      selected: false,
+    },
+    {
+      id: 3,
+      title: "Third Item",
+      description: "Description of the third item",
+      isFavorite: false,
+      selected: true,
+    },
+  ];
+
+  editItem(item: any): void {
+    console.log("Editing item:", item.title);
+  }
+
+  toggleFavorite(item: any): void {
+    item.isFavorite = !item.isFavorite;
+    console.log("Favorite toggled for:", item.title);
+  }
+
+  deleteItem(item: any): void {
+    const index = this.items.indexOf(item);
+    if (index > -1) {
+      this.items.splice(index, 1);
+      console.log("Deleted item:", item.title);
+    }
+  }
+
+  trackByItemId(index: number, item: any): number {
+    return item.id;
+  }
+
+  editCard(): void {
+    console.log("Editing card...");
+  }
+
+  shareCard(): void {
+    console.log("Sharing card...");
+  }
+}
+```
+
+#### Navigation Mini FABs
+
+```typescript
+@Component({
+  template: `
+    <div class="navigation-container">
+      <!-- Pagination mini FABs -->
+      <div
+        class="pagination-controls"
+        role="navigation"
+        aria-label="Pagination"
+      >
+        <button
+          mat-mini-fab
+          [disabled]="currentPage === 1"
+          (click)="goToFirstPage()"
+          aria-label="Go to first page"
+          matTooltip="First page"
+        >
+          <mat-icon>first_page</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          [disabled]="currentPage === 1"
+          (click)="goToPreviousPage()"
+          aria-label="Go to previous page"
+          matTooltip="Previous page"
+        >
+          <mat-icon>navigate_before</mat-icon>
+        </button>
+
+        <span class="page-info" aria-live="polite">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+
+        <button
+          mat-mini-fab
+          [disabled]="currentPage === totalPages"
+          (click)="goToNextPage()"
+          aria-label="Go to next page"
+          matTooltip="Next page"
+        >
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          [disabled]="currentPage === totalPages"
+          (click)="goToLastPage()"
+          aria-label="Go to last page"
+          matTooltip="Last page"
+        >
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+
+      <!-- Directional navigation mini FABs -->
+      <div
+        class="directional-controls"
+        role="navigation"
+        aria-label="Content navigation"
+      >
+        <div class="direction-grid">
+          <button
+            mat-mini-fab
+            (click)="moveUp()"
+            aria-label="Move up"
+            matTooltip="Move up"
+            class="direction-up"
+          >
+            <mat-icon>keyboard_arrow_up</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="moveLeft()"
+            aria-label="Move left"
+            matTooltip="Move left"
+            class="direction-left"
+          >
+            <mat-icon>keyboard_arrow_left</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="resetPosition()"
+            aria-label="Reset position"
+            matTooltip="Reset to center"
+            color="primary"
+            class="direction-center"
+          >
+            <mat-icon>center_focus_strong</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="moveRight()"
+            aria-label="Move right"
+            matTooltip="Move right"
+            class="direction-right"
+          >
+            <mat-icon>keyboard_arrow_right</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="moveDown()"
+            aria-label="Move down"
+            matTooltip="Move down"
+            class="direction-down"
+          >
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Zoom controls -->
+      <div class="zoom-controls" role="group" aria-label="Zoom controls">
+        <button
+          mat-mini-fab
+          (click)="zoomOut()"
+          [disabled]="zoomLevel <= minZoom"
+          aria-label="Zoom out"
+          matTooltip="Zoom out"
+        >
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+
+        <span class="zoom-level" aria-live="polite">
+          {{ Math.round(zoomLevel * 100) }}%
+        </span>
+
+        <button
+          mat-mini-fab
+          (click)="zoomIn()"
+          [disabled]="zoomLevel >= maxZoom"
+          aria-label="Zoom in"
+          matTooltip="Zoom in"
+        >
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+
+        <button
+          mat-mini-fab
+          (click)="resetZoom()"
+          aria-label="Reset zoom"
+          matTooltip="Reset zoom to 100%"
+          color="accent"
+        >
+          <mat-icon>zoom_out_map</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .navigation-container {
+        padding: 24px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .pagination-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 32px;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .page-info {
+        margin: 0 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        min-width: 100px;
+        text-align: center;
+      }
+
+      .directional-controls {
+        margin-bottom: 32px;
+      }
+
+      .direction-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap: 8px;
+        max-width: 200px;
+        margin: 0 auto;
+      }
+
+      .direction-up {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .direction-left {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .direction-center {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      .direction-right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      .direction-down {
+        grid-column: 2;
+        grid-row: 3;
+      }
+
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .zoom-level {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        min-width: 50px;
+        text-align: center;
+      }
+
+      @media (max-width: 600px) {
+        .pagination-controls {
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+
+        .page-info {
+          margin: 8px 0;
+          flex-basis: 100%;
+        }
+
+        .zoom-controls {
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
+})
+export class NavigationMiniFabsComponent {
+  currentPage = 1;
+  totalPages = 10;
+  zoomLevel = 1.0;
+  minZoom = 0.25;
+  maxZoom = 4.0;
+
+  // Add Math to component for template access
+  Math = Math;
+
+  goToFirstPage(): void {
+    this.currentPage = 1;
+    console.log("Navigated to first page");
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      console.log("Navigated to previous page:", this.currentPage);
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      console.log("Navigated to next page:", this.currentPage);
+    }
+  }
+
+  goToLastPage(): void {
+    this.currentPage = this.totalPages;
+    console.log("Navigated to last page");
+  }
+
+  moveUp(): void {
+    console.log("Moving up");
+  }
+
+  moveDown(): void {
+    console.log("Moving down");
+  }
+
+  moveLeft(): void {
+    console.log("Moving left");
+  }
+
+  moveRight(): void {
+    console.log("Moving right");
+  }
+
+  resetPosition(): void {
+    console.log("Resetting position to center");
+  }
+
+  zoomIn(): void {
+    if (this.zoomLevel < this.maxZoom) {
+      this.zoomLevel = Math.min(this.zoomLevel * 1.25, this.maxZoom);
+      console.log("Zoomed in to:", Math.round(this.zoomLevel * 100) + "%");
+    }
+  }
+
+  zoomOut(): void {
+    if (this.zoomLevel > this.minZoom) {
+      this.zoomLevel = Math.max(this.zoomLevel / 1.25, this.minZoom);
+      console.log("Zoomed out to:", Math.round(this.zoomLevel * 100) + "%");
+    }
+  }
+
+  resetZoom(): void {
+    this.zoomLevel = 1.0;
+    console.log("Zoom reset to 100%");
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Secondary action prioritization**: Use mini FABs for secondary actions that support the primary workflow without competing for user attention
+- **Space-efficient grouping**: Group related mini FABs logically with consistent spacing (8-12px gaps) to maintain visual clarity
+- **Consistent sizing**: Maintain the standard mini FAB size (40dp) to ensure accessibility and visual consistency across the interface
+- **Appropriate color usage**: Use theme colors purposefully - primary for positive actions, warn for destructive actions, accent for special features
+- **Clear visual hierarchy**: Position mini FABs to support, not compete with, primary actions and content flow
+
+### Accessibility
+
+- **Descriptive aria-labels**: Provide clear, context-specific aria-label attributes since mini FABs rely heavily on iconography
+- **Keyboard navigation**: Ensure all mini FABs are reachable via Tab navigation and activatable with Enter or Space keys
+- **Touch target compliance**: Maintain minimum 44dp touch targets with adequate spacing to prevent accidental activation
+- **Screen reader support**: Use live regions to announce state changes and action results for dynamic mini FABs
+- **Focus management**: Provide clear focus indicators that meet WCAG contrast requirements and are visible against all backgrounds
+
+### Performance
+
+- **Icon optimization**: Use Material Icons efficiently and consider icon loading strategies for large sets of mini FABs
+- **Event delegation**: For lists with many mini FABs, consider event delegation patterns to optimize memory usage
+- **Ripple performance**: Monitor ripple effects in dense layouts and consider disabling for performance-critical scenarios
+- **State management**: Optimize state updates for dynamic mini FABs to prevent unnecessary re-renders
+- **Animation efficiency**: Use CSS transforms for smooth transitions and avoid animating layout-affecting properties
+
+## Common Patterns
+
+### Pattern 1: Toolbar Mini FABs
+
+```typescript
+@Component({
+  template: `
+    <div class="toolbar-container">
+      <!-- Mini FAB toolbar for content editing -->
+      <div class="editor-toolbar" role="toolbar" aria-label="Formatting tools">
+        <div class="toolbar-group">
+          <button
+            mat-mini-fab
+            (click)="toggleBold()"
+            [color]="isFormatActive('bold') ? 'primary' : ''"
+            aria-label="Toggle bold formatting"
+            [attr.aria-pressed]="isFormatActive('bold')"
+            matTooltip="Bold"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_bold</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="toggleItalic()"
+            [color]="isFormatActive('italic') ? 'primary' : ''"
+            aria-label="Toggle italic formatting"
+            [attr.aria-pressed]="isFormatActive('italic')"
+            matTooltip="Italic"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_italic</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="toggleUnderline()"
+            [color]="isFormatActive('underline') ? 'primary' : ''"
+            aria-label="Toggle underline formatting"
+            [attr.aria-pressed]="isFormatActive('underline')"
+            matTooltip="Underline"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_underlined</mat-icon>
+          </button>
+        </div>
+
+        <div class="toolbar-separator" aria-hidden="true"></div>
+
+        <div class="toolbar-group">
+          <button
+            mat-mini-fab
+            (click)="alignLeft()"
+            [color]="currentAlignment === 'left' ? 'primary' : ''"
+            aria-label="Align text left"
+            matTooltip="Align left"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_align_left</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="alignCenter()"
+            [color]="currentAlignment === 'center' ? 'primary' : ''"
+            aria-label="Align text center"
+            matTooltip="Align center"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_align_center</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="alignRight()"
+            [color]="currentAlignment === 'right' ? 'primary' : ''"
+            aria-label="Align text right"
+            matTooltip="Align right"
+            matTooltipPosition="below"
+          >
+            <mat-icon>format_align_right</mat-icon>
+          </button>
+        </div>
+
+        <div class="toolbar-separator" aria-hidden="true"></div>
+
+        <div class="toolbar-group">
+          <button
+            mat-mini-fab
+            (click)="insertLink()"
+            aria-label="Insert link"
+            matTooltip="Insert link"
+            matTooltipPosition="below"
+            color="accent"
+          >
+            <mat-icon>link</mat-icon>
+          </button>
+
+          <button
+            mat-mini-fab
+            (click)="insertImage()"
+            aria-label="Insert image"
+            matTooltip="Insert image"
+            matTooltipPosition="below"
+            color="accent"
+          >
+            <mat-icon>image</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <div class="content-area" contenteditable="true" aria-label="Text editor">
+        <p>
+          Type your content here. Use the toolbar above to format your text.
+        </p>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .toolbar-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      .editor-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px 8px 0 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .toolbar-group {
+        display: flex;
+        gap: 4px;
+      }
+
+      .toolbar-separator {
+        width: 1px;
+        height: 32px;
+        background: #e0e0e0;
+        margin: 0 8px;
+      }
+
+      .content-area {
+        min-height: 300px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        outline: none;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .content-area:focus {
+        border-color: #2196f3;
+        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+      }
+
+      @media (max-width: 600px) {
+        .editor-toolbar {
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .toolbar-separator {
+          display: none;
+        }
+
+        .toolbar-group {
+          gap: 3px;
+        }
+      }
+    `,
+  ],
+})
+export class ToolbarMiniFabsComponent {
+  activeFormats = new Set<string>();
+  currentAlignment = "left";
+
+  isFormatActive(format: string): boolean {
+    return this.activeFormats.has(format);
+  }
+
+  toggleBold(): void {
+    this.toggleFormat("bold");
+    console.log("Bold formatting toggled");
+  }
+
+  toggleItalic(): void {
+    this.toggleFormat("italic");
+    console.log("Italic formatting toggled");
+  }
+
+  toggleUnderline(): void {
+    this.toggleFormat("underline");
+    console.log("Underline formatting toggled");
+  }
+
+  private toggleFormat(format: string): void {
+    if (this.activeFormats.has(format)) {
+      this.activeFormats.delete(format);
+    } else {
+      this.activeFormats.add(format);
+    }
+  }
+
+  alignLeft(): void {
+    this.currentAlignment = "left";
+    console.log("Text aligned left");
+  }
+
+  alignCenter(): void {
+    this.currentAlignment = "center";
+    console.log("Text aligned center");
+  }
+
+  alignRight(): void {
+    this.currentAlignment = "right";
+    console.log("Text aligned right");
+  }
+
+  insertLink(): void {
+    console.log("Insert link dialog opened");
+  }
+
+  insertImage(): void {
+    console.log("Insert image dialog opened");
+  }
+}
+```
+
+### Pattern 2: Context-Sensitive Mini FABs
+
+```typescript
+@Component({
+  template: `
+    <div class="context-sensitive-container">
+      <!-- Selection-based context -->
+      <div class="selectable-items">
+        <div
+          *ngFor="let item of items; trackBy: trackByItemId"
+          class="selectable-item"
+          [class.selected]="item.selected"
+          (click)="toggleItemSelection(item)"
+        >
+          <mat-icon class="item-icon">{{ item.icon }}</mat-icon>
+          <span class="item-title">{{ item.title }}</span>
+
+          <!-- Item-specific mini FABs -->
+          <div class="item-actions" *ngIf="item.selected">
+            <button
+              mat-mini-fab
+              (click)="editItem(item); $event.stopPropagation()"
+              aria-label="Edit {{ item.title }}"
+              matTooltip="Edit item"
+              matTooltipPosition="above"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="duplicateItem(item); $event.stopPropagation()"
+              aria-label="Duplicate {{ item.title }}"
+              matTooltip="Duplicate item"
+              matTooltipPosition="above"
+              color="accent"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="deleteItem(item); $event.stopPropagation()"
+              aria-label="Delete {{ item.title }}"
+              matTooltip="Delete item"
+              matTooltipPosition="above"
+              color="warn"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk actions for multiple selection -->
+      <div class="bulk-actions" *ngIf="selectedItems.length > 0" [@slideInUp]>
+        <div class="bulk-actions-content">
+          <span class="selection-info">
+            {{ selectedItems.length }} item{{
+              selectedItems.length === 1 ? "" : "s"
+            }}
+            selected
+          </span>
+
+          <div class="bulk-action-buttons">
+            <button
+              mat-mini-fab
+              (click)="bulkEdit()"
+              aria-label="Edit selected items"
+              matTooltip="Edit all selected"
+              matTooltipPosition="above"
+              color="primary"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="bulkMove()"
+              aria-label="Move selected items"
+              matTooltip="Move selected"
+              matTooltipPosition="above"
+              color="accent"
+            >
+              <mat-icon>drive_file_move</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="bulkExport()"
+              aria-label="Export selected items"
+              matTooltip="Export selected"
+              matTooltipPosition="above"
+            >
+              <mat-icon>download</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="bulkDelete()"
+              aria-label="Delete selected items"
+              matTooltip="Delete selected"
+              matTooltipPosition="above"
+              color="warn"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+
+            <button
+              mat-mini-fab
+              (click)="clearSelection()"
+              aria-label="Clear selection"
+              matTooltip="Clear selection"
+              matTooltipPosition="above"
+            >
+              <mat-icon>clear</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode-based context -->
+      <div class="mode-context">
+        <div class="mode-selector">
+          <button
+            *ngFor="let mode of modes"
+            mat-mini-fab
+            [color]="currentMode === mode.id ? 'primary' : ''"
+            (click)="setMode(mode.id)"
+            [attr.aria-label]="'Switch to ' + mode.label + ' mode'"
+            [attr.aria-pressed]="currentMode === mode.id"
+            [matTooltip]="mode.label + ' mode'"
+            matTooltipPosition="below"
+          >
+            <mat-icon>{{ mode.icon }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Mode-specific actions -->
+        <div class="mode-actions" *ngIf="currentMode">
+          <div class="mode-title">{{ getCurrentModeLabel() }} Actions</div>
+
+          <div class="mode-action-buttons">
+            <button
+              *ngFor="let action of getCurrentModeActions()"
+              mat-mini-fab
+              (click)="executeModeAction(action)"
+              [color]="action.color || ''"
+              [disabled]="!action.enabled"
+              [attr.aria-label]="action.label"
+              [matTooltip]="action.tooltip"
+              matTooltipPosition="above"
+            >
+              <mat-icon>{{ action.icon }}</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .context-sensitive-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      .selectable-items {
+        margin-bottom: 24px;
+      }
+
+      .selectable-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        background: white;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .selectable-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .selectable-item.selected {
+        border-color: #2196f3;
+        background: #e3f2fd;
+      }
+
+      .item-icon {
+        margin-right: 12px;
+        color: #666;
+      }
+
+      .item-title {
+        flex: 1;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .item-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: 16px;
+      }
+
+      .bulk-actions {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+      }
+
+      .bulk-actions-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 20px;
+        background: white;
+        border-radius: 28px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e0e0e0;
+      }
+
+      .selection-info {
+        font-size: 14px;
+        font-weight: 500;
+        color: #2196f3;
+        white-space: nowrap;
+      }
+
+      .bulk-action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .mode-context {
+        margin-top: 32px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 12px;
+      }
+
+      .mode-selector {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+
+      .mode-title {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 16px;
+        color: #333;
+      }
+
+      .mode-action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 600px) {
+        .selectable-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .item-actions {
+          margin-left: 0;
+          margin-top: 12px;
+          align-self: flex-end;
+        }
+
+        .bulk-actions-content {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .selection-info {
+          order: -1;
+        }
+      }
+    `,
+  ],
+  animations: [
+    // You would need to import animations from @angular/animations
+    // This is a placeholder for the slide-in animation
+  ],
+})
+export class ContextSensitiveMiniFabsComponent {
+  items = [
+    { id: 1, title: "Document 1", icon: "description", selected: false },
+    { id: 2, title: "Image 1", icon: "image", selected: false },
+    { id: 3, title: "Video 1", icon: "movie", selected: false },
+    { id: 4, title: "Audio 1", icon: "audio_file", selected: false },
+  ];
+
+  modes = [
+    { id: "view", label: "View", icon: "visibility" },
+    { id: "edit", label: "Edit", icon: "edit" },
+    { id: "organize", label: "Organize", icon: "folder" },
+  ];
+
+  modeActions = {
+    view: [
+      {
+        id: "zoom",
+        icon: "zoom_in",
+        label: "Zoom",
+        tooltip: "Zoom view",
+        enabled: true,
+      },
+      {
+        id: "fullscreen",
+        icon: "fullscreen",
+        label: "Fullscreen",
+        tooltip: "Toggle fullscreen",
+        enabled: true,
+      },
+      {
+        id: "info",
+        icon: "info",
+        label: "Info",
+        tooltip: "Show information",
+        enabled: true,
+      },
+    ],
+    edit: [
+      {
+        id: "cut",
+        icon: "content_cut",
+        label: "Cut",
+        tooltip: "Cut selection",
+        enabled: true,
+      },
+      {
+        id: "copy",
+        icon: "content_copy",
+        label: "Copy",
+        tooltip: "Copy selection",
+        enabled: true,
+      },
+      {
+        id: "paste",
+        icon: "content_paste",
+        label: "Paste",
+        tooltip: "Paste content",
+        enabled: false,
+      },
+      {
+        id: "undo",
+        icon: "undo",
+        label: "Undo",
+        tooltip: "Undo last action",
+        enabled: true,
+      },
+    ],
+    organize: [
+      {
+        id: "move",
+        icon: "drive_file_move",
+        label: "Move",
+        tooltip: "Move items",
+        enabled: true,
+        color: "accent",
+      },
+      {
+        id: "archive",
+        icon: "archive",
+        label: "Archive",
+        tooltip: "Archive items",
+        enabled: true,
+      },
+      {
+        id: "tag",
+        icon: "label",
+        label: "Tag",
+        tooltip: "Add tags",
+        enabled: true,
+        color: "primary",
+      },
+    ],
+  };
+
+  currentMode = "view";
+
+  get selectedItems() {
+    return this.items.filter((item) => item.selected);
+  }
+
+  toggleItemSelection(item: any): void {
+    item.selected = !item.selected;
+  }
+
+  trackByItemId(index: number, item: any): number {
+    return item.id;
+  }
+
+  editItem(item: any): void {
+    console.log("Editing item:", item.title);
+  }
+
+  duplicateItem(item: any): void {
+    console.log("Duplicating item:", item.title);
+  }
+
+  deleteItem(item: any): void {
+    console.log("Deleting item:", item.title);
+    item.selected = false;
+  }
+
+  bulkEdit(): void {
+    console.log("Bulk editing", this.selectedItems.length, "items");
+  }
+
+  bulkMove(): void {
+    console.log("Bulk moving", this.selectedItems.length, "items");
+  }
+
+  bulkExport(): void {
+    console.log("Bulk exporting", this.selectedItems.length, "items");
+  }
+
+  bulkDelete(): void {
+    console.log("Bulk deleting", this.selectedItems.length, "items");
+    this.items.forEach((item) => (item.selected = false));
+  }
+
+  clearSelection(): void {
+    this.items.forEach((item) => (item.selected = false));
+  }
+
+  setMode(modeId: string): void {
+    this.currentMode = modeId;
+    console.log("Mode changed to:", modeId);
+  }
+
+  getCurrentModeLabel(): string {
+    const mode = this.modes.find((m) => m.id === this.currentMode);
+    return mode ? mode.label : "";
+  }
+
+  getCurrentModeActions(): any[] {
+    return (
+      this.modeActions[this.currentMode as keyof typeof this.modeActions] || []
+    );
+  }
+
+  executeModeAction(action: any): void {
+    if (action.enabled) {
+      console.log("Executing mode action:", action.label);
+    }
+  }
+}
+```

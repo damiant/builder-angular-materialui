@@ -1,0 +1,1156 @@
+---
+title: FabButton Components
+---
+
+# FabButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate floating action button functionality. The FabButton component provides Material Design styled floating action buttons (FABs) that enable users to access the primary action in an application. FABs are circular buttons that float above the UI and represent the most common or important action on a screen, following Material Design 3 specifications for floating elements with proper elevation, accessibility features, and flexible customization options.
+
+### When to Use
+
+- **Primary Screen Actions**: When you need to highlight the single most important action on a screen (e.g., "Add", "Create", "Compose")
+- **Content Creation**: For buttons that trigger creation of new content like posts, documents, or items in lists
+- **Quick Actions**: When providing immediate access to frequent actions that users perform regularly
+- **Navigation Shortcuts**: For floating navigation elements that provide quick access to key app sections
+- **Modal Triggers**: When opening creation dialogs, forms, or important modal interactions
+- **Progressive Actions**: For actions that lead users forward in a workflow or process
+- **Persistent Actions**: When an action needs to remain visible and accessible while scrolling through content
+- **Mobile-First Interfaces**: Particularly effective on mobile devices where they provide easy thumb access to primary actions
+- **Single-Action Contexts**: When a screen or section has one clear, primary action that dominates user intent
+- **Accessibility-Critical Actions**: When you need a highly visible, easily targetable action element for users with motor impairments
+
+### Architecture
+
+**No Coupling**: The FabButton component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete floating action button implementation with all necessary features built-in
+- **Flexible positioning**: Can be positioned anywhere in the UI without dependencies on parent layout components
+- **Consistent elevation**: Maintains proper Material Design elevation and shadow effects regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system while maintaining FAB-specific styling
+
+## Components
+
+### MatFabButton {Standalone Component}
+
+A specialized floating action button component that provides prominent, circular button styling with Material Design elevation and positioning for primary actions.
+
+**Purpose:** Creates prominent floating action buttons with Material Design styling, proper elevation effects, and accessibility features for highlighting the most important action on a screen.
+
+**Interface:**
+
+```typescript
+interface MatFabButtonProps {
+  // Appearance and Styling
+  color?: "primary" | "accent" | "warn" | string; // Theme color for the button
+  extended?: boolean; // Whether to show as extended FAB with text and icon
+
+  // Interaction States
+  disabled?: boolean; // Whether the button is disabled
+  disableRipple?: boolean; // Whether to disable the ripple effect
+
+  // Accessibility
+  ariaLabel?: string; // Required accessible label for screen readers
+
+  // Focus and Navigation
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Events (inherited from HTMLButtonElement)
+  click?: () => void; // Click event handler
+  focus?: () => void; // Focus event handler
+  blur?: () => void; // Blur event handler
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-fab-examples",
+  template: `
+    <!-- Basic FAB -->
+    <button mat-fab aria-label="Add item">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <!-- FAB with primary color -->
+    <button mat-fab color="primary" aria-label="Create new document">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <!-- Extended FAB with text and icon -->
+    <button mat-fab extended aria-label="Add new contact">
+      <mat-icon>person_add</mat-icon>
+      Add Contact
+    </button>
+
+    <!-- Disabled FAB -->
+    <button mat-fab [disabled]="true" aria-label="Add item">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <!-- FAB with click handler -->
+    <button mat-fab (click)="createNewItem()" aria-label="Create new item">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <!-- Warning color FAB -->
+    <button mat-fab color="warn" aria-label="Delete selected items">
+      <mat-icon>delete</mat-icon>
+    </button>
+
+    <!-- FAB without ripple effect -->
+    <button mat-fab [disableRipple]="true" aria-label="Quick action">
+      <mat-icon>bolt</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      button[mat-fab] {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      button[mat-fab][extended] {
+        bottom: 20px;
+        right: 20px;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule],
+})
+export class FabExamplesComponent {
+  createNewItem(): void {
+    console.log("Creating new item...");
+  }
+}
+```
+
+### MatMiniFabButton {Standalone Component}
+
+A smaller variant of the floating action button designed for secondary actions or when space is constrained.
+
+**Purpose:** Creates compact floating action buttons with reduced size for secondary actions, toolbar integration, or space-constrained interfaces.
+
+**Interface:**
+
+```typescript
+interface MatMiniFabButtonProps {
+  // Appearance and Styling
+  color?: "primary" | "accent" | "warn" | string; // Theme color for the button
+
+  // Interaction States
+  disabled?: boolean; // Whether the button is disabled
+  disableRipple?: boolean; // Whether to disable the ripple effect
+
+  // Accessibility
+  ariaLabel?: string; // Required accessible label for screen readers
+
+  // Focus and Navigation
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Events (inherited from HTMLButtonElement)
+  click?: () => void; // Click event handler
+  focus?: () => void; // Focus event handler
+  blur?: () => void; // Blur event handler
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-mini-fab-examples",
+  template: `
+    <!-- Basic Mini FAB -->
+    <button mat-mini-fab aria-label="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <!-- Mini FAB with primary color -->
+    <button mat-mini-fab color="primary" aria-label="Save">
+      <mat-icon>save</mat-icon>
+    </button>
+
+    <!-- Mini FAB in a group -->
+    <div class="mini-fab-group">
+      <button mat-mini-fab aria-label="Previous" (click)="previous()">
+        <mat-icon>navigate_before</mat-icon>
+      </button>
+
+      <button mat-mini-fab aria-label="Next" (click)="next()">
+        <mat-icon>navigate_next</mat-icon>
+      </button>
+    </div>
+
+    <!-- Disabled Mini FAB -->
+    <button mat-mini-fab [disabled]="true" aria-label="Unavailable action">
+      <mat-icon>block</mat-icon>
+    </button>
+  `,
+  styles: [
+    `
+      .mini-fab-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule],
+})
+export class MiniFabExamplesComponent {
+  previous(): void {
+    console.log("Previous action");
+  }
+
+  next(): void {
+    console.log("Next action");
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic FAB Positioning
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-fab-positioning",
+  template: `
+    <div class="fab-container">
+      <!-- Bottom-right positioned FAB (most common) -->
+      <button mat-fab class="fab-bottom-right" aria-label="Add new item">
+        <mat-icon>add</mat-icon>
+      </button>
+
+      <!-- Bottom-left positioned FAB -->
+      <button mat-fab class="fab-bottom-left" aria-label="Quick action">
+        <mat-icon>star</mat-icon>
+      </button>
+
+      <!-- Top-right positioned FAB -->
+      <button mat-fab class="fab-top-right" aria-label="Settings">
+        <mat-icon>settings</mat-icon>
+      </button>
+
+      <!-- Extended FAB with proper positioning -->
+      <button
+        mat-fab
+        extended
+        class="fab-extended"
+        aria-label="Create new document"
+      >
+        <mat-icon>description</mat-icon>
+        New Document
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .fab-container {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+      }
+
+      .fab-bottom-right {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .fab-bottom-left {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+      }
+
+      .fab-top-right {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .fab-extended {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      @media (max-width: 600px) {
+        .fab-bottom-right,
+        .fab-bottom-left,
+        .fab-extended {
+          bottom: 16px;
+        }
+
+        .fab-bottom-right,
+        .fab-extended {
+          right: 16px;
+        }
+
+        .fab-bottom-left {
+          left: 16px;
+        }
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule],
+})
+export class FabPositioningComponent {}
+```
+
+### Advanced FAB Implementation
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  selector: "app-advanced-fabs",
+  template: `
+    <div class="advanced-fab-examples">
+      <!-- FAB with loading state -->
+      <button
+        mat-fab
+        [disabled]="isLoading"
+        (click)="performAsyncAction()"
+        class="loading-fab"
+        aria-label="Save changes"
+        [matTooltip]="isLoading ? 'Saving...' : 'Save changes'"
+      >
+        <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+        <mat-icon *ngIf="!isLoading">save</mat-icon>
+      </button>
+
+      <!-- Conditional FAB with state changes -->
+      <button
+        mat-fab
+        [color]="getFabColor()"
+        (click)="toggleFavorite()"
+        class="favorite-fab"
+        [aria-label]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+        [matTooltip]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+      >
+        <mat-icon>{{ isFavorite ? "favorite" : "favorite_border" }}</mat-icon>
+      </button>
+
+      <!-- Extended FAB with dynamic content -->
+      <button
+        mat-fab
+        extended
+        [disabled]="!canCreateItem"
+        (click)="createItem()"
+        class="create-fab"
+        aria-label="Create new item"
+        matTooltip="Create a new item in the current context"
+      >
+        <mat-icon>{{ getCreateIcon() }}</mat-icon>
+        {{ getCreateLabel() }}
+      </button>
+
+      <!-- Mini FAB toolbar -->
+      <div class="mini-fab-toolbar" role="toolbar" aria-label="Quick actions">
+        <button
+          mat-mini-fab
+          *ngFor="let action of quickActions; trackBy: trackByActionId"
+          [disabled]="!action.enabled"
+          (click)="executeAction(action)"
+          [aria-label]="action.label"
+          [matTooltip]="action.tooltip"
+          [color]="action.color"
+        >
+          <mat-icon>{{ action.icon }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Responsive FAB -->
+      <button
+        [attr.mat-fab]="isMobile ? '' : null"
+        [attr.mat-mini-fab]="!isMobile ? '' : null"
+        class="responsive-fab"
+        aria-label="Quick action"
+        (click)="quickAction()"
+      >
+        <mat-icon>bolt</mat-icon>
+      </button>
+
+      <!-- FAB with badge/notification -->
+      <div class="fab-with-badge">
+        <button
+          mat-fab
+          color="primary"
+          (click)="openNotifications()"
+          aria-label="View notifications"
+          [matTooltip]="'You have ' + notificationCount + ' notifications'"
+        >
+          <mat-icon>notifications</mat-icon>
+        </button>
+        <span
+          class="notification-badge"
+          *ngIf="notificationCount > 0"
+          [attr.aria-label]="notificationCount + ' unread notifications'"
+        >
+          {{ notificationCount > 99 ? "99+" : notificationCount }}
+        </span>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-fab-examples {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+      }
+
+      .loading-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .favorite-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 90px;
+        z-index: 1000;
+      }
+
+      .create-fab {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+      }
+
+      .mini-fab-toolbar {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 1000;
+      }
+
+      .responsive-fab {
+        position: fixed;
+        top: 200px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .fab-with-badge {
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #f44336;
+        color: white;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 1001;
+      }
+
+      @media (max-width: 600px) {
+        .loading-fab,
+        .favorite-fab,
+        .create-fab,
+        .fab-with-badge {
+          bottom: 16px;
+        }
+
+        .loading-fab {
+          right: 16px;
+        }
+
+        .favorite-fab {
+          right: 86px;
+        }
+
+        .create-fab {
+          left: 16px;
+        }
+
+        .mini-fab-toolbar {
+          right: 16px;
+        }
+
+        .fab-with-badge {
+          right: 16px;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+  ],
+})
+export class AdvancedFabsComponent {
+  isLoading = false;
+  isFavorite = false;
+  canCreateItem = true;
+  isMobile = false;
+  notificationCount = 5;
+
+  quickActions = [
+    {
+      id: 1,
+      icon: "edit",
+      label: "Edit",
+      tooltip: "Edit current item",
+      enabled: true,
+      color: "primary",
+    },
+    {
+      id: 2,
+      icon: "share",
+      label: "Share",
+      tooltip: "Share current item",
+      enabled: true,
+      color: "accent",
+    },
+    {
+      id: 3,
+      icon: "delete",
+      label: "Delete",
+      tooltip: "Delete current item",
+      enabled: false,
+      color: "warn",
+    },
+  ];
+
+  async performAsyncAction(): Promise<void> {
+    this.isLoading = true;
+    try {
+      // Simulate async operation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Action completed");
+    } catch (error) {
+      console.error("Action failed:", error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+    console.log("Favorite toggled:", this.isFavorite);
+  }
+
+  getFabColor(): string {
+    return this.isFavorite ? "warn" : "primary";
+  }
+
+  createItem(): void {
+    console.log("Creating new item...");
+  }
+
+  getCreateIcon(): string {
+    return this.canCreateItem ? "add" : "block";
+  }
+
+  getCreateLabel(): string {
+    return this.canCreateItem ? "Create Item" : "Cannot Create";
+  }
+
+  executeAction(action: any): void {
+    if (action.enabled) {
+      console.log("Executing action:", action.label);
+    }
+  }
+
+  trackByActionId(index: number, action: any): number {
+    return action.id;
+  }
+
+  quickAction(): void {
+    console.log("Quick action performed");
+  }
+
+  openNotifications(): void {
+    console.log("Opening notifications...");
+    this.notificationCount = 0; // Clear notifications
+  }
+}
+```
+
+### Common Variations
+
+#### FAB Speed Dial Pattern
+
+```typescript
+@Component({
+  template: `
+    <div class="speed-dial-container">
+      <!-- Main FAB -->
+      <button
+        mat-fab
+        color="primary"
+        (click)="toggleSpeedDial()"
+        class="speed-dial-main"
+        [attr.aria-expanded]="isSpeedDialOpen"
+        aria-label="Open quick actions menu"
+        [class.rotated]="isSpeedDialOpen"
+      >
+        <mat-icon>{{ isSpeedDialOpen ? "close" : "add" }}</mat-icon>
+      </button>
+
+      <!-- Speed dial actions -->
+      <div class="speed-dial-actions" [class.open]="isSpeedDialOpen">
+        <button
+          mat-mini-fab
+          *ngFor="let action of speedDialActions; let i = index"
+          [style.transition-delay]="
+            (isSpeedDialOpen
+              ? i * 50
+              : (speedDialActions.length - i - 1) * 50) + 'ms'
+          "
+          (click)="executeSpeedDialAction(action)"
+          [aria-label]="action.label"
+          [matTooltip]="action.label"
+          matTooltipPosition="left"
+          [color]="action.color"
+        >
+          <mat-icon>{{ action.icon }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Backdrop -->
+      <div
+        class="speed-dial-backdrop"
+        [class.visible]="isSpeedDialOpen"
+        (click)="closeSpeedDial()"
+        aria-hidden="true"
+      ></div>
+    </div>
+  `,
+  styles: [
+    `
+      .speed-dial-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .speed-dial-main {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1002;
+        position: relative;
+      }
+
+      .speed-dial-main.rotated {
+        transform: rotate(45deg);
+      }
+
+      .speed-dial-actions {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .speed-dial-actions.open {
+        pointer-events: auto;
+      }
+
+      .speed-dial-actions button {
+        transform: scale(0);
+        opacity: 0;
+        transition:
+          transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 8px;
+      }
+
+      .speed-dial-actions.open button {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      .speed-dial-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 999;
+      }
+
+      .speed-dial-backdrop.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    `,
+  ],
+})
+export class SpeedDialFabComponent {
+  isSpeedDialOpen = false;
+
+  speedDialActions = [
+    { icon: "edit", label: "Edit", color: "primary" },
+    { icon: "share", label: "Share", color: "accent" },
+    { icon: "delete", label: "Delete", color: "warn" },
+    { icon: "star", label: "Favorite", color: "" },
+  ];
+
+  toggleSpeedDial(): void {
+    this.isSpeedDialOpen = !this.isSpeedDialOpen;
+  }
+
+  closeSpeedDial(): void {
+    this.isSpeedDialOpen = false;
+  }
+
+  executeSpeedDialAction(action: any): void {
+    console.log("Speed dial action:", action.label);
+    this.closeSpeedDial();
+  }
+}
+```
+
+#### Context-Aware FAB
+
+```typescript
+@Component({
+  template: `
+    <div class="context-fab-container">
+      <!-- Context-sensitive FAB -->
+      <button
+        mat-fab
+        [extended]="shouldShowExtended"
+        [color]="getCurrentFabColor()"
+        (click)="performContextAction()"
+        class="context-fab"
+        [attr.aria-label]="getCurrentActionLabel()"
+        [matTooltip]="getCurrentActionTooltip()"
+      >
+        <mat-icon>{{ getCurrentActionIcon() }}</mat-icon>
+        <span *ngIf="shouldShowExtended">{{ getCurrentActionText() }}</span>
+      </button>
+
+      <!-- Multi-state FAB -->
+      <button
+        mat-fab
+        [class]="'state-' + currentState"
+        (click)="progressState()"
+        class="multi-state-fab"
+        [attr.aria-label]="getStateLabel()"
+        [disabled]="currentState === 'processing'"
+      >
+        <mat-spinner
+          *ngIf="currentState === 'processing'"
+          diameter="24"
+        ></mat-spinner>
+        <mat-icon *ngIf="currentState !== 'processing'">{{
+          getStateIcon()
+        }}</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .context-fab-container {
+        position: relative;
+      }
+
+      .context-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .multi-state-fab {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .state-idle {
+        background-color: #2196f3;
+      }
+
+      .state-processing {
+        background-color: #ff9800;
+      }
+
+      .state-completed {
+        background-color: #4caf50;
+      }
+
+      .state-error {
+        background-color: #f44336;
+      }
+    `,
+  ],
+})
+export class ContextAwareFabComponent {
+  @Input() currentContext: "list" | "detail" | "edit" = "list";
+  @Input() hasSelection = false;
+  @Input() isScrolled = false;
+
+  currentState: "idle" | "processing" | "completed" | "error" = "idle";
+
+  get shouldShowExtended(): boolean {
+    return !this.isScrolled && this.currentContext !== "edit";
+  }
+
+  performContextAction(): void {
+    switch (this.currentContext) {
+      case "list":
+        this.createNewItem();
+        break;
+      case "detail":
+        this.editCurrentItem();
+        break;
+      case "edit":
+        this.saveChanges();
+        break;
+    }
+  }
+
+  getCurrentFabColor(): string {
+    return this.currentContext === "edit" ? "accent" : "primary";
+  }
+
+  getCurrentActionIcon(): string {
+    switch (this.currentContext) {
+      case "list":
+        return "add";
+      case "detail":
+        return "edit";
+      case "edit":
+        return "save";
+      default:
+        return "add";
+    }
+  }
+
+  getCurrentActionText(): string {
+    switch (this.currentContext) {
+      case "list":
+        return "Add New";
+      case "detail":
+        return "Edit";
+      case "edit":
+        return "Save";
+      default:
+        return "Action";
+    }
+  }
+
+  getCurrentActionLabel(): string {
+    switch (this.currentContext) {
+      case "list":
+        return "Add new item";
+      case "detail":
+        return "Edit current item";
+      case "edit":
+        return "Save changes";
+      default:
+        return "Perform action";
+    }
+  }
+
+  getCurrentActionTooltip(): string {
+    return this.getCurrentActionLabel();
+  }
+
+  progressState(): void {
+    switch (this.currentState) {
+      case "idle":
+        this.currentState = "processing";
+        setTimeout(() => {
+          this.currentState = Math.random() > 0.7 ? "error" : "completed";
+          setTimeout(() => {
+            this.currentState = "idle";
+          }, 2000);
+        }, 2000);
+        break;
+      case "completed":
+      case "error":
+        this.currentState = "idle";
+        break;
+    }
+  }
+
+  getStateIcon(): string {
+    switch (this.currentState) {
+      case "idle":
+        return "play_arrow";
+      case "completed":
+        return "check";
+      case "error":
+        return "error";
+      default:
+        return "play_arrow";
+    }
+  }
+
+  getStateLabel(): string {
+    switch (this.currentState) {
+      case "idle":
+        return "Start process";
+      case "processing":
+        return "Processing...";
+      case "completed":
+        return "Process completed";
+      case "error":
+        return "Process failed";
+      default:
+        return "Unknown state";
+    }
+  }
+
+  private createNewItem(): void {
+    console.log("Creating new item...");
+  }
+
+  private editCurrentItem(): void {
+    console.log("Editing current item...");
+  }
+
+  private saveChanges(): void {
+    console.log("Saving changes...");
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Single primary action**: Use FABs for the single most important action on a screen - avoid multiple FABs competing for attention
+- **Maintain consistent positioning**: Keep FAB positioning consistent across screens, typically bottom-right for primary actions
+- **Use appropriate sizing**: Use regular FABs for primary actions and mini FABs for secondary actions or when space is limited
+- **Implement proper elevation**: Ensure FABs maintain proper Material Design elevation (6dp) to float above content
+- **Provide clear visual feedback**: Use loading states, color changes, and animations to communicate action progress and results
+
+### Accessibility
+
+- **Required aria-labels**: Always provide descriptive aria-label attributes since FABs often contain only icons
+- **Keyboard navigation**: Ensure FABs are reachable and activatable via keyboard navigation (Tab and Enter/Space keys)
+- **Screen reader announcements**: Use live regions or announcements to communicate state changes and action results
+- **Touch target sizing**: Maintain minimum 48dp touch targets for accessibility compliance
+- **Focus indicators**: Provide clear focus indicators that meet contrast requirements and are easily visible
+
+### Performance
+
+- **Elevation optimization**: Use CSS transforms and shadows efficiently to minimize repaints during scroll interactions
+- **Animation performance**: Leverage hardware acceleration for FAB animations and transitions using transform properties
+- **Ripple management**: Consider disabling ripples in performance-critical scenarios with many FABs
+- **Icon optimization**: Use Material Icons efficiently and consider SVG optimization for custom icons
+- **Z-index management**: Maintain proper stacking context without excessive z-index values
+
+## Common Patterns
+
+### Pattern 1: Primary Action FAB
+
+```typescript
+@Component({
+  template: `
+    <div class="primary-action-container">
+      <!-- Content area -->
+      <div class="content">
+        <!-- Your main content here -->
+      </div>
+
+      <!-- Primary action FAB -->
+      <button
+        mat-fab
+        color="primary"
+        (click)="onPrimaryAction()"
+        class="primary-fab"
+        aria-label="Add new item"
+        [matTooltip]="tooltipText"
+        [disabled]="!canPerformAction"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .primary-action-container {
+        position: relative;
+        min-height: 100vh;
+      }
+
+      .content {
+        padding: 16px;
+        padding-bottom: 100px; /* Space for FAB */
+      }
+
+      .primary-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      @media (max-width: 600px) {
+        .primary-fab {
+          bottom: 16px;
+          right: 16px;
+        }
+
+        .content {
+          padding-bottom: 84px;
+        }
+      }
+    `,
+  ],
+})
+export class PrimaryActionFabComponent {
+  @Input() canPerformAction = true;
+  @Input() tooltipText = "Add new item";
+
+  onPrimaryAction(): void {
+    // Implement primary action logic
+    console.log("Primary action performed");
+  }
+}
+```
+
+### Pattern 2: Scrolling FAB Behavior
+
+```typescript
+@Component({
+  template: `
+    <div class="scrolling-container" (scroll)="onScroll($event)">
+      <!-- Scrollable content -->
+      <div class="content">
+        <div *ngFor="let item of items" class="content-item">
+          {{ item }}
+        </div>
+      </div>
+
+      <!-- FAB that responds to scroll -->
+      <button
+        mat-fab
+        [extended]="!isScrollingDown"
+        [class.hide-fab]="isScrollingDown && scrollPosition > 100"
+        (click)="scrollToTop()"
+        class="scroll-responsive-fab"
+        [attr.aria-label]="isScrollingDown ? 'Scroll to top' : 'Add new item'"
+      >
+        <mat-icon>{{
+          isScrollingDown && scrollPosition > 100 ? "keyboard_arrow_up" : "add"
+        }}</mat-icon>
+        <span *ngIf="!isScrollingDown">Add Item</span>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .scrolling-container {
+        height: 100vh;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .content {
+        padding: 16px;
+        padding-bottom: 100px;
+      }
+
+      .content-item {
+        height: 100px;
+        margin-bottom: 16px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+      }
+
+      .scroll-responsive-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        transition:
+          transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .scroll-responsive-fab.hide-fab {
+        transform: translateY(100px);
+        opacity: 0;
+        pointer-events: none;
+      }
+    `,
+  ],
+})
+export class ScrollingFabComponent {
+  items = Array.from({ length: 50 }, (_, i) => `Item ${i + 1}`);
+  scrollPosition = 0;
+  isScrollingDown = false;
+  private lastScrollTop = 0;
+
+  onScroll(event: Event): void {
+    const element = event.target as HTMLElement;
+    this.scrollPosition = element.scrollTop;
+
+    this.isScrollingDown = element.scrollTop > this.lastScrollTop;
+    this.lastScrollTop = element.scrollTop;
+  }
+
+  scrollToTop(): void {
+    const container = document.querySelector(".scrolling-container");
+    if (container) {
+      container.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+}
+```

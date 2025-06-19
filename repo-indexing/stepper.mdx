@@ -1,0 +1,790 @@
+---
+title: Stepper Components
+---
+
+# Stepper Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle step-by-step navigation with required hierarchical structure. The Stepper component group provides a wizard-like workflow by dividing content into logical steps with Material Design styling, built-in form validation, and flexible navigation patterns.
+
+### When to Use
+
+- **Multi-step Forms**: When you need to break complex forms into manageable, sequential steps with validation at each stage
+- **Wizard Workflows**: For guiding users through multi-step processes like onboarding, setup wizards, or checkout flows
+- **Progressive Disclosure**: When presenting information or tasks that build upon each other in a logical sequence
+- **Form Validation**: For forms requiring step-by-step validation before allowing users to proceed to the next step
+- **User Onboarding**: In applications requiring guided user experiences with clear progress indicators
+- **Data Collection**: When collecting extensive user data that benefits from being organized into discrete, focused steps
+
+### Architecture
+
+**Critical/Strong Coupling**: The Stepper component group follows a required hierarchical structure where components must be used together in specific parent-child relationships. The architecture is built around:
+
+- **Required parent-child relationships**: `mat-stepper` serves as the root container, with `mat-step` components as required children
+- **Shared context dependencies**: The stepper manages navigation state and provides context to all step components
+- **Compositional hierarchy**: Steps can contain labels, content, and navigation controls that work together as a cohesive unit
+
+### Component Interdependencies
+
+The Stepper component group requires strict composition patterns:
+
+- **`mat-stepper`** → Root container that manages step navigation, validation, and overall workflow state
+- **`mat-step`** → Individual step containers that hold content and validation logic (required children of `mat-stepper`)
+- **`mat-step-label`** → Custom labels for steps that can include icons and complex content (optional child of `mat-step`)
+- **`mat-step-content`** → Lazy-loaded content templates for performance optimization (optional child of `mat-step`)
+- **Navigation Components** → `matStepperNext`, `matStepperPrevious` provide step navigation controls within step content
+- **Header Components** → `mat-step-header` and `mat-stepper-icon` work together to render step headers with proper states
+
+## Components
+
+### MatStepper {Primary Component}
+
+The main container component that manages the stepper workflow, navigation state, and step validation.
+
+**Purpose:** Serves as the root container for all step-related components, manages step navigation, handles form validation, and provides the foundation for Material Design stepper styling.
+
+**Interface:**
+
+```typescript
+interface MatStepperProps {
+  linear?: boolean; // Requires completion of previous steps before advancing
+  selectedIndex?: number; // Index of the currently selected step
+  disableRipple?: boolean; // Disables ripple effects on step headers
+  color?: ThemePalette; // Theme color for the stepper
+  labelPosition?: "bottom" | "end"; // Position of step labels relative to icons
+  headerPosition?: number; // Position of the header
+  animationDuration?: string; // Duration of step transition animations
+  orientation?: "horizontal" | "vertical"; // Stepper orientation
+}
+```
+
+**Dependencies:** Requires Angular Material's stepper module and CDK stepper functionality
+**Provides:** Navigation context, step management, and validation state for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatStepperModule } from "@angular/material/stepper";
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+
+@Component({
+  selector: "app-stepper-example",
+  template: `
+    <mat-stepper [linear]="true" #stepper>
+      <mat-step [stepControl]="firstFormGroup">
+        <!-- Step content -->
+      </mat-step>
+      <mat-step [stepControl]="secondFormGroup">
+        <!-- Step content -->
+      </mat-step>
+    </mat-stepper>
+  `,
+  imports: [MatStepperModule, ReactiveFormsModule],
+})
+export class StepperExampleComponent {
+  firstFormGroup: FormGroup;
+  secondFormGroup: FormGroup;
+
+  constructor(private formBuilder: FormBuilder) {
+    this.firstFormGroup = this.formBuilder.group({
+      firstCtrl: ["", Validators.required],
+    });
+    this.secondFormGroup = this.formBuilder.group({
+      secondCtrl: ["", Validators.required],
+    });
+  }
+}
+```
+
+### MatStep {Required Step Container}
+
+Individual step components that contain the content, validation logic, and state for each step in the workflow.
+
+**Purpose:** Represents a single step within the stepper, manages step-specific validation, and provides content organization for the step workflow.
+
+**Interface:**
+
+```typescript
+interface MatStepProps {
+  ariaLabel?: string; // ARIA label for the step
+  ariaLabelledby?: string; // ID of element that labels the step
+  completed?: boolean; // Whether the step is marked as completed
+  editable?: boolean; // Whether users can return to this step after completion
+  errorMessage?: string; // Error message to display when step has errors
+  hasError?: boolean; // Whether the step currently has an error
+  label?: string; // Plain text label for the step
+  optional?: boolean; // Whether completion of this step is optional
+  state?: "number" | "edit" | "done" | "error" | string; // Current state of the step
+  stepControl?: AbstractControl; // Form control for step validation
+}
+```
+
+**Context Dependencies:** Must be a direct child of `mat-stepper`
+**Parent Requirements:** Required parent component is `mat-stepper`
+**Provides:** Step content container and validation context for step content and navigation controls
+
+**Usage Example:**
+
+```html
+<mat-stepper linear>
+  <mat-step
+    [stepControl]="formGroup"
+    label="Personal Information"
+    [optional]="false"
+    [editable]="true"
+  >
+    <form [formGroup]="formGroup">
+      <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required />
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperNext [disabled]="!formGroup.valid">
+          Next
+        </button>
+      </div>
+    </form>
+  </mat-step>
+</mat-stepper>
+```
+
+### MatStepLabel {Custom Step Label}
+
+Directive for defining custom step labels that can include icons, complex HTML, or dynamic content.
+
+**Purpose:** Provides the ability to create rich, customized step labels beyond simple text, allowing for icons, tooltips, and complex formatting.
+
+**Interface:**
+
+```typescript
+interface MatStepLabelProps {
+  // Template directive - no direct props
+  // Content is defined within the template
+  // Inherits from CdkStepLabel
+}
+```
+
+**Context Dependencies:** Must be used within `mat-step`
+**Parent Requirements:** Required parent is a `mat-step` component
+
+**Usage Example:**
+
+```html
+<mat-step [stepControl]="formGroup">
+  <ng-template matStepLabel>
+    <mat-icon>account_circle</mat-icon>
+    Personal Info
+  </ng-template>
+  <!-- Step content -->
+</mat-step>
+```
+
+### MatStepContent {Lazy-Loaded Content}
+
+Directive for defining step content that should be rendered only when the step becomes active, improving performance for complex steppers.
+
+**Purpose:** Enables lazy loading of step content to improve initial rendering performance and memory usage in steppers with many or complex steps.
+
+**Interface:**
+
+```typescript
+interface MatStepContentProps {
+  // Template directive - no direct props
+  // Content is defined within the ng-template
+  // Inherits from CdkStepContent
+}
+```
+
+**Context Dependencies:** Must be used within `mat-step` as an `ng-template`
+**Parent Requirements:** Required parent is a `mat-step` component
+
+**Usage Example:**
+
+```html
+<mat-step>
+  <ng-template matStepContent>
+    <div>
+      <!-- This content is only rendered when the step is active -->
+      <complex-component [data]="expensiveData"></complex-component>
+    </div>
+  </ng-template>
+</mat-step>
+```
+
+### MatStepperNext {Navigation Control}
+
+Directive for creating buttons that navigate to the next step in the stepper sequence.
+
+**Purpose:** Provides standardized navigation controls that integrate with the stepper's validation and state management.
+
+**Interface:**
+
+```typescript
+interface MatStepperNextProps {
+  type?: "button" | "submit"; // Button type for form handling
+  // Applied as directive to button elements
+}
+```
+
+**Context Dependencies:** Must be used within `mat-step` content
+**Parent Requirements:** Must be within a `mat-step` component
+
+**Usage Example:**
+
+```html
+<mat-step [stepControl]="formGroup">
+  <form [formGroup]="formGroup">
+    <!-- Form fields -->
+    <div>
+      <button mat-button matStepperNext [disabled]="!formGroup.valid">
+        Next
+      </button>
+    </div>
+  </form>
+</mat-step>
+```
+
+### MatStepperPrevious {Navigation Control}
+
+Directive for creating buttons that navigate to the previous step in the stepper sequence.
+
+**Purpose:** Provides standardized backward navigation controls that work seamlessly with the stepper's state management.
+
+**Interface:**
+
+```typescript
+interface MatStepperPreviousProps {
+  type?: "button" | "submit"; // Button type for form handling
+  // Applied as directive to button elements
+}
+```
+
+**Context Dependencies:** Must be used within `mat-step` content
+**Parent Requirements:** Must be within a `mat-step` component
+
+**Usage Example:**
+
+```html
+<mat-step>
+  <!-- Step content -->
+  <div>
+    <button mat-button matStepperPrevious>Back</button>
+    <button mat-button matStepperNext>Next</button>
+  </div>
+</mat-step>
+```
+
+### MatStepHeader {Step Header Component}
+
+Component that renders the visual header for each step, including the step number, label, and state indicators.
+
+**Purpose:** Provides the visual representation of step headers with proper Material Design styling and accessibility features.
+
+**Interface:**
+
+```typescript
+interface MatStepHeaderProps {
+  state: string; // Current state of the step ('number', 'edit', 'done', 'error')
+  label?: string; // Step label text
+  errorMessage?: string; // Error message for accessibility
+  iconOverrides?: { [key: string]: TemplateRef<MatStepperIconContext> }; // Custom icons
+  index: number; // Step index
+  selected: boolean; // Whether this step is currently selected
+  active: boolean; // Whether this step is active
+  optional: boolean; // Whether this step is optional
+  disableRipple: boolean; // Whether ripple effects are disabled
+}
+```
+
+**Context Dependencies:** Automatically managed by `mat-stepper`
+**Parent Requirements:** Generated automatically by the stepper
+
+### MatStepperIcon {Step Icon Customization}
+
+Directive for customizing the icons displayed in step headers for different step states.
+
+**Purpose:** Allows customization of step header icons for different states (number, edit, done, error) while maintaining accessibility.
+
+**Interface:**
+
+```typescript
+interface MatStepperIconProps {
+  svgIcon?: string; // SVG icon name
+  fontIcon?: string; // Font icon name
+  fontSet?: string; // Font icon set
+  // Applied to mat-icon within step headers
+}
+```
+
+**Context Dependencies:** Used within stepper icon templates
+**Parent Requirements:** Applied to icon elements in step customization
+
+**Usage Example:**
+
+```html
+<mat-stepper>
+  <ng-template matStepperIcon="edit">
+    <mat-icon>edit</mat-icon>
+  </ng-template>
+  <ng-template matStepperIcon="done">
+    <mat-icon>check</mat-icon>
+  </ng-template>
+
+  <!-- Steps -->
+  <mat-step>Step content</mat-step>
+</mat-stepper>
+```
+
+## Integration Patterns
+
+### Basic Linear Stepper
+
+```typescript
+import { MatStepperModule } from "@angular/material/stepper";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+
+@Component({
+  selector: "app-linear-stepper",
+  template: `
+    <mat-stepper linear #stepper>
+      <mat-step [stepControl]="firstFormGroup" label="Fill out your name">
+        <form [formGroup]="firstFormGroup">
+          <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="firstCtrl" required />
+          </mat-form-field>
+          <div>
+            <button
+              mat-button
+              matStepperNext
+              [disabled]="!firstFormGroup.valid"
+            >
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [stepControl]="secondFormGroup" label="Fill out your address">
+        <form [formGroup]="secondFormGroup">
+          <mat-form-field>
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="secondCtrl" required />
+          </mat-form-field>
+          <div>
+            <button mat-button matStepperPrevious>Back</button>
+            <button
+              mat-button
+              matStepperNext
+              [disabled]="!secondFormGroup.valid"
+            >
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step label="Done">
+        <p>You are now done.</p>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button (click)="stepper.reset()">Reset</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+  imports: [
+    MatStepperModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    ReactiveFormsModule,
+  ],
+})
+export class LinearStepperComponent {
+  firstFormGroup: FormGroup;
+  secondFormGroup: FormGroup;
+
+  constructor(private formBuilder: FormBuilder) {
+    this.firstFormGroup = this.formBuilder.group({
+      firstCtrl: ["", Validators.required],
+    });
+    this.secondFormGroup = this.formBuilder.group({
+      secondCtrl: ["", Validators.required],
+    });
+  }
+}
+```
+
+### Advanced Stepper with Custom Labels and Icons
+
+```typescript
+@Component({
+  selector: "app-advanced-stepper",
+  template: `
+    <mat-stepper #stepper>
+      <!-- Custom icon templates -->
+      <ng-template matStepperIcon="edit">
+        <mat-icon>edit</mat-icon>
+      </ng-template>
+      <ng-template matStepperIcon="done">
+        <mat-icon>done_all</mat-icon>
+      </ng-template>
+
+      <mat-step [stepControl]="personalInfoForm" [editable]="true">
+        <ng-template matStepLabel>
+          <mat-icon>person</mat-icon>
+          Personal Information
+        </ng-template>
+
+        <form [formGroup]="personalInfoForm">
+          <mat-form-field>
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" required />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" required />
+          </mat-form-field>
+
+          <div>
+            <button
+              mat-button
+              matStepperNext
+              [disabled]="!personalInfoForm.valid"
+            >
+              Continue
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [stepControl]="contactForm" [optional]="true">
+        <ng-template matStepLabel>
+          <mat-icon>contact_mail</mat-icon>
+          Contact Details
+          <span class="optional-label">(Optional)</span>
+        </ng-template>
+
+        <ng-template matStepContent>
+          <!-- Lazy-loaded content -->
+          <form [formGroup]="contactForm">
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" />
+            </mat-form-field>
+
+            <div>
+              <button mat-button matStepperPrevious>Back</button>
+              <button mat-button matStepperNext>Continue</button>
+            </div>
+          </form>
+        </ng-template>
+      </mat-step>
+
+      <mat-step label="Review & Submit">
+        <div class="review-section">
+          <h3>Review Your Information</h3>
+          <p><strong>Name:</strong> {{ getFullName() }}</p>
+          <p>
+            <strong>Email:</strong>
+            {{ contactForm.get("email")?.value || "Not provided" }}
+          </p>
+
+          <div>
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" (click)="submit()">
+              Submit
+            </button>
+          </div>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+  styles: [
+    `
+      .optional-label {
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 4px;
+      }
+
+      .review-section {
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 4px;
+      }
+    `,
+  ],
+  imports: [
+    MatStepperModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedStepperComponent {
+  personalInfoForm: FormGroup;
+  contactForm: FormGroup;
+
+  constructor(private formBuilder: FormBuilder) {
+    this.personalInfoForm = this.formBuilder.group({
+      firstName: ["", Validators.required],
+      lastName: ["", Validators.required],
+    });
+
+    this.contactForm = this.formBuilder.group({
+      email: ["", Validators.email],
+      phone: [""],
+    });
+  }
+
+  getFullName(): string {
+    const firstName = this.personalInfoForm.get("firstName")?.value;
+    const lastName = this.personalInfoForm.get("lastName")?.value;
+    return `${firstName} ${lastName}`;
+  }
+
+  submit(): void {
+    // Handle form submission
+    console.log("Personal Info:", this.personalInfoForm.value);
+    console.log("Contact Info:", this.contactForm.value);
+  }
+}
+```
+
+### Common Variations
+
+#### Vertical Stepper with Error Handling
+
+```html
+<mat-vertical-stepper linear>
+  <mat-step [stepControl]="formGroup" [hasError]="hasStepError">
+    <ng-template matStepLabel> Step with Error Handling </ng-template>
+
+    <form [formGroup]="formGroup">
+      <mat-form-field>
+        <mat-label>Required Field</mat-label>
+        <input matInput formControlName="requiredField" required />
+        <mat-error *ngIf="formGroup.get('requiredField')?.hasError('required')">
+          This field is required
+        </mat-error>
+      </mat-form-field>
+
+      <div>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </form>
+  </mat-step>
+</mat-vertical-stepper>
+```
+
+#### Non-Linear Stepper with Custom Navigation
+
+```html
+<mat-stepper #stepper [selectedIndex]="selectedStepIndex">
+  <mat-step label="Step 1" [completed]="step1Completed">
+    <!-- Step 1 content -->
+    <button mat-button (click)="goToStep(2)">Skip to Step 3</button>
+  </mat-step>
+
+  <mat-step label="Step 2" [completed]="step2Completed">
+    <!-- Step 2 content -->
+  </mat-step>
+
+  <mat-step label="Step 3">
+    <!-- Step 3 content -->
+    <button mat-button (click)="goToStep(0)">Go Back to Step 1</button>
+  </mat-step>
+</mat-stepper>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Stepper → Steps**: The `MatStepper` manages the active step state and passes context to child `MatStep` components
+2. **Steps → Content**: Each step provides validation context and content organization for forms and controls
+3. **Navigation Controls → Stepper**: `matStepperNext` and `matStepperPrevious` directives communicate with the parent stepper for navigation
+4. **Form Controls → Step Validation**: Step controls provide validation state that determines navigation availability
+
+### Context Sharing
+
+- **Navigation Context**: `MatStepper` provides navigation methods and state management to all child components
+- **Validation Context**: Each `MatStep` provides form validation context that integrates with the stepper's linear behavior
+- **Step State**: Steps share completion, error, and selection state through the parent stepper
+- **Template Context**: Custom labels and content templates receive step index, state, and other contextual information
+
+### Event Handling
+
+- **Step Selection**: Events bubble from step headers through the stepper to handle step changes
+- **Navigation**: Next/Previous button events integrate with form validation and stepper state
+- **Validation**: Form validation events from step controls determine navigation availability
+- **State Changes**: Step completion and error states automatically update visual indicators
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use linear steppers for sequential workflows**: Enable linear mode when steps must be completed in order
+- **Implement proper form validation**: Associate FormGroup or FormControl with each step for validation
+- **Provide clear navigation**: Always include appropriate navigation buttons and clear labeling
+- **Handle error states**: Implement error messaging and validation feedback for better user experience
+- **Consider performance**: Use `matStepContent` for lazy loading of complex step content
+
+### Accessibility
+
+- **ARIA relationships**: Stepper components automatically provide proper ARIA labels and step relationships
+- **Keyboard navigation**: Steps can be navigated using arrow keys when not in linear mode
+- **Screen reader support**: Step labels, states, and validation messages are properly announced
+- **Focus management**: Focus is automatically managed when navigating between steps
+- **Error announcements**: Error states and messages are accessible to screen readers
+
+### Performance
+
+- **Lazy loading**: Use `matStepContent` directive for steps with heavy content or components
+- **Form optimization**: Use reactive forms with proper validation strategies
+- **Change detection**: Implement OnPush change detection for performance-critical steppers
+- **Memory management**: Properly dispose of subscriptions and clean up resources
+- **Conditional rendering**: Only render step content when necessary to improve initial load times
+
+## Common Patterns
+
+### Pattern 1: Multi-Step Form with Validation
+
+```typescript
+@Component({
+  template: `
+    <mat-stepper linear #stepper>
+      <mat-step
+        *ngFor="let step of steps; let i = index"
+        [stepControl]="step.formGroup"
+        [label]="step.label"
+      >
+        <form [formGroup]="step.formGroup">
+          <div *ngFor="let field of step.fields">
+            <mat-form-field>
+              <mat-label>{{ field.label }}</mat-label>
+              <input
+                matInput
+                [formControlName]="field.name"
+                [type]="field.type"
+              />
+              <mat-error
+                *ngIf="step.formGroup.get(field.name)?.hasError('required')"
+              >
+                {{ field.label }} is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <button mat-button matStepperPrevious *ngIf="i > 0">Back</button>
+            <button
+              mat-button
+              matStepperNext
+              [disabled]="!step.formGroup.valid"
+            >
+              {{ i === steps.length - 1 ? "Submit" : "Next" }}
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
+  `,
+})
+export class DynamicFormStepperComponent {
+  steps = [
+    {
+      label: "Personal Info",
+      formGroup: this.fb.group({
+        firstName: ["", Validators.required],
+        lastName: ["", Validators.required],
+      }),
+      fields: [
+        { name: "firstName", label: "First Name", type: "text" },
+        { name: "lastName", label: "Last Name", type: "text" },
+      ],
+    },
+    {
+      label: "Contact Info",
+      formGroup: this.fb.group({
+        email: ["", [Validators.required, Validators.email]],
+        phone: ["", Validators.required],
+      }),
+      fields: [
+        { name: "email", label: "Email", type: "email" },
+        { name: "phone", label: "Phone", type: "tel" },
+      ],
+    },
+  ];
+
+  constructor(private fb: FormBuilder) {}
+}
+```
+
+### Pattern 2: Stepper with Progress Tracking
+
+```typescript
+@Component({
+  template: `
+    <div class="progress-indicator">
+      <mat-progress-bar [value]="progressPercentage"></mat-progress-bar>
+      <span>Step {{ stepper.selectedIndex + 1 }} of {{ totalSteps }}</span>
+    </div>
+
+    <mat-stepper #stepper (selectionChange)="onStepChange($event)">
+      <mat-step *ngFor="let step of steps" [label]="step.label">
+        <div [innerHTML]="step.content"></div>
+        <div>
+          <button mat-button matStepperPrevious>Previous</button>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  `,
+  styles: [
+    `
+      .progress-indicator {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+    `,
+  ],
+})
+export class ProgressStepperComponent {
+  totalSteps = 4;
+  progressPercentage = 0;
+
+  onStepChange(event: StepperSelectionEvent): void {
+    this.progressPercentage =
+      ((event.selectedIndex + 1) / this.totalSteps) * 100;
+  }
+}
+```

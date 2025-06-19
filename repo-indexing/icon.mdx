@@ -1,0 +1,1819 @@
+---
+title: Icon Components
+---
+
+# Icon Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate icon functionality. The Icon component provides a comprehensive solution for displaying icons in your Angular Material application, supporting both SVG and font-based icons with consistent styling, proper accessibility features, and flexible customization options that integrate seamlessly with Material Design themes.
+
+### When to Use
+
+- **UI Navigation Elements**: When creating navigation menus, toolbars, and action bars that require visual indicators alongside or instead of text labels
+- **Button Enhancement**: For adding visual context to buttons, making actions more intuitive and recognizable to users
+- **Status Indicators**: When displaying system states, notifications, or feedback messages that benefit from visual reinforcement
+- **Content Organization**: For categorizing content sections, indicating file types, or providing visual hierarchy in lists and tables
+- **Interactive Elements**: When creating icon-only buttons for space-constrained interfaces like mobile applications or compact toolbars
+- **Data Visualization**: For representing different data types, categories, or actions in charts, graphs, and data tables
+- **Form Controls**: When enhancing form inputs with contextual icons that clarify field purpose or indicate validation states
+- **Accessibility Enhancement**: For providing visual cues that support screen readers and improve overall accessibility
+- **Brand Consistency**: When maintaining visual consistency across the application with standardized iconography
+- **Multi-language Support**: For creating interfaces that rely less on text and more on universally understood visual symbols
+
+### Architecture
+
+**No Coupling**: The Icon component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete icon rendering with built-in support for multiple icon sources and formats
+- **Flexible integration**: Can be embedded anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and visual consistency regardless of usage context
+- **Theme integration**: Automatically inherits styling from the Material Design theme system
+- **Accessibility features**: Built-in ARIA support and semantic HTML structure for screen reader compatibility
+
+## Components
+
+### MatIcon {Standalone Component}
+
+A versatile icon component that provides Material Design icon rendering with support for font icons, SVG icons, and custom icon sets, offering comprehensive customization and accessibility features.
+
+**Purpose:** Renders icons from various sources (font icons, SVG icons, custom icon sets) with Material Design styling, proper accessibility features, and seamless integration with Angular Material's theming system.
+
+**Interface:**
+
+```typescript
+interface MatIconProps {
+  // Icon Source Configuration
+  fontIcon?: string; // Name of the icon within the specified font set
+  fontSet?: string; // Font set that the icon is part of (e.g., 'material-icons')
+  svgIcon?: string; // Name of the icon in the SVG icon set
+
+  // Styling and Appearance
+  color?: string | null; // Theme color palette (M2 themes only, deprecated in M3)
+  inline?: boolean; // Whether to inline the icon, sizing to match surrounding font
+
+  // Accessibility
+  ariaLabel?: string; // Accessible label for screen readers
+  ariaHidden?: boolean; // Whether to hide from screen readers
+
+  // Standard HTML attributes (inherited from HTMLElement)
+  class?: string; // CSS classes for custom styling
+  style?: string; // Inline styles for specific customization
+  id?: string; // Unique identifier
+  tabIndex?: number; // Tab order for keyboard navigation
+}
+
+// Configuration interfaces for icon management
+interface MatIconDefaultOptions {
+  color?: string; // Default color for all icons
+  fontSet?: string; // Default font set for all icons
+}
+
+interface IconOptions {
+  viewBox?: string; // SVG viewBox attribute
+  withCredentials?: boolean; // HTTP credentials for icon fetching
+}
+
+interface SafeResourceUrlWithIconOptions {
+  url: SafeResourceUrl; // Sanitized URL for the icon resource
+  options?: IconOptions; // Additional options for the icon
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatIconModule } from "@angular/material/icon";
+import { MatIconRegistry } from "@angular/material/icon";
+import { DomSanitizer } from "@angular/platform-browser";
+
+@Component({
+  selector: "app-icon-examples",
+  template: `
+    <!-- Basic Material Icons font icon -->
+    <mat-icon>home</mat-icon>
+    <mat-icon>search</mat-icon>
+    <mat-icon>settings</mat-icon>
+
+    <!-- Font icon with specific font set -->
+    <mat-icon fontSet="material-icons-outlined" fontIcon="favorite"></mat-icon>
+
+    <!-- Inline icon that matches surrounding text size -->
+    <p>Click the <mat-icon inline>info</mat-icon> icon for more details</p>
+
+    <!-- SVG icon from registered icon set -->
+    <mat-icon svgIcon="custom-logo"></mat-icon>
+
+    <!-- Icon with custom styling -->
+    <mat-icon class="large-icon">star</mat-icon>
+
+    <!-- Icon with accessibility label -->
+    <mat-icon aria-label="Delete item">delete</mat-icon>
+
+    <!-- Decorative icon hidden from screen readers -->
+    <mat-icon aria-hidden="true">decorative</mat-icon>
+
+    <!-- Icon with theme color (M2 themes only) -->
+    <mat-icon color="primary">bookmark</mat-icon>
+  `,
+  styles: [
+    `
+      .large-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+    `,
+  ],
+  imports: [MatIconModule],
+})
+export class IconExamplesComponent {
+  constructor(
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer,
+  ) {
+    // Register custom SVG icon
+    this.matIconRegistry.addSvgIcon(
+      "custom-logo",
+      this.domSanitizer.bypassSecurityTrustResourceUrl("assets/icons/logo.svg"),
+    );
+
+    // Register icon set
+    this.matIconRegistry.addSvgIconSet(
+      this.domSanitizer.bypassSecurityTrustResourceUrl(
+        "assets/icons/icon-set.svg",
+      ),
+    );
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Icon Usage
+
+```typescript
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-basic-icons",
+  template: `
+    <div class="icon-showcase">
+      <!-- Material Icons (default font set) -->
+      <div class="icon-group">
+        <h3>Material Icons</h3>
+        <mat-icon>home</mat-icon>
+        <mat-icon>search</mat-icon>
+        <mat-icon>favorite</mat-icon>
+        <mat-icon>account_circle</mat-icon>
+      </div>
+
+      <!-- Outlined variant -->
+      <div class="icon-group">
+        <h3>Outlined Icons</h3>
+        <mat-icon fontSet="material-icons-outlined">home</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">search</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">favorite</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">account_circle</mat-icon>
+      </div>
+
+      <!-- Different sizes -->
+      <div class="icon-group">
+        <h3>Different Sizes</h3>
+        <mat-icon class="small-icon">star</mat-icon>
+        <mat-icon>star</mat-icon>
+        <mat-icon class="large-icon">star</mat-icon>
+        <mat-icon class="extra-large-icon">star</mat-icon>
+      </div>
+
+      <!-- Inline icons -->
+      <div class="icon-group">
+        <h3>Inline Icons</h3>
+        <p>
+          Small inline icon: <mat-icon inline>info</mat-icon> for information
+        </p>
+        <h2>
+          Large inline icon: <mat-icon inline>warning</mat-icon> for warnings
+        </h2>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .icon-showcase {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .icon-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .icon-group h3 {
+        margin: 0;
+        min-width: 150px;
+      }
+
+      .small-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .large-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+      }
+
+      .extra-large-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+    `,
+  ],
+  imports: [MatIconModule],
+})
+export class BasicIconsComponent {}
+```
+
+### Advanced Icon Implementation
+
+```typescript
+import { MatIconModule, MatIconRegistry } from "@angular/material/icon";
+import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
+import { MatButtonModule } from "@angular/material/button";
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  selector: "app-advanced-icons",
+  template: `
+    <div class="advanced-icon-examples">
+      <!-- Custom SVG Icons -->
+      <section class="icon-section">
+        <h3>Custom SVG Icons</h3>
+        <div class="icon-row">
+          <mat-icon svgIcon="custom-heart" class="custom-icon"></mat-icon>
+          <mat-icon svgIcon="custom-star" class="custom-icon"></mat-icon>
+          <mat-icon svgIcon="company-logo" class="custom-icon"></mat-icon>
+        </div>
+      </section>
+
+      <!-- Interactive Icon Buttons -->
+      <section class="icon-section">
+        <h3>Interactive Icon Buttons</h3>
+        <div class="icon-row">
+          <button
+            mat-icon-button
+            (click)="toggleFavorite()"
+            [class.favorite-active]="isFavorite"
+            matTooltip="Toggle favorite"
+            aria-label="Toggle favorite"
+          >
+            <mat-icon>{{
+              isFavorite ? "favorite" : "favorite_border"
+            }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            (click)="toggleVisibility()"
+            matTooltip="Toggle visibility"
+            aria-label="Toggle visibility"
+          >
+            <mat-icon>{{
+              isVisible ? "visibility" : "visibility_off"
+            }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            [disabled]="isLoading"
+            (click)="refresh()"
+            matTooltip="Refresh data"
+            aria-label="Refresh data"
+          >
+            <mat-icon [class.spinning]="isLoading">refresh</mat-icon>
+          </button>
+        </div>
+      </section>
+
+      <!-- Status Icons with Dynamic Colors -->
+      <section class="icon-section">
+        <h3>Status Icons</h3>
+        <div class="icon-row">
+          <div class="status-item">
+            <mat-icon class="status-success">check_circle</mat-icon>
+            <span>Success</span>
+          </div>
+          <div class="status-item">
+            <mat-icon class="status-warning">warning</mat-icon>
+            <span>Warning</span>
+          </div>
+          <div class="status-item">
+            <mat-icon class="status-error">error</mat-icon>
+            <span>Error</span>
+          </div>
+          <div class="status-item">
+            <mat-icon class="status-info">info</mat-icon>
+            <span>Info</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contextual Icon Usage -->
+      <section class="icon-section">
+        <h3>Contextual Usage</h3>
+
+        <!-- Navigation icons -->
+        <div class="context-group">
+          <h4>Navigation</h4>
+          <div class="icon-row">
+            <button mat-stroked-button>
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button mat-stroked-button>
+              <mat-icon>home</mat-icon>
+              Home
+            </button>
+            <button mat-stroked-button>
+              Forward
+              <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- File type icons -->
+        <div class="context-group">
+          <h4>File Types</h4>
+          <div class="file-list">
+            <div class="file-item">
+              <mat-icon class="file-icon pdf">picture_as_pdf</mat-icon>
+              <span>document.pdf</span>
+            </div>
+            <div class="file-item">
+              <mat-icon class="file-icon image">image</mat-icon>
+              <span>photo.jpg</span>
+            </div>
+            <div class="file-item">
+              <mat-icon class="file-icon video">movie</mat-icon>
+              <span>video.mp4</span>
+            </div>
+            <div class="file-item">
+              <mat-icon class="file-icon document">description</mat-icon>
+              <span>text.doc</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social media icons -->
+        <div class="context-group">
+          <h4>Social Actions</h4>
+          <div class="social-actions">
+            <button mat-icon-button matTooltip="Like">
+              <mat-icon>thumb_up</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Share">
+              <mat-icon>share</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Comment">
+              <mat-icon>comment</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Bookmark">
+              <mat-icon>bookmark_border</mat-icon>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Responsive Icon Grid -->
+      <section class="icon-section">
+        <h3>Icon Grid</h3>
+        <div class="icon-grid">
+          <div class="grid-item" *ngFor="let icon of iconGrid">
+            <mat-icon>{{ icon.name }}</mat-icon>
+            <span>{{ icon.label }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-icon-examples {
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .icon-section {
+        margin-bottom: 32px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .icon-section h3 {
+        margin-top: 0;
+        color: #1976d2;
+        border-bottom: 2px solid #1976d2;
+        padding-bottom: 8px;
+      }
+
+      .icon-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .custom-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+
+      .favorite-active {
+        color: #e91e63 !important;
+      }
+
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        background-color: #f5f5f5;
+      }
+
+      .status-success {
+        color: #4caf50;
+      }
+      .status-warning {
+        color: #ff9800;
+      }
+      .status-error {
+        color: #f44336;
+      }
+      .status-info {
+        color: #2196f3;
+      }
+
+      .context-group {
+        margin-bottom: 16px;
+      }
+
+      .context-group h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+      }
+
+      .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 4px;
+        background-color: #fafafa;
+      }
+
+      .file-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .file-icon.pdf {
+        color: #d32f2f;
+      }
+      .file-icon.image {
+        color: #388e3c;
+      }
+      .file-icon.video {
+        color: #1976d2;
+      }
+      .file-icon.document {
+        color: #7b1fa2;
+      }
+
+      .social-actions {
+        display: flex;
+        gap: 8px;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #fafafa;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .grid-item:hover {
+        background-color: #e3f2fd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      .grid-item span {
+        font-size: 12px;
+        text-align: center;
+        color: #666;
+      }
+
+      @media (max-width: 768px) {
+        .icon-row {
+          justify-content: center;
+        }
+
+        .icon-grid {
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 12px;
+        }
+
+        .social-actions {
+          justify-content: center;
+        }
+      }
+    `,
+  ],
+  imports: [MatIconModule, MatButtonModule, MatTooltipModule],
+})
+export class AdvancedIconsComponent {
+  isFavorite = false;
+  isVisible = true;
+  isLoading = false;
+
+  iconGrid = [
+    { name: "dashboard", label: "Dashboard" },
+    { name: "analytics", label: "Analytics" },
+    { name: "inventory", label: "Inventory" },
+    { name: "people", label: "Users" },
+    { name: "settings", label: "Settings" },
+    { name: "help", label: "Help" },
+    { name: "notifications", label: "Alerts" },
+    { name: "calendar_today", label: "Calendar" },
+  ];
+
+  constructor(
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer,
+  ) {
+    this.registerCustomIcons();
+  }
+
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+  }
+
+  toggleVisibility(): void {
+    this.isVisible = !this.isVisible;
+  }
+
+  refresh(): void {
+    this.isLoading = true;
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);
+  }
+
+  private registerCustomIcons(): void {
+    // Register individual SVG icons
+    this.matIconRegistry.addSvgIcon(
+      "custom-heart",
+      this.domSanitizer.bypassSecurityTrustResourceUrl(
+        "assets/icons/heart.svg",
+      ),
+    );
+
+    this.matIconRegistry.addSvgIcon(
+      "custom-star",
+      this.domSanitizer.bypassSecurityTrustResourceUrl("assets/icons/star.svg"),
+    );
+
+    this.matIconRegistry.addSvgIcon(
+      "company-logo",
+      this.domSanitizer.bypassSecurityTrustResourceUrl("assets/icons/logo.svg"),
+    );
+
+    // Register icon set for namespace
+    this.matIconRegistry.addSvgIconSetInNamespace(
+      "custom",
+      this.domSanitizer.bypassSecurityTrustResourceUrl(
+        "assets/icons/custom-set.svg",
+      ),
+    );
+  }
+}
+```
+
+### Common Variations
+
+#### Icon with Text Combinations
+
+```typescript
+@Component({
+  template: `
+    <div class="icon-text-patterns">
+      <!-- Leading icons -->
+      <div class="pattern-group">
+        <h4>Leading Icons</h4>
+        <button mat-button class="text-button">
+          <mat-icon>add</mat-icon>
+          Add Item
+        </button>
+        <button mat-raised-button color="primary">
+          <mat-icon>save</mat-icon>
+          Save Document
+        </button>
+      </div>
+
+      <!-- Trailing icons -->
+      <div class="pattern-group">
+        <h4>Trailing Icons</h4>
+        <button mat-button class="text-button">
+          Open Menu
+          <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+        </button>
+        <button mat-raised-button color="accent">
+          Download
+          <mat-icon iconPositionEnd>download</mat-icon>
+        </button>
+      </div>
+
+      <!-- Icon only buttons -->
+      <div class="pattern-group">
+        <h4>Icon Only</h4>
+        <button mat-icon-button aria-label="Edit" matTooltip="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button aria-label="Delete" matTooltip="Delete">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button
+          mat-fab
+          color="primary"
+          aria-label="Add"
+          matTooltip="Add new item"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <!-- List items with icons -->
+      <div class="pattern-group">
+        <h4>List Items</h4>
+        <mat-list>
+          <mat-list-item>
+            <mat-icon matListItemIcon>folder</mat-icon>
+            <div matListItemTitle>Documents</div>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-icon matListItemIcon>image</mat-icon>
+            <div matListItemTitle>Pictures</div>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-icon matListItemIcon>music_note</mat-icon>
+            <div matListItemTitle>Music</div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+
+      <!-- Form fields with icons -->
+      <div class="pattern-group">
+        <h4>Form Fields</h4>
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput placeholder="Enter search terms" />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" placeholder="user@example.com" />
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .icon-text-patterns {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .pattern-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .pattern-group h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .text-button {
+        align-self: flex-start;
+      }
+    `,
+  ],
+})
+export class IconTextPatternsComponent {}
+```
+
+#### Animated and Interactive Icons
+
+```typescript
+@Component({
+  template: `
+    <div class="animated-icons">
+      <!-- Hover animations -->
+      <div class="animation-group">
+        <h4>Hover Animations</h4>
+        <mat-icon class="hover-scale">favorite</mat-icon>
+        <mat-icon class="hover-rotate">settings</mat-icon>
+        <mat-icon class="hover-bounce">notifications</mat-icon>
+      </div>
+
+      <!-- Loading states -->
+      <div class="animation-group">
+        <h4>Loading States</h4>
+        <mat-icon class="spinning">refresh</mat-icon>
+        <mat-icon class="pulsing">sync</mat-icon>
+        <mat-icon class="loading-dots">more_horiz</mat-icon>
+      </div>
+
+      <!-- State transitions -->
+      <div class="animation-group">
+        <h4>State Transitions</h4>
+        <button mat-icon-button (click)="togglePlay()">
+          <mat-icon class="state-transition">
+            {{ isPlaying ? "pause" : "play_arrow" }}
+          </mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleMute()">
+          <mat-icon class="state-transition">
+            {{ isMuted ? "volume_off" : "volume_up" }}
+          </mat-icon>
+        </button>
+      </div>
+
+      <!-- Color transitions -->
+      <div class="animation-group">
+        <h4>Color Transitions</h4>
+        <mat-icon
+          class="color-transition"
+          [class.active]="isLiked"
+          (click)="toggleLike()"
+        >
+          {{ isLiked ? "favorite" : "favorite_border" }}
+        </mat-icon>
+        <mat-icon
+          class="color-transition star"
+          [class.rated]="isRated"
+          (click)="toggleRating()"
+        >
+          {{ isRated ? "star" : "star_border" }}
+        </mat-icon>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .animated-icons {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .animation-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .animation-group h4 {
+        margin: 0;
+        min-width: 150px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+      }
+
+      /* Hover animations */
+      .hover-scale {
+        transition: transform 0.2s ease;
+        cursor: pointer;
+      }
+      .hover-scale:hover {
+        transform: scale(1.2);
+      }
+
+      .hover-rotate {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      .hover-rotate:hover {
+        transform: rotate(180deg);
+      }
+
+      .hover-bounce {
+        transition: transform 0.2s ease;
+        cursor: pointer;
+      }
+      .hover-bounce:hover {
+        animation: bounce 0.6s ease;
+      }
+
+      /* Loading animations */
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      .pulsing {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      .loading-dots {
+        animation: loadingDots 1.5s ease-in-out infinite;
+      }
+
+      /* State transitions */
+      .state-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Color transitions */
+      .color-transition {
+        transition: color 0.3s ease;
+        cursor: pointer;
+      }
+
+      .color-transition.active {
+        color: #e91e63;
+      }
+
+      .color-transition.star.rated {
+        color: #ffc107;
+      }
+
+      /* Keyframe animations */
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-10px);
+        }
+        60% {
+          transform: translateY(-5px);
+        }
+      }
+
+      @keyframes loadingDots {
+        0%,
+        20% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        80%,
+        100% {
+          transform: scale(1);
+        }
+      }
+    `,
+  ],
+})
+export class AnimatedIconsComponent {
+  isPlaying = false;
+  isMuted = false;
+  isLiked = false;
+  isRated = false;
+
+  togglePlay(): void {
+    this.isPlaying = !this.isPlaying;
+  }
+
+  toggleMute(): void {
+    this.isMuted = !this.isMuted;
+  }
+
+  toggleLike(): void {
+    this.isLiked = !this.isLiked;
+  }
+
+  toggleRating(): void {
+    this.isRated = !this.isRated;
+  }
+}
+```
+
+#### Responsive Icon Layouts
+
+```typescript
+@Component({
+  template: `
+    <div class="responsive-icons">
+      <!-- Mobile-first navigation -->
+      <nav class="mobile-nav" *ngIf="isMobile">
+        <button mat-icon-button>
+          <mat-icon>menu</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </nav>
+
+      <!-- Desktop navigation -->
+      <nav class="desktop-nav" *ngIf="!isMobile">
+        <button mat-button>
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+        </button>
+        <button mat-button>
+          <mat-icon>analytics</mat-icon>
+          Analytics
+        </button>
+        <button mat-button>
+          <mat-icon>settings</mat-icon>
+          Settings
+        </button>
+      </nav>
+
+      <!-- Adaptive icon grid -->
+      <div class="adaptive-grid">
+        <div class="grid-item" *ngFor="let item of adaptiveItems">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span *ngIf="!isMobile">{{ item.label }}</span>
+        </div>
+      </div>
+
+      <!-- Responsive action bar -->
+      <div class="action-bar">
+        <div class="primary-actions">
+          <button mat-fab color="primary" *ngIf="isMobile">
+            <mat-icon>add</mat-icon>
+          </button>
+          <button mat-raised-button color="primary" *ngIf="!isMobile">
+            <mat-icon>add</mat-icon>
+            Add New Item
+          </button>
+        </div>
+
+        <div class="secondary-actions">
+          <button mat-icon-button *ngIf="isMobile">
+            <mat-icon>filter_list</mat-icon>
+          </button>
+          <button mat-icon-button *ngIf="isMobile">
+            <mat-icon>sort</mat-icon>
+          </button>
+
+          <button mat-button *ngIf="!isMobile">
+            <mat-icon>filter_list</mat-icon>
+            Filter
+          </button>
+          <button mat-button *ngIf="!isMobile">
+            <mat-icon>sort</mat-icon>
+            Sort
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .responsive-icons {
+        padding: 16px;
+      }
+
+      .mobile-nav,
+      .desktop-nav {
+        display: flex;
+        gap: 8px;
+        padding: 12px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+
+      .desktop-nav {
+        justify-content: center;
+      }
+
+      .adaptive-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #fafafa;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .grid-item:hover {
+        background-color: #e3f2fd;
+      }
+
+      .grid-item span {
+        font-size: 12px;
+        text-align: center;
+        color: #666;
+      }
+
+      .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .primary-actions,
+      .secondary-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      @media (max-width: 600px) {
+        .adaptive-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+
+        .action-bar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background-color: white;
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+          z-index: 1000;
+        }
+      }
+    `,
+  ],
+})
+export class ResponsiveIconsComponent {
+  @Input() isMobile = false;
+
+  adaptiveItems = [
+    { icon: "home", label: "Home" },
+    { icon: "favorite", label: "Favorites" },
+    { icon: "settings", label: "Settings" },
+    { icon: "help", label: "Help" },
+    { icon: "account_circle", label: "Profile" },
+    { icon: "notifications", label: "Alerts" },
+  ];
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose the right icon source**: Use Material Icons for consistency with Material Design, custom SVG icons for brand-specific elements, and ensure all icons follow the same visual style
+- **Maintain appropriate sizing**: Keep icons at standard sizes (16px, 20px, 24px, 32px, 48px) and use the `inline` property when icons should match surrounding text size
+- **Provide meaningful context**: Always include accessible labels for icon-only buttons and ensure icons clearly represent their intended actions or content
+- **Optimize for touch targets**: Ensure interactive icons meet minimum touch target sizes (44px) and provide adequate spacing between clickable icons
+- **Use consistent iconography**: Establish a consistent icon vocabulary across your application and avoid using different icons for the same action in different contexts
+
+### Accessibility
+
+- **Screen reader support**: Use `aria-label` attributes for interactive icons and `aria-hidden="true"` for purely decorative icons that don't convey meaningful information
+- **Keyboard navigation**: Ensure icon buttons are properly focusable and provide visible focus indicators for keyboard users
+- **Color independence**: Don't rely solely on color to convey meaning; combine color changes with icon shape changes or additional text labels
+- **Context and meaning**: Provide tooltips or adjacent text labels to clarify icon meaning, especially for less universal icon symbols
+- **High contrast**: Ensure icons maintain sufficient contrast ratios against their backgrounds for users with visual impairments
+
+### Performance
+
+- **Icon loading optimization**: Register frequently used SVG icons at application startup and consider lazy loading for less common icon sets
+- **Bundle size management**: Import only the icon fonts you need and consider using tree-shaking with individual icon imports when possible
+- **Caching strategies**: Implement proper caching headers for icon font files and SVG assets to improve loading performance on repeat visits
+- **Memory efficiency**: Avoid creating excessive DOM nodes for icons by reusing icon components and implementing proper change detection strategies
+- **Rendering optimization**: Use CSS transforms instead of JavaScript animations for icon transitions and leverage GPU acceleration for smooth animations
+
+## Common Patterns
+
+### Pattern 1: Navigation with Icons
+
+```typescript
+@Component({
+  template: `
+    <nav class="navigation-with-icons">
+      <!-- Primary navigation -->
+      <div class="nav-section">
+        <h4>Main Navigation</h4>
+        <ul class="nav-list">
+          <li class="nav-item" *ngFor="let item of mainNavigation">
+            <a
+              [routerLink]="item.route"
+              class="nav-link"
+              routerLinkActive="active"
+            >
+              <mat-icon>{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Secondary navigation -->
+      <div class="nav-section">
+        <h4>Tools</h4>
+        <ul class="nav-list">
+          <li class="nav-item" *ngFor="let item of toolNavigation">
+            <button class="nav-button" (click)="item.action()">
+              <mat-icon>{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- User navigation -->
+      <div class="nav-section user-section">
+        <button class="user-profile" (click)="openProfile()">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ currentUser.name }}</span>
+          <mat-icon class="expand-icon">expand_more</mat-icon>
+        </button>
+      </div>
+    </nav>
+  `,
+  styles: [
+    `
+      .navigation-with-icons {
+        width: 250px;
+        height: 100vh;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+      }
+
+      .nav-section {
+        margin-bottom: 24px;
+        padding: 0 16px;
+      }
+
+      .nav-section h4 {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #666;
+        margin: 0 0 12px 0;
+        letter-spacing: 0.5px;
+      }
+
+      .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-item {
+        margin-bottom: 4px;
+      }
+
+      .nav-link,
+      .nav-button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+      }
+
+      .nav-link:hover,
+      .nav-button:hover {
+        background-color: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .nav-link.active {
+        background-color: #1976d2;
+        color: white;
+      }
+
+      .user-section {
+        margin-top: auto;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 16px;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        transition: background-color 0.2s ease;
+      }
+
+      .user-profile:hover {
+        background-color: #e3f2fd;
+      }
+
+      .expand-icon {
+        margin-left: auto;
+        font-size: 20px;
+      }
+    `,
+  ],
+})
+export class NavigationWithIconsComponent {
+  currentUser = { name: "John Doe" };
+
+  mainNavigation = [
+    { route: "/dashboard", icon: "dashboard", label: "Dashboard" },
+    { route: "/projects", icon: "folder", label: "Projects" },
+    { route: "/team", icon: "people", label: "Team" },
+    { route: "/analytics", icon: "analytics", label: "Analytics" },
+    { route: "/reports", icon: "assessment", label: "Reports" },
+  ];
+
+  toolNavigation = [
+    {
+      icon: "settings",
+      label: "Settings",
+      action: () => console.log("Open settings"),
+    },
+    {
+      icon: "help",
+      label: "Help & Support",
+      action: () => console.log("Open help"),
+    },
+    {
+      icon: "feedback",
+      label: "Feedback",
+      action: () => console.log("Open feedback"),
+    },
+  ];
+
+  openProfile(): void {
+    console.log("Open user profile");
+  }
+}
+```
+
+### Pattern 2: Data Actions with Icons
+
+```typescript
+@Component({
+  template: `
+    <div class="data-actions-with-icons">
+      <!-- Table header with bulk actions -->
+      <div class="table-header">
+        <div class="selection-info" *ngIf="selectedItems.length > 0">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ selectedItems.length }} item(s) selected</span>
+        </div>
+
+        <div class="bulk-actions" *ngIf="selectedItems.length > 0">
+          <button
+            mat-icon-button
+            matTooltip="Edit selected"
+            (click)="bulkEdit()"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Archive selected"
+            (click)="bulkArchive()"
+          >
+            <mat-icon>archive</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Delete selected"
+            (click)="bulkDelete()"
+          >
+            <mat-icon color="warn">delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="table-actions">
+          <button mat-icon-button matTooltip="Filter" (click)="toggleFilter()">
+            <mat-icon [class.active]="showFilter">filter_list</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Sort"
+            [matMenuTriggerFor]="sortMenu"
+          >
+            <mat-icon>sort</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Export" (click)="exportData()">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Refresh" (click)="refreshData()">
+            <mat-icon [class.spinning]="isRefreshing">refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Data rows with individual actions -->
+      <div class="data-table">
+        <div
+          class="data-row"
+          *ngFor="let item of dataItems; trackBy: trackByFn"
+        >
+          <div class="row-content">
+            <mat-checkbox
+              [checked]="isSelected(item.id)"
+              (change)="toggleSelection(item.id)"
+            ></mat-checkbox>
+
+            <div class="item-info">
+              <mat-icon class="item-icon">{{
+                getItemIcon(item.type)
+              }}</mat-icon>
+              <div class="item-details">
+                <h4>{{ item.name }}</h4>
+                <p>{{ item.description }}</p>
+              </div>
+            </div>
+
+            <div class="item-status">
+              <mat-icon [class]="'status-' + item.status">
+                {{ getStatusIcon(item.status) }}
+              </mat-icon>
+              <span>{{ item.status | titlecase }}</span>
+            </div>
+          </div>
+
+          <div class="row-actions">
+            <button
+              mat-icon-button
+              matTooltip="View details"
+              (click)="viewItem(item)"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Edit" (click)="editItem(item)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Share"
+              (click)="shareItem(item)"
+            >
+              <mat-icon>share</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="itemMenu"
+              [matMenuTriggerData]="{ item: item }"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating action button -->
+      <button mat-fab color="primary" class="add-fab" (click)="addNewItem()">
+        <mat-icon>add</mat-icon>
+      </button>
+
+      <!-- Context menus -->
+      <mat-menu #sortMenu="matMenu">
+        <button mat-menu-item (click)="sortBy('name')">
+          <mat-icon>sort_by_alpha</mat-icon>
+          <span>Name</span>
+        </button>
+        <button mat-menu-item (click)="sortBy('date')">
+          <mat-icon>schedule</mat-icon>
+          <span>Date</span>
+        </button>
+        <button mat-menu-item (click)="sortBy('status')">
+          <mat-icon>flag</mat-icon>
+          <span>Status</span>
+        </button>
+      </mat-menu>
+
+      <mat-menu #itemMenu="matMenu">
+        <ng-template matMenuContent let-item="item">
+          <button mat-menu-item (click)="duplicateItem(item)">
+            <mat-icon>content_copy</mat-icon>
+            <span>Duplicate</span>
+          </button>
+          <button mat-menu-item (click)="archiveItem(item)">
+            <mat-icon>archive</mat-icon>
+            <span>Archive</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button
+            mat-menu-item
+            (click)="deleteItem(item)"
+            class="delete-action"
+          >
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </ng-template>
+      </mat-menu>
+    </div>
+  `,
+  styles: [
+    `
+      .data-actions-with-icons {
+        position: relative;
+        padding: 16px;
+      }
+
+      .table-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background-color: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .selection-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1976d2;
+        font-weight: 500;
+      }
+
+      .bulk-actions,
+      .table-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .bulk-actions {
+        margin-left: auto;
+      }
+
+      .active {
+        color: #1976d2 !important;
+      }
+
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      .data-table {
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 8px 8px;
+      }
+
+      .data-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s ease;
+      }
+
+      .data-row:hover {
+        background-color: #f8f9fa;
+      }
+
+      .data-row:last-child {
+        border-bottom: none;
+      }
+
+      .row-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+      }
+
+      .item-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+      }
+
+      .item-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #666;
+      }
+
+      .item-details h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .item-details p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .item-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 120px;
+      }
+
+      .status-active {
+        color: #4caf50;
+      }
+      .status-pending {
+        color: #ff9800;
+      }
+      .status-inactive {
+        color: #f44336;
+      }
+      .status-draft {
+        color: #9e9e9e;
+      }
+
+      .row-actions {
+        display: flex;
+        gap: 4px;
+      }
+
+      .add-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1000;
+      }
+
+      .delete-action {
+        color: #f44336 !important;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .table-header {
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .bulk-actions,
+        .table-actions {
+          order: 2;
+          width: 100%;
+          justify-content: center;
+        }
+
+        .row-content {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .item-info {
+          width: 100%;
+        }
+
+        .item-status {
+          min-width: auto;
+        }
+      }
+    `,
+  ],
+})
+export class DataActionsWithIconsComponent {
+  selectedItems: number[] = [];
+  showFilter = false;
+  isRefreshing = false;
+
+  dataItems = [
+    {
+      id: 1,
+      name: "Project Alpha",
+      description: "Main application development",
+      type: "project",
+      status: "active",
+    },
+    {
+      id: 2,
+      name: "Design System",
+      description: "Component library and guidelines",
+      type: "design",
+      status: "pending",
+    },
+    {
+      id: 3,
+      name: "Documentation",
+      description: "User and developer documentation",
+      type: "document",
+      status: "draft",
+    },
+    {
+      id: 4,
+      name: "Testing Suite",
+      description: "Automated testing framework",
+      type: "test",
+      status: "inactive",
+    },
+  ];
+
+  getItemIcon(type: string): string {
+    const iconMap: Record<string, string> = {
+      project: "folder",
+      design: "palette",
+      document: "description",
+      test: "bug_report",
+    };
+    return iconMap[type] || "folder";
+  }
+
+  getStatusIcon(status: string): string {
+    const iconMap: Record<string, string> = {
+      active: "check_circle",
+      pending: "schedule",
+      inactive: "cancel",
+      draft: "edit",
+    };
+    return iconMap[status] || "help";
+  }
+
+  isSelected(id: number): boolean {
+    return this.selectedItems.includes(id);
+  }
+
+  toggleSelection(id: number): void {
+    const index = this.selectedItems.indexOf(id);
+    if (index > -1) {
+      this.selectedItems.splice(index, 1);
+    } else {
+      this.selectedItems.push(id);
+    }
+  }
+
+  toggleFilter(): void {
+    this.showFilter = !this.showFilter;
+  }
+
+  refreshData(): void {
+    this.isRefreshing = true;
+    setTimeout(() => {
+      this.isRefreshing = false;
+    }, 1500);
+  }
+
+  trackByFn(index: number, item: any): number {
+    return item.id;
+  }
+
+  // Action methods
+  bulkEdit(): void {
+    console.log("Bulk edit:", this.selectedItems);
+  }
+  bulkArchive(): void {
+    console.log("Bulk archive:", this.selectedItems);
+  }
+  bulkDelete(): void {
+    console.log("Bulk delete:", this.selectedItems);
+  }
+  exportData(): void {
+    console.log("Export data");
+  }
+  sortBy(field: string): void {
+    console.log("Sort by:", field);
+  }
+  addNewItem(): void {
+    console.log("Add new item");
+  }
+  viewItem(item: any): void {
+    console.log("View item:", item);
+  }
+  editItem(item: any): void {
+    console.log("Edit item:", item);
+  }
+  shareItem(item: any): void {
+    console.log("Share item:", item);
+  }
+  duplicateItem(item: any): void {
+    console.log("Duplicate item:", item);
+  }
+  archiveItem(item: any): void {
+    console.log("Archive item:", item);
+  }
+  deleteItem(item: any): void {
+    console.log("Delete item:", item);
+  }
+}
+```

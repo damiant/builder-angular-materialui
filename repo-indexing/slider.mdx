@@ -1,0 +1,2825 @@
+---
+title: Slider Components
+---
+
+# Slider Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate slider functionality. The Slider component provides Material Design styled range sliders that enable users to select numerical values from a continuous or discrete range by dragging a handle along a track. It follows Material Design 3 specifications for input controls, offering consistent visual styling, proper accessibility features, and seamless form integration.
+
+### When to Use
+
+- **Numerical Range Selection**: When users need to select a numerical value from a continuous range (e.g., volume control, price range, age selection)
+- **Settings and Configuration**: For adjusting configuration values like brightness, quality settings, or performance parameters
+- **Filter Controls**: When providing range-based filters for search results or data visualization
+- **Media Controls**: For controlling audio/video playback position, volume, or playback speed
+- **Data Input**: When collecting numerical data where visual feedback of the value's position within a range is helpful
+- **Progressive Adjustment**: For settings that benefit from real-time feedback as the user adjusts the value
+- **Mobile-Friendly Input**: When creating touch-friendly numerical input that works well on mobile devices
+- **Accessible Value Selection**: When you need properly structured, keyboard-navigable, and screen-reader friendly numerical input controls
+- **Visual Value Comparison**: When users need to understand the relative position of a value within its possible range
+
+### Architecture
+
+**No Coupling**: The Slider component is a standalone component that operates independently without requiring other components beyond optional form field integration. It provides:
+
+- **Self-contained functionality**: Complete slider implementation with track, handle, value display, and interaction handling
+- **Flexible value management**: Supports continuous and discrete values, custom step intervals, and value formatting
+- **Form integration**: Designed to work seamlessly with reactive forms and template-driven forms
+- **Theme integration**: Automatically inherits from the Material Design theme system
+
+## Components
+
+### MatSlider {Standalone Component}
+
+A versatile slider component that provides Material Design styling with comprehensive value selection and accessibility support.
+
+**Purpose:** Creates interactive range sliders with Material Design styling, proper accessibility features, and seamless form integration for selecting numerical values from defined ranges.
+
+**Interface:**
+
+```typescript
+interface MatSliderProps {
+  // Value Management
+  value?: number; // Current slider value
+  min?: number; // Minimum value (default: 0)
+  max?: number; // Maximum value (default: 100)
+  step?: number; // Step interval (default: 1)
+
+  // Display Options
+  thumbLabel?: boolean; // Show value label on thumb
+  tickInterval?: number | "auto"; // Tick mark intervals
+  displayWith?: (value: number) => string; // Custom value display function
+
+  // Interaction States
+  disabled?: boolean; // Whether the slider is disabled
+  invert?: boolean; // Invert the slider direction
+  vertical?: boolean; // Vertical orientation
+
+  // Styling
+  color?: "primary" | "accent" | "warn"; // Theme color
+  disableRipple?: boolean; // Disable ripple effects
+
+  // Form Integration
+  tabIndex?: number; // Tab order for keyboard navigation
+  id?: string; // Unique identifier
+  ariaLabel?: string; // Accessibility label
+  ariaLabelledby?: string; // ID of labeling element
+
+  // Events
+  change?: (event: MatSliderChange) => void; // Value change event (on release)
+  input?: (event: MatSliderChange) => void; // Continuous input event (while dragging)
+}
+
+interface MatSliderChange {
+  source: MatSlider; // The slider component instance
+  value: number; // The new slider value
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatSliderModule } from "@angular/material/slider";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { ReactiveFormsModule, FormControl } from "@angular/forms";
+
+@Component({
+  selector: "app-slider-examples",
+  template: `
+    <!-- Basic slider -->
+    <div class="slider-container">
+      <label>Volume: {{ volume }}</label>
+      <mat-slider
+        min="0"
+        max="100"
+        step="1"
+        [(value)]="volume"
+        thumbLabel
+      ></mat-slider>
+    </div>
+
+    <!-- Slider with custom display -->
+    <div class="slider-container">
+      <label>Price Range: {{ formatPrice(priceRange) }}</label>
+      <mat-slider
+        min="0"
+        max="1000"
+        step="10"
+        [(value)]="priceRange"
+        [displayWith]="formatPrice"
+        thumbLabel
+        tickInterval="100"
+      ></mat-slider>
+    </div>
+
+    <!-- Disabled slider -->
+    <div class="slider-container">
+      <label>Temperature (Read-only)</label>
+      <mat-slider
+        min="0"
+        max="40"
+        [value]="temperature"
+        [disabled]="true"
+        thumbLabel
+      ></mat-slider>
+    </div>
+
+    <!-- Slider with form control -->
+    <div class="slider-container">
+      <label>Quality Setting: {{ qualityControl.value }}</label>
+      <mat-slider
+        min="1"
+        max="10"
+        step="1"
+        [formControl]="qualityControl"
+        thumbLabel
+        tickInterval="1"
+        color="accent"
+      ></mat-slider>
+    </div>
+
+    <!-- Vertical slider -->
+    <div class="vertical-slider-container">
+      <label>Brightness</label>
+      <mat-slider
+        min="0"
+        max="100"
+        [(value)]="brightness"
+        vertical
+        thumbLabel
+        tickInterval="25"
+      ></mat-slider>
+      <span>{{ brightness }}%</span>
+    </div>
+
+    <!-- Slider with events -->
+    <div class="slider-container">
+      <label>Sensitivity: {{ sensitivity }}</label>
+      <mat-slider
+        min="0.1"
+        max="2.0"
+        step="0.1"
+        [(value)]="sensitivity"
+        (input)="onSensitivityInput($event)"
+        (change)="onSensitivityChange($event)"
+        [displayWith]="formatSensitivity"
+        thumbLabel
+      ></mat-slider>
+      <p class="slider-feedback">{{ sensitivityFeedback }}</p>
+    </div>
+  `,
+  styles: [
+    `
+      .slider-container {
+        margin: 16px 0;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .slider-container label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .vertical-slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 200px;
+        margin: 16px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .vertical-slider-container label {
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .vertical-slider-container span {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .slider-feedback {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #666;
+        font-style: italic;
+      }
+    `,
+  ],
+  imports: [MatSliderModule, MatFormFieldModule, ReactiveFormsModule],
+})
+export class SliderExamplesComponent {
+  volume = 50;
+  priceRange = 200;
+  temperature = 23;
+  brightness = 75;
+  sensitivity = 1.0;
+  sensitivityFeedback = "Normal sensitivity";
+
+  qualityControl = new FormControl(7);
+
+  formatPrice(value: number): string {
+    return `$${value}`;
+  }
+
+  formatSensitivity(value: number): string {
+    return `${value.toFixed(1)}x`;
+  }
+
+  onSensitivityInput(event: MatSliderChange): void {
+    this.sensitivity = event.value;
+    this.updateSensitivityFeedback(event.value);
+  }
+
+  onSensitivityChange(event: MatSliderChange): void {
+    console.log("Final sensitivity value:", event.value);
+  }
+
+  private updateSensitivityFeedback(value: number): void {
+    if (value < 0.5) {
+      this.sensitivityFeedback = "Very low sensitivity";
+    } else if (value < 1.0) {
+      this.sensitivityFeedback = "Low sensitivity";
+    } else if (value === 1.0) {
+      this.sensitivityFeedback = "Normal sensitivity";
+    } else if (value < 1.5) {
+      this.sensitivityFeedback = "High sensitivity";
+    } else {
+      this.sensitivityFeedback = "Very high sensitivity";
+    }
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Slider Implementation
+
+```typescript
+import { MatSliderModule } from "@angular/material/slider";
+
+@Component({
+  selector: "app-basic-sliders",
+  template: `
+    <div class="slider-examples">
+      <!-- Simple value slider -->
+      <div class="slider-section">
+        <h3>Volume Control</h3>
+        <mat-slider
+          min="0"
+          max="100"
+          [(value)]="volume"
+          thumbLabel
+          class="volume-slider"
+        ></mat-slider>
+        <p>Current volume: {{ volume }}%</p>
+      </div>
+
+      <!-- Slider with steps -->
+      <div class="slider-section">
+        <h3>Rating (1-5 stars)</h3>
+        <mat-slider
+          min="1"
+          max="5"
+          step="1"
+          [(value)]="rating"
+          thumbLabel
+          tickInterval="1"
+          class="rating-slider"
+        ></mat-slider>
+        <p>Rating: {{ getRatingText(rating) }}</p>
+      </div>
+
+      <!-- Price range slider -->
+      <div class="slider-section">
+        <h3>Budget Filter</h3>
+        <mat-slider
+          min="0"
+          max="2000"
+          step="50"
+          [(value)]="budget"
+          [displayWith]="formatCurrency"
+          thumbLabel
+          tickInterval="500"
+          color="accent"
+          class="budget-slider"
+        ></mat-slider>
+        <p>Maximum budget: {{ formatCurrency(budget) }}</p>
+      </div>
+
+      <!-- Percentage slider -->
+      <div class="slider-section">
+        <h3>Progress</h3>
+        <mat-slider
+          min="0"
+          max="100"
+          [(value)]="progress"
+          [displayWith]="formatPercentage"
+          thumbLabel
+          tickInterval="25"
+          class="progress-slider"
+        ></mat-slider>
+        <p>Completion: {{ formatPercentage(progress) }}</p>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .slider-examples {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .slider-section {
+        margin-bottom: 32px;
+        padding: 16px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .slider-section h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .slider-section p {
+        margin: 12px 0 0 0;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .volume-slider,
+      .rating-slider,
+      .budget-slider,
+      .progress-slider {
+        width: 100%;
+      }
+    `,
+  ],
+  imports: [MatSliderModule],
+})
+export class BasicSlidersComponent {
+  volume = 75;
+  rating = 4;
+  budget = 800;
+  progress = 65;
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(value);
+  }
+
+  formatPercentage(value: number): string {
+    return `${value}%`;
+  }
+
+  getRatingText(rating: number): string {
+    const ratings = {
+      1: "⭐ Poor",
+      2: "⭐⭐ Fair",
+      3: "⭐⭐⭐ Good",
+      4: "⭐⭐⭐⭐ Very Good",
+      5: "⭐⭐⭐⭐⭐ Excellent",
+    };
+    return ratings[rating as keyof typeof ratings] || "Not rated";
+  }
+}
+```
+
+### Advanced Slider with Form Integration
+
+```typescript
+import { MatSliderModule } from "@angular/material/slider";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatCardModule } from "@angular/material/card";
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+} from "@angular/forms";
+
+interface MediaSettings {
+  volume: number;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  playbackSpeed: number;
+  quality: number;
+}
+
+@Component({
+  selector: "app-advanced-slider-form",
+  template: `
+    <div class="settings-form">
+      <h2>Media Player Settings</h2>
+
+      <form [formGroup]="settingsForm" class="form-container">
+        <!-- Audio Settings -->
+        <mat-card class="settings-section">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>volume_up</mat-icon>
+            <mat-card-title>Audio Settings</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="slider-group">
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Volume</label>
+                  <span class="slider-value"
+                    >{{ settingsForm.get("volume")?.value }}%</span
+                  >
+                </div>
+                <mat-slider
+                  min="0"
+                  max="100"
+                  step="1"
+                  formControlName="volume"
+                  (input)="onVolumeChange($event)"
+                  thumbLabel
+                  tickInterval="25"
+                  class="audio-slider"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <mat-icon>volume_mute</mat-icon>
+                  <mat-icon>volume_up</mat-icon>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Video Settings -->
+        <mat-card class="settings-section">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>tune</mat-icon>
+            <mat-card-title>Video Settings</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="slider-group">
+              <!-- Brightness -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Brightness</label>
+                  <span class="slider-value"
+                    >{{ settingsForm.get("brightness")?.value }}%</span
+                  >
+                </div>
+                <mat-slider
+                  min="0"
+                  max="200"
+                  step="5"
+                  formControlName="brightness"
+                  [displayWith]="formatPercentage"
+                  thumbLabel
+                  tickInterval="50"
+                  class="video-slider"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <mat-icon>brightness_low</mat-icon>
+                  <mat-icon>brightness_high</mat-icon>
+                </div>
+              </div>
+
+              <!-- Contrast -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Contrast</label>
+                  <span class="slider-value"
+                    >{{ settingsForm.get("contrast")?.value }}%</span
+                  >
+                </div>
+                <mat-slider
+                  min="50"
+                  max="150"
+                  step="5"
+                  formControlName="contrast"
+                  [displayWith]="formatPercentage"
+                  thumbLabel
+                  tickInterval="25"
+                  class="video-slider"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <mat-icon>contrast</mat-icon>
+                  <mat-icon>contrast</mat-icon>
+                </div>
+              </div>
+
+              <!-- Saturation -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Saturation</label>
+                  <span class="slider-value"
+                    >{{ settingsForm.get("saturation")?.value }}%</span
+                  >
+                </div>
+                <mat-slider
+                  min="0"
+                  max="200"
+                  step="10"
+                  formControlName="saturation"
+                  [displayWith]="formatPercentage"
+                  thumbLabel
+                  tickInterval="50"
+                  class="video-slider"
+                  color="accent"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <mat-icon>invert_colors_off</mat-icon>
+                  <mat-icon>invert_colors</mat-icon>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Playback Settings -->
+        <mat-card class="settings-section">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>play_circle</mat-icon>
+            <mat-card-title>Playback Settings</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="slider-group">
+              <!-- Playback Speed -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Playback Speed</label>
+                  <span class="slider-value">{{
+                    formatSpeed(settingsForm.get("playbackSpeed")?.value)
+                  }}</span>
+                </div>
+                <mat-slider
+                  min="0.25"
+                  max="3"
+                  step="0.25"
+                  formControlName="playbackSpeed"
+                  [displayWith]="formatSpeed"
+                  thumbLabel
+                  tickInterval="0.25"
+                  class="playback-slider"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <mat-icon>slow_motion_video</mat-icon>
+                  <mat-icon>fast_forward</mat-icon>
+                </div>
+              </div>
+
+              <!-- Quality -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label>Quality</label>
+                  <span class="slider-value">{{
+                    getQualityLabel(settingsForm.get("quality")?.value)
+                  }}</span>
+                </div>
+                <mat-slider
+                  min="1"
+                  max="5"
+                  step="1"
+                  formControlName="quality"
+                  [displayWith]="getQualityLabel"
+                  thumbLabel
+                  tickInterval="1"
+                  class="quality-slider"
+                  color="warn"
+                ></mat-slider>
+                <div class="slider-indicators">
+                  <span class="quality-indicator">480p</span>
+                  <span class="quality-indicator">4K</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Custom Range Settings -->
+        <mat-card class="settings-section">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>settings</mat-icon>
+            <mat-card-title>Advanced Settings</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <!-- Dual Range Example -->
+            <div class="dual-range-control">
+              <div class="slider-header">
+                <label>Audio Frequency Range</label>
+                <span class="slider-value">
+                  {{ lowFreq }}Hz - {{ highFreq }}Hz
+                </span>
+              </div>
+              <div class="dual-slider-container">
+                <div class="dual-slider">
+                  <label>Low</label>
+                  <mat-slider
+                    min="20"
+                    max="1000"
+                    step="10"
+                    [(value)]="lowFreq"
+                    [displayWith]="formatFrequency"
+                    thumbLabel
+                    class="range-slider low-range"
+                  ></mat-slider>
+                </div>
+                <div class="dual-slider">
+                  <label>High</label>
+                  <mat-slider
+                    min="1000"
+                    max="20000"
+                    step="100"
+                    [(value)]="highFreq"
+                    [displayWith]="formatFrequency"
+                    thumbLabel
+                    class="range-slider high-range"
+                  ></mat-slider>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vertical Sliders -->
+            <div class="vertical-controls">
+              <div class="vertical-slider-group">
+                <div class="vertical-slider-control">
+                  <label>Bass</label>
+                  <mat-slider
+                    min="-10"
+                    max="10"
+                    step="1"
+                    [(value)]="bassLevel"
+                    vertical
+                    thumbLabel
+                    tickInterval="5"
+                    class="equalizer-slider"
+                  ></mat-slider>
+                  <span class="slider-value">{{ bassLevel }}dB</span>
+                </div>
+
+                <div class="vertical-slider-control">
+                  <label>Mid</label>
+                  <mat-slider
+                    min="-10"
+                    max="10"
+                    step="1"
+                    [(value)]="midLevel"
+                    vertical
+                    thumbLabel
+                    tickInterval="5"
+                    class="equalizer-slider"
+                  ></mat-slider>
+                  <span class="slider-value">{{ midLevel }}dB</span>
+                </div>
+
+                <div class="vertical-slider-control">
+                  <label>Treble</label>
+                  <mat-slider
+                    min="-10"
+                    max="10"
+                    step="1"
+                    [(value)]="trebleLevel"
+                    vertical
+                    thumbLabel
+                    tickInterval="5"
+                    class="equalizer-slider"
+                  ></mat-slider>
+                  <span class="slider-value">{{ trebleLevel }}dB</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Settings Preview -->
+        <mat-card class="preview-section">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>preview</mat-icon>
+            <mat-card-title>Settings Preview</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="preview-grid">
+              <div class="preview-item">
+                <strong>Audio:</strong>
+                <span>Volume {{ settingsForm.get("volume")?.value }}%</span>
+              </div>
+              <div class="preview-item">
+                <strong>Video:</strong>
+                <span>
+                  Brightness {{ settingsForm.get("brightness")?.value }}%,
+                  Contrast {{ settingsForm.get("contrast")?.value }}%,
+                  Saturation {{ settingsForm.get("saturation")?.value }}%
+                </span>
+              </div>
+              <div class="preview-item">
+                <strong>Playback:</strong>
+                <span>
+                  {{
+                    formatSpeed(settingsForm.get("playbackSpeed")?.value)
+                  }}
+                  speed,
+                  {{
+                    getQualityLabel(settingsForm.get("quality")?.value)
+                  }}
+                  quality
+                </span>
+              </div>
+              <div class="preview-item">
+                <strong>Equalizer:</strong>
+                <span
+                  >Bass {{ bassLevel }}dB, Mid {{ midLevel }}dB, Treble
+                  {{ trebleLevel }}dB</span
+                >
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="resetToDefaults()"
+          >
+            Reset to Defaults
+          </button>
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="loadPreset('cinema')"
+          >
+            Cinema Preset
+          </button>
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="loadPreset('music')"
+          >
+            Music Preset
+          </button>
+          <button
+            type="button"
+            mat-button="filled"
+            (click)="saveSettings()"
+            [disabled]="settingsForm.invalid"
+          >
+            Save Settings
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .settings-section,
+      .preview-section {
+        margin-bottom: 16px;
+      }
+
+      .slider-group {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .slider-control {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .slider-header label {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .slider-value {
+        font-weight: bold;
+        color: #2196f3;
+        font-size: 14px;
+      }
+
+      .slider-indicators {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 4px;
+        color: #666;
+      }
+
+      .quality-indicator {
+        font-size: 12px;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .audio-slider,
+      .video-slider,
+      .playback-slider,
+      .quality-slider,
+      .range-slider {
+        width: 100%;
+      }
+
+      .dual-range-control {
+        margin-bottom: 24px;
+      }
+
+      .dual-slider-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 8px;
+      }
+
+      .dual-slider {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .dual-slider label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+      }
+
+      .vertical-controls {
+        margin-top: 24px;
+      }
+
+      .vertical-slider-group {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        height: 200px;
+      }
+
+      .vertical-slider-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        height: 100%;
+      }
+
+      .vertical-slider-control label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .equalizer-slider {
+        height: 120px;
+      }
+
+      .preview-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .preview-item {
+        display: flex;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .preview-item:last-child {
+        border-bottom: none;
+      }
+
+      .preview-item strong {
+        min-width: 80px;
+        color: #333;
+      }
+
+      .preview-item span {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 768px) {
+        .dual-slider-container {
+          grid-template-columns: 1fr;
+        }
+
+        .vertical-slider-group {
+          flex-direction: row;
+          height: 120px;
+        }
+
+        .equalizer-slider {
+          height: 80px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatSliderModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedSliderFormComponent {
+  settingsForm = new FormGroup({
+    volume: new FormControl(75, [Validators.min(0), Validators.max(100)]),
+    brightness: new FormControl(100, [Validators.min(0), Validators.max(200)]),
+    contrast: new FormControl(100, [Validators.min(50), Validators.max(150)]),
+    saturation: new FormControl(100, [Validators.min(0), Validators.max(200)]),
+    playbackSpeed: new FormControl(1.0, [
+      Validators.min(0.25),
+      Validators.max(3),
+    ]),
+    quality: new FormControl(3, [Validators.min(1), Validators.max(5)]),
+  });
+
+  // Dual range values
+  lowFreq = 60;
+  highFreq = 15000;
+
+  // Equalizer values
+  bassLevel = 0;
+  midLevel = 0;
+  trebleLevel = 0;
+
+  formatPercentage(value: number): string {
+    return `${value}%`;
+  }
+
+  formatSpeed(value: number): string {
+    return `${value}x`;
+  }
+
+  formatFrequency(value: number): string {
+    return `${value}Hz`;
+  }
+
+  getQualityLabel(value: number): string {
+    const qualities = {
+      1: "480p",
+      2: "720p",
+      3: "1080p",
+      4: "1440p",
+      5: "4K",
+    };
+    return qualities[value as keyof typeof qualities] || "Unknown";
+  }
+
+  onVolumeChange(event: MatSliderChange): void {
+    // Provide real-time feedback for volume changes
+    console.log("Volume changed to:", event.value);
+  }
+
+  loadPreset(preset: "cinema" | "music"): void {
+    if (preset === "cinema") {
+      this.settingsForm.patchValue({
+        volume: 85,
+        brightness: 120,
+        contrast: 110,
+        saturation: 95,
+        playbackSpeed: 1.0,
+        quality: 4,
+      });
+      this.bassLevel = 2;
+      this.midLevel = 0;
+      this.trebleLevel = -1;
+    } else if (preset === "music") {
+      this.settingsForm.patchValue({
+        volume: 90,
+        brightness: 100,
+        contrast: 100,
+        saturation: 100,
+        playbackSpeed: 1.0,
+        quality: 3,
+      });
+      this.bassLevel = 3;
+      this.midLevel = 1;
+      this.trebleLevel = 2;
+    }
+  }
+
+  resetToDefaults(): void {
+    this.settingsForm.patchValue({
+      volume: 75,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      playbackSpeed: 1.0,
+      quality: 3,
+    });
+    this.lowFreq = 60;
+    this.highFreq = 15000;
+    this.bassLevel = 0;
+    this.midLevel = 0;
+    this.trebleLevel = 0;
+  }
+
+  saveSettings(): void {
+    if (this.settingsForm.valid) {
+      const settings: MediaSettings = {
+        ...this.settingsForm.value,
+      } as MediaSettings;
+
+      const equalizerSettings = {
+        bass: this.bassLevel,
+        mid: this.midLevel,
+        treble: this.trebleLevel,
+        lowFreq: this.lowFreq,
+        highFreq: this.highFreq,
+      };
+
+      console.log("Saving settings:", {
+        ...settings,
+        equalizer: equalizerSettings,
+      });
+      // Implement settings save logic
+    }
+  }
+}
+```
+
+### Common Variations
+
+#### Range Slider (Dual Handle)
+
+```typescript
+@Component({
+  template: `
+    <div class="range-slider-examples">
+      <h3>Price Range Filter</h3>
+
+      <!-- Simulated dual-handle slider using two sliders -->
+      <div class="price-range-container">
+        <div class="range-display">
+          <span
+            >{{ formatCurrency(priceRange.min) }} -
+            {{ formatCurrency(priceRange.max) }}</span
+          >
+        </div>
+
+        <div class="dual-slider-wrapper">
+          <div class="range-track"></div>
+          <div
+            class="range-fill"
+            [style.left.%]="getMinPercentage()"
+            [style.width.%]="getRangeWidth()"
+          ></div>
+
+          <mat-slider
+            min="0"
+            max="2000"
+            step="50"
+            [(value)]="priceRange.min"
+            (input)="onMinPriceChange($event)"
+            class="range-slider min-slider"
+            [displayWith]="formatCurrency"
+            thumbLabel
+          ></mat-slider>
+
+          <mat-slider
+            min="0"
+            max="2000"
+            step="50"
+            [(value)]="priceRange.max"
+            (input)="onMaxPriceChange($event)"
+            class="range-slider max-slider"
+            [displayWith]="formatCurrency"
+            thumbLabel
+          ></mat-slider>
+        </div>
+
+        <div class="range-labels">
+          <span>$0</span>
+          <span>$2000</span>
+        </div>
+      </div>
+
+      <!-- Age range slider -->
+      <div class="age-range-container">
+        <h4>Age Range</h4>
+        <div class="age-display">
+          {{ ageRange.min }} - {{ ageRange.max }} years old
+        </div>
+
+        <div class="dual-slider-wrapper">
+          <mat-slider
+            min="18"
+            max="65"
+            step="1"
+            [(value)]="ageRange.min"
+            (input)="onMinAgeChange($event)"
+            class="range-slider"
+            thumbLabel
+          ></mat-slider>
+
+          <mat-slider
+            min="18"
+            max="65"
+            step="1"
+            [(value)]="ageRange.max"
+            (input)="onMaxAgeChange($event)"
+            class="range-slider"
+            thumbLabel
+          ></mat-slider>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .range-slider-examples {
+        padding: 24px;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .price-range-container,
+      .age-range-container {
+        margin-bottom: 32px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .range-display,
+      .age-display {
+        text-align: center;
+        font-weight: bold;
+        color: #2196f3;
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+
+      .dual-slider-wrapper {
+        position: relative;
+        margin: 24px 0;
+      }
+
+      .range-track {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e0e0e0;
+        transform: translateY(-50%);
+        z-index: 1;
+      }
+
+      .range-fill {
+        position: absolute;
+        top: 50%;
+        height: 2px;
+        background: #2196f3;
+        transform: translateY(-50%);
+        z-index: 2;
+      }
+
+      .range-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 3;
+      }
+
+      .min-slider {
+        /* Styles for minimum value slider */
+      }
+
+      .max-slider {
+        /* Styles for maximum value slider */
+      }
+
+      .range-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #666;
+        margin-top: 8px;
+      }
+    `,
+  ],
+})
+export class RangeSliderComponent {
+  priceRange = { min: 200, max: 1500 };
+  ageRange = { min: 25, max: 45 };
+
+  formatCurrency(value: number): string {
+    return `$${value}`;
+  }
+
+  onMinPriceChange(event: MatSliderChange): void {
+    if (event.value >= this.priceRange.max) {
+      this.priceRange.min = this.priceRange.max - 50;
+    } else {
+      this.priceRange.min = event.value;
+    }
+  }
+
+  onMaxPriceChange(event: MatSliderChange): void {
+    if (event.value <= this.priceRange.min) {
+      this.priceRange.max = this.priceRange.min + 50;
+    } else {
+      this.priceRange.max = event.value;
+    }
+  }
+
+  onMinAgeChange(event: MatSliderChange): void {
+    if (event.value >= this.ageRange.max) {
+      this.ageRange.min = this.ageRange.max - 1;
+    } else {
+      this.ageRange.min = event.value;
+    }
+  }
+
+  onMaxAgeChange(event: MatSliderChange): void {
+    if (event.value <= this.ageRange.min) {
+      this.ageRange.max = this.ageRange.min + 1;
+    } else {
+      this.ageRange.max = event.value;
+    }
+  }
+
+  getMinPercentage(): number {
+    return (this.priceRange.min / 2000) * 100;
+  }
+
+  getRangeWidth(): number {
+    return ((this.priceRange.max - this.priceRange.min) / 2000) * 100;
+  }
+}
+```
+
+#### Interactive Control Panel
+
+```typescript
+@Component({
+  template: `
+    <div class="control-panel">
+      <h2>Audio Mixer Control Panel</h2>
+
+      <!-- Master Controls -->
+      <div class="master-section">
+        <h3>Master Controls</h3>
+        <div class="master-controls">
+          <div class="control-group">
+            <div class="vertical-control">
+              <label>Master</label>
+              <mat-slider
+                min="0"
+                max="100"
+                [(value)]="masterVolume"
+                vertical
+                thumbLabel
+                tickInterval="25"
+                class="master-slider"
+                color="primary"
+              ></mat-slider>
+              <span class="control-value">{{ masterVolume }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channel Controls -->
+      <div class="channels-section">
+        <h3>Channel Controls</h3>
+        <div class="channels-grid">
+          <div
+            *ngFor="let channel of channels; trackBy: trackByChannel"
+            class="channel-control"
+          >
+            <h4>{{ channel.name }}</h4>
+
+            <!-- Gain -->
+            <div class="channel-param">
+              <label>Gain</label>
+              <mat-slider
+                min="-20"
+                max="20"
+                step="1"
+                [(value)]="channel.gain"
+                [displayWith]="formatDecibel"
+                thumbLabel
+                tickInterval="10"
+                class="param-slider"
+                [color]="getChannelColor(channel.type)"
+              ></mat-slider>
+              <span class="param-value">{{ formatDecibel(channel.gain) }}</span>
+            </div>
+
+            <!-- Pan -->
+            <div class="channel-param">
+              <label>Pan</label>
+              <mat-slider
+                min="-100"
+                max="100"
+                step="1"
+                [(value)]="channel.pan"
+                [displayWith]="formatPan"
+                thumbLabel
+                tickInterval="50"
+                class="param-slider"
+              ></mat-slider>
+              <span class="param-value">{{ formatPan(channel.pan) }}</span>
+            </div>
+
+            <!-- Volume Fader -->
+            <div class="volume-fader">
+              <label>Volume</label>
+              <mat-slider
+                min="0"
+                max="100"
+                [(value)]="channel.volume"
+                vertical
+                thumbLabel
+                tickInterval="25"
+                class="fader-slider"
+                (input)="onChannelVolumeChange(channel, $event)"
+              ></mat-slider>
+              <span class="fader-value">{{ channel.volume }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EQ Section -->
+      <div class="eq-section">
+        <h3>Master EQ</h3>
+        <div class="eq-controls">
+          <div
+            *ngFor="let band of eqBands; trackBy: trackByBand"
+            class="eq-band"
+          >
+            <label>{{ band.label }}</label>
+            <mat-slider
+              min="-12"
+              max="12"
+              step="0.5"
+              [(value)]="band.gain"
+              [displayWith]="formatEqGain"
+              vertical
+              thumbLabel
+              tickInterval="6"
+              class="eq-slider"
+              color="accent"
+            ></mat-slider>
+            <span class="eq-value">{{ formatEqGain(band.gain) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Effects Send -->
+      <div class="effects-section">
+        <h3>Effects Send</h3>
+        <div class="effects-controls">
+          <div
+            *ngFor="let effect of effects; trackBy: trackByEffect"
+            class="effect-control"
+          >
+            <div class="effect-header">
+              <mat-icon>{{ effect.icon }}</mat-icon>
+              <label>{{ effect.name }}</label>
+            </div>
+
+            <div class="effect-params">
+              <div *ngFor="let param of effect.parameters" class="effect-param">
+                <label>{{ param.name }}</label>
+                <mat-slider
+                  [min]="param.min"
+                  [max]="param.max"
+                  [step]="param.step"
+                  [(value)]="param.value"
+                  [displayWith]="param.formatter"
+                  thumbLabel
+                  class="effect-slider"
+                ></mat-slider>
+                <span class="param-display">{{
+                  param.formatter(param.value)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Actions -->
+      <div class="control-actions">
+        <button
+          type="button"
+          mat-button="outlined"
+          (click)="resetAllControls()"
+        >
+          Reset All
+        </button>
+        <button
+          type="button"
+          mat-button="outlined"
+          (click)="loadPreset('rock')"
+        >
+          Rock Preset
+        </button>
+        <button
+          type="button"
+          mat-button="outlined"
+          (click)="loadPreset('jazz')"
+        >
+          Jazz Preset
+        </button>
+        <button
+          type="button"
+          mat-button="filled"
+          (click)="saveCurrentSettings()"
+        >
+          Save Settings
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .control-panel {
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #2c2c2c;
+        color: white;
+        border-radius: 12px;
+      }
+
+      .control-panel h2 {
+        text-align: center;
+        margin-bottom: 32px;
+        color: #fff;
+      }
+
+      .master-section,
+      .channels-section,
+      .eq-section,
+      .effects-section {
+        margin-bottom: 32px;
+        padding: 16px;
+        background: #3c3c3c;
+        border-radius: 8px;
+      }
+
+      .master-section h3,
+      .channels-section h3,
+      .eq-section h3,
+      .effects-section h3 {
+        margin: 0 0 16px 0;
+        color: #fff;
+        text-align: center;
+      }
+
+      .master-controls {
+        display: flex;
+        justify-content: center;
+      }
+
+      .vertical-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+      }
+
+      .master-slider {
+        height: 120px;
+      }
+
+      .control-value,
+      .param-value,
+      .fader-value,
+      .eq-value,
+      .param-display {
+        font-size: 12px;
+        color: #ccc;
+        text-align: center;
+        min-width: 40px;
+      }
+
+      .channels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .channel-control {
+        background: #4c4c4c;
+        padding: 16px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .channel-control h4 {
+        margin: 0;
+        text-align: center;
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .channel-param {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .channel-param label {
+        font-size: 12px;
+        color: #ccc;
+      }
+
+      .param-slider {
+        width: 100%;
+      }
+
+      .volume-fader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .fader-slider {
+        height: 100px;
+      }
+
+      .eq-controls {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        padding: 16px;
+        background: #4c4c4c;
+        border-radius: 8px;
+        min-height: 180px;
+      }
+
+      .eq-band {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .eq-band label {
+        font-size: 12px;
+        color: #ccc;
+      }
+
+      .eq-slider {
+        height: 120px;
+      }
+
+      .effects-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .effect-control {
+        background: #4c4c4c;
+        padding: 16px;
+        border-radius: 8px;
+      }
+
+      .effect-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .effect-header mat-icon {
+        color: #2196f3;
+      }
+
+      .effect-header label {
+        color: #fff;
+        font-weight: 500;
+      }
+
+      .effect-params {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .effect-param {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .effect-param label {
+        font-size: 12px;
+        color: #ccc;
+      }
+
+      .effect-slider {
+        width: 100%;
+      }
+
+      .control-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+
+      @media (max-width: 768px) {
+        .channels-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .eq-controls {
+          overflow-x: auto;
+          justify-content: flex-start;
+          gap: 16px;
+        }
+
+        .eq-band {
+          flex-shrink: 0;
+        }
+
+        .control-actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
+})
+export class ControlPanelComponent {
+  masterVolume = 85;
+
+  channels = [
+    { name: "Channel 1", type: "input", gain: 0, pan: 0, volume: 75 },
+    { name: "Channel 2", type: "input", gain: -2, pan: -25, volume: 80 },
+    { name: "Channel 3", type: "input", gain: 3, pan: 25, volume: 70 },
+    { name: "Playback", type: "playback", gain: 0, pan: 0, volume: 90 },
+  ];
+
+  eqBands = [
+    { label: "60Hz", frequency: 60, gain: 0 },
+    { label: "170Hz", frequency: 170, gain: 0 },
+    { label: "350Hz", frequency: 350, gain: 0 },
+    { label: "1kHz", frequency: 1000, gain: 0 },
+    { label: "3kHz", frequency: 3000, gain: 0 },
+    { label: "6kHz", frequency: 6000, gain: 0 },
+    { label: "12kHz", frequency: 12000, gain: 0 },
+    { label: "14kHz", frequency: 14000, gain: 0 },
+  ];
+
+  effects = [
+    {
+      name: "Reverb",
+      icon: "waves",
+      parameters: [
+        {
+          name: "Room Size",
+          min: 0,
+          max: 100,
+          step: 1,
+          value: 30,
+          formatter: (v: number) => `${v}%`,
+        },
+        {
+          name: "Decay",
+          min: 0.1,
+          max: 5.0,
+          step: 0.1,
+          value: 1.5,
+          formatter: (v: number) => `${v.toFixed(1)}s`,
+        },
+        {
+          name: "Mix",
+          min: 0,
+          max: 100,
+          step: 1,
+          value: 25,
+          formatter: (v: number) => `${v}%`,
+        },
+      ],
+    },
+    {
+      name: "Delay",
+      icon: "schedule",
+      parameters: [
+        {
+          name: "Time",
+          min: 10,
+          max: 1000,
+          step: 10,
+          value: 250,
+          formatter: (v: number) => `${v}ms`,
+        },
+        {
+          name: "Feedback",
+          min: 0,
+          max: 95,
+          step: 1,
+          value: 40,
+          formatter: (v: number) => `${v}%`,
+        },
+        {
+          name: "Level",
+          min: 0,
+          max: 100,
+          step: 1,
+          value: 20,
+          formatter: (v: number) => `${v}%`,
+        },
+      ],
+    },
+  ];
+
+  formatDecibel(value: number): string {
+    return `${value > 0 ? "+" : ""}${value}dB`;
+  }
+
+  formatPan(value: number): string {
+    if (value === 0) return "C";
+    return value < 0 ? `L${Math.abs(value)}` : `R${value}`;
+  }
+
+  formatEqGain(value: number): string {
+    return `${value > 0 ? "+" : ""}${value.toFixed(1)}dB`;
+  }
+
+  getChannelColor(type: string): string {
+    return type === "playback" ? "accent" : "primary";
+  }
+
+  onChannelVolumeChange(channel: any, event: MatSliderChange): void {
+    channel.volume = event.value;
+    // Provide real-time feedback
+    console.log(`${channel.name} volume: ${event.value}`);
+  }
+
+  trackByChannel(index: number, channel: any): string {
+    return channel.name;
+  }
+
+  trackByBand(index: number, band: any): number {
+    return band.frequency;
+  }
+
+  trackByEffect(index: number, effect: any): string {
+    return effect.name;
+  }
+
+  loadPreset(preset: "rock" | "jazz"): void {
+    if (preset === "rock") {
+      // Rock preset: boosted bass and treble
+      this.eqBands[0].gain = 4; // 60Hz
+      this.eqBands[1].gain = 2; // 170Hz
+      this.eqBands[6].gain = 3; // 12kHz
+      this.eqBands[7].gain = 2; // 14kHz
+    } else if (preset === "jazz") {
+      // Jazz preset: warm mids
+      this.eqBands[2].gain = 2; // 350Hz
+      this.eqBands[3].gain = 1; // 1kHz
+      this.eqBands[4].gain = 1; // 3kHz
+    }
+  }
+
+  resetAllControls(): void {
+    this.masterVolume = 85;
+    this.channels.forEach((channel) => {
+      channel.gain = 0;
+      channel.pan = 0;
+      channel.volume = 75;
+    });
+    this.eqBands.forEach((band) => (band.gain = 0));
+    this.effects.forEach((effect) => {
+      effect.parameters.forEach((param) => {
+        // Reset to reasonable defaults
+        if (param.name === "Mix" || param.name === "Level") {
+          param.value = 25;
+        } else if (param.name === "Feedback") {
+          param.value = 40;
+        } else {
+          param.value = param.min + (param.max - param.min) * 0.3;
+        }
+      });
+    });
+  }
+
+  saveCurrentSettings(): void {
+    const settings = {
+      master: this.masterVolume,
+      channels: this.channels,
+      eq: this.eqBands,
+      effects: this.effects,
+    };
+    console.log("Saving control panel settings:", settings);
+    // Implement settings save logic
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate ranges**: Set min/max values that make sense for your use case and provide reasonable default values
+- **Use meaningful step intervals**: Set step values that provide appropriate precision without making the slider too sensitive
+- **Provide visual feedback**: Use thumb labels, tick marks, and value displays to help users understand the current value
+- **Consider the use case**: Use continuous sliders for values like volume or brightness, discrete sliders for settings with specific levels
+- **Include formatting functions**: Use `displayWith` to format values in a user-friendly way (e.g., percentages, currency, units)
+- **Handle real-time updates**: Use the `input` event for real-time feedback and `change` event for final value confirmation
+
+### Accessibility
+
+- **ARIA labeling**: Sliders automatically provide proper ARIA roles and attributes for screen readers
+- **Keyboard navigation**: Supports arrow keys for fine adjustment, Page Up/Down for larger steps, Home/End for min/max values
+- **Screen reader support**: Properly announces current values, ranges, and value changes
+- **Focus management**: Maintains proper focus indicators and supports keyboard-only navigation
+- **High contrast support**: All slider components work correctly with high contrast themes
+
+### Performance
+
+- **Debounce input events**: For expensive operations, consider debouncing the `input` event to avoid excessive updates
+- **Optimize rendering**: Use OnPush change detection strategy and trackBy functions for dynamic slider lists
+- **Value formatting**: Implement efficient formatting functions that don't perform expensive calculations
+- **Form integration**: Use reactive forms with proper validation strategies to optimize form performance
+- **Bundle optimization**: Import only the slider module to minimize bundle size
+
+## Common Patterns
+
+### Pattern 1: Settings Panel
+
+```typescript
+@Component({
+  template: `
+    <div class="settings-panel">
+      <h2>Application Settings</h2>
+
+      <form [formGroup]="settingsForm" class="settings-form">
+        <!-- Display Settings -->
+        <div class="setting-category">
+          <h3>Display Settings</h3>
+
+          <div class="setting-item">
+            <label>Screen Brightness</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="10"
+                max="100"
+                step="5"
+                formControlName="brightness"
+                thumbLabel
+                tickInterval="25"
+                class="setting-slider"
+              ></mat-slider>
+              <span class="setting-value"
+                >{{ settingsForm.get("brightness")?.value }}%</span
+              >
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <label>Font Size</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="12"
+                max="24"
+                step="1"
+                formControlName="fontSize"
+                [displayWith]="formatFontSize"
+                thumbLabel
+                tickInterval="2"
+                class="setting-slider"
+              ></mat-slider>
+              <span class="setting-value">{{
+                formatFontSize(settingsForm.get("fontSize")?.value)
+              }}</span>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <label>UI Scale</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="0.8"
+                max="1.5"
+                step="0.1"
+                formControlName="uiScale"
+                [displayWith]="formatScale"
+                thumbLabel
+                tickInterval="0.1"
+                class="setting-slider"
+                color="accent"
+              ></mat-slider>
+              <span class="setting-value">{{
+                formatScale(settingsForm.get("uiScale")?.value)
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Settings -->
+        <div class="setting-category">
+          <h3>Audio Settings</h3>
+
+          <div class="setting-item">
+            <label>Master Volume</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="0"
+                max="100"
+                step="1"
+                formControlName="masterVolume"
+                (input)="onVolumeChange($event)"
+                thumbLabel
+                tickInterval="25"
+                class="setting-slider"
+              ></mat-slider>
+              <span class="setting-value"
+                >{{ settingsForm.get("masterVolume")?.value }}%</span
+              >
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <label>Notification Volume</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="0"
+                max="100"
+                step="5"
+                formControlName="notificationVolume"
+                thumbLabel
+                tickInterval="25"
+                class="setting-slider"
+              ></mat-slider>
+              <span class="setting-value"
+                >{{ settingsForm.get("notificationVolume")?.value }}%</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Settings -->
+        <div class="setting-category">
+          <h3>Performance Settings</h3>
+
+          <div class="setting-item">
+            <label>Animation Speed</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="0.5"
+                max="2.0"
+                step="0.1"
+                formControlName="animationSpeed"
+                [displayWith]="formatSpeed"
+                thumbLabel
+                class="setting-slider"
+                color="warn"
+              ></mat-slider>
+              <span class="setting-value">{{
+                formatSpeed(settingsForm.get("animationSpeed")?.value)
+              }}</span>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <label>Auto-save Interval</label>
+            <div class="slider-with-value">
+              <mat-slider
+                min="30"
+                max="600"
+                step="30"
+                formControlName="autoSaveInterval"
+                [displayWith]="formatInterval"
+                thumbLabel
+                tickInterval="120"
+                class="setting-slider"
+              ></mat-slider>
+              <span class="setting-value">{{
+                formatInterval(settingsForm.get("autoSaveInterval")?.value)
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="settings-actions">
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="resetToDefaults()"
+          >
+            Reset to Defaults
+          </button>
+          <button
+            type="button"
+            mat-button="filled"
+            (click)="saveSettings()"
+            [disabled]="settingsForm.invalid"
+          >
+            Save Settings
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-panel {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .setting-category {
+        padding: 16px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .setting-category h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 16px;
+      }
+
+      .setting-item {
+        margin-bottom: 20px;
+      }
+
+      .setting-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .setting-item label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .slider-with-value {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .setting-slider {
+        flex: 1;
+      }
+
+      .setting-value {
+        min-width: 60px;
+        text-align: right;
+        font-weight: bold;
+        color: #2196f3;
+      }
+
+      .settings-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+
+      @media (max-width: 600px) {
+        .settings-actions {
+          flex-direction: column-reverse;
+        }
+      }
+    `,
+  ],
+})
+export class SettingsPanelComponent {
+  settingsForm = new FormGroup({
+    brightness: new FormControl(80, [Validators.min(10), Validators.max(100)]),
+    fontSize: new FormControl(16, [Validators.min(12), Validators.max(24)]),
+    uiScale: new FormControl(1.0, [Validators.min(0.8), Validators.max(1.5)]),
+    masterVolume: new FormControl(75, [Validators.min(0), Validators.max(100)]),
+    notificationVolume: new FormControl(50, [
+      Validators.min(0),
+      Validators.max(100),
+    ]),
+    animationSpeed: new FormControl(1.0, [
+      Validators.min(0.5),
+      Validators.max(2.0),
+    ]),
+    autoSaveInterval: new FormControl(300, [
+      Validators.min(30),
+      Validators.max(600),
+    ]),
+  });
+
+  formatFontSize(value: number): string {
+    return `${value}px`;
+  }
+
+  formatScale(value: number): string {
+    return `${Math.round(value * 100)}%`;
+  }
+
+  formatSpeed(value: number): string {
+    return `${value.toFixed(1)}x`;
+  }
+
+  formatInterval(value: number): string {
+    return value < 60 ? `${value}s` : `${Math.round(value / 60)}m`;
+  }
+
+  onVolumeChange(event: MatSliderChange): void {
+    // Provide real-time audio feedback
+    console.log("Volume changed to:", event.value);
+  }
+
+  resetToDefaults(): void {
+    this.settingsForm.patchValue({
+      brightness: 80,
+      fontSize: 16,
+      uiScale: 1.0,
+      masterVolume: 75,
+      notificationVolume: 50,
+      animationSpeed: 1.0,
+      autoSaveInterval: 300,
+    });
+  }
+
+  saveSettings(): void {
+    if (this.settingsForm.valid) {
+      const settings = this.settingsForm.value;
+      console.log("Saving settings:", settings);
+      // Implement settings save logic
+    }
+  }
+}
+```
+
+### Pattern 2: Data Visualization Controls
+
+```typescript
+@Component({
+  template: `
+    <div class="visualization-controls">
+      <h2>Data Visualization Controls</h2>
+
+      <div class="controls-container">
+        <!-- Time Range Control -->
+        <div class="control-section">
+          <h3>Time Range</h3>
+          <div class="time-range-control">
+            <div class="range-display">
+              {{ formatDate(timeRange.start) }} -
+              {{ formatDate(timeRange.end) }}
+            </div>
+
+            <div class="dual-range-slider">
+              <mat-slider
+                min="0"
+                max="365"
+                step="1"
+                [(value)]="timeRange.startDay"
+                (input)="updateTimeRange()"
+                [displayWith]="formatDayOfYear"
+                thumbLabel
+                class="time-slider start-slider"
+              ></mat-slider>
+
+              <mat-slider
+                min="0"
+                max="365"
+                step="1"
+                [(value)]="timeRange.endDay"
+                (input)="updateTimeRange()"
+                [displayWith]="formatDayOfYear"
+                thumbLabel
+                class="time-slider end-slider"
+              ></mat-slider>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Options -->
+        <div class="control-section">
+          <h3>Chart Options</h3>
+
+          <div class="chart-controls">
+            <div class="control-row">
+              <label>Data Points</label>
+              <mat-slider
+                min="10"
+                max="1000"
+                step="10"
+                [(value)]="dataPoints"
+                (change)="onDataPointsChange($event)"
+                [displayWith]="formatDataPoints"
+                thumbLabel
+                tickInterval="100"
+                class="chart-slider"
+              ></mat-slider>
+              <span class="control-value">{{
+                formatDataPoints(dataPoints)
+              }}</span>
+            </div>
+
+            <div class="control-row">
+              <label>Smoothing</label>
+              <mat-slider
+                min="0"
+                max="100"
+                step="5"
+                [(value)]="smoothing"
+                (input)="onSmoothingChange($event)"
+                thumbLabel
+                tickInterval="25"
+                class="chart-slider"
+                color="accent"
+              ></mat-slider>
+              <span class="control-value">{{ smoothing }}%</span>
+            </div>
+
+            <div class="control-row">
+              <label>Zoom Level</label>
+              <mat-slider
+                min="1"
+                max="10"
+                step="0.5"
+                [(value)]="zoomLevel"
+                (input)="onZoomChange($event)"
+                [displayWith]="formatZoom"
+                thumbLabel
+                class="chart-slider"
+              ></mat-slider>
+              <span class="control-value">{{ formatZoom(zoomLevel) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="control-section">
+          <h3>Data Filters</h3>
+
+          <div class="filter-controls">
+            <div class="filter-group">
+              <h4>Value Range</h4>
+              <div class="range-filter">
+                <div class="range-inputs">
+                  <div class="range-input">
+                    <label>Min Value</label>
+                    <mat-slider
+                      min="0"
+                      max="500"
+                      step="10"
+                      [(value)]="valueRange.min"
+                      (input)="updateValueFilter()"
+                      thumbLabel
+                      class="filter-slider"
+                    ></mat-slider>
+                    <span class="filter-value">{{ valueRange.min }}</span>
+                  </div>
+
+                  <div class="range-input">
+                    <label>Max Value</label>
+                    <mat-slider
+                      min="500"
+                      max="1000"
+                      step="10"
+                      [(value)]="valueRange.max"
+                      (input)="updateValueFilter()"
+                      thumbLabel
+                      class="filter-slider"
+                    ></mat-slider>
+                    <span class="filter-value">{{ valueRange.max }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <h4>Threshold Settings</h4>
+              <div class="threshold-controls">
+                <div class="threshold-item">
+                  <label>Alert Threshold</label>
+                  <mat-slider
+                    min="0"
+                    max="100"
+                    step="1"
+                    [(value)]="alertThreshold"
+                    (input)="onThresholdChange('alert', $event)"
+                    thumbLabel
+                    class="threshold-slider alert-threshold"
+                    color="warn"
+                  ></mat-slider>
+                  <span class="threshold-value">{{ alertThreshold }}%</span>
+                </div>
+
+                <div class="threshold-item">
+                  <label>Warning Threshold</label>
+                  <mat-slider
+                    min="0"
+                    max="100"
+                    step="1"
+                    [(value)]="warningThreshold"
+                    (input)="onThresholdChange('warning', $event)"
+                    thumbLabel
+                    class="threshold-slider warning-threshold"
+                    color="accent"
+                  ></mat-slider>
+                  <span class="threshold-value">{{ warningThreshold }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animation Controls -->
+        <div class="control-section">
+          <h3>Animation</h3>
+
+          <div class="animation-controls">
+            <div class="control-row">
+              <label>Animation Speed</label>
+              <mat-slider
+                min="0.1"
+                max="3.0"
+                step="0.1"
+                [(value)]="animationSpeed"
+                [displayWith]="formatAnimationSpeed"
+                thumbLabel
+                class="animation-slider"
+              ></mat-slider>
+              <span class="control-value">{{
+                formatAnimationSpeed(animationSpeed)
+              }}</span>
+            </div>
+
+            <div class="control-row">
+              <label>Transition Duration</label>
+              <mat-slider
+                min="100"
+                max="2000"
+                step="100"
+                [(value)]="transitionDuration"
+                [displayWith]="formatDuration"
+                thumbLabel
+                class="animation-slider"
+              ></mat-slider>
+              <span class="control-value">{{
+                formatDuration(transitionDuration)
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Preview -->
+        <div class="preview-section">
+          <h3>Preview</h3>
+          <div class="chart-preview">
+            <div class="preview-info">
+              <div class="info-item">
+                <strong>Data Points:</strong> {{ formatDataPoints(dataPoints) }}
+              </div>
+              <div class="info-item">
+                <strong>Time Range:</strong> {{ formatDateRange() }}
+              </div>
+              <div class="info-item">
+                <strong>Value Range:</strong> {{ valueRange.min }} -
+                {{ valueRange.max }}
+              </div>
+              <div class="info-item">
+                <strong>Zoom:</strong> {{ formatZoom(zoomLevel) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Actions -->
+        <div class="control-actions">
+          <button type="button" mat-button="outlined" (click)="resetControls()">
+            Reset
+          </button>
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="exportSettings()"
+          >
+            Export Settings
+          </button>
+          <button type="button" mat-button="filled" (click)="applyChanges()">
+            Apply Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .visualization-controls {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .controls-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .control-section {
+        padding: 16px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .control-section h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .time-range-control {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .range-display {
+        text-align: center;
+        font-weight: bold;
+        color: #2196f3;
+        font-size: 16px;
+        padding: 8px;
+        background: white;
+        border-radius: 4px;
+      }
+
+      .dual-range-slider {
+        position: relative;
+        margin: 16px 0;
+      }
+
+      .time-slider {
+        position: absolute;
+        width: 100%;
+        top: 0;
+      }
+
+      .end-slider {
+        top: 8px;
+      }
+
+      .chart-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .control-row label {
+        min-width: 120px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .chart-slider,
+      .filter-slider,
+      .threshold-slider,
+      .animation-slider {
+        flex: 1;
+      }
+
+      .control-value,
+      .filter-value,
+      .threshold-value {
+        min-width: 60px;
+        text-align: right;
+        font-weight: bold;
+        color: #2196f3;
+      }
+
+      .filter-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .filter-group h4 {
+        margin: 0 0 12px 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .range-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .range-input {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .range-input label {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .threshold-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .threshold-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .threshold-item label {
+        min-width: 140px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .animation-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .preview-section {
+        background: #f0f8ff;
+        border: 1px solid #e3f2fd;
+      }
+
+      .chart-preview {
+        background: white;
+        border-radius: 4px;
+        padding: 16px;
+      }
+
+      .preview-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .info-item:last-child {
+        border-bottom: none;
+      }
+
+      .control-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .range-inputs {
+          grid-template-columns: 1fr;
+        }
+
+        .control-row {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+
+        .control-row label {
+          min-width: auto;
+        }
+
+        .threshold-item {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+
+        .threshold-item label {
+          min-width: auto;
+        }
+
+        .control-actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
+})
+export class VisualizationControlsComponent {
+  // Time range controls
+  timeRange = {
+    startDay: 30,
+    endDay: 335,
+    start: new Date(),
+    end: new Date(),
+  };
+
+  // Chart controls
+  dataPoints = 100;
+  smoothing = 20;
+  zoomLevel = 1.0;
+
+  // Filter controls
+  valueRange = { min: 50, max: 800 };
+  alertThreshold = 85;
+  warningThreshold = 70;
+
+  // Animation controls
+  animationSpeed = 1.0;
+  transitionDuration = 500;
+
+  ngOnInit(): void {
+    this.updateTimeRange();
+  }
+
+  formatDate(date: Date): string {
+    return date.toLocaleDateString();
+  }
+
+  formatDayOfYear(day: number): string {
+    const date = new Date(2024, 0, day + 1);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  formatDataPoints(points: number): string {
+    return `${points} points`;
+  }
+
+  formatZoom(zoom: number): string {
+    return `${zoom.toFixed(1)}x`;
+  }
+
+  formatAnimationSpeed(speed: number): string {
+    return `${speed.toFixed(1)}x`;
+  }
+
+  formatDuration(duration: number): string {
+    return `${duration}ms`;
+  }
+
+  formatDateRange(): string {
+    return `${this.formatDate(this.timeRange.start)} - ${this.formatDate(this.timeRange.end)}`;
+  }
+
+  updateTimeRange(): void {
+    this.timeRange.start = new Date(2024, 0, this.timeRange.startDay + 1);
+    this.timeRange.end = new Date(2024, 0, this.timeRange.endDay + 1);
+  }
+
+  onDataPointsChange(event: MatSliderChange): void {
+    console.log("Data points changed to:", event.value);
+    // Update chart data points
+  }
+
+  onSmoothingChange(event: MatSliderChange): void {
+    console.log("Smoothing changed to:", event.value);
+    // Apply smoothing to chart
+  }
+
+  onZoomChange(event: MatSliderChange): void {
+    console.log("Zoom changed to:", event.value);
+    // Update chart zoom level
+  }
+
+  updateValueFilter(): void {
+    console.log("Value filter updated:", this.valueRange);
+    // Apply value range filter to data
+  }
+
+  onThresholdChange(type: "alert" | "warning", event: MatSliderChange): void {
+    console.log(`${type} threshold changed to:`, event.value);
+    // Update threshold lines on chart
+  }
+
+  resetControls(): void {
+    this.timeRange = {
+      startDay: 30,
+      endDay: 335,
+      start: new Date(),
+      end: new Date(),
+    };
+    this.dataPoints = 100;
+    this.smoothing = 20;
+    this.zoomLevel = 1.0;
+    this.valueRange = { min: 50, max: 800 };
+    this.alertThreshold = 85;
+    this.warningThreshold = 70;
+    this.animationSpeed = 1.0;
+    this.transitionDuration = 500;
+    this.updateTimeRange();
+  }
+
+  exportSettings(): void {
+    const settings = {
+      timeRange: this.timeRange,
+      dataPoints: this.dataPoints,
+      smoothing: this.smoothing,
+      zoomLevel: this.zoomLevel,
+      valueRange: this.valueRange,
+      thresholds: {
+        alert: this.alertThreshold,
+        warning: this.warningThreshold,
+      },
+      animation: {
+        speed: this.animationSpeed,
+        duration: this.transitionDuration,
+      },
+    };
+    console.log("Exporting settings:", settings);
+    // Implement export functionality
+  }
+
+  applyChanges(): void {
+    console.log("Applying visualization changes");
+    // Apply all current settings to the chart
+  }
+}
+```

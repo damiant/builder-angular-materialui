@@ -1,0 +1,1706 @@
+---
+title: Select Components
+---
+
+# Select Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate select dropdown functionality. The Select component provides Material Design styled dropdowns that enable users to choose from a list of options. It follows Material Design 3 specifications for selection controls, offering consistent visual styling, proper accessibility features, and seamless integration with form field components.
+
+### When to Use
+
+- **Single Option Selection**: When users need to select one option from a predefined list of choices (e.g., country selection, status filters, category selection)
+- **Form Data Entry**: For collecting structured data in forms where users must choose from specific, validated options
+- **Settings and Configuration**: When providing dropdown menus for application settings, preferences, or configuration options
+- **Filtering and Sorting**: For dropdown filters that allow users to refine displayed data or change sorting criteria
+- **Navigation Menus**: When creating dropdown navigation menus with predefined destination options
+- **Data Validation**: When you need to ensure users can only select from approved, validated options rather than free-text input
+- **Space-Constrained Interfaces**: For interfaces where displaying all options at once would consume too much screen space
+- **Mobile-Friendly Selection**: When creating touch-friendly selection interfaces that work well on mobile devices
+- **Accessible Option Selection**: When you need properly structured, keyboard-navigable, and screen-reader friendly selection controls
+
+### Architecture
+
+**No Coupling**: The Select component is a standalone component that operates independently without requiring other components beyond the form field wrapper. It provides:
+
+- **Self-contained functionality**: Complete select implementation with dropdown behavior, option management, and selection state
+- **Form field integration**: Designed to work seamlessly within `mat-form-field` for consistent styling and accessibility
+- **Flexible option management**: Supports static options, dynamic data binding, and complex option objects
+- **Theme integration**: Automatically inherits from the Material Design theme system
+
+## Components
+
+### MatSelect {Standalone Component}
+
+A versatile select dropdown component that provides Material Design styling with comprehensive option management and accessibility support.
+
+**Purpose:** Creates interactive dropdown selection controls with Material Design styling, proper accessibility features, and seamless form integration for choosing from predefined options.
+
+**Interface:**
+
+```typescript
+interface MatSelectProps {
+  // Selection Management
+  value?: any; // Currently selected value(s)
+  multiple?: boolean; // Allow multiple selections
+  placeholder?: string; // Placeholder text when no selection
+
+  // Display and Behavior
+  panelClass?: string | string[]; // CSS classes for the dropdown panel
+  disableOptionCentering?: boolean; // Disable automatic option centering
+  typeaheadDebounceInterval?: number; // Debounce interval for typeahead
+
+  // Selection Options
+  compareWith?: (o1: any, o2: any) => boolean; // Custom comparison function
+  sortComparator?: (a: MatOption, b: MatOption, options: MatOption[]) => number; // Custom sort function
+
+  // Interaction States
+  disabled?: boolean; // Whether the select is disabled
+  required?: boolean; // Whether selection is required
+  readonly?: boolean; // Whether the select is read-only
+
+  // Panel Behavior
+  disableRipple?: boolean; // Whether to disable ripple effects
+  hideSingleSelectionIndicator?: boolean; // Hide checkmark for single selections
+
+  // Form Integration
+  tabIndex?: number; // Tab order for keyboard navigation
+  id?: string; // Unique identifier
+  ariaLabel?: string; // Accessibility label
+  ariaLabelledby?: string; // ID of labeling element
+
+  // Events
+  selectionChange?: (event: MatSelectChange) => void; // Selection change event
+  valueChange?: (value: any) => void; // Value change event
+  openedChange?: (opened: boolean) => void; // Panel open/close event
+}
+
+interface MatSelectChange {
+  source: MatSelect; // The select component instance
+  value: any; // The new selected value(s)
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatSelectModule } from "@angular/material/select";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatOptionModule } from "@angular/material/core";
+
+@Component({
+  selector: "app-select-examples",
+  template: `
+    <!-- Basic select -->
+    <mat-form-field appearance="outline">
+      <mat-label>Choose an option</mat-label>
+      <mat-select [(value)]="selectedValue">
+        <mat-option value="option1">Option 1</mat-option>
+        <mat-option value="option2">Option 2</mat-option>
+        <mat-option value="option3">Option 3</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Select with object values -->
+    <mat-form-field appearance="outline">
+      <mat-label>Select Country</mat-label>
+      <mat-select [(value)]="selectedCountry" [compareWith]="compareCountries">
+        <mat-option *ngFor="let country of countries" [value]="country">
+          {{ country.name }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Select your country of residence</mat-hint>
+    </mat-form-field>
+
+    <!-- Multi-select -->
+    <mat-form-field appearance="outline">
+      <mat-label>Select Skills</mat-label>
+      <mat-select [(value)]="selectedSkills" multiple>
+        <mat-option *ngFor="let skill of skills" [value]="skill">
+          {{ skill }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>{{ selectedSkills?.length || 0 }} skills selected</mat-hint>
+    </mat-form-field>
+
+    <!-- Disabled select -->
+    <mat-form-field appearance="outline">
+      <mat-label>Disabled Select</mat-label>
+      <mat-select [disabled]="true">
+        <mat-option value="disabled">This is disabled</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Select with form control -->
+    <mat-form-field appearance="outline">
+      <mat-label>Priority</mat-label>
+      <mat-select [formControl]="priorityControl">
+        <mat-option value="low">Low</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="high">High</mat-option>
+        <mat-option value="urgent">Urgent</mat-option>
+      </mat-select>
+      <mat-error *ngIf="priorityControl.hasError('required')">
+        Priority is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Select with custom trigger -->
+    <mat-form-field appearance="outline">
+      <mat-label>Custom Display</mat-label>
+      <mat-select [(value)]="selectedCustom">
+        <mat-select-trigger>
+          <span *ngIf="selectedCustom">
+            {{ getCustomDisplayText(selectedCustom) }}
+          </span>
+        </mat-select-trigger>
+        <mat-option value="red">Red Color</mat-option>
+        <mat-option value="blue">Blue Color</mat-option>
+        <mat-option value="green">Green Color</mat-option>
+      </mat-select>
+    </mat-form-field>
+  `,
+  imports: [MatSelectModule, MatFormFieldModule, MatOptionModule],
+})
+export class SelectExamplesComponent {
+  selectedValue = "option2";
+  selectedSkills: string[] = ["Angular", "TypeScript"];
+  selectedCountry: Country | null = null;
+  selectedCustom = "red";
+
+  priorityControl = new FormControl("", [Validators.required]);
+
+  countries: Country[] = [
+    { code: "US", name: "United States" },
+    { code: "CA", name: "Canada" },
+    { code: "UK", name: "United Kingdom" },
+  ];
+
+  skills = ["Angular", "React", "Vue", "TypeScript", "JavaScript", "Node.js"];
+
+  compareCountries(c1: Country, c2: Country): boolean {
+    return c1 && c2 ? c1.code === c2.code : c1 === c2;
+  }
+
+  getCustomDisplayText(value: string): string {
+    const colors = {
+      red: "🔴 Red Color",
+      blue: "🔵 Blue Color",
+      green: "🟢 Green Color",
+    };
+    return colors[value as keyof typeof colors] || value;
+  }
+}
+
+interface Country {
+  code: string;
+  name: string;
+}
+```
+
+## Integration Patterns
+
+### Basic Select Implementation
+
+```typescript
+import { MatSelectModule } from "@angular/material/select";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatOptionModule } from "@angular/material/core";
+
+@Component({
+  selector: "app-basic-select",
+  template: `
+    <div class="select-examples">
+      <!-- Simple select -->
+      <mat-form-field appearance="outline">
+        <mat-label>Size</mat-label>
+        <mat-select [(value)]="selectedSize">
+          <mat-option value="small">Small</mat-option>
+          <mat-option value="medium">Medium</mat-option>
+          <mat-option value="large">Large</mat-option>
+          <mat-option value="xl">Extra Large</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Select with icons -->
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(value)]="selectedStatus">
+          <mat-option value="draft">
+            <mat-icon>edit</mat-icon>
+            Draft
+          </mat-option>
+          <mat-option value="review">
+            <mat-icon>rate_review</mat-icon>
+            In Review
+          </mat-option>
+          <mat-option value="published">
+            <mat-icon>publish</mat-icon>
+            Published
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Select with groups -->
+      <mat-form-field appearance="outline">
+        <mat-label>Food Category</mat-label>
+        <mat-select [(value)]="selectedFood">
+          <mat-optgroup label="Fruits">
+            <mat-option value="apple">Apple</mat-option>
+            <mat-option value="banana">Banana</mat-option>
+            <mat-option value="orange">Orange</mat-option>
+          </mat-optgroup>
+          <mat-optgroup label="Vegetables">
+            <mat-option value="carrot">Carrot</mat-option>
+            <mat-option value="broccoli">Broccoli</mat-option>
+            <mat-option value="spinach">Spinach</mat-option>
+          </mat-optgroup>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  `,
+  styles: [
+    `
+      .select-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 300px;
+      }
+    `,
+  ],
+  imports: [MatSelectModule, MatFormFieldModule, MatOptionModule],
+})
+export class BasicSelectComponent {
+  selectedSize = "medium";
+  selectedStatus = "draft";
+  selectedFood = "";
+}
+```
+
+### Advanced Select with Dynamic Data
+
+```typescript
+import { MatSelectModule } from "@angular/material/select";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatOptionModule } from "@angular/material/core";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatIconModule } from "@angular/material/icon";
+import { ReactiveFormsModule, FormControl, FormGroup } from "@angular/forms";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  department: string;
+  avatar?: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  description: string;
+}
+
+@Component({
+  selector: "app-advanced-select",
+  template: `
+    <form [formGroup]="filterForm" class="advanced-select-form">
+      <!-- Department filter with loading -->
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+        <mat-select
+          formControlName="department"
+          (selectionChange)="onDepartmentChange($event)"
+        >
+          <mat-option value="">All Departments</mat-option>
+          <mat-option
+            *ngFor="let dept of departments"
+            [value]="dept.id"
+            [disabled]="dept.id === 'disabled'"
+          >
+            <div class="department-option">
+              <span class="department-name">{{ dept.name }}</span>
+              <span class="department-desc">{{ dept.description }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-hint>Filter users by department</mat-hint>
+      </mat-form-field>
+
+      <!-- User select with search and custom display -->
+      <mat-form-field appearance="outline">
+        <mat-label>Assign To User</mat-label>
+        <mat-select
+          formControlName="assignedUser"
+          [compareWith]="compareUsers"
+          [disabled]="loadingUsers"
+        >
+          <mat-select-trigger *ngIf="filterForm.get('assignedUser')?.value">
+            <div class="user-trigger">
+              <img
+                *ngIf="filterForm.get('assignedUser')?.value?.avatar"
+                [src]="filterForm.get('assignedUser')?.value?.avatar"
+                class="user-avatar"
+                alt="User avatar"
+              />
+              <div
+                class="user-avatar-placeholder"
+                *ngIf="!filterForm.get('assignedUser')?.value?.avatar"
+              >
+                {{ getInitials(filterForm.get("assignedUser")?.value?.name) }}
+              </div>
+              <div class="user-info">
+                <span class="user-name">{{
+                  filterForm.get("assignedUser")?.value?.name
+                }}</span>
+                <span class="user-email">{{
+                  filterForm.get("assignedUser")?.value?.email
+                }}</span>
+              </div>
+            </div>
+          </mat-select-trigger>
+
+          <div *ngIf="loadingUsers" class="loading-option">
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Loading users...</span>
+          </div>
+
+          <mat-option *ngFor="let user of filteredUsers" [value]="user">
+            <div class="user-option">
+              <img
+                *ngIf="user.avatar"
+                [src]="user.avatar"
+                class="user-avatar"
+                alt="User avatar"
+              />
+              <div class="user-avatar-placeholder" *ngIf="!user.avatar">
+                {{ getInitials(user.name) }}
+              </div>
+              <div class="user-details">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+                <span class="user-department">{{ user.department }}</span>
+              </div>
+            </div>
+          </mat-option>
+
+          <mat-option
+            *ngIf="filteredUsers.length === 0 && !loadingUsers"
+            value=""
+            disabled
+          >
+            <em>No users found in selected department</em>
+          </mat-option>
+        </mat-select>
+        <mat-hint>{{ filteredUsers.length }} users available</mat-hint>
+      </mat-form-field>
+
+      <!-- Multi-select with chips -->
+      <mat-form-field appearance="outline">
+        <mat-label>Tags</mat-label>
+        <mat-select formControlName="tags" multiple [panelClass]="'tags-panel'">
+          <mat-select-trigger>
+            <div
+              class="chip-container"
+              *ngIf="filterForm.get('tags')?.value?.length"
+            >
+              <span
+                class="tag-chip"
+                *ngFor="let tag of filterForm.get('tags')?.value.slice(0, 2)"
+              >
+                {{ tag }}
+              </span>
+              <span
+                *ngIf="filterForm.get('tags')?.value?.length > 2"
+                class="more-tags"
+              >
+                +{{ filterForm.get("tags")?.value?.length - 2 }} more
+              </span>
+            </div>
+          </mat-select-trigger>
+
+          <mat-option *ngFor="let tag of availableTags" [value]="tag">
+            {{ tag }}
+          </mat-option>
+        </mat-select>
+        <mat-hint>Select multiple tags</mat-hint>
+      </mat-form-field>
+
+      <!-- Priority select with colors -->
+      <mat-form-field appearance="outline">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          <mat-option
+            *ngFor="let priority of priorities"
+            [value]="priority.value"
+            [class]="'priority-' + priority.value"
+          >
+            <div class="priority-option">
+              <div
+                class="priority-indicator"
+                [style.background-color]="priority.color"
+              ></div>
+              <span>{{ priority.label }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <button type="button" mat-button="outlined" (click)="resetFilters()">
+          Reset
+        </button>
+        <button
+          type="button"
+          mat-button="filled"
+          (click)="applyFilters()"
+          [disabled]="filterForm.invalid"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .advanced-select-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+        padding: 16px;
+      }
+
+      .department-option {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .department-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .department-desc {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .user-trigger,
+      .user-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .user-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #2196f3;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .user-info,
+      .user-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .user-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .user-email {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .user-department {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.2;
+      }
+
+      .loading-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        justify-content: center;
+      }
+
+      .chip-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .tag-chip {
+        background-color: #e0e0e0;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 12px;
+        color: #333;
+      }
+
+      .more-tags {
+        font-size: 12px;
+        color: #666;
+        font-style: italic;
+      }
+
+      .priority-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .priority-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .priority-low {
+        color: #4caf50;
+      }
+
+      .priority-medium {
+        color: #ff9800;
+      }
+
+      .priority-high {
+        color: #f44336;
+      }
+
+      .priority-urgent {
+        color: #9c27b0;
+        font-weight: bold;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+
+      ::ng-deep .tags-panel {
+        max-height: 300px;
+      }
+    `,
+  ],
+  imports: [
+    MatSelectModule,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedSelectComponent implements OnInit {
+  filterForm = new FormGroup({
+    department: new FormControl(""),
+    assignedUser: new FormControl(null),
+    tags: new FormControl<string[]>([]),
+    priority: new FormControl("medium"),
+  });
+
+  departments: Department[] = [
+    {
+      id: "engineering",
+      name: "Engineering",
+      description: "Software development team",
+    },
+    { id: "design", name: "Design", description: "UX/UI design team" },
+    {
+      id: "marketing",
+      name: "Marketing",
+      description: "Product marketing team",
+    },
+    {
+      id: "sales",
+      name: "Sales",
+      description: "Sales and business development",
+    },
+  ];
+
+  allUsers: User[] = [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john.doe@company.com",
+      department: "engineering",
+      avatar: "/assets/avatars/john.jpg",
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane.smith@company.com",
+      department: "design",
+    },
+    {
+      id: 3,
+      name: "Mike Johnson",
+      email: "mike.johnson@company.com",
+      department: "engineering",
+      avatar: "/assets/avatars/mike.jpg",
+    },
+    {
+      id: 4,
+      name: "Sarah Wilson",
+      email: "sarah.wilson@company.com",
+      department: "marketing",
+    },
+  ];
+
+  filteredUsers: User[] = [];
+  loadingUsers = false;
+
+  availableTags = [
+    "urgent",
+    "bug",
+    "feature",
+    "enhancement",
+    "documentation",
+    "testing",
+    "security",
+    "performance",
+  ];
+
+  priorities = [
+    { value: "low", label: "Low", color: "#4caf50" },
+    { value: "medium", label: "Medium", color: "#ff9800" },
+    { value: "high", label: "High", color: "#f44336" },
+    { value: "urgent", label: "Urgent", color: "#9c27b0" },
+  ];
+
+  ngOnInit(): void {
+    this.filteredUsers = this.allUsers;
+
+    // Watch for department changes to filter users
+    this.filterForm
+      .get("department")
+      ?.valueChanges.subscribe((departmentId) => {
+        this.loadUsersForDepartment(departmentId);
+      });
+  }
+
+  onDepartmentChange(event: any): void {
+    // Reset user selection when department changes
+    this.filterForm.get("assignedUser")?.setValue(null);
+  }
+
+  loadUsersForDepartment(departmentId: string): void {
+    this.loadingUsers = true;
+
+    // Simulate API call delay
+    setTimeout(() => {
+      if (departmentId) {
+        this.filteredUsers = this.allUsers.filter(
+          (user) => user.department === departmentId,
+        );
+      } else {
+        this.filteredUsers = this.allUsers;
+      }
+      this.loadingUsers = false;
+    }, 500);
+  }
+
+  compareUsers(user1: User, user2: User): boolean {
+    return user1 && user2 ? user1.id === user2.id : user1 === user2;
+  }
+
+  getInitials(name: string): string {
+    return name
+      .split(" ")
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  resetFilters(): void {
+    this.filterForm.reset({
+      department: "",
+      assignedUser: null,
+      tags: [],
+      priority: "medium",
+    });
+  }
+
+  applyFilters(): void {
+    const filters = this.filterForm.value;
+    console.log("Applying filters:", filters);
+    // Implement filter logic here
+  }
+}
+```
+
+### Common Variations
+
+#### Searchable Select with Filter
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Search Countries</mat-label>
+      <mat-select
+        [(value)]="selectedCountry"
+        [panelClass]="'searchable-select-panel'"
+      >
+        <!-- Search input inside the panel -->
+        <mat-option disabled>
+          <mat-form-field appearance="outline" class="search-field">
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="filterCountries()"
+              placeholder="Search countries..."
+              (click)="$event.stopPropagation()"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </mat-option>
+
+        <mat-option
+          *ngFor="let country of filteredCountries"
+          [value]="country.code"
+        >
+          <span class="country-flag">{{ country.flag }}</span>
+          {{ country.name }}
+        </mat-option>
+
+        <mat-option *ngIf="filteredCountries.length === 0" disabled>
+          <em>No countries found</em>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  `,
+  styles: [
+    `
+      .search-field {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      .country-flag {
+        margin-right: 8px;
+        font-size: 18px;
+      }
+
+      ::ng-deep .searchable-select-panel {
+        max-height: 400px;
+      }
+
+      ::ng-deep .searchable-select-panel .mat-option:first-child {
+        padding: 8px 16px;
+        min-height: auto;
+      }
+    `,
+  ],
+})
+export class SearchableSelectComponent {
+  searchTerm = "";
+  selectedCountry = "";
+
+  allCountries = [
+    { code: "US", name: "United States", flag: "🇺🇸" },
+    { code: "CA", name: "Canada", flag: "🇨🇦" },
+    { code: "UK", name: "United Kingdom", flag: "🇬🇧" },
+    { code: "DE", name: "Germany", flag: "🇩🇪" },
+    { code: "FR", name: "France", flag: "🇫🇷" },
+    { code: "JP", name: "Japan", flag: "🇯🇵" },
+  ];
+
+  filteredCountries = this.allCountries;
+
+  filterCountries(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredCountries = this.allCountries.filter(
+      (country) =>
+        country.name.toLowerCase().includes(term) ||
+        country.code.toLowerCase().includes(term),
+    );
+  }
+}
+```
+
+#### Cascading Selects
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="locationForm" class="cascading-selects">
+      <mat-form-field appearance="outline">
+        <mat-label>Country</mat-label>
+        <mat-select
+          formControlName="country"
+          (selectionChange)="onCountryChange($event)"
+        >
+          <mat-option *ngFor="let country of countries" [value]="country">
+            {{ country.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>State/Province</mat-label>
+        <mat-select
+          formControlName="state"
+          [disabled]="!locationForm.get('country')?.value"
+          (selectionChange)="onStateChange($event)"
+        >
+          <mat-option *ngFor="let state of availableStates" [value]="state">
+            {{ state.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!locationForm.get('country')?.value">
+          Select a country first
+        </mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <mat-select
+          formControlName="city"
+          [disabled]="!locationForm.get('state')?.value"
+        >
+          <mat-option *ngFor="let city of availableCities" [value]="city">
+            {{ city.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!locationForm.get('state')?.value">
+          Select a state/province first
+        </mat-hint>
+      </mat-form-field>
+    </form>
+  `,
+  styles: [
+    `
+      .cascading-selects {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 300px;
+      }
+    `,
+  ],
+})
+export class CascadingSelectsComponent {
+  locationForm = new FormGroup({
+    country: new FormControl(null),
+    state: new FormControl({ value: null, disabled: true }),
+    city: new FormControl({ value: null, disabled: true }),
+  });
+
+  countries = [
+    { id: "us", name: "United States" },
+    { id: "ca", name: "Canada" },
+  ];
+
+  statesByCountry = {
+    us: [
+      { id: "ca", name: "California" },
+      { id: "ny", name: "New York" },
+      { id: "tx", name: "Texas" },
+    ],
+    ca: [
+      { id: "on", name: "Ontario" },
+      { id: "bc", name: "British Columbia" },
+      { id: "qc", name: "Quebec" },
+    ],
+  };
+
+  citiesByState = {
+    ca: [
+      { id: "la", name: "Los Angeles" },
+      { id: "sf", name: "San Francisco" },
+    ],
+    ny: [
+      { id: "nyc", name: "New York City" },
+      { id: "buf", name: "Buffalo" },
+    ],
+    on: [
+      { id: "tor", name: "Toronto" },
+      { id: "ott", name: "Ottawa" },
+    ],
+    bc: [
+      { id: "van", name: "Vancouver" },
+      { id: "vic", name: "Victoria" },
+    ],
+  };
+
+  availableStates: any[] = [];
+  availableCities: any[] = [];
+
+  onCountryChange(event: any): void {
+    const country = event.value;
+    if (country) {
+      this.availableStates =
+        this.statesByCountry[country.id as keyof typeof this.statesByCountry] ||
+        [];
+      this.locationForm.get("state")?.enable();
+    } else {
+      this.availableStates = [];
+      this.locationForm.get("state")?.disable();
+    }
+
+    // Reset dependent fields
+    this.locationForm.get("state")?.setValue(null);
+    this.locationForm.get("city")?.setValue(null);
+    this.availableCities = [];
+    this.locationForm.get("city")?.disable();
+  }
+
+  onStateChange(event: any): void {
+    const state = event.value;
+    if (state) {
+      this.availableCities =
+        this.citiesByState[state.id as keyof typeof this.citiesByState] || [];
+      this.locationForm.get("city")?.enable();
+    } else {
+      this.availableCities = [];
+      this.locationForm.get("city")?.disable();
+    }
+
+    // Reset dependent field
+    this.locationForm.get("city")?.setValue(null);
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Wrap in mat-form-field**: Always use `mat-form-field` as the container for consistent Material Design styling and accessibility
+- **Provide clear labels**: Use descriptive `mat-label` that clearly indicates what the user is selecting
+- **Include helpful hints**: Use `mat-hint` to provide guidance about the selection or show current state (e.g., "3 items selected")
+- **Handle empty states**: Provide appropriate feedback when no options are available or when loading data
+- **Use appropriate comparison**: Implement `compareWith` function for object values to ensure proper selection tracking
+- **Consider performance**: For large option lists, implement virtual scrolling or server-side filtering
+
+### Accessibility
+
+- **ARIA labeling**: Form fields automatically provide proper ARIA labels and descriptions for screen readers
+- **Keyboard navigation**: Supports arrow keys for option navigation, Enter/Space for selection, and Escape to close
+- **Screen reader support**: Properly announces selected values, option counts, and state changes
+- **Focus management**: Maintains proper focus when opening/closing the dropdown and navigating options
+- **High contrast support**: All select components work correctly with high contrast themes
+
+### Performance
+
+- **Virtual scrolling**: For lists with hundreds of options, consider implementing virtual scrolling
+- **Lazy loading**: Load options dynamically as needed rather than loading all options upfront
+- **Debounced filtering**: Implement debounced search/filter functionality to avoid excessive API calls
+- **Option recycling**: Use trackBy functions with `*ngFor` to optimize option rendering
+- **Bundle optimization**: Import only the select module to minimize bundle size
+
+## Common Patterns
+
+### Pattern 1: Filter Interface
+
+```typescript
+@Component({
+  template: `
+    <div class="filter-container">
+      <h3>Filter Products</h3>
+
+      <form [formGroup]="filterForm" class="filter-form">
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="category">
+              <mat-option value="">All Categories</mat-option>
+              <mat-option
+                *ngFor="let category of categories"
+                [value]="category.id"
+              >
+                {{ category.name }} ({{ category.count }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Price Range</mat-label>
+            <mat-select formControlName="priceRange">
+              <mat-option value="">Any Price</mat-option>
+              <mat-option value="0-25">$0 - $25</mat-option>
+              <mat-option value="25-50">$25 - $50</mat-option>
+              <mat-option value="50-100">$50 - $100</mat-option>
+              <mat-option value="100+">$100+</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Brand</mat-label>
+            <mat-select formControlName="brands" multiple>
+              <mat-select-trigger>
+                <span *ngIf="filterForm.get('brands')?.value?.length === 0">
+                  Any Brand
+                </span>
+                <span *ngIf="filterForm.get('brands')?.value?.length === 1">
+                  {{ filterForm.get("brands")?.value[0] }}
+                </span>
+                <span *ngIf="filterForm.get('brands')?.value?.length > 1">
+                  {{ filterForm.get("brands")?.value[0] }}
+                  (+{{ filterForm.get("brands")?.value?.length - 1 }} others)
+                </span>
+              </mat-select-trigger>
+
+              <mat-option *ngFor="let brand of brands" [value]="brand">
+                {{ brand }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sort By</mat-label>
+            <mat-select formControlName="sortBy">
+              <mat-option value="name">Name A-Z</mat-option>
+              <mat-option value="name-desc">Name Z-A</mat-option>
+              <mat-option value="price">Price Low-High</mat-option>
+              <mat-option value="price-desc">Price High-Low</mat-option>
+              <mat-option value="rating">Highest Rated</mat-option>
+              <mat-option value="newest">Newest First</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" mat-button="outlined" (click)="clearFilters()">
+            Clear All
+          </button>
+          <button type="button" mat-button="filled" (click)="applyFilters()">
+            Apply Filters ({{ getResultCount() }} results)
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .filter-container {
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+
+      .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .filter-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .filter-row mat-form-field {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      @media (max-width: 768px) {
+        .filter-row {
+          flex-direction: column;
+        }
+
+        .filter-actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
+})
+export class ProductFilterComponent implements OnInit {
+  filterForm = new FormGroup({
+    category: new FormControl(""),
+    priceRange: new FormControl(""),
+    brands: new FormControl<string[]>([]),
+    sortBy: new FormControl("name"),
+  });
+
+  categories = [
+    { id: "electronics", name: "Electronics", count: 150 },
+    { id: "clothing", name: "Clothing", count: 89 },
+    { id: "books", name: "Books", count: 45 },
+    { id: "sports", name: "Sports", count: 67 },
+  ];
+
+  brands = [
+    "Apple",
+    "Samsung",
+    "Nike",
+    "Adidas",
+    "Sony",
+    "Microsoft",
+    "Google",
+    "Amazon",
+    "Dell",
+    "HP",
+  ];
+
+  ngOnInit(): void {
+    // Watch for filter changes
+    this.filterForm.valueChanges.subscribe((filters) => {
+      console.log("Filters changed:", filters);
+      // Optionally auto-apply filters on change
+    });
+  }
+
+  clearFilters(): void {
+    this.filterForm.reset({
+      category: "",
+      priceRange: "",
+      brands: [],
+      sortBy: "name",
+    });
+  }
+
+  applyFilters(): void {
+    const filters = this.filterForm.value;
+    console.log("Applying filters:", filters);
+    // Implement filter application logic
+  }
+
+  getResultCount(): number {
+    // Calculate result count based on current filters
+    return 42; // Placeholder
+  }
+}
+```
+
+### Pattern 2: User Assignment Interface
+
+```typescript
+@Component({
+  template: `
+    <div class="assignment-interface">
+      <h3>Assign Task</h3>
+
+      <form [formGroup]="assignmentForm" class="assignment-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Assign to Team</mat-label>
+          <mat-select
+            formControlName="team"
+            (selectionChange)="onTeamChange($event)"
+          >
+            <mat-option *ngFor="let team of teams" [value]="team">
+              <div class="team-option">
+                <mat-icon>{{ team.icon }}</mat-icon>
+                <div class="team-info">
+                  <span class="team-name">{{ team.name }}</span>
+                  <span class="team-members"
+                    >{{ team.memberCount }} members</span
+                  >
+                </div>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Assign to User</mat-label>
+          <mat-select
+            formControlName="assignee"
+            [disabled]="!assignmentForm.get('team')?.value"
+            [compareWith]="compareUsers"
+          >
+            <mat-select-trigger *ngIf="assignmentForm.get('assignee')?.value">
+              <div class="user-display">
+                <div class="avatar-container">
+                  <img
+                    *ngIf="assignmentForm.get('assignee')?.value?.avatar"
+                    [src]="assignmentForm.get('assignee')?.value?.avatar"
+                    class="user-avatar"
+                    alt="User avatar"
+                  />
+                  <div
+                    *ngIf="!assignmentForm.get('assignee')?.value?.avatar"
+                    class="avatar-placeholder"
+                  >
+                    {{
+                      getInitials(assignmentForm.get("assignee")?.value?.name)
+                    }}
+                  </div>
+                  <div
+                    class="status-indicator"
+                    [class]="
+                      'status-' + assignmentForm.get('assignee')?.value?.status
+                    "
+                  ></div>
+                </div>
+                <div class="user-details">
+                  <span class="user-name">{{
+                    assignmentForm.get("assignee")?.value?.name
+                  }}</span>
+                  <span class="user-role">{{
+                    assignmentForm.get("assignee")?.value?.role
+                  }}</span>
+                </div>
+              </div>
+            </mat-select-trigger>
+
+            <mat-option
+              *ngFor="let user of availableUsers"
+              [value]="user"
+              [disabled]="user.status === 'unavailable'"
+            >
+              <div class="user-option">
+                <div class="avatar-container">
+                  <img
+                    *ngIf="user.avatar"
+                    [src]="user.avatar"
+                    class="user-avatar"
+                    alt="User avatar"
+                  />
+                  <div *ngIf="!user.avatar" class="avatar-placeholder">
+                    {{ getInitials(user.name) }}
+                  </div>
+                  <div
+                    class="status-indicator"
+                    [class]="'status-' + user.status"
+                  ></div>
+                </div>
+                <div class="user-info">
+                  <span class="user-name">{{ user.name }}</span>
+                  <span class="user-role">{{ user.role }}</span>
+                  <span class="user-workload"
+                    >{{ user.currentTasks }} tasks</span
+                  >
+                </div>
+                <div class="user-status">
+                  <mat-icon [class]="'status-icon-' + user.status">
+                    {{ getStatusIcon(user.status) }}
+                  </mat-icon>
+                </div>
+              </div>
+            </mat-option>
+
+            <mat-option *ngIf="availableUsers.length === 0" disabled>
+              <em>No users available in selected team</em>
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="!assignmentForm.get('team')?.value">
+            Select a team first
+          </mat-hint>
+          <mat-hint *ngIf="assignmentForm.get('team')?.value">
+            {{ availableUsers.length }} users available
+          </mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Priority</mat-label>
+          <mat-select formControlName="priority">
+            <mat-option
+              *ngFor="let priority of priorities"
+              [value]="priority.value"
+            >
+              <div class="priority-option">
+                <mat-icon [style.color]="priority.color">
+                  {{ priority.icon }}
+                </mat-icon>
+                <span>{{ priority.label }}</span>
+                <span class="priority-description">{{
+                  priority.description
+                }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Due Date</mat-label>
+          <mat-select formControlName="dueDate">
+            <mat-option
+              *ngFor="let option of dueDateOptions"
+              [value]="option.value"
+            >
+              <div class="date-option">
+                <span class="date-label">{{ option.label }}</span>
+                <span class="date-description">{{ option.description }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="assignment-actions">
+          <button type="button" mat-button="outlined" (click)="cancel()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            mat-button="filled"
+            (click)="assignTask()"
+            [disabled]="assignmentForm.invalid"
+          >
+            Assign Task
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .assignment-interface {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .assignment-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .team-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .team-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .team-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .team-members {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .user-display,
+      .user-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 48px;
+      }
+
+      .avatar-container {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #2196f3;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .status-indicator {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+
+      .status-available {
+        background-color: #4caf50;
+      }
+
+      .status-busy {
+        background-color: #ff9800;
+      }
+
+      .status-unavailable {
+        background-color: #f44336;
+      }
+
+      .user-details,
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .user-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .user-role,
+      .user-workload {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .user-status {
+        flex-shrink: 0;
+      }
+
+      .status-icon-available {
+        color: #4caf50;
+      }
+
+      .status-icon-busy {
+        color: #ff9800;
+      }
+
+      .status-icon-unavailable {
+        color: #f44336;
+      }
+
+      .priority-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .priority-description {
+        font-size: 12px;
+        color: #666;
+        margin-left: auto;
+      }
+
+      .date-option {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .date-label {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .date-description {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .assignment-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+    `,
+  ],
+})
+export class TaskAssignmentComponent implements OnInit {
+  assignmentForm = new FormGroup({
+    team: new FormControl(null, [Validators.required]),
+    assignee: new FormControl(null, [Validators.required]),
+    priority: new FormControl("medium", [Validators.required]),
+    dueDate: new FormControl("", [Validators.required]),
+  });
+
+  teams = [
+    { id: "frontend", name: "Frontend Team", icon: "web", memberCount: 8 },
+    { id: "backend", name: "Backend Team", icon: "dns", memberCount: 6 },
+    {
+      id: "mobile",
+      name: "Mobile Team",
+      icon: "phone_android",
+      memberCount: 4,
+    },
+    { id: "qa", name: "QA Team", icon: "bug_report", memberCount: 5 },
+  ];
+
+  allUsers = [
+    {
+      id: 1,
+      name: "Alice Johnson",
+      role: "Senior Frontend Developer",
+      status: "available",
+      currentTasks: 3,
+      team: "frontend",
+      avatar: "/assets/avatars/alice.jpg",
+    },
+    {
+      id: 2,
+      name: "Bob Smith",
+      role: "Backend Developer",
+      status: "busy",
+      currentTasks: 8,
+      team: "backend",
+    },
+    {
+      id: 3,
+      name: "Carol Davis",
+      role: "Mobile Developer",
+      status: "available",
+      currentTasks: 2,
+      team: "mobile",
+      avatar: "/assets/avatars/carol.jpg",
+    },
+    {
+      id: 4,
+      name: "David Wilson",
+      role: "QA Engineer",
+      status: "unavailable",
+      currentTasks: 0,
+      team: "qa",
+    },
+  ];
+
+  availableUsers: any[] = [];
+
+  priorities = [
+    {
+      value: "low",
+      label: "Low",
+      icon: "keyboard_arrow_down",
+      color: "#4caf50",
+      description: "Can wait",
+    },
+    {
+      value: "medium",
+      label: "Medium",
+      icon: "remove",
+      color: "#ff9800",
+      description: "Normal priority",
+    },
+    {
+      value: "high",
+      label: "High",
+      icon: "keyboard_arrow_up",
+      color: "#f44336",
+      description: "Important",
+    },
+    {
+      value: "urgent",
+      label: "Urgent",
+      icon: "priority_high",
+      color: "#9c27b0",
+      description: "Critical",
+    },
+  ];
+
+  dueDateOptions = [
+    { value: "today", label: "Today", description: "Due by end of day" },
+    {
+      value: "tomorrow",
+      label: "Tomorrow",
+      description: "Due by end of tomorrow",
+    },
+    { value: "week", label: "This Week", description: "Due by end of week" },
+    { value: "month", label: "This Month", description: "Due by end of month" },
+    {
+      value: "custom",
+      label: "Custom Date",
+      description: "Choose specific date",
+    },
+  ];
+
+  ngOnInit(): void {
+    this.assignmentForm.get("team")?.valueChanges.subscribe((team) => {
+      this.onTeamChange({ value: team });
+    });
+  }
+
+  onTeamChange(event: any): void {
+    const team = event.value;
+    if (team) {
+      this.availableUsers = this.allUsers.filter(
+        (user) => user.team === team.id,
+      );
+    } else {
+      this.availableUsers = [];
+    }
+
+    // Reset assignee when team changes
+    this.assignmentForm.get("assignee")?.setValue(null);
+  }
+
+  compareUsers(user1: any, user2: any): boolean {
+    return user1 && user2 ? user1.id === user2.id : user1 === user2;
+  }
+
+  getInitials(name: string): string {
+    return name
+      .split(" ")
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  getStatusIcon(status: string): string {
+    const icons = {
+      available: "check_circle",
+      busy: "schedule",
+      unavailable: "cancel",
+    };
+    return icons[status as keyof typeof icons] || "help";
+  }
+
+  assignTask(): void {
+    if (this.assignmentForm.valid) {
+      const assignment = this.assignmentForm.value;
+      console.log("Task assigned:", assignment);
+      // Implement task assignment logic
+    }
+  }
+
+  cancel(): void {
+    console.log("Assignment cancelled");
+    // Handle cancellation
+  }
+}
+```

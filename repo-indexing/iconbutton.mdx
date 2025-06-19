@@ -1,0 +1,1178 @@
+---
+title: IconButton Components
+---
+
+# IconButton Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate icon button functionality. The IconButton component provides Material Design styled circular buttons specifically designed to contain icons, offering a clean and compact way to trigger actions while maintaining proper accessibility standards and visual consistency.
+
+### When to Use
+
+- **Compact Action Triggers**: When you need space-efficient buttons for toolbars, headers, or areas with limited space
+- **Icon-Only Actions**: For actions that are universally understood through icons (close, edit, delete, share, favorite, etc.)
+- **Navigation Controls**: In app bars, navigation drawers, or as back/forward buttons
+- **Secondary Actions**: For less prominent actions that don't require prominent button styling
+- **Interactive Lists**: As action buttons within list items, table rows, or card components
+- **Toggle Actions**: For binary state changes like favorite/unfavorite, show/hide, or enable/disable
+- **Form Field Enhancements**: As suffix or prefix elements in form fields for actions like clear, visibility toggle, or search
+- **Floating Action Scenarios**: When you need circular button styling but without the elevation of FAB buttons
+- **Accessible Icon Interactions**: When you need properly labeled icon-based interactions for screen readers
+
+### Architecture
+
+**No Coupling**: The IconButton component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete icon button implementation with Material Design styling built-in
+- **Flexible integration**: Can be used anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and functionality regardless of context
+- **Icon system integration**: Works seamlessly with Angular Material's icon system and custom icon solutions
+
+## Components
+
+### MatIconButton {Standalone Component}
+
+A specialized button component that creates circular, icon-focused buttons with Material Design styling and comprehensive accessibility support.
+
+**Purpose:** Creates compact, circular buttons designed specifically for icons, providing consistent Material Design styling with proper accessibility features and interactive states.
+
+**Interface:**
+
+```typescript
+interface MatIconButtonProps {
+  // Theme and Styling
+  color?: "primary" | "accent" | "warn" | null; // Theme color palette
+
+  // Interaction States
+  disabled?: boolean; // Whether the button is disabled
+  disabledInteractive?: boolean; // Allows interaction while maintaining disabled appearance
+  ariaDisabled?: boolean | undefined; // ARIA disabled state
+
+  // Ripple Effects
+  disableRipple?: boolean; // Whether to disable the ripple effect
+
+  // Button Type and Behavior
+  type?: "button" | "submit" | "reset"; // HTML button type
+
+  // Focus and Navigation
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Accessibility (Required for icon-only buttons)
+  ariaLabel?: string; // Descriptive label for screen readers
+  ariaLabelledby?: string; // ID of element that labels this button
+  ariaDescribedby?: string; // ID of element that describes this button
+
+  // Events (inherited from HTMLButtonElement)
+  click?: () => void; // Click event handler
+  focus?: () => void; // Focus event handler
+  blur?: () => void; // Blur event handler
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+
+@Component({
+  selector: "app-icon-button-examples",
+  template: `
+    <!-- Basic icon button with aria-label -->
+    <button mat-icon-button aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Icon button with tooltip -->
+    <button
+      mat-icon-button
+      aria-label="Add to favorites"
+      matTooltip="Add to favorites"
+    >
+      <mat-icon>favorite_border</mat-icon>
+    </button>
+
+    <!-- Colored icon button -->
+    <button
+      mat-icon-button
+      color="primary"
+      aria-label="Edit item"
+      matTooltip="Edit"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <!-- Disabled icon button -->
+    <button
+      mat-icon-button
+      [disabled]="true"
+      aria-label="Delete item"
+      matTooltip="Delete (disabled)"
+    >
+      <mat-icon>delete</mat-icon>
+    </button>
+
+    <!-- Icon button with click handler -->
+    <button
+      mat-icon-button
+      aria-label="Share content"
+      matTooltip="Share"
+      (click)="shareContent()"
+    >
+      <mat-icon>share</mat-icon>
+    </button>
+
+    <!-- Toggle icon button -->
+    <button
+      mat-icon-button
+      [attr.aria-label]="isVisible ? 'Hide content' : 'Show content'"
+      [matTooltip]="isVisible ? 'Hide' : 'Show'"
+      (click)="toggleVisibility()"
+    >
+      <mat-icon>{{ isVisible ? "visibility_off" : "visibility" }}</mat-icon>
+    </button>
+
+    <!-- Icon button with custom icon -->
+    <button mat-icon-button aria-label="Settings" matTooltip="Settings">
+      <mat-icon svgIcon="custom-settings"></mat-icon>
+    </button>
+  `,
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+})
+export class IconButtonExamplesComponent {
+  isVisible = true;
+
+  shareContent(): void {
+    console.log("Content shared!");
+  }
+
+  toggleVisibility(): void {
+    this.isVisible = !this.isVisible;
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Icon Button Usage
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-basic-icon-buttons",
+  template: `
+    <div class="icon-button-group">
+      <!-- Essential accessibility: Always include aria-label for icon-only buttons -->
+      <button mat-icon-button aria-label="Home">
+        <mat-icon>home</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="Search">
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="Settings">
+        <mat-icon>settings</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="Profile">
+        <mat-icon>person</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="Help">
+        <mat-icon>help</mat-icon>
+      </button>
+    </div>
+  `,
+  styles: [
+    `
+      .icon-button-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+    `,
+  ],
+  imports: [MatButtonModule, MatIconModule],
+})
+export class BasicIconButtonsComponent {}
+```
+
+### Advanced Icon Button Implementation
+
+```typescript
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatBadgeModule } from "@angular/material/badge";
+
+@Component({
+  selector: "app-advanced-icon-buttons",
+  template: `
+    <div class="advanced-icon-examples">
+      <!-- Toolbar icon buttons -->
+      <div class="toolbar-section">
+        <h3>Toolbar Actions</h3>
+        <div class="toolbar-buttons">
+          <button
+            mat-icon-button
+            aria-label="Go back"
+            matTooltip="Back"
+            (click)="goBack()"
+          >
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Refresh page"
+            matTooltip="Refresh"
+            [disabled]="isLoading"
+            (click)="refresh()"
+          >
+            <mat-icon>{{ isLoading ? "hourglass_empty" : "refresh" }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Open menu"
+            matTooltip="More options"
+            [matMenuTriggerFor]="menu"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- State-based icon buttons -->
+      <div class="state-section">
+        <h3>Interactive States</h3>
+        <div class="state-buttons">
+          <button
+            mat-icon-button
+            [color]="isFavorited ? 'warn' : null"
+            [attr.aria-label]="
+              isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            "
+            [matTooltip]="
+              isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            "
+            (click)="toggleFavorite()"
+          >
+            <mat-icon>{{
+              isFavorited ? "favorite" : "favorite_border"
+            }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            [attr.aria-label]="
+              isBookmarked ? 'Remove bookmark' : 'Add bookmark'
+            "
+            [matTooltip]="isBookmarked ? 'Remove bookmark' : 'Add bookmark'"
+            (click)="toggleBookmark()"
+          >
+            <mat-icon>{{
+              isBookmarked ? "bookmark" : "bookmark_border"
+            }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            [attr.aria-label]="isLocked ? 'Unlock' : 'Lock'"
+            [matTooltip]="isLocked ? 'Unlock' : 'Lock'"
+            [color]="isLocked ? 'accent' : null"
+            (click)="toggleLock()"
+          >
+            <mat-icon>{{ isLocked ? "lock" : "lock_open" }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Notification icon buttons -->
+      <div class="notification-section">
+        <h3>Notification Buttons</h3>
+        <div class="notification-buttons">
+          <button
+            mat-icon-button
+            aria-label="Notifications"
+            matTooltip="View notifications"
+            matBadge="{{ notificationCount }}"
+            [matBadgeHidden]="notificationCount === 0"
+            matBadgeColor="warn"
+            (click)="openNotifications()"
+          >
+            <mat-icon>notifications</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Messages"
+            matTooltip="View messages"
+            matBadge="{{ messageCount }}"
+            [matBadgeHidden]="messageCount === 0"
+            matBadgeColor="primary"
+            (click)="openMessages()"
+          >
+            <mat-icon>mail</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form field icon buttons -->
+      <div class="form-section">
+        <h3>Form Integration</h3>
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Enter password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            [matTooltip]="showPassword ? 'Hide password' : 'Show password'"
+            (click)="togglePasswordVisibility()"
+            type="button"
+          >
+            <mat-icon>{{
+              showPassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput placeholder="Type to search" />
+          <button
+            mat-icon-button
+            matSuffix
+            aria-label="Clear search"
+            matTooltip="Clear"
+            (click)="clearSearch()"
+            type="button"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Context menu -->
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>print</mat-icon>
+        <span>Print</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>share</mat-icon>
+        <span>Share</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>download</mat-icon>
+        <span>Download</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .advanced-icon-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .toolbar-section h3,
+      .state-section h3,
+      .notification-section h3,
+      .form-section h3 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .toolbar-buttons,
+      .state-buttons,
+      .notification-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .form-section mat-form-field {
+        width: 300px;
+      }
+
+      @media (max-width: 600px) {
+        .form-section mat-form-field {
+          width: 100%;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatBadgeModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
+})
+export class AdvancedIconButtonsComponent {
+  isLoading = false;
+  isFavorited = false;
+  isBookmarked = false;
+  isLocked = false;
+  showPassword = false;
+  notificationCount = 3;
+  messageCount = 7;
+
+  goBack(): void {
+    window.history.back();
+  }
+
+  refresh(): void {
+    this.isLoading = true;
+    setTimeout(() => {
+      this.isLoading = false;
+      console.log("Page refreshed");
+    }, 2000);
+  }
+
+  toggleFavorite(): void {
+    this.isFavorited = !this.isFavorited;
+    console.log("Favorite toggled:", this.isFavorited);
+  }
+
+  toggleBookmark(): void {
+    this.isBookmarked = !this.isBookmarked;
+    console.log("Bookmark toggled:", this.isBookmarked);
+  }
+
+  toggleLock(): void {
+    this.isLocked = !this.isLocked;
+    console.log("Lock toggled:", this.isLocked);
+  }
+
+  openNotifications(): void {
+    console.log("Opening notifications");
+    this.notificationCount = 0;
+  }
+
+  openMessages(): void {
+    console.log("Opening messages");
+    this.messageCount = 0;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  clearSearch(): void {
+    console.log("Search cleared");
+  }
+}
+```
+
+### Common Variations
+
+#### App Bar Icon Buttons
+
+```typescript
+@Component({
+  template: `
+    <mat-toolbar color="primary">
+      <button
+        mat-icon-button
+        aria-label="Menu"
+        matTooltip="Open menu"
+        (click)="toggleSidenav()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="app-title">My Application</span>
+
+      <div class="spacer"></div>
+
+      <button
+        mat-icon-button
+        aria-label="Search"
+        matTooltip="Search"
+        (click)="openSearch()"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        aria-label="Account"
+        matTooltip="Account settings"
+        [matMenuTriggerFor]="accountMenu"
+      >
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <mat-menu #accountMenu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <span>Profile</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .app-title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .spacer {
+        flex: 1 1 auto;
+      }
+    `,
+  ],
+})
+export class AppBarIconButtonsComponent {
+  toggleSidenav(): void {
+    console.log("Toggle sidenav");
+  }
+
+  openSearch(): void {
+    console.log("Open search");
+  }
+}
+```
+
+#### Data List Action Buttons
+
+```typescript
+@Component({
+  template: `
+    <mat-list>
+      <mat-list-item *ngFor="let item of items">
+        <div matListItemTitle>{{ item.title }}</div>
+        <div matListItemLine>{{ item.description }}</div>
+
+        <div matListItemMeta class="list-actions">
+          <button
+            mat-icon-button
+            aria-label="Edit {{ item.title }}"
+            matTooltip="Edit"
+            (click)="editItem(item)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Share {{ item.title }}"
+            matTooltip="Share"
+            (click)="shareItem(item)"
+          >
+            <mat-icon>share</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Delete {{ item.title }}"
+            matTooltip="Delete"
+            color="warn"
+            (click)="deleteItem(item)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="More options for {{ item.title }}"
+            matTooltip="More options"
+            [matMenuTriggerFor]="itemMenu"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </mat-list-item>
+    </mat-list>
+
+    <mat-menu #itemMenu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>archive</mat-icon>
+        <span>Archive</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>info</mat-icon>
+        <span>Details</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .list-actions {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      mat-list-item {
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      mat-list-item:last-child {
+        border-bottom: none;
+      }
+    `,
+  ],
+})
+export class DataListIconButtonsComponent {
+  items = [
+    { id: 1, title: "First Item", description: "Description of first item" },
+    { id: 2, title: "Second Item", description: "Description of second item" },
+    { id: 3, title: "Third Item", description: "Description of third item" },
+  ];
+
+  editItem(item: any): void {
+    console.log("Edit item:", item);
+  }
+
+  shareItem(item: any): void {
+    console.log("Share item:", item);
+  }
+
+  deleteItem(item: any): void {
+    if (confirm(`Delete "${item.title}"?`)) {
+      console.log("Delete item:", item);
+    }
+  }
+}
+```
+
+#### Toggle State Icon Buttons
+
+```typescript
+@Component({
+  template: `
+    <div class="toggle-examples">
+      <h3>Media Controls</h3>
+      <div class="media-controls">
+        <button
+          mat-icon-button
+          [attr.aria-label]="isPlaying ? 'Pause' : 'Play'"
+          [matTooltip]="isPlaying ? 'Pause' : 'Play'"
+          (click)="togglePlay()"
+          color="primary"
+        >
+          <mat-icon>{{ isPlaying ? "pause" : "play_arrow" }}</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          [attr.aria-label]="isMuted ? 'Unmute' : 'Mute'"
+          [matTooltip]="isMuted ? 'Unmute' : 'Mute'"
+          (click)="toggleMute()"
+        >
+          <mat-icon>{{ isMuted ? "volume_off" : "volume_up" }}</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          [attr.aria-label]="
+            isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+          "
+          [matTooltip]="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+          (click)="toggleFullscreen()"
+        >
+          <mat-icon>{{
+            isFullscreen ? "fullscreen_exit" : "fullscreen"
+          }}</mat-icon>
+        </button>
+      </div>
+
+      <h3>Content Controls</h3>
+      <div class="content-controls">
+        <button
+          mat-icon-button
+          [color]="isStarred ? 'accent' : null"
+          [attr.aria-label]="isStarred ? 'Remove star' : 'Add star'"
+          [matTooltip]="isStarred ? 'Remove star' : 'Add star'"
+          (click)="toggleStar()"
+        >
+          <mat-icon>{{ isStarred ? "star" : "star_border" }}</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          [color]="isThumbsUp ? 'primary' : null"
+          [attr.aria-label]="isThumbsUp ? 'Remove like' : 'Like'"
+          [matTooltip]="isThumbsUp ? 'Remove like' : 'Like'"
+          (click)="toggleThumbsUp()"
+        >
+          <mat-icon>{{
+            isThumbsUp ? "thumb_up" : "thumb_up_off_alt"
+          }}</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'"
+          [matTooltip]="isExpanded ? 'Collapse' : 'Expand'"
+          (click)="toggleExpand()"
+        >
+          <mat-icon>{{ isExpanded ? "expand_less" : "expand_more" }}</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .toggle-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 16px;
+      }
+
+      .toggle-examples h3 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .media-controls,
+      .content-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+    `,
+  ],
+})
+export class ToggleIconButtonsComponent {
+  isPlaying = false;
+  isMuted = false;
+  isFullscreen = false;
+  isStarred = false;
+  isThumbsUp = false;
+  isExpanded = false;
+
+  togglePlay(): void {
+    this.isPlaying = !this.isPlaying;
+    console.log("Play state:", this.isPlaying);
+  }
+
+  toggleMute(): void {
+    this.isMuted = !this.isMuted;
+    console.log("Mute state:", this.isMuted);
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    console.log("Fullscreen state:", this.isFullscreen);
+  }
+
+  toggleStar(): void {
+    this.isStarred = !this.isStarred;
+    console.log("Star state:", this.isStarred);
+  }
+
+  toggleThumbsUp(): void {
+    this.isThumbsUp = !this.isThumbsUp;
+    console.log("Thumbs up state:", this.isThumbsUp);
+  }
+
+  toggleExpand(): void {
+    this.isExpanded = !this.isExpanded;
+    console.log("Expand state:", this.isExpanded);
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always provide accessible labels**: Use `aria-label` or `aria-labelledby` for all icon-only buttons to ensure screen reader compatibility
+- **Combine with tooltips**: Pair icon buttons with `matTooltip` to provide context for sighted users who may not understand the icon meaning
+- **Use recognizable icons**: Choose universally understood icons or provide additional context through labels and tooltips
+- **Maintain consistent sizing**: Icon buttons have a standard 40x40px touch target that should not be modified for accessibility compliance
+- **Group related actions**: Place related icon buttons together and use consistent spacing for better visual organization
+
+### Accessibility
+
+- **Mandatory ARIA labeling**: Every icon button must have an `aria-label` or `aria-labelledby` attribute describing its action
+- **Dynamic label updates**: Use `[attr.aria-label]` binding to update labels when button state changes (e.g., play/pause, show/hide)
+- **Keyboard navigation**: Icon buttons automatically support Enter and Space key activation with proper focus indicators
+- **High contrast support**: Ensure icon buttons remain visible and usable in high contrast mode
+- **Touch target requirements**: Maintain the 40x40px minimum touch target size for mobile accessibility
+
+### Performance
+
+- **Icon optimization**: Use Material Icons efficiently and avoid loading unnecessary icon sets
+- **Ripple management**: Consider `disableRipple` for performance-critical applications with many icon buttons
+- **Event handling efficiency**: Implement lightweight event handlers and avoid complex operations in click handlers
+- **Bundle optimization**: Import only necessary Angular Material modules to minimize bundle size
+- **Memory management**: Properly manage event listeners and subscriptions in component lifecycle methods
+
+## Common Patterns
+
+### Pattern 1: Toolbar Action Buttons
+
+```typescript
+@Component({
+  template: `
+    <mat-toolbar class="action-toolbar">
+      <div class="toolbar-section">
+        <button
+          mat-icon-button
+          aria-label="Back to previous page"
+          matTooltip="Back"
+          (click)="navigateBack()"
+        >
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+
+        <span class="toolbar-title">{{ pageTitle }}</span>
+      </div>
+
+      <div class="toolbar-actions">
+        <button
+          mat-icon-button
+          aria-label="Save changes"
+          matTooltip="Save"
+          [disabled]="!hasChanges"
+          (click)="saveChanges()"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          aria-label="Refresh data"
+          matTooltip="Refresh"
+          [disabled]="isLoading"
+          (click)="refreshData()"
+        >
+          <mat-icon [class.spinning]="isLoading">refresh</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          aria-label="Print page"
+          matTooltip="Print"
+          (click)="printPage()"
+        >
+          <mat-icon>print</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          aria-label="More options"
+          matTooltip="More options"
+          [matMenuTriggerFor]="toolbarMenu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <mat-menu #toolbarMenu="matMenu">
+      <button mat-menu-item (click)="exportData()">
+        <mat-icon>download</mat-icon>
+        <span>Export</span>
+      </button>
+      <button mat-menu-item (click)="shareContent()">
+        <mat-icon>share</mat-icon>
+        <span>Share</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="openSettings()">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .action-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .toolbar-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .toolbar-title {
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .toolbar-title {
+          font-size: 16px;
+        }
+
+        .toolbar-actions {
+          gap: 4px;
+        }
+      }
+    `,
+  ],
+})
+export class ToolbarIconButtonsComponent {
+  @Input() pageTitle = "Page Title";
+  hasChanges = false;
+  isLoading = false;
+
+  navigateBack(): void {
+    window.history.back();
+  }
+
+  saveChanges(): void {
+    console.log("Saving changes...");
+    this.hasChanges = false;
+  }
+
+  refreshData(): void {
+    this.isLoading = true;
+    setTimeout(() => {
+      this.isLoading = false;
+      console.log("Data refreshed");
+    }, 2000);
+  }
+
+  printPage(): void {
+    window.print();
+  }
+
+  exportData(): void {
+    console.log("Exporting data...");
+  }
+
+  shareContent(): void {
+    console.log("Sharing content...");
+  }
+
+  openSettings(): void {
+    console.log("Opening settings...");
+  }
+}
+```
+
+### Pattern 2: Card Action Buttons
+
+```typescript
+@Component({
+  template: `
+    <mat-card class="content-card">
+      <mat-card-header>
+        <mat-card-title>{{ card.title }}</mat-card-title>
+        <mat-card-subtitle>{{ card.subtitle }}</mat-card-subtitle>
+
+        <div class="card-actions" mat-card-avatar>
+          <button
+            mat-icon-button
+            [attr.aria-label]="
+              card.isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            "
+            [matTooltip]="
+              card.isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            "
+            [color]="card.isFavorited ? 'warn' : null"
+            (click)="toggleFavorite(card)"
+          >
+            <mat-icon>{{
+              card.isFavorited ? "favorite" : "favorite_border"
+            }}</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="Share card"
+            matTooltip="Share"
+            (click)="shareCard(card)"
+          >
+            <mat-icon>share</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            aria-label="More options"
+            matTooltip="More options"
+            [matMenuTriggerFor]="cardMenu"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>{{ card.content }}</p>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button
+          mat-icon-button
+          aria-label="Edit card"
+          matTooltip="Edit"
+          (click)="editCard(card)"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          aria-label="Download card"
+          matTooltip="Download"
+          (click)="downloadCard(card)"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          aria-label="Delete card"
+          matTooltip="Delete"
+          color="warn"
+          (click)="deleteCard(card)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-menu #cardMenu="matMenu">
+      <button mat-menu-item (click)="duplicateCard(card)">
+        <mat-icon>content_copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item (click)="archiveCard(card)">
+        <mat-icon>archive</mat-icon>
+        <span>Archive</span>
+      </button>
+      <button mat-menu-item (click)="moveCard(card)">
+        <mat-icon>drive_file_move</mat-icon>
+        <span>Move</span>
+      </button>
+    </mat-menu>
+  `,
+  styles: [
+    `
+      .content-card {
+        max-width: 400px;
+        margin: 16px;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 4px;
+        margin-left: auto;
+      }
+
+      mat-card-header {
+        align-items: flex-start;
+      }
+
+      mat-card-actions {
+        padding: 8px 16px;
+      }
+    `,
+  ],
+})
+export class CardIconButtonsComponent {
+  @Input() card = {
+    title: "Sample Card",
+    subtitle: "Card subtitle",
+    content: "This is the content of the card with some descriptive text.",
+    isFavorited: false,
+  };
+
+  toggleFavorite(card: any): void {
+    card.isFavorited = !card.isFavorited;
+    console.log("Favorite toggled:", card.isFavorited);
+  }
+
+  shareCard(card: any): void {
+    console.log("Sharing card:", card);
+  }
+
+  editCard(card: any): void {
+    console.log("Editing card:", card);
+  }
+
+  downloadCard(card: any): void {
+    console.log("Downloading card:", card);
+  }
+
+  deleteCard(card: any): void {
+    if (confirm("Are you sure you want to delete this card?")) {
+      console.log("Deleting card:", card);
+    }
+  }
+
+  duplicateCard(card: any): void {
+    console.log("Duplicating card:", card);
+  }
+
+  archiveCard(card: any): void {
+    console.log("Archiving card:", card);
+  }
+
+  moveCard(card: any): void {
+    console.log("Moving card:", card);
+  }
+}
+```
