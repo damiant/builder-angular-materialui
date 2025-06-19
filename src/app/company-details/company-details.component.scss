@@ -1,0 +1,353 @@
+.company-details-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 20px;
+  font-family:
+    Kentledge,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+
+  @media (max-width: 991px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  form {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    align-items: flex-start;
+
+    @media (max-width: 991px) {
+      flex-direction: column;
+    }
+  }
+
+  .left-column {
+    min-width: 240px;
+    width: 684px;
+
+    @media (max-width: 991px) {
+      width: 100%;
+    }
+  }
+
+  .section-card {
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    width: 100%;
+    max-width: 684px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 991px) {
+      max-width: 100%;
+    }
+
+    .mat-mdc-card-header {
+      padding: 32px 40px 0 40px;
+
+      @media (max-width: 991px) {
+        padding: 24px 20px 0 20px;
+      }
+    }
+
+    .mat-mdc-card-content {
+      padding: 32px 40px 40px 40px;
+
+      @media (max-width: 991px) {
+        padding: 24px 20px 20px 20px;
+      }
+    }
+  }
+
+  .section-title {
+    font-size: 24px;
+    color: #000;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+
+    @media (max-width: 991px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .half-width {
+    flex: 1;
+    min-width: 240px;
+
+    @media (max-width: 991px) {
+      width: 100%;
+    }
+  }
+
+  .quarter-width {
+    flex: 0.5;
+    min-width: 120px;
+
+    @media (max-width: 991px) {
+      width: 100%;
+    }
+  }
+
+  .mat-mdc-form-field {
+    margin-bottom: 16px;
+
+    .mat-mdc-form-field-label {
+      color: #7b7f97;
+      font-size: 16px;
+    }
+
+    .mat-mdc-input-element {
+      color: #4f5474;
+      font-size: 16px;
+
+      &:read-only,
+      &[readonly] {
+        background-color: #f8f8f9 !important;
+        color: #4f5474 !important;
+        cursor: default;
+      }
+    }
+
+    &.mat-form-field-appearance-outline {
+      .mat-mdc-form-field-outline {
+        color: #e9e9ed;
+      }
+
+      &.mat-focused .mat-mdc-form-field-outline {
+        color: #562e76;
+      }
+    }
+  }
+
+  .info-block {
+    margin-top: 24px;
+    padding: 16px 0;
+
+    .info-label {
+      color: #5a605d;
+      font-size: 12px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      color: #232951;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.4;
+    }
+  }
+
+  .upload-section {
+    display: flex;
+    flex-direction: column;
+    max-width: 263px;
+
+    .upload-button {
+      align-self: flex-start;
+      color: #3195c5;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+      padding: 4px 0;
+      margin-bottom: 8px;
+
+      .mat-icon {
+        margin-right: 8px;
+      }
+    }
+
+    .file-info {
+      font-size: 12px;
+      color: #4f5474;
+      font-weight: 400;
+      line-height: 1.4;
+
+      .file-types {
+        margin-bottom: 4px;
+      }
+
+      .file-size {
+        color: #4f5474;
+      }
+    }
+  }
+
+  .chip-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+
+    @media (max-width: 991px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .chip-label {
+      color: #232951;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+
+    .chip-options {
+      display: flex;
+      gap: 16px;
+
+      .mat-mdc-chip-set {
+        .mat-mdc-chip {
+          border-radius: 100px;
+          padding: 6px 16px;
+          font-size: 16px;
+          line-height: 1.4;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &.selected {
+            background-color: #562e76;
+            color: #fff;
+            box-shadow: 0px 2px 6px 0px rgba(35, 41, 81, 0.15);
+          }
+
+          &:not(.selected) {
+            background-color: #fff;
+            color: #562e76;
+            border: 1px solid #e9e9ed;
+            box-shadow: 0px 2px 6px 0px rgba(35, 41, 81, 0.15);
+          }
+
+          .mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+    }
+  }
+
+  .toggle-section {
+    margin: 24px 0;
+
+    .mat-mdc-slide-toggle {
+      .mdc-switch__track {
+        background-color: #ddd5e4;
+      }
+
+      &.mat-checked .mdc-switch__track {
+        background-color: #562e76;
+      }
+
+      .mdc-switch__handle-track {
+        .mdc-switch__handle {
+          background-color: #fff;
+        }
+      }
+
+      .mdc-form-field {
+        color: #232951;
+        font-family:
+          Kentledge,
+          -apple-system,
+          Roboto,
+          Helvetica,
+          sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .right-column {
+    min-width: 240px;
+    width: 684px;
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 991px) {
+      width: 100%;
+    }
+  }
+}
+
+// Global form field styling overrides
+::ng-deep {
+  .mat-mdc-form-field.mat-form-field-appearance-outline {
+    .mat-mdc-form-field-outline {
+      color: #e9e9ed;
+    }
+
+    &.mat-focused .mat-mdc-form-field-outline-thick {
+      color: #562e76;
+    }
+
+    .mat-mdc-form-field-label {
+      color: #7b7f97;
+    }
+
+    &.mat-focused .mat-mdc-form-field-label {
+      color: #562e76;
+    }
+  }
+
+  .mat-mdc-input-element {
+    color: #4f5474;
+
+    &::placeholder {
+      color: #7b7f97;
+    }
+  }
+
+  .mat-mdc-select-value {
+    color: #4f5474;
+  }
+
+  .mat-mdc-select-placeholder {
+    color: #7b7f97;
+  }
+
+  .mat-mdc-option {
+    color: #4f5474;
+
+    &.mat-mdc-option-active {
+      background-color: #f8f8f9;
+    }
+  }
+
+  .mat-datepicker-toggle {
+    color: #7b7f97;
+  }
+
+  .mat-mdc-form-field-hint {
+    color: #7b7f97;
+    font-size: 12px;
+  }
+}

@@ -5,78 +5,73 @@ import { CommonModule } from "@angular/common";
   selector: "app-header",
   template: `
     <div class="header">
-      <div class="main-header">
+      <div class="main-header-container">
         <div class="logo-menu-section">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/53422e31a1fbe82ce02aa8b62abe12ea6d0cdacf?placeholderIfAbsent=true"
+            src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/c4d771d27897aaaddb4e5cdad1e85d27120e76d3?placeholderIfAbsent=true"
             class="menu-icon"
-            alt="Menu"
           />
-          <div class="logo-content">
-            <div class="logo">
+          <div class="logo-navigation-wrapper">
+            <div class="logo-section">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/1d009d1ec487016a49d7367b9b6ab75a99da261a?placeholderIfAbsent=true"
-                class="logo-image"
-                alt="Company Logo"
+                class="company-logo"
               />
-              <div class="company-title">Company Management</div>
+              <div class="company-name">Company Management</div>
             </div>
-            <div class="breadcrumbs">
+            <div class="breadcrumb-navigation">
               <div class="breadcrumb-item">
                 <div class="breadcrumb-text">Empower</div>
               </div>
               <img
-                src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/37db57c98943a0e00693f34cc9fb1bf4cac04ff5?placeholderIfAbsent=true"
+                src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/706d864628531a4f5a232c1ce62c8d231fb90b0e?placeholderIfAbsent=true"
                 class="breadcrumb-separator"
-                alt="separator"
               />
               <div class="breadcrumb-item">
-                <div class="breadcrumb-content">
+                <div class="breadcrumb-with-icon">
                   <img
-                    src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/84699cd3d8955d291561c88e0afc5ceecfb244e3?placeholderIfAbsent=true"
+                    src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/1d1b98ee06fd8e1c8f2e4b0658d30e22f9697dd0?placeholderIfAbsent=true"
                     class="breadcrumb-icon"
-                    alt="Activation"
                   />
-                  <div class="breadcrumb-text">Activation</div>
+                  <div class="breadcrumb-label">Activation</div>
                 </div>
               </div>
               <img
-                src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/37db57c98943a0e00693f34cc9fb1bf4cac04ff5?placeholderIfAbsent=true"
+                src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/706d864628531a4f5a232c1ce62c8d231fb90b0e?placeholderIfAbsent=true"
                 class="breadcrumb-separator"
-                alt="separator"
               />
               <div class="breadcrumb-item">
-                <div class="breadcrumb-text active">Company Management</div>
+                <div class="breadcrumb-text">Companies</div>
               </div>
             </div>
           </div>
         </div>
         <div class="user-section">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/3380a2c7e9dc1c12d016de0351f25b636701f94d?placeholderIfAbsent=true"
+            src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/1f54ac53aa8e3a7fca8a000282a1829380619f8d?placeholderIfAbsent=true"
             class="notification-icon"
-            alt="Notifications"
           />
-          <div class="user-avatar">
+          <div class="user-avatar-section">
             <div class="user-name">John Smith</div>
             <img
-              src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/8102c37a7d74daf5f1bcc17091d25a10b772c7d1?placeholderIfAbsent=true"
-              class="avatar-image"
-              alt="User Avatar"
+              src="https://cdn.builder.io/api/v1/image/assets/923540ce194c403ba6d59d22b451f70a/fa22ef8cae94b00d6f6675dbaa142c5a608962c4?placeholderIfAbsent=true"
+              class="user-avatar"
             />
           </div>
         </div>
       </div>
       <div class="secondary-header">
-        <div class="header-content">
-          <div class="content-wrapper">
+        <div class="secondary-content-wrapper">
+          <div class="secondary-content">
             <div class="title-section">
-              <div class="page-title">
-                <div class="title-text">aDDING New Company</div>
+              <div class="page-titles">
+                <div class="page-title-primary">Client Summary Editing:</div>
+                <div class="page-title-secondary">Client name</div>
               </div>
             </div>
             <div class="action-buttons">
               <div class="cancel-button">Cancel</div>
+              <div class="save-button">Save</div>
               <div class="submit-button">Submit for Approval</div>
             </div>
           </div>
@@ -101,7 +96,7 @@ import { CommonModule } from "@angular/common";
           sans-serif;
         justify-content: center;
       }
-      .main-header {
+      .main-header-container {
         justify-content: space-between;
         align-items: center;
         display: flex;
@@ -112,7 +107,7 @@ import { CommonModule } from "@angular/common";
         background-color: #fff;
       }
       @media (max-width: 991px) {
-        .main-header {
+        .main-header-container {
           max-width: 100%;
           padding: 8px 20px;
         }
@@ -126,11 +121,6 @@ import { CommonModule } from "@angular/common";
         gap: 24px;
         justify-content: start;
       }
-      @media (max-width: 991px) {
-        .logo-menu-section {
-          max-width: 100%;
-        }
-      }
       .menu-icon {
         aspect-ratio: 1;
         object-fit: contain;
@@ -140,7 +130,7 @@ import { CommonModule } from "@angular/common";
         margin: auto 0;
         flex-shrink: 0;
       }
-      .logo-content {
+      .logo-navigation-wrapper {
         align-self: stretch;
         display: flex;
         min-width: 240px;
@@ -149,8 +139,7 @@ import { CommonModule } from "@angular/common";
         align-items: stretch;
         justify-content: start;
       }
-      .logo {
-        align-self: start;
+      .logo-section {
         display: flex;
         align-items: center;
         gap: 16px;
@@ -159,7 +148,7 @@ import { CommonModule } from "@angular/common";
         font-weight: 900;
         justify-content: start;
       }
-      .logo-image {
+      .company-logo {
         aspect-ratio: 4.93;
         object-fit: contain;
         object-position: center;
@@ -168,15 +157,16 @@ import { CommonModule } from "@angular/common";
         margin: auto 0;
         flex-shrink: 0;
       }
-      .company-title {
+      .company-name {
         color: #232951;
         align-self: stretch;
         margin: auto 0;
         padding-top: 4px;
         gap: 4px;
       }
-      .breadcrumbs {
+      .breadcrumb-navigation {
         border-radius: 50px;
+        align-self: start;
         display: flex;
         margin-top: 4px;
         padding: 0 4px;
@@ -185,15 +175,20 @@ import { CommonModule } from "@angular/common";
         font-size: 12px;
         color: #4f5474;
         font-weight: 400;
+        white-space: nowrap;
         line-height: 1.4;
         justify-content: start;
+      }
+      @media (max-width: 991px) {
+        .breadcrumb-navigation {
+          white-space: initial;
+        }
       }
       .breadcrumb-item {
         align-self: stretch;
         display: flex;
         margin: auto 0;
         align-items: start;
-        white-space: nowrap;
         justify-content: start;
       }
       @media (max-width: 991px) {
@@ -220,14 +215,14 @@ import { CommonModule } from "@angular/common";
         margin: auto 0;
         flex-shrink: 0;
       }
-      .breadcrumb-content {
+      .breadcrumb-with-icon {
         display: flex;
         align-items: start;
         gap: 8px;
         justify-content: start;
       }
       @media (max-width: 991px) {
-        .breadcrumb-content {
+        .breadcrumb-with-icon {
           white-space: initial;
         }
       }
@@ -238,6 +233,9 @@ import { CommonModule } from "@angular/common";
         width: 16px;
         border-radius: 100px;
         flex-shrink: 0;
+      }
+      .breadcrumb-label {
+        color: #4f5474;
       }
       .user-section {
         align-self: stretch;
@@ -260,7 +258,7 @@ import { CommonModule } from "@angular/common";
         margin: auto 0;
         flex-shrink: 0;
       }
-      .user-avatar {
+      .user-avatar-section {
         align-self: stretch;
         display: flex;
         margin: auto 0;
@@ -272,7 +270,7 @@ import { CommonModule } from "@angular/common";
         align-self: stretch;
         margin: auto 0;
       }
-      .avatar-image {
+      .user-avatar {
         aspect-ratio: 1;
         object-fit: contain;
         object-position: center;
@@ -296,15 +294,15 @@ import { CommonModule } from "@angular/common";
           padding: 12px 20px;
         }
       }
-      .header-content {
+      .secondary-content-wrapper {
         width: 100%;
       }
       @media (max-width: 991px) {
-        .header-content {
+        .secondary-content-wrapper {
           max-width: 100%;
         }
       }
-      .content-wrapper {
+      .secondary-content {
         display: flex;
         width: 100%;
         align-items: center;
@@ -313,46 +311,52 @@ import { CommonModule } from "@angular/common";
         flex-wrap: wrap;
       }
       @media (max-width: 991px) {
-        .content-wrapper {
+        .secondary-content {
           max-width: 100%;
         }
       }
       .title-section {
         align-self: stretch;
         display: flex;
+        min-width: 240px;
         margin: auto 0;
-        flex-direction: column;
-        align-items: stretch;
+        align-items: center;
+        gap: 24px;
         font-size: 16px;
-        color: #000;
         font-weight: 900;
         text-align: center;
         text-transform: uppercase;
         line-height: 1.2;
-        justify-content: center;
-        width: 142px;
+        justify-content: start;
       }
-      .page-title {
+      .page-titles {
+        align-self: stretch;
         display: flex;
-        width: 100%;
-        max-width: 142px;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: center;
+        min-width: 240px;
+        margin: auto 0;
+        align-items: center;
+        gap: 8px;
+        justify-content: start;
       }
-      .title-text {
+      .page-title-primary {
         color: #000;
-        min-height: 19px;
-        width: 100%;
-        gap: 10px;
+        align-self: stretch;
+        margin: auto 0;
+      }
+      .page-title-secondary {
+        color: #3195c5;
+        align-self: stretch;
+        margin: auto 0;
       }
       .action-buttons {
         align-self: stretch;
         display: flex;
+        min-width: 240px;
         margin: auto 0;
         align-items: start;
         gap: 16px;
         font-size: 12px;
+        color: #562e76;
         font-weight: 700;
         line-height: 1;
         justify-content: start;
@@ -373,6 +377,23 @@ import { CommonModule } from "@angular/common";
           white-space: initial;
         }
       }
+      .save-button {
+        color: #562e76;
+        leading-trim: both;
+        text-edge: cap;
+        align-self: stretch;
+        border-radius: 10px;
+        border: 1px solid var(--Primary-Purple, #562e76);
+        min-height: 32px;
+        padding: 12px 16px;
+        gap: 8px;
+        white-space: nowrap;
+      }
+      @media (max-width: 991px) {
+        .save-button {
+          white-space: initial;
+        }
+      }
       .submit-button {
         align-self: stretch;
         border-radius: 10px;
@@ -387,4 +408,6 @@ import { CommonModule } from "@angular/common";
   standalone: true,
   imports: [CommonModule],
 })
-export default class HeaderComponent {}
+export class HeaderComponent {}
+
+export default HeaderComponent;
