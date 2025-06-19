@@ -1,0 +1,1763 @@
+---
+title: ProgressSpinner Components
+---
+
+# ProgressSpinner Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate progress spinner functionality. The ProgressSpinner component provides Material Design styled circular progress indicators that communicate the status of ongoing processes, loading states, and indeterminate operations to users. It follows Material Design 3 specifications for circular progress indicators, offering multiple modes for different use cases, proper accessibility features, and smooth animation transitions.
+
+### When to Use
+
+- **Indeterminate Loading States**: When displaying loading indicators for operations where progress percentage is unknown or constantly changing
+- **Page Loading Indicators**: For showing that a page or major content section is loading without specific progress information
+- **Background Processing**: When indicating that background operations are running without blocking user interaction
+- **Form Submission States**: During form processing or validation when exact progress cannot be determined
+- **API Call Loading**: For REST API calls, database queries, or network operations with unknown duration
+- **Lazy Loading Content**: When content is being loaded asynchronously and you need to show activity
+- **Search Operations**: For search queries or filtering operations where processing time varies
+- **Authentication Processes**: During login, logout, or token refresh operations
+- **Determinate Progress Visualization**: When you know the exact percentage and want circular representation instead of linear
+- **Accessibility-First Feedback**: When providing screen-reader compatible loading information with proper ARIA attributes
+
+### Architecture
+
+**No Coupling**: The ProgressSpinner component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete circular progress indicator implementation with multiple modes and animation support
+- **Flexible integration**: Can be used anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and functionality regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system
+- **Animation support**: Built-in smooth circular animations that can be configured or disabled
+
+## Components
+
+### MatProgressSpinner {Standalone Component}
+
+A versatile circular progress indicator component that provides Material Design styling with multiple operation modes, smooth animations, and comprehensive accessibility support for various loading and progress indication scenarios.
+
+**Purpose:** Creates circular progress indicators with Material Design styling, supporting determinate and indeterminate progress states, customizable appearance, and proper accessibility features for communicating loading or progress status to users.
+
+**Interface:**
+
+```typescript
+interface MatProgressSpinnerProps {
+  // Visual Appearance
+  color?: ThemePalette | null; // Theme color palette: 'primary' | 'accent' | 'warn' | null
+  diameter?: number; // Diameter of the spinner in pixels (default: 40)
+  strokeWidth?: number; // Stroke width of the spinner circle in pixels
+
+  // Progress Values
+  value?: number; // Progress value (0-100), defaults to 0, only used in determinate mode
+
+  // Operation Modes
+  mode?: ProgressSpinnerMode; // Spinner mode: 'determinate' | 'indeterminate'
+
+  // Accessibility
+  // Note: ARIA attributes are automatically applied:
+  // - role="progressbar"
+  // - aria-valuemin="0"
+  // - aria-valuemax="100"
+  // - aria-valuenow (reflects current value in determinate mode)
+}
+
+// Supporting Types
+type ProgressSpinnerMode = "determinate" | "indeterminate";
+type ThemePalette = "primary" | "accent" | "warn";
+```
+
+**Usage Example:**
+
+```typescript
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-spinner-examples",
+  template: `
+    <!-- Basic indeterminate spinner -->
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+
+    <!-- Determinate spinner with specific value -->
+    <mat-progress-spinner mode="determinate" [value]="progressValue">
+    </mat-progress-spinner>
+
+    <!-- Customized spinner with color and size -->
+    <mat-progress-spinner
+      mode="indeterminate"
+      color="accent"
+      [diameter]="60"
+      [strokeWidth]="8"
+    >
+    </mat-progress-spinner>
+
+    <!-- Loading spinner for buttons -->
+    <button mat-button [disabled]="isLoading">
+      <mat-progress-spinner
+        *ngIf="isLoading"
+        mode="indeterminate"
+        [diameter]="20"
+        [strokeWidth]="3"
+      >
+      </mat-progress-spinner>
+      <span *ngIf="!isLoading">Submit</span>
+      <span *ngIf="isLoading">Processing...</span>
+    </button>
+
+    <!-- Spinner with accessibility labels -->
+    <div class="loading-container">
+      <mat-progress-spinner
+        mode="indeterminate"
+        [attr.aria-label]="'Loading user data'"
+        [attr.aria-describedby]="'loading-description'"
+      >
+      </mat-progress-spinner>
+      <div id="loading-description">
+        Please wait while we load your profile information
+      </div>
+    </div>
+
+    <!-- Circular progress indicator -->
+    <div class="progress-container">
+      <mat-progress-spinner
+        mode="determinate"
+        [value]="downloadProgress"
+        color="primary"
+        [diameter]="80"
+        [strokeWidth]="6"
+      >
+      </mat-progress-spinner>
+      <div class="progress-overlay">{{ downloadProgress }}%</div>
+    </div>
+  `,
+  styles: [
+    `
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .progress-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      .progress-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: 600;
+        font-size: 14px;
+      }
+    `,
+  ],
+  imports: [MatProgressSpinnerModule],
+})
+export class SpinnerExamplesComponent {
+  progressValue = 65;
+  isLoading = false;
+  downloadProgress = 45;
+}
+```
+
+## Integration Patterns
+
+### Basic Spinner Usage
+
+```typescript
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-basic-spinners",
+  template: `
+    <div class="spinner-examples">
+      <div class="spinner-item">
+        <h3>Indeterminate Spinner</h3>
+        <p>Use when progress duration is unknown</p>
+        <mat-progress-spinner mode="indeterminate" color="primary">
+        </mat-progress-spinner>
+        <span class="spinner-text">Loading...</span>
+      </div>
+
+      <div class="spinner-item">
+        <h3>Determinate Spinner</h3>
+        <p>Use when you know the exact progress percentage</p>
+        <div class="determinate-container">
+          <mat-progress-spinner
+            mode="determinate"
+            [value]="75"
+            color="accent"
+            [diameter]="60"
+          >
+          </mat-progress-spinner>
+          <div class="percentage-overlay">75%</div>
+        </div>
+        <span class="spinner-text">75% Complete</span>
+      </div>
+
+      <div class="spinner-item">
+        <h3>Small Spinner</h3>
+        <p>Use in buttons or compact spaces</p>
+        <mat-progress-spinner
+          mode="indeterminate"
+          [diameter]="24"
+          [strokeWidth]="3"
+          color="warn"
+        >
+        </mat-progress-spinner>
+        <span class="spinner-text">Processing...</span>
+      </div>
+
+      <div class="spinner-item">
+        <h3>Large Spinner</h3>
+        <p>Use for page-level loading states</p>
+        <mat-progress-spinner
+          mode="indeterminate"
+          [diameter]="80"
+          [strokeWidth]="8"
+          color="primary"
+        >
+        </mat-progress-spinner>
+        <span class="spinner-text">Loading Application...</span>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .spinner-examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 32px;
+        padding: 24px;
+      }
+
+      .spinner-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .spinner-item h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .spinner-item p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .determinate-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      .percentage-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: 600;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .spinner-text {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+      }
+
+      @media (max-width: 600px) {
+        .spinner-examples {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
+  imports: [MatProgressSpinnerModule],
+})
+export class BasicSpinnersComponent {}
+```
+
+### Advanced Spinner Implementation
+
+```typescript
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { interval, Subscription } from "rxjs";
+
+@Component({
+  selector: "app-advanced-spinners",
+  template: `
+    <div class="advanced-spinner-examples">
+      <!-- Loading Button with Spinner -->
+      <mat-card class="spinner-card">
+        <mat-card-header>
+          <mat-card-title>Loading Button</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Button with integrated loading spinner</p>
+
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isSubmitting"
+            (click)="simulateSubmission()"
+            class="loading-button"
+          >
+            <mat-progress-spinner
+              *ngIf="isSubmitting"
+              mode="indeterminate"
+              [diameter]="20"
+              [strokeWidth]="3"
+              color="primary"
+            >
+            </mat-progress-spinner>
+            <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+            <span class="button-text">
+              {{ isSubmitting ? "Submitting..." : "Submit Form" }}
+            </span>
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Page Loading Overlay -->
+      <mat-card class="spinner-card">
+        <mat-card-header>
+          <mat-card-title>Page Loading</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Full-page loading overlay pattern</p>
+
+          <button
+            mat-button
+            (click)="showPageLoading()"
+            [disabled]="isPageLoading"
+          >
+            Show Page Loading
+          </button>
+
+          <div class="loading-overlay" *ngIf="isPageLoading">
+            <div class="loading-content">
+              <mat-progress-spinner
+                mode="indeterminate"
+                [diameter]="60"
+                [strokeWidth]="6"
+                color="primary"
+              >
+              </mat-progress-spinner>
+              <h3>Loading Content</h3>
+              <p>Please wait while we fetch your data...</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Progress Tracking -->
+      <mat-card class="spinner-card">
+        <mat-card-header>
+          <mat-card-title>Progress Tracking</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Determinate progress with percentage display</p>
+
+          <div class="progress-spinner-container">
+            <mat-progress-spinner
+              mode="determinate"
+              [value]="progressValue"
+              [diameter]="100"
+              [strokeWidth]="8"
+              color="accent"
+              class="progress-spinner"
+            >
+            </mat-progress-spinner>
+            <div class="progress-content">
+              <div class="progress-percentage">
+                {{ progressValue.toFixed(0) }}%
+              </div>
+              <div class="progress-label">{{ getProgressLabel() }}</div>
+            </div>
+          </div>
+
+          <div class="progress-controls">
+            <button
+              mat-button
+              (click)="startProgress()"
+              [disabled]="isProgressing"
+            >
+              Start Process
+            </button>
+            <button
+              mat-button
+              (click)="resetProgress()"
+              [disabled]="isProgressing"
+            >
+              Reset
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Data Loading States -->
+      <mat-card class="spinner-card">
+        <mat-card-header>
+          <mat-card-title>Data Loading States</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="data-section" *ngFor="let section of dataSections">
+            <div class="section-header">
+              <h4>{{ section.title }}</h4>
+              <button
+                mat-icon-button
+                (click)="refreshSection(section.id)"
+                [disabled]="section.loading"
+                [attr.aria-label]="'Refresh ' + section.title"
+              >
+                <mat-icon *ngIf="!section.loading">refresh</mat-icon>
+                <mat-progress-spinner
+                  *ngIf="section.loading"
+                  mode="indeterminate"
+                  [diameter]="20"
+                  [strokeWidth]="3"
+                >
+                </mat-progress-spinner>
+              </button>
+            </div>
+
+            <div class="section-content">
+              <div
+                *ngIf="!section.loading && section.data"
+                class="data-content"
+              >
+                {{ section.data }}
+              </div>
+
+              <div *ngIf="section.loading" class="loading-state">
+                <mat-progress-spinner
+                  mode="indeterminate"
+                  [diameter]="32"
+                  [strokeWidth]="4"
+                >
+                </mat-progress-spinner>
+                <span>Loading {{ section.title.toLowerCase() }}...</span>
+              </div>
+
+              <div
+                *ngIf="!section.loading && !section.data"
+                class="empty-state"
+              >
+                <mat-icon>inbox</mat-icon>
+                <span>No {{ section.title.toLowerCase() }} available</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Multi-Step Loading -->
+      <mat-card class="spinner-card">
+        <mat-card-header>
+          <mat-card-title>Multi-Step Process</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="multi-step-loading">
+            <div
+              class="step"
+              *ngFor="let step of steps; let i = index"
+              [class.active]="i === currentStepIndex"
+              [class.completed]="i < currentStepIndex"
+              [class.pending]="i > currentStepIndex"
+            >
+              <div class="step-indicator">
+                <mat-progress-spinner
+                  *ngIf="i === currentStepIndex && isMultiStepRunning"
+                  mode="indeterminate"
+                  [diameter]="24"
+                  [strokeWidth]="3"
+                  color="primary"
+                >
+                </mat-progress-spinner>
+                <mat-icon *ngIf="i < currentStepIndex">check_circle</mat-icon>
+                <mat-icon *ngIf="i > currentStepIndex"
+                  >radio_button_unchecked</mat-icon
+                >
+                <mat-icon *ngIf="i === currentStepIndex && !isMultiStepRunning"
+                  >play_circle</mat-icon
+                >
+              </div>
+
+              <div class="step-content">
+                <div class="step-title">{{ step.title }}</div>
+                <div class="step-description">{{ step.description }}</div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="startMultiStep()"
+            [disabled]="isMultiStepRunning"
+            class="start-process-button"
+          >
+            {{ isMultiStepRunning ? "Processing..." : "Start Process" }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-spinner-examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 24px;
+        padding: 24px;
+      }
+
+      .spinner-card {
+        height: fit-content;
+      }
+
+      .loading-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 140px;
+        position: relative;
+      }
+
+      .button-text {
+        margin-left: 4px;
+      }
+
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .loading-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .loading-content h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .loading-content p {
+        margin: 0;
+        color: #666;
+      }
+
+      .progress-spinner-container {
+        position: relative;
+        display: inline-block;
+        margin: 20px;
+      }
+
+      .progress-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      .progress-percentage {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1;
+      }
+
+      .progress-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .progress-controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 16px;
+      }
+
+      .data-section {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .section-header h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .section-content {
+        padding: 16px;
+      }
+
+      .loading-state {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .empty-state {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #999;
+        font-size: 14px;
+      }
+
+      .data-content {
+        font-size: 14px;
+        color: #333;
+      }
+
+      .multi-step-loading {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+      }
+
+      .step.active {
+        background: #e3f2fd;
+      }
+
+      .step.completed {
+        background: #f1f8e9;
+      }
+
+      .step.pending {
+        background: #fafafa;
+        opacity: 0.7;
+      }
+
+      .step-indicator {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .step-indicator mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .step.completed .step-indicator mat-icon {
+        color: #4caf50;
+      }
+
+      .step.active .step-indicator mat-icon {
+        color: #2196f3;
+      }
+
+      .step.pending .step-indicator mat-icon {
+        color: #999;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+
+      .step-title {
+        font-weight: 500;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .step-description {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .start-process-button {
+        width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .advanced-spinner-examples {
+          grid-template-columns: 1fr;
+        }
+
+        .loading-overlay {
+          position: absolute;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+  ],
+})
+export class AdvancedSpinnersComponent implements OnInit, OnDestroy {
+  // Button loading state
+  isSubmitting = false;
+
+  // Page loading state
+  isPageLoading = false;
+
+  // Progress tracking state
+  progressValue = 0;
+  isProgressing = false;
+
+  // Data loading state
+  dataSections = [
+    {
+      id: 1,
+      title: "User Profile",
+      loading: false,
+      data: "John Doe - Software Engineer",
+    },
+    {
+      id: 2,
+      title: "Recent Orders",
+      loading: false,
+      data: "5 orders in the last month",
+    },
+    { id: 3, title: "Notifications", loading: false, data: null },
+  ];
+
+  // Multi-step process state
+  currentStepIndex = 0;
+  isMultiStepRunning = false;
+  steps = [
+    { title: "Initialize", description: "Setting up the process" },
+    { title: "Download", description: "Downloading required files" },
+    { title: "Install", description: "Installing components" },
+    { title: "Configure", description: "Configuring settings" },
+    { title: "Complete", description: "Process completed" },
+  ];
+
+  private subscriptions: Subscription[] = [];
+
+  ngOnInit(): void {
+    // Component initialization
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  async simulateSubmission(): Promise<void> {
+    this.isSubmitting = true;
+
+    // Simulate async operation
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    this.isSubmitting = false;
+    console.log("Form submitted successfully");
+  }
+
+  async showPageLoading(): Promise<void> {
+    this.isPageLoading = true;
+
+    // Simulate page load
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    this.isPageLoading = false;
+  }
+
+  startProgress(): void {
+    this.isProgressing = true;
+    this.progressValue = 0;
+
+    const progressInterval = interval(100).subscribe(() => {
+      this.progressValue += Math.random() * 2;
+
+      if (this.progressValue >= 100) {
+        this.progressValue = 100;
+        this.isProgressing = false;
+        progressInterval.unsubscribe();
+      }
+    });
+
+    this.subscriptions.push(progressInterval);
+  }
+
+  resetProgress(): void {
+    this.progressValue = 0;
+    this.isProgressing = false;
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  getProgressLabel(): string {
+    if (this.progressValue >= 100) return "Complete";
+    if (this.isProgressing) return "Processing";
+    return "Ready";
+  }
+
+  async refreshSection(sectionId: number): Promise<void> {
+    const section = this.dataSections.find((s) => s.id === sectionId);
+    if (!section) return;
+
+    section.loading = true;
+
+    // Simulate data loading
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    section.loading = false;
+    section.data = `Updated data for ${section.title} at ${new Date().toLocaleTimeString()}`;
+  }
+
+  startMultiStep(): void {
+    this.isMultiStepRunning = true;
+    this.currentStepIndex = 0;
+    this.runNextStep();
+  }
+
+  private runNextStep(): void {
+    if (this.currentStepIndex >= this.steps.length) {
+      this.isMultiStepRunning = false;
+      this.currentStepIndex = this.steps.length;
+      return;
+    }
+
+    // Simulate step processing time
+    const stepDuration = 1000 + Math.random() * 2000;
+
+    setTimeout(() => {
+      this.currentStepIndex++;
+      this.runNextStep();
+    }, stepDuration);
+  }
+}
+```
+
+### Common Variations
+
+#### Responsive Spinner Layouts
+
+```typescript
+@Component({
+  template: `
+    <div class="responsive-spinner-container">
+      <!-- Desktop: Side-by-side layout -->
+      <div class="desktop-layout" *ngIf="!isMobile">
+        <div class="content-section">
+          <h3>Content Loading</h3>
+          <p>Your content will appear here when ready...</p>
+        </div>
+        <div class="spinner-section">
+          <mat-progress-spinner
+            mode="indeterminate"
+            [diameter]="40"
+            color="primary"
+          >
+          </mat-progress-spinner>
+          <span class="loading-text">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Mobile: Centered layout -->
+      <div class="mobile-layout" *ngIf="isMobile">
+        <div class="centered-spinner">
+          <mat-progress-spinner
+            mode="indeterminate"
+            [diameter]="60"
+            color="primary"
+          >
+          </mat-progress-spinner>
+          <h3>Loading Content</h3>
+          <p>Please wait while we fetch your data</p>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .desktop-layout {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        padding: 24px;
+      }
+
+      .content-section {
+        flex: 1;
+      }
+
+      .spinner-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mobile-layout {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+        padding: 24px;
+      }
+
+      .centered-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .loading-text {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .centered-spinner h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .centered-spinner p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+    `,
+  ],
+})
+export class ResponsiveSpinnerComponent {
+  @Input() isMobile = false;
+}
+```
+
+#### Themed Spinners
+
+```typescript
+@Component({
+  template: `
+    <div class="themed-spinners">
+      <div class="theme-section" *ngFor="let theme of themes">
+        <h3>{{ theme.name }}</h3>
+
+        <div class="spinner-row">
+          <div class="spinner-item">
+            <mat-progress-spinner
+              mode="indeterminate"
+              [color]="theme.color"
+              [diameter]="40"
+            >
+            </mat-progress-spinner>
+            <span>Indeterminate</span>
+          </div>
+
+          <div class="spinner-item">
+            <div class="determinate-wrapper">
+              <mat-progress-spinner
+                mode="determinate"
+                [value]="75"
+                [color]="theme.color"
+                [diameter]="50"
+                [strokeWidth]="5"
+              >
+              </mat-progress-spinner>
+              <div class="percentage">75%</div>
+            </div>
+            <span>Determinate</span>
+          </div>
+
+          <div class="spinner-item">
+            <mat-progress-spinner
+              mode="indeterminate"
+              [color]="theme.color"
+              [diameter]="24"
+              [strokeWidth]="3"
+            >
+            </mat-progress-spinner>
+            <span>Small</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .themed-spinners {
+        padding: 24px;
+      }
+
+      .theme-section {
+        margin-bottom: 32px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .theme-section h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        text-transform: capitalize;
+      }
+
+      .spinner-row {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+      }
+
+      .spinner-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .spinner-item span {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .determinate-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+
+      .percentage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 600px) {
+        .spinner-row {
+          flex-direction: column;
+          gap: 16px;
+        }
+      }
+    `,
+  ],
+})
+export class ThemedSpinnersComponent {
+  themes = [
+    { name: "Primary", color: "primary" as const },
+    { name: "Accent", color: "accent" as const },
+    { name: "Warn", color: "warn" as const },
+  ];
+}
+```
+
+#### Overlay Spinner Patterns
+
+```typescript
+@Component({
+  template: `
+    <div class="overlay-patterns">
+      <div class="pattern-section" *ngFor="let pattern of overlayPatterns">
+        <h3>{{ pattern.title }}</h3>
+        <p>{{ pattern.description }}</p>
+
+        <button
+          mat-raised-button
+          (click)="showOverlay(pattern.type)"
+          [disabled]="activeOverlay === pattern.type"
+        >
+          Show {{ pattern.title }}
+        </button>
+
+        <!-- Card Overlay -->
+        <div
+          class="card-overlay"
+          *ngIf="activeOverlay === 'card'"
+          [class.card-overlay-active]="activeOverlay === 'card'"
+        >
+          <div class="card-content">
+            <h4>Sample Card Content</h4>
+            <p>This content is overlaid with a loading spinner.</p>
+
+            <div class="overlay-spinner">
+              <mat-progress-spinner
+                mode="indeterminate"
+                [diameter]="48"
+                color="primary"
+              >
+              </mat-progress-spinner>
+              <span>Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Overlay -->
+        <div
+          class="modal-overlay"
+          *ngIf="activeOverlay === 'modal'"
+          (click)="hideOverlay()"
+        >
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <mat-progress-spinner
+              mode="indeterminate"
+              [diameter]="60"
+              color="primary"
+            >
+            </mat-progress-spinner>
+            <h3>Processing Request</h3>
+            <p>Please wait while we process your request...</p>
+            <button mat-button (click)="hideOverlay()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Inline Overlay -->
+        <div class="inline-container" *ngIf="activeOverlay === 'inline'">
+          <div class="inline-content">
+            <h4>Content Section</h4>
+            <p>This section shows inline loading state.</p>
+
+            <div class="inline-spinner">
+              <mat-progress-spinner
+                mode="indeterminate"
+                [diameter]="32"
+                color="accent"
+              >
+              </mat-progress-spinner>
+              <span>Updating content...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .overlay-patterns {
+        padding: 24px;
+      }
+
+      .pattern-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .pattern-section h3 {
+        margin: 0 0 8px 0;
+        color: #333;
+      }
+
+      .pattern-section p {
+        margin: 0 0 16px 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .card-overlay {
+        position: relative;
+        margin-top: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        overflow: hidden;
+      }
+
+      .card-overlay-active::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 1;
+      }
+
+      .card-content {
+        padding: 20px;
+        position: relative;
+      }
+
+      .overlay-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        z-index: 2;
+      }
+
+      .overlay-spinner span {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 32px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+        max-width: 300px;
+        margin: 20px;
+      }
+
+      .modal-content h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .modal-content p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .inline-container {
+        margin-top: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #f9f9f9;
+      }
+
+      .inline-content {
+        padding: 20px;
+        position: relative;
+      }
+
+      .inline-spinner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 12px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .inline-spinner span {
+        font-size: 14px;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class OverlaySpinnerPatternsComponent {
+  activeOverlay: string | null = null;
+
+  overlayPatterns = [
+    {
+      type: "card",
+      title: "Card Overlay",
+      description: "Overlay spinner on top of existing content",
+    },
+    {
+      type: "modal",
+      title: "Modal Overlay",
+      description: "Full-screen modal with spinner",
+    },
+    {
+      type: "inline",
+      title: "Inline Loading",
+      description: "Inline spinner within content area",
+    },
+  ];
+
+  showOverlay(type: string): void {
+    this.activeOverlay = type;
+
+    // Auto-hide after 3 seconds for demo
+    setTimeout(() => {
+      this.hideOverlay();
+    }, 3000);
+  }
+
+  hideOverlay(): void {
+    this.activeOverlay = null;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate mode**: Use 'indeterminate' for unknown duration operations and 'determinate' when you can show exact progress percentage
+- **Size appropriately**: Use smaller spinners (16-24px) for buttons and inline elements, medium (40-60px) for content areas, and larger (80px+) for full-page loading
+- **Provide context**: Always accompany spinners with descriptive text explaining what operation is in progress
+- **Use consistent theming**: Stick to your application's color palette using the color property with 'primary', 'accent', or 'warn' values
+- **Implement proper timeout handling**: Consider timeout scenarios for long-running operations and provide escape mechanisms
+
+### Accessibility
+
+- **ARIA attributes**: Spinners automatically include role="progressbar" and proper aria-valuemin, aria-valuemax, and aria-valuenow attributes
+- **Descriptive labeling**: Use aria-label or aria-labelledby to provide context about what is loading
+- **Live regions**: Consider using aria-live regions to announce loading state changes to screen reader users
+- **Focus management**: Ensure that interactive elements remain keyboard accessible and don't trap focus during loading states
+- **Color independence**: Don't rely solely on color to convey loading status; use text labels and positioning for context
+
+### Performance
+
+- **Animation optimization**: Spinner animations are CSS-based and optimized for smooth performance across devices
+- **Bundle optimization**: Import only MatProgressSpinnerModule to minimize bundle size
+- **Memory management**: Properly clean up timers and subscriptions when components are destroyed to prevent memory leaks
+- **Efficient updates**: Limit progress value updates to reasonable intervals for determinate spinners to avoid excessive re-renders
+- **Lazy loading**: Consider lazy loading content behind spinners to improve perceived performance
+
+## Common Patterns
+
+### Pattern 1: Async Button Loading
+
+```typescript
+@Component({
+  template: `
+    <div class="async-button-container">
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="isLoading"
+        (click)="performAsyncAction()"
+        class="async-button"
+      >
+        <mat-progress-spinner
+          *ngIf="isLoading"
+          mode="indeterminate"
+          [diameter]="20"
+          [strokeWidth]="3"
+          class="button-spinner"
+        >
+        </mat-progress-spinner>
+        <mat-icon *ngIf="!isLoading">{{ getActionIcon() }}</mat-icon>
+        <span class="button-label">{{ getButtonLabel() }}</span>
+      </button>
+
+      <div class="action-result" *ngIf="actionResult">
+        <mat-icon
+          [class.success]="actionResult.success"
+          [class.error]="!actionResult.success"
+        >
+          {{ actionResult.success ? "check_circle" : "error" }}
+        </mat-icon>
+        <span>{{ actionResult.message }}</span>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .async-button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .async-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 140px;
+        position: relative;
+      }
+
+      .button-spinner {
+        margin-right: 4px;
+      }
+
+      .button-label {
+        transition: all 0.2s ease;
+      }
+
+      .action-result {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        background: #f5f5f5;
+      }
+
+      .action-result mat-icon.success {
+        color: #4caf50;
+      }
+
+      .action-result mat-icon.error {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class AsyncButtonComponent {
+  isLoading = false;
+  actionResult: { success: boolean; message: string } | null = null;
+
+  async performAsyncAction(): Promise<void> {
+    this.isLoading = true;
+    this.actionResult = null;
+
+    try {
+      // Simulate async operation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Simulate random success/failure
+      const success = Math.random() > 0.3;
+
+      this.actionResult = {
+        success,
+        message: success
+          ? "Action completed successfully!"
+          : "Action failed. Please try again.",
+      };
+    } catch (error) {
+      this.actionResult = {
+        success: false,
+        message: "An error occurred. Please try again.",
+      };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  getActionIcon(): string {
+    if (this.actionResult?.success) return "check";
+    if (this.actionResult?.success === false) return "error";
+    return "send";
+  }
+
+  getButtonLabel(): string {
+    if (this.isLoading) return "Processing...";
+    if (this.actionResult?.success) return "Success!";
+    if (this.actionResult?.success === false) return "Retry";
+    return "Submit";
+  }
+}
+```
+
+### Pattern 2: Data Loading with States
+
+```typescript
+@Component({
+  template: `
+    <div class="data-loading-container">
+      <div class="loading-header">
+        <h2>{{ title }}</h2>
+        <button
+          mat-icon-button
+          (click)="refreshData()"
+          [disabled]="loadingState === 'loading'"
+          [attr.aria-label]="'Refresh ' + title"
+        >
+          <mat-icon *ngIf="loadingState !== 'loading'">refresh</mat-icon>
+          <mat-progress-spinner
+            *ngIf="loadingState === 'loading'"
+            mode="indeterminate"
+            [diameter]="24"
+            [strokeWidth]="3"
+          >
+          </mat-progress-spinner>
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="loadingState === 'loading'">
+        <mat-progress-spinner
+          mode="indeterminate"
+          [diameter]="48"
+          color="primary"
+        >
+        </mat-progress-spinner>
+        <h3>Loading Data</h3>
+        <p>{{ loadingMessage }}</p>
+      </div>
+
+      <!-- Success State -->
+      <div class="success-state" *ngIf="loadingState === 'success'">
+        <div class="data-content">
+          <h3>Data Loaded Successfully</h3>
+          <div class="data-items">
+            <div class="data-item" *ngFor="let item of data">
+              <mat-icon>{{ item.icon }}</mat-icon>
+              <div class="item-content">
+                <div class="item-title">{{ item.title }}</div>
+                <div class="item-description">{{ item.description }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" *ngIf="loadingState === 'error'">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h3>Failed to Load Data</h3>
+        <p>{{ errorMessage }}</p>
+        <button mat-raised-button color="primary" (click)="refreshData()">
+          Try Again
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="loadingState === 'empty'">
+        <mat-icon class="empty-icon">inbox</mat-icon>
+        <h3>No Data Available</h3>
+        <p>There's nothing to show right now.</p>
+        <button mat-button (click)="refreshData()">Refresh</button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .data-loading-container {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        overflow: hidden;
+      }
+
+      .loading-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .loading-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #333;
+      }
+
+      .loading-state,
+      .error-state,
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        min-height: 200px;
+      }
+
+      .loading-state h3,
+      .error-state h3,
+      .empty-state h3 {
+        margin: 16px 0 8px 0;
+        color: #333;
+      }
+
+      .loading-state p,
+      .error-state p,
+      .empty-state p {
+        margin: 0 0 16px 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .success-state {
+        padding: 20px;
+      }
+
+      .data-content h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+      }
+
+      .data-items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .data-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: #fafafa;
+      }
+
+      .data-item mat-icon {
+        color: #666;
+      }
+
+      .item-content {
+        flex: 1;
+      }
+
+      .item-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .item-description {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .error-icon {
+        color: #f44336;
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+
+      .empty-icon {
+        color: #999;
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+    `,
+  ],
+})
+export class DataLoadingStatesComponent {
+  @Input() title = "User Dashboard";
+
+  loadingState: "loading" | "success" | "error" | "empty" = "loading";
+  loadingMessage = "Fetching your latest data...";
+  errorMessage = "Unable to connect to server. Please check your connection.";
+  data: any[] = [];
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  async refreshData(): Promise<void> {
+    this.loadData();
+  }
+
+  private async loadData(): Promise<void> {
+    this.loadingState = "loading";
+    this.loadingMessage = "Connecting to server...";
+
+    try {
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Update loading message
+      this.loadingMessage = "Processing data...";
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Simulate different outcomes
+      const outcome = Math.random();
+
+      if (outcome < 0.1) {
+        // 10% chance of error
+        throw new Error("Network error");
+      } else if (outcome < 0.2) {
+        // 10% chance of empty
+        this.data = [];
+        this.loadingState = "empty";
+      } else {
+        // 80% chance of success
+        this.data = [
+          {
+            icon: "person",
+            title: "Profile Updated",
+            description: "Your profile information was successfully updated",
+          },
+          {
+            icon: "shopping_cart",
+            title: "New Order",
+            description: "Order #12345 has been placed and is being processed",
+          },
+          {
+            icon: "notifications",
+            title: "System Notification",
+            description: "Scheduled maintenance completed successfully",
+          },
+        ];
+        this.loadingState = "success";
+      }
+    } catch (error) {
+      this.loadingState = "error";
+      this.errorMessage = "Failed to load data. Please try again.";
+    }
+  }
+}
+```

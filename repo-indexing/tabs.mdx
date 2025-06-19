@@ -1,0 +1,1165 @@
+---
+title: Tabs Components
+---
+
+# Tabs Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle tabbed navigation with required hierarchical structure. The Tabs component group provides a comprehensive tabbed interface system with Material Design styling, supporting both contained tab groups and navigation-style tab bars with animated ink indicators, keyboard navigation, and accessibility features.
+
+### When to Use
+
+- **Content Organization**: When you need to organize related content into discrete, switchable sections within a single view
+- **Navigation Interfaces**: For creating tab-based navigation patterns where each tab reveals different content or views
+- **Multi-section Forms**: When breaking complex forms or workflows into logical, tabbed sections for better user experience
+- **Dashboard Layouts**: For organizing different data views, reports, or tools into tabbed sections
+- **Settings Panels**: When grouping related configuration options or preferences into organized tab sections
+- **Document Viewers**: For displaying multiple documents, files, or data sets in a tabbed interface
+- **Responsive Design**: When you need navigation that adapts well to different screen sizes while maintaining usability
+
+### Architecture
+
+**Critical/Strong Coupling**: The Tabs component group follows a required hierarchical structure where components must be used together in specific parent-child relationships. The architecture is built around:
+
+- **Required parent-child relationships**: `MatTabGroup` serves as the root container with `MatTab` components as required children, or `MatTabNav` with `MatTabLink` children for navigation patterns
+- **Shared context dependencies**: Tab groups manage selection state, animation timing, and provide context to all child tab components
+- **Compositional hierarchy**: Tabs contain labels, content, headers, and body components that work together as a cohesive tabbed interface system
+
+### Component Interdependencies
+
+The Tabs component group requires strict composition patterns with two main architectural patterns:
+
+**Tab Group Pattern (Content Tabs):**
+
+- **`MatTabGroup`** → Root container managing tab selection, animation, and overall state
+- **`MatTab`** → Individual tab containers with content and labels (required children of `MatTabGroup`)
+- **`MatTabLabel`** → Custom label templates for rich tab headers (optional child of `MatTab`)
+- **`MatTabContent`** → Lazy-loaded content templates for performance (optional child of `MatTab`)
+
+**Tab Navigation Pattern (Link Tabs):**
+
+- **`MatTabNav`** → Navigation bar container for link-based tabs
+- **`MatTabLink`** → Individual navigational tab links (required children of `MatTabNav`)
+- **`MatTabNavPanel`** → Associated content panel controlled by the nav bar (optional)
+
+**Internal Components (Managed Automatically):**
+
+- **`MatTabHeader`**, **`MatTabBody`**, **`MatTabBodyPortal`**, **`MatTabLabelWrapper`** → Internal components that handle rendering, transitions, and layout
+
+## Components
+
+### MatTabGroup {Primary Component for Content Tabs}
+
+The main container component for content-based tabs that manages tab selection, content switching, and animation states.
+
+**Purpose:** Serves as the root container for content-based tabbed interfaces, manages tab selection state, handles content switching animations, and provides the foundation for Material Design tab styling.
+
+**Interface:**
+
+```typescript
+interface MatTabGroupProps {
+  selectedIndex?: number; // Index of the currently selected tab
+  animationDuration?: string | number; // Duration for tab switching animations
+  dynamicHeight?: boolean; // Whether tab group grows to fit active tab content
+  headerPosition?: "above" | "below"; // Position of tab headers relative to content
+  color?: ThemePalette; // Material theme color for the tab group
+  backgroundColor?: ThemePalette; // Background color theme (deprecated in M3)
+  fitInkBarToContent?: boolean; // Whether ink bar fits to label content width
+  stretchTabs?: boolean; // Whether tabs stretch to fill header width
+  alignTabs?: "start" | "center" | "end"; // Alignment of tab labels
+  contentTabIndex?: number; // tabindex for tab content wrapper
+  disablePagination?: boolean; // Disable pagination for scrollable tabs
+  disableRipple?: boolean; // Disable ripple effects on tab headers
+  preserveContent?: boolean; // Keep inactive tab content in DOM
+  ariaLabel?: string; // ARIA label for the tab list
+  ariaLabelledby?: string; // ID of element that labels the tab list
+}
+```
+
+**Dependencies:** Requires Angular Material's tabs module and CDK functionality
+**Provides:** Tab selection context, animation management, and styling for all child tab components
+
+**Usage Example:**
+
+```typescript
+import { MatTabsModule } from "@angular/material/tabs";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-tab-example",
+  template: `
+    <mat-tab-group
+      [(selectedIndex)]="selectedTabIndex"
+      animationDuration="300ms"
+      dynamicHeight="true"
+      color="primary"
+    >
+      <mat-tab label="First Tab">
+        <p>Content for the first tab</p>
+      </mat-tab>
+      <mat-tab label="Second Tab">
+        <p>Content for the second tab</p>
+      </mat-tab>
+      <mat-tab label="Third Tab" [disabled]="true">
+        <p>Disabled tab content</p>
+      </mat-tab>
+    </mat-tab-group>
+  `,
+  imports: [MatTabsModule],
+})
+export class TabExampleComponent {
+  selectedTabIndex = 0;
+}
+```
+
+**Events:**
+
+```typescript
+// Event emitters available on MatTabGroup
+selectedIndexChange: EventEmitter<number>; // Two-way binding support
+selectedTabChange: EventEmitter<MatTabChangeEvent>; // Tab selection changes
+focusChange: EventEmitter<MatTabChangeEvent>; // Focus changes within tabs
+animationDone: EventEmitter<void>; // Animation completion events
+```
+
+### MatTab {Required Content Container}
+
+Individual tab components that contain content, labels, and state for each tab within the tab group.
+
+**Purpose:** Represents a single tab within the tab group, manages tab-specific content and labeling, provides lazy loading capabilities, and maintains individual tab state.
+
+**Interface:**
+
+```typescript
+interface MatTabProps {
+  label?: string; // Plain text label for the tab
+  disabled?: boolean; // Whether the tab is disabled
+  ariaLabel?: string; // ARIA label for accessibility
+  ariaLabelledby?: string; // ID of element that labels the tab
+  labelClass?: string | string[]; // CSS classes for the tab label
+  bodyClass?: string | string[]; // CSS classes for the tab body
+  id?: string; // Custom ID for the tab (auto-generated if not provided)
+}
+```
+
+**Context Dependencies:** Must be a direct child of `MatTabGroup`
+**Parent Requirements:** Required parent component is `MatTabGroup`
+**Provides:** Content container and label context for the tabbed interface
+
+**Usage Example:**
+
+```html
+<mat-tab-group>
+  <mat-tab
+    label="User Profile"
+    [disabled]="!userLoggedIn"
+    ariaLabel="User profile settings"
+    labelClass="custom-tab-label"
+    bodyClass="profile-content"
+  >
+    <div class="profile-form">
+      <!-- Profile content -->
+      <h3>User Information</h3>
+      <form>
+        <!-- Form fields -->
+      </form>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Settings">
+    <div class="settings-panel">
+      <!-- Settings content -->
+    </div>
+  </mat-tab>
+</mat-tab-group>
+```
+
+### MatTabLabel {Custom Label Template}
+
+Directive for creating rich, custom tab labels that can include icons, complex HTML, or dynamic content beyond simple text.
+
+**Purpose:** Enables creation of sophisticated tab labels with icons, badges, complex formatting, or interactive elements while maintaining accessibility and Material Design principles.
+
+**Interface:**
+
+```typescript
+interface MatTabLabelProps {
+  // Template directive - no direct props
+  // Content is defined within ng-template
+  // Automatically provides portal context for rich content
+}
+```
+
+**Context Dependencies:** Must be used within `MatTab` as a template
+**Parent Requirements:** Required parent is a `MatTab` component
+
+**Usage Example:**
+
+```html
+<mat-tab-group>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>person</mat-icon>
+      Profile
+      <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
+    </ng-template>
+    <div>Profile content with notification badge in tab label</div>
+  </mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <span class="custom-label">
+        <mat-icon>settings</mat-icon>
+        Settings
+        <span class="beta-tag">BETA</span>
+      </span>
+    </ng-template>
+    <div>Settings content with beta indicator</div>
+  </mat-tab>
+</mat-tab-group>
+```
+
+### MatTabContent {Lazy-Loaded Content Template}
+
+Directive for defining tab content that should be rendered only when the tab becomes active, improving performance for complex tabbed interfaces.
+
+**Purpose:** Enables lazy loading of tab content to improve initial rendering performance and memory usage in tab groups with many tabs or complex content.
+
+**Interface:**
+
+```typescript
+interface MatTabContentProps {
+  // Template directive - no direct props
+  // Content is defined within ng-template
+  // Rendered only when tab becomes active
+}
+```
+
+**Context Dependencies:** Must be used within `MatTab` as an ng-template
+**Parent Requirements:** Required parent is a `MatTab` component
+
+**Usage Example:**
+
+```html
+<mat-tab-group>
+  <mat-tab label="Heavy Content">
+    <ng-template matTabContent>
+      <!-- This content is only rendered when tab becomes active -->
+      <div class="expensive-component">
+        <data-visualization [largeDataset]="chartData"></data-visualization>
+        <complex-form [formData]="formData"></complex-form>
+      </div>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab label="Immediate Content">
+    <!-- This content is rendered immediately -->
+    <p>Simple content that doesn't need lazy loading</p>
+  </mat-tab>
+</mat-tab-group>
+```
+
+### MatTabNav {Primary Component for Navigation Tabs}
+
+Navigation bar component that provides tab-style navigation with animated ink bar, designed for routing and link-based tab interfaces.
+
+**Purpose:** Creates tab-style navigation interfaces where tabs function as navigation links rather than content containers, ideal for routing scenarios and page-level navigation.
+
+**Interface:**
+
+```typescript
+interface MatTabNavProps {
+  color?: ThemePalette; // Theme color for the navigation bar
+  backgroundColor?: ThemePalette; // Background theme color (deprecated in M3)
+  disableRipple?: boolean; // Disable ripple effects on tab links
+  fitInkBarToContent?: boolean; // Whether ink bar fits to link content width
+  stretchTabs?: boolean; // Whether tabs stretch to fill nav bar width
+  animationDuration?: string | number; // Duration for ink bar animations
+  disablePagination?: boolean; // Disable pagination for scrollable nav tabs
+  tabPanel?: MatTabNavPanel; // Associated content panel
+}
+```
+
+**Dependencies:** Requires Angular Material's tabs module for navigation pattern
+**Provides:** Navigation context and ink bar management for child tab links
+
+**Usage Example:**
+
+```typescript
+import { MatTabsModule } from "@angular/material/tabs";
+import { RouterModule } from "@angular/router";
+
+@Component({
+  selector: "app-nav-tabs",
+  template: `
+    <nav mat-tab-nav-bar [backgroundColor]="'primary'">
+      <a
+        mat-tab-link
+        *ngFor="let link of navLinks"
+        [routerLink]="link.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [active]="rla.isActive"
+      >
+        {{ link.label }}
+      </a>
+    </nav>
+
+    <div class="nav-content">
+      <router-outlet></router-outlet>
+    </div>
+  `,
+  imports: [MatTabsModule, RouterModule],
+})
+export class NavTabsComponent {
+  navLinks = [
+    { path: "/dashboard", label: "Dashboard" },
+    { path: "/users", label: "Users" },
+    { path: "/reports", label: "Reports" },
+    { path: "/settings", label: "Settings" },
+  ];
+}
+```
+
+### MatTabLink {Navigation Link Component}
+
+Individual navigation link components that function as tab-style navigation elements within a tab navigation bar.
+
+**Purpose:** Provides tab-styled navigation links with Material Design styling, ripple effects, accessibility features, and active state management.
+
+**Interface:**
+
+```typescript
+interface MatTabLinkProps {
+  active?: boolean; // Whether the link represents the active route/state
+  disabled?: boolean; // Whether the link is disabled
+  disableRipple?: boolean; // Disable ripple effects for this link
+  tabIndex?: number; // Tab index for keyboard navigation
+  id?: string; // Unique identifier for the link
+}
+```
+
+**Context Dependencies:** Must be a direct child of `MatTabNav`
+**Parent Requirements:** Required parent component is `MatTabNav`
+
+**Usage Example:**
+
+```html
+<nav mat-tab-nav-bar>
+  <a
+    mat-tab-link
+    [routerLink]="['/home']"
+    routerLinkActive
+    #homeLink="routerLinkActive"
+    [active]="homeLink.isActive"
+  >
+    Home
+  </a>
+
+  <a
+    mat-tab-link
+    [routerLink]="['/products']"
+    routerLinkActive
+    #productsLink="routerLinkActive"
+    [active]="productsLink.isActive"
+  >
+    Products
+  </a>
+
+  <a
+    mat-tab-link
+    [routerLink]="['/admin']"
+    routerLinkActive
+    #adminLink="routerLinkActive"
+    [active]="adminLink.isActive"
+    [disabled]="!isAdmin"
+  >
+    Admin Panel
+  </a>
+</nav>
+```
+
+### MatTabNavPanel {Associated Content Panel}
+
+Content panel component that works with MatTabNav to provide ARIA-compliant tab panel relationships for accessibility.
+
+**Purpose:** Provides the content area associated with tab navigation, establishing proper ARIA relationships for screen readers and accessibility compliance.
+
+**Interface:**
+
+```typescript
+interface MatTabNavPanelProps {
+  id?: string; // Unique identifier for the panel
+}
+```
+
+**Context Dependencies:** Associated with `MatTabNav` through tabPanel property
+**Parent Requirements:** Works in conjunction with `MatTabNav`
+
+**Usage Example:**
+
+```html
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+  <a mat-tab-link [active]="activeLink === 'overview'">Overview</a>
+  <a mat-tab-link [active]="activeLink === 'details'">Details</a>
+</nav>
+
+<mat-tab-nav-panel #tabPanel>
+  <div [ngSwitch]="activeLink">
+    <div *ngSwitchCase="'overview'">
+      <h2>Overview Content</h2>
+      <p>This is the overview section content.</p>
+    </div>
+    <div *ngSwitchCase="'details'">
+      <h2>Details Content</h2>
+      <p>This is the details section content.</p>
+    </div>
+  </div>
+</mat-tab-nav-panel>
+```
+
+### Internal Components {Automatically Managed}
+
+The following components are managed automatically by the tab system and typically don't require direct interaction:
+
+#### MatTabHeader
+
+Renders the visual header containing tab labels with pagination controls when needed.
+
+#### MatTabBody
+
+Manages the content area for each tab with animation and positioning logic.
+
+#### MatTabBodyPortal
+
+Handles the portal-based rendering of tab content with lazy loading support.
+
+#### MatTabLabelWrapper
+
+Wraps individual tab labels with proper styling and interaction handling.
+
+## Integration Patterns
+
+### Basic Content Tabs
+
+```typescript
+import { MatTabsModule } from "@angular/material/tabs";
+import { MatIconModule } from "@angular/material/icon";
+import { MatButtonModule } from "@angular/material/button";
+
+@Component({
+  selector: "app-basic-tabs",
+  template: `
+    <mat-tab-group
+      [(selectedIndex)]="selectedTab"
+      (selectedTabChange)="onTabChange($event)"
+    >
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <h3>Project Overview</h3>
+          <p>
+            Welcome to the project dashboard. Here you can see the overall
+            status and metrics.
+          </p>
+          <button mat-raised-button color="primary">Get Started</button>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Analytics">
+        <div class="tab-content">
+          <h3>Analytics Dashboard</h3>
+          <p>View detailed analytics and performance metrics.</p>
+          <!-- Analytics components -->
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Settings" [disabled]="!canAccessSettings">
+        <div class="tab-content">
+          <h3>Project Settings</h3>
+          <p>Configure your project preferences and settings.</p>
+          <!-- Settings form -->
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  `,
+  styles: [
+    `
+      .tab-content {
+        padding: 24px;
+        min-height: 200px;
+      }
+    `,
+  ],
+  imports: [MatTabsModule, MatIconModule, MatButtonModule],
+})
+export class BasicTabsComponent {
+  selectedTab = 0;
+  canAccessSettings = true;
+
+  onTabChange(event: MatTabChangeEvent): void {
+    console.log("Tab changed to:", event.index);
+    // Handle tab change logic
+  }
+}
+```
+
+### Advanced Tabs with Custom Labels and Lazy Loading
+
+```typescript
+@Component({
+  selector: "app-advanced-tabs",
+  template: `
+    <mat-tab-group
+      dynamicHeight="true"
+      animationDuration="400ms"
+      fitInkBarToContent="true"
+    >
+      <!-- Tab with custom label and immediate content -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+          <mat-icon
+            matBadge="{{ notificationCount }}"
+            matBadgeColor="warn"
+            *ngIf="notificationCount > 0"
+          >
+            notifications
+          </mat-icon>
+        </ng-template>
+
+        <div class="dashboard-content">
+          <h2>Dashboard</h2>
+          <div class="metrics-grid">
+            <div *ngFor="let metric of dashboardMetrics" class="metric-card">
+              <h4>{{ metric.title }}</h4>
+              <span class="metric-value">{{ metric.value }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Tab with lazy-loaded heavy content -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>assessment</mat-icon>
+          Reports
+        </ng-template>
+
+        <ng-template matTabContent>
+          <!-- Only loaded when tab becomes active -->
+          <div class="reports-content">
+            <h2>Detailed Reports</h2>
+            <heavy-chart-component [data]="chartData"></heavy-chart-component>
+            <data-table [dataSource]="reportData"></data-table>
+          </div>
+        </ng-template>
+      </mat-tab>
+
+      <!-- Tab with form content -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>settings</mat-icon>
+          Configuration
+        </ng-template>
+
+        <div class="config-content">
+          <h2>System Configuration</h2>
+          <form [formGroup]="configForm" (ngSubmit)="saveConfig()">
+            <mat-form-field>
+              <mat-label>API Endpoint</mat-label>
+              <input matInput formControlName="apiEndpoint" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Timeout (ms)</mat-label>
+              <input matInput type="number" formControlName="timeout" />
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-button type="button">Reset</button>
+              <button mat-raised-button color="primary" type="submit">
+                Save Configuration
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  `,
+  styles: [
+    `
+      .tab-content,
+      .dashboard-content,
+      .reports-content,
+      .config-content {
+        padding: 24px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .metric-card {
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #1976d2;
+      }
+
+      .form-actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+    `,
+  ],
+  imports: [
+    MatTabsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedTabsComponent {
+  notificationCount = 3;
+  dashboardMetrics = [
+    { title: "Active Users", value: "1,234" },
+    { title: "Revenue", value: "$45,678" },
+    { title: "Conversion Rate", value: "3.2%" },
+  ];
+
+  configForm = this.fb.group({
+    apiEndpoint: ["https://api.example.com"],
+    timeout: [5000],
+  });
+
+  constructor(private fb: FormBuilder) {}
+
+  saveConfig(): void {
+    console.log("Saving configuration:", this.configForm.value);
+  }
+}
+```
+
+### Navigation Tabs with Routing
+
+```typescript
+@Component({
+  selector: "app-nav-tabs",
+  template: `
+    <nav mat-tab-nav-bar [backgroundColor]="'primary'" [stretchTabs]="true">
+      <a
+        mat-tab-link
+        *ngFor="let route of routes"
+        [routerLink]="route.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [active]="rla.isActive"
+        [disabled]="route.disabled"
+      >
+        <mat-icon *ngIf="route.icon">{{ route.icon }}</mat-icon>
+        {{ route.label }}
+      </a>
+    </nav>
+
+    <div class="nav-tab-content">
+      <router-outlet></router-outlet>
+    </div>
+  `,
+  styles: [
+    `
+      .nav-tab-content {
+        padding: 24px;
+        min-height: 400px;
+      }
+
+      .mat-mdc-tab-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    `,
+  ],
+  imports: [MatTabsModule, MatIconModule, RouterModule],
+})
+export class NavTabsComponent {
+  routes = [
+    { path: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { path: "/users", label: "Users", icon: "people" },
+    { path: "/analytics", label: "Analytics", icon: "analytics" },
+    { path: "/settings", label: "Settings", icon: "settings", disabled: false },
+  ];
+}
+```
+
+### Common Variations
+
+#### Vertical Tabs with Side Navigation
+
+```html
+<div class="vertical-tabs-container">
+  <mat-tab-group
+    headerPosition="below"
+    class="vertical-tabs"
+    [selectedIndex]="selectedVerticalTab"
+  >
+    <mat-tab label="Profile">
+      <div class="vertical-tab-content">
+        <h3>User Profile</h3>
+        <!-- Profile content -->
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Security">
+      <div class="vertical-tab-content">
+        <h3>Security Settings</h3>
+        <!-- Security content -->
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Notifications">
+      <div class="vertical-tab-content">
+        <h3>Notification Preferences</h3>
+        <!-- Notification content -->
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+```
+
+#### Tabs with Scrollable Content
+
+```html
+<mat-tab-group [disablePagination]="false" class="scrollable-tabs">
+  <mat-tab
+    *ngFor="let section of manySections; let i = index"
+    [label]="section.title"
+  >
+    <div class="scrollable-content">
+      <h3>{{section.title}}</h3>
+      <div [innerHTML]="section.content"></div>
+    </div>
+  </mat-tab>
+</mat-tab-group>
+```
+
+#### Tabs with Custom Styling
+
+```typescript
+@Component({
+  template: `
+    <mat-tab-group
+      color="accent"
+      [fitInkBarToContent]="true"
+      class="custom-styled-tabs"
+    >
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="custom-tab-label">
+            <mat-icon class="tab-icon">star</mat-icon>
+            Featured
+          </span>
+        </ng-template>
+        <div class="tab-content">Featured content</div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="custom-tab-label">
+            <mat-icon class="tab-icon">trending_up</mat-icon>
+            Trending
+          </span>
+        </ng-template>
+        <div class="tab-content">Trending content</div>
+      </mat-tab>
+    </mat-tab-group>
+  `,
+  styles: [
+    `
+      .custom-styled-tabs {
+        --mdc-tab-indicator-active-indicator-color: #ff5722;
+      }
+
+      .custom-tab-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+
+      .tab-icon {
+        font-size: 18px;
+      }
+    `,
+  ],
+})
+export class CustomStyledTabsComponent {}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Tab Group → Tabs**: The `MatTabGroup` manages active tab state and passes selection context to child `MatTab` components
+2. **Tab Selection → Content**: When a tab is selected, the tab group triggers content switching and animation
+3. **Navigation Events → State Updates**: Tab clicks and keyboard navigation update the tab group's selected index
+4. **Content Portals → Rendering**: Tab content is rendered through portal system for lazy loading and efficient DOM management
+
+### Context Sharing
+
+- **Selection Context**: `MatTabGroup` provides selected index and tab change events to all child components
+- **Animation Context**: Tab groups coordinate animations between tab bodies and ink bar movements
+- **Navigation Context**: `MatTabNav` provides active link state and ink bar positioning for navigation scenarios
+- **Accessibility Context**: ARIA relationships and keyboard navigation are managed at the container level
+
+### Event Handling
+
+- **Tab Selection**: Click events on tab headers bubble through the tab group to trigger selection changes
+- **Keyboard Navigation**: Arrow key navigation and space/enter activation are handled at the tab group level
+- **Animation Events**: Tab body animations emit events that coordinate with ink bar movements
+- **Focus Management**: Focus events are tracked to maintain proper tab navigation and accessibility
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose the right pattern**: Use `MatTabGroup` for content organization, `MatTabNav` for navigation routing
+- **Implement proper labeling**: Always provide clear, descriptive labels for tabs to improve usability
+- **Consider performance**: Use `matTabContent` directive for heavy content that benefits from lazy loading
+- **Plan for responsive design**: Consider how tabs will behave on mobile devices and smaller screens
+- **Maintain consistent content height**: Use `dynamicHeight` judiciously to avoid jarring layout shifts
+
+### Accessibility
+
+- **ARIA relationships**: Tab components automatically provide proper ARIA labels, roles, and relationships
+- **Keyboard navigation**: Arrow keys navigate between tabs, Space/Enter activates tabs
+- **Screen reader support**: Tab labels, states, and content are properly announced to screen readers
+- **Focus management**: Focus is properly managed when switching between tabs and their content
+- **High contrast support**: Tab indicators and labels work well with high contrast themes
+
+### Performance
+
+- **Lazy loading**: Use `matTabContent` for complex content that doesn't need immediate rendering
+- **Content preservation**: Use `preserveContent` property carefully as it keeps all tab content in DOM
+- **Animation optimization**: Adjust `animationDuration` based on your application's performance needs
+- **Pagination control**: Use `disablePagination` when you know tabs won't exceed container width
+- **Memory management**: Ensure proper cleanup of subscriptions in tab content components
+
+## Common Patterns
+
+### Pattern 1: Dashboard with Tab-Based Views
+
+```typescript
+@Component({
+  template: `
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>Analytics Dashboard</h1>
+        <div class="dashboard-actions">
+          <button mat-button (click)="refreshData()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <mat-tab-group
+        [(selectedIndex)]="activeTabIndex"
+        (selectedTabChange)="onTabChange($event)"
+        class="dashboard-tabs"
+      >
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>analytics</mat-icon>
+            Overview
+          </ng-template>
+          <overview-dashboard [data]="overviewData"></overview-dashboard>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>people</mat-icon>
+            Users
+          </ng-template>
+          <ng-template matTabContent>
+            <!-- Lazy-loaded user analytics -->
+            <user-analytics [dateRange]="selectedDateRange"></user-analytics>
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>monetization_on</mat-icon>
+            Revenue
+          </ng-template>
+          <ng-template matTabContent>
+            <!-- Lazy-loaded revenue charts -->
+            <revenue-dashboard
+              [currency]="selectedCurrency"
+            ></revenue-dashboard>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  `,
+  styles: [
+    `
+      .dashboard {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .dashboard-tabs {
+        flex: 1;
+        overflow: hidden;
+      }
+    `,
+  ],
+})
+export class DashboardTabsComponent {
+  activeTabIndex = 0;
+  overviewData: any;
+  selectedDateRange: DateRange;
+  selectedCurrency = "USD";
+
+  onTabChange(event: MatTabChangeEvent): void {
+    // Load data specific to the selected tab
+    this.loadTabData(event.index);
+  }
+
+  refreshData(): void {
+    // Refresh data for the current tab
+    this.loadTabData(this.activeTabIndex);
+  }
+
+  private loadTabData(tabIndex: number): void {
+    // Load appropriate data based on tab index
+    switch (tabIndex) {
+      case 0:
+        this.loadOverviewData();
+        break;
+      case 1:
+        this.loadUserAnalytics();
+        break;
+      case 2:
+        this.loadRevenueData();
+        break;
+    }
+  }
+}
+```
+
+### Pattern 2: Multi-Step Form with Tab Navigation
+
+```typescript
+@Component({
+  template: `
+    <div class="form-wizard">
+      <h2>Account Setup Wizard</h2>
+
+      <mat-tab-group
+        [selectedIndex]="currentStep"
+        [animationDuration]="'200ms'"
+        [disablePagination]="true"
+      >
+        <mat-tab
+          *ngFor="let step of formSteps; let i = index"
+          [disabled]="isStepDisabled(i)"
+        >
+          <ng-template mat-tab-label>
+            <span class="step-label">
+              <mat-icon
+                [class.completed]="isStepCompleted(i)"
+                [class.active]="currentStep === i"
+              >
+                {{ isStepCompleted(i) ? "check_circle" : i + 1 }}
+              </mat-icon>
+              {{ step.title }}
+            </span>
+          </ng-template>
+
+          <div class="step-content">
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+
+            <form [formGroup]="step.formGroup">
+              <div *ngFor="let field of step.fields">
+                <mat-form-field>
+                  <mat-label>{{ field.label }}</mat-label>
+                  <input
+                    matInput
+                    [formControlName]="field.name"
+                    [type]="field.type"
+                    [required]="field.required"
+                  />
+                  <mat-error
+                    *ngIf="step.formGroup.get(field.name)?.hasError('required')"
+                  >
+                    {{ field.label }} is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </form>
+
+            <div class="step-actions">
+              <button
+                mat-button
+                [disabled]="currentStep === 0"
+                (click)="previousStep()"
+              >
+                Previous
+              </button>
+
+              <button
+                mat-raised-button
+                color="primary"
+                [disabled]="!step.formGroup.valid"
+                (click)="nextStep()"
+              >
+                {{ currentStep === formSteps.length - 1 ? "Complete" : "Next" }}
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  `,
+  styles: [
+    `
+      .form-wizard {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .step-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .step-label mat-icon.completed {
+        color: #4caf50;
+      }
+
+      .step-label mat-icon.active {
+        color: #1976d2;
+      }
+
+      .step-content {
+        padding: 24px;
+        min-height: 400px;
+      }
+
+      .step-actions {
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+      }
+    `,
+  ],
+})
+export class FormWizardTabsComponent {
+  currentStep = 0;
+  formSteps = [
+    {
+      title: "Personal Information",
+      description: "Please provide your basic information",
+      formGroup: this.fb.group({
+        firstName: ["", Validators.required],
+        lastName: ["", Validators.required],
+        email: ["", [Validators.required, Validators.email]],
+      }),
+      fields: [
+        {
+          name: "firstName",
+          label: "First Name",
+          type: "text",
+          required: true,
+        },
+        { name: "lastName", label: "Last Name", type: "text", required: true },
+        { name: "email", label: "Email", type: "email", required: true },
+      ],
+    },
+    {
+      title: "Account Details",
+      description: "Set up your account preferences",
+      formGroup: this.fb.group({
+        username: ["", Validators.required],
+        password: ["", [Validators.required, Validators.minLength(8)]],
+      }),
+      fields: [
+        { name: "username", label: "Username", type: "text", required: true },
+        {
+          name: "password",
+          label: "Password",
+          type: "password",
+          required: true,
+        },
+      ],
+    },
+  ];
+
+  constructor(private fb: FormBuilder) {}
+
+  isStepDisabled(stepIndex: number): boolean {
+    return stepIndex > this.currentStep;
+  }
+
+  isStepCompleted(stepIndex: number): boolean {
+    return (
+      stepIndex < this.currentStep ||
+      (stepIndex === this.currentStep &&
+        this.formSteps[stepIndex].formGroup.valid)
+    );
+  }
+
+  nextStep(): void {
+    if (this.currentStep < this.formSteps.length - 1) {
+      this.currentStep++;
+    } else {
+      this.completeWizard();
+    }
+  }
+
+  previousStep(): void {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+    }
+  }
+
+  completeWizard(): void {
+    const formData = this.formSteps.reduce((acc, step) => {
+      return { ...acc, ...step.formGroup.value };
+    }, {});
+
+    console.log("Wizard completed with data:", formData);
+    // Handle form submission
+  }
+}
+```

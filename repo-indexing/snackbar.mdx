@@ -1,0 +1,1189 @@
+---
+title: SnackBar Components
+---
+
+# SnackBar Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate snack bar functionality. The SnackBar component provides Material Design styled notifications that appear temporarily at the bottom of the screen to inform users about operations, confirmations, or system status. It follows Material Design 3 specifications for snackbars, offering consistent positioning, animations, accessibility features, and flexible customization options for various notification scenarios.
+
+### When to Use
+
+- **Operation Feedback**: When you need to provide feedback about completed actions like saving, deleting, or updating data
+- **Error Notifications**: For displaying non-critical error messages that don't require modal attention
+- **Success Confirmations**: When confirming that an action was completed successfully (e.g., "Message sent", "Item saved")
+- **Undo Operations**: For providing users with the ability to undo recent actions with a temporary action button
+- **System Status Updates**: When communicating system-level information like connection status or sync updates
+- **Form Submission Results**: For providing immediate feedback after form submissions without full page navigation
+- **Background Process Notifications**: When notifying users about background operations or scheduled tasks
+- **Warning Messages**: For non-critical warnings that inform but don't block user workflow
+- **Information Messages**: When providing helpful information or tips that appear temporarily
+- **Connectivity Updates**: For notifying users about network status changes or offline/online state
+
+### Architecture
+
+**No Coupling**: The SnackBar component is a standalone service-based component that operates independently without requiring other components. It provides:
+
+- **Service-based instantiation**: Complete snackbar implementation accessible through injectable service
+- **Overlay management**: Automatic positioning, stacking, and lifecycle management
+- **Flexible content**: Support for simple text messages or custom component content
+- **Global accessibility**: Consistent behavior and styling across the entire application
+- **Independent operation**: No dependencies on parent or child components for basic functionality
+
+## Components
+
+### MatSnackBar {Service Component}
+
+A versatile service component that provides Material Design snackbar notifications with automatic positioning, duration management, and comprehensive customization options for various notification scenarios.
+
+**Purpose:** Injectable service that creates and manages snackbar notifications with Material Design styling, proper accessibility features, positioning options, and support for both simple text messages and complex custom content.
+
+**Interface:**
+
+```typescript
+interface MatSnackBar {
+  // Basic message methods
+  open(
+    message: string,
+    action?: string,
+    config?: MatSnackBarConfig,
+  ): MatSnackBarRef<SimpleSnackBar>;
+  openFromComponent<T>(
+    component: ComponentType<T>,
+    config?: MatSnackBarConfig,
+  ): MatSnackBarRef<T>;
+  openFromTemplate(
+    template: TemplateRef<any>,
+    config?: MatSnackBarConfig,
+  ): MatSnackBarRef<EmbeddedViewRef<any>>;
+
+  // Management methods
+  dismiss(): void;
+  ngOnDestroy(): void;
+}
+
+interface MatSnackBarConfig<D = any> {
+  // Accessibility
+  politeness?: AriaLivePoliteness; // Screen reader announcement priority ('assertive' | 'polite' | 'off')
+  announcementMessage?: string; // Custom message for screen readers
+
+  // Positioning
+  horizontalPosition?: "start" | "center" | "end" | "left" | "right"; // Horizontal placement
+  verticalPosition?: "top" | "bottom"; // Vertical placement
+
+  // Behavior
+  duration?: number; // Auto-dismiss duration in milliseconds (0 for persistent)
+  direction?: Direction; // Text direction for RTL support
+
+  // Styling
+  panelClass?: string | string[]; // Custom CSS classes for styling
+
+  // Data and Context
+  data?: D | null; // Data to inject into custom components
+  viewContainerRef?: ViewContainerRef; // Container for dependency injection context
+}
+
+interface MatSnackBarRef<T> {
+  // Component instance and container access
+  instance: T; // Reference to snackbar content component
+  containerInstance: MatSnackBarContainer; // Container component reference
+
+  // Lifecycle methods
+  dismiss(): void; // Manually dismiss the snackbar
+  dismissWithAction(): void; // Dismiss and mark as action-triggered
+
+  // Event observables
+  afterDismissed(): Observable<MatSnackBarDismiss>; // Fires when snackbar is closed
+  afterOpened(): Observable<void>; // Fires when snackbar opens and animations complete
+  onAction(): Observable<void>; // Fires when action button is clicked
+}
+
+interface MatSnackBarDismiss {
+  dismissedByAction: boolean; // Whether snackbar was closed via action button
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
+import { Component, inject } from "@angular/core";
+
+@Component({
+  selector: "app-snackbar-examples",
+  template: `
+    <!-- Basic notification triggers -->
+    <div class="notification-examples">
+      <button mat-raised-button (click)="showSimpleMessage()" color="primary">
+        Show Simple Message
+      </button>
+
+      <button
+        mat-raised-button
+        (click)="showMessageWithAction()"
+        color="accent"
+      >
+        Show with Action
+      </button>
+
+      <button
+        mat-raised-button
+        (click)="showSuccessMessage()"
+        class="success-button"
+      >
+        Show Success
+      </button>
+
+      <button mat-raised-button (click)="showErrorMessage()" color="warn">
+        Show Error
+      </button>
+
+      <button mat-raised-button (click)="showCustomMessage()">
+        Show Custom Message
+      </button>
+
+      <button mat-raised-button (click)="showPersistentMessage()">
+        Show Persistent Message
+      </button>
+    </div>
+
+    <!-- Form example with snackbar feedback -->
+    <form #form="ngForm" (ngSubmit)="saveForm(form)" class="example-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" ngModel required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" name="email" ngModel required />
+      </mat-form-field>
+
+      <button
+        type="submit"
+        mat-raised-button
+        color="primary"
+        [disabled]="form.invalid"
+      >
+        Save
+      </button>
+    </form>
+  `,
+  styles: [
+    `
+      .notification-examples {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .example-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+      }
+
+      .success-button {
+        background-color: #4caf50 !important;
+        color: white !important;
+      }
+    `,
+  ],
+  imports: [
+    MatSnackBarModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    FormsModule,
+  ],
+})
+export class SnackBarExamplesComponent {
+  private snackBar = inject(MatSnackBar);
+
+  showSimpleMessage(): void {
+    this.snackBar.open("Operation completed successfully!");
+  }
+
+  showMessageWithAction(): void {
+    const snackBarRef = this.snackBar.open("Message sent", "Undo", {
+      duration: 5000,
+    });
+
+    snackBarRef.onAction().subscribe(() => {
+      console.log("Undo action triggered");
+      this.snackBar.open("Action undone", "", { duration: 2000 });
+    });
+  }
+
+  showSuccessMessage(): void {
+    this.snackBar.open("✅ Changes saved successfully!", "Close", {
+      duration: 4000,
+      horizontalPosition: "center",
+      verticalPosition: "top",
+      panelClass: ["success-snackbar"],
+    });
+  }
+
+  showErrorMessage(): void {
+    this.snackBar.open("❌ Error: Failed to save changes", "Retry", {
+      duration: 0, // Persistent until action
+      panelClass: ["error-snackbar"],
+    });
+  }
+
+  showCustomMessage(): void {
+    this.snackBar.open("Processing your request...", "", {
+      duration: 3000,
+      horizontalPosition: "end",
+      verticalPosition: "bottom",
+      panelClass: ["custom-snackbar"],
+      politeness: "assertive",
+    });
+  }
+
+  showPersistentMessage(): void {
+    const snackBarRef = this.snackBar.open(
+      "This message stays until you dismiss it",
+      "Got it",
+      { duration: 0 },
+    );
+
+    snackBarRef.afterDismissed().subscribe((result) => {
+      console.log("Snackbar dismissed:", result.dismissedByAction);
+    });
+  }
+
+  saveForm(form: any): void {
+    if (form.valid) {
+      // Simulate save operation
+      setTimeout(() => {
+        this.snackBar.open("Form saved successfully!", "View", {
+          duration: 5000,
+          horizontalPosition: "center",
+        });
+      }, 1000);
+
+      // Show loading message
+      this.snackBar.open("Saving...", "", { duration: 1000 });
+    }
+  }
+}
+```
+
+**Custom Component Example:**
+
+```typescript
+import { Component, Inject } from "@angular/core";
+import {
+  MAT_SNACK_BAR_DATA,
+  MatSnackBarRef,
+} from "@angular/material/snack-bar";
+
+// Custom snackbar component
+@Component({
+  selector: "app-custom-snackbar",
+  template: `
+    <div class="custom-snackbar-content">
+      <mat-icon [color]="data.iconColor">{{ data.icon }}</mat-icon>
+      <span class="message">{{ data.message }}</span>
+      <div class="actions">
+        <button mat-button (click)="dismiss()" *ngIf="data.showDismiss">
+          {{ data.dismissText || "Dismiss" }}
+        </button>
+        <button
+          mat-raised-button
+          (click)="performAction()"
+          *ngIf="data.actionText"
+          [color]="data.actionColor"
+        >
+          {{ data.actionText }}
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .custom-snackbar-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .message {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+    `,
+  ],
+  imports: [MatIconModule, MatButtonModule],
+})
+export class CustomSnackBarComponent {
+  constructor(
+    public snackBarRef: MatSnackBarRef<CustomSnackBarComponent>,
+    @Inject(MAT_SNACK_BAR_DATA) public data: any,
+  ) {}
+
+  dismiss(): void {
+    this.snackBarRef.dismiss();
+  }
+
+  performAction(): void {
+    this.snackBarRef.dismissWithAction();
+    // Handle custom action
+    if (this.data.action) {
+      this.data.action();
+    }
+  }
+}
+
+// Usage of custom component
+@Component({
+  template: `
+    <button mat-raised-button (click)="showCustomNotification()">
+      Show Custom Notification
+    </button>
+  `,
+})
+export class CustomSnackBarUsageComponent {
+  private snackBar = inject(MatSnackBar);
+
+  showCustomNotification(): void {
+    this.snackBar.openFromComponent(CustomSnackBarComponent, {
+      duration: 6000,
+      data: {
+        icon: "cloud_upload",
+        iconColor: "primary",
+        message: "File uploaded successfully to cloud storage",
+        actionText: "View File",
+        actionColor: "accent",
+        showDismiss: true,
+        action: () => {
+          console.log("Navigate to file view");
+          // Handle navigation or action
+        },
+      },
+      panelClass: ["custom-upload-snackbar"],
+    });
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Message Notifications
+
+```typescript
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { Component, inject } from "@angular/core";
+
+@Component({
+  selector: "app-basic-notifications",
+  template: `
+    <div class="notification-buttons">
+      <!-- Simple informational messages -->
+      <button mat-button (click)="showInfo()">Info Message</button>
+      <button mat-button (click)="showSuccess()">Success Message</button>
+      <button mat-button (click)="showWarning()">Warning Message</button>
+      <button mat-button (click)="showError()">Error Message</button>
+    </div>
+  `,
+  styles: [
+    `
+      .notification-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+    `,
+  ],
+})
+export class BasicNotificationsComponent {
+  private snackBar = inject(MatSnackBar);
+
+  showInfo(): void {
+    this.snackBar.open("ℹ️ Information: Data has been refreshed", "OK", {
+      duration: 3000,
+      horizontalPosition: "center",
+      politeness: "polite",
+    });
+  }
+
+  showSuccess(): void {
+    this.snackBar.open("✅ Success: Operation completed successfully!", "", {
+      duration: 3000,
+      panelClass: ["success-snackbar"],
+    });
+  }
+
+  showWarning(): void {
+    this.snackBar.open("⚠️ Warning: Please review your input", "Review", {
+      duration: 5000,
+      panelClass: ["warning-snackbar"],
+    });
+  }
+
+  showError(): void {
+    this.snackBar.open("❌ Error: Something went wrong", "Retry", {
+      duration: 0, // Keep until action
+      panelClass: ["error-snackbar"],
+      politeness: "assertive",
+    });
+  }
+}
+```
+
+### Advanced Notification Service
+
+```typescript
+import { Injectable, inject } from "@angular/core";
+import { MatSnackBar, MatSnackBarRef } from "@angular/material/snack-bar";
+import { Observable } from "rxjs";
+
+export interface NotificationConfig {
+  message: string;
+  action?: string;
+  duration?: number;
+  type?: "info" | "success" | "warning" | "error";
+  position?: "top" | "bottom";
+  alignment?: "start" | "center" | "end";
+}
+
+@Injectable({
+  providedIn: "root",
+})
+export class NotificationService {
+  private snackBar = inject(MatSnackBar);
+
+  show(config: NotificationConfig): MatSnackBarRef<any> {
+    const panelClass = [`${config.type || "info"}-snackbar`];
+
+    return this.snackBar.open(config.message, config.action, {
+      duration: config.duration ?? 4000,
+      horizontalPosition: config.alignment || "start",
+      verticalPosition: config.position || "bottom",
+      panelClass,
+      politeness: config.type === "error" ? "assertive" : "polite",
+    });
+  }
+
+  success(message: string, action?: string): MatSnackBarRef<any> {
+    return this.show({
+      message: `✅ ${message}`,
+      action,
+      type: "success",
+      duration: 3000,
+    });
+  }
+
+  error(message: string, action?: string): MatSnackBarRef<any> {
+    return this.show({
+      message: `❌ ${message}`,
+      action,
+      type: "error",
+      duration: 0, // Persistent for errors
+    });
+  }
+
+  warning(message: string, action?: string): MatSnackBarRef<any> {
+    return this.show({
+      message: `⚠️ ${message}`,
+      action,
+      type: "warning",
+      duration: 5000,
+    });
+  }
+
+  info(message: string, action?: string): MatSnackBarRef<any> {
+    return this.show({
+      message: `ℹ️ ${message}`,
+      action,
+      type: "info",
+      duration: 4000,
+    });
+  }
+
+  // Specialized notification methods
+  saveSuccess(): MatSnackBarRef<any> {
+    return this.success("Changes saved successfully!");
+  }
+
+  deleteSuccess(itemName: string): MatSnackBarRef<any> {
+    return this.success(`${itemName} deleted successfully`, "Undo");
+  }
+
+  networkError(): MatSnackBarRef<any> {
+    return this.error("Network connection failed", "Retry");
+  }
+
+  validationError(fieldName: string): MatSnackBarRef<any> {
+    return this.warning(`Please check the ${fieldName} field`);
+  }
+
+  dismiss(): void {
+    this.snackBar.dismiss();
+  }
+}
+
+// Usage in components
+@Component({
+  selector: "app-notification-example",
+  template: `
+    <div class="action-buttons">
+      <button mat-raised-button (click)="performSave()" color="primary">
+        Save Data
+      </button>
+      <button mat-raised-button (click)="performDelete()" color="warn">
+        Delete Item
+      </button>
+      <button mat-raised-button (click)="testConnection()">
+        Test Connection
+      </button>
+    </div>
+  `,
+})
+export class NotificationExampleComponent {
+  private notificationService = inject(NotificationService);
+
+  performSave(): void {
+    // Simulate save operation
+    setTimeout(() => {
+      this.notificationService.saveSuccess();
+    }, 1000);
+
+    this.notificationService.info("Saving changes...");
+  }
+
+  performDelete(): void {
+    const snackBarRef = this.notificationService.deleteSuccess("Document");
+
+    snackBarRef.onAction().subscribe(() => {
+      this.notificationService.info("Delete action cancelled");
+    });
+  }
+
+  testConnection(): void {
+    // Simulate network test
+    setTimeout(() => {
+      if (Math.random() > 0.5) {
+        this.notificationService.success("Connection successful");
+      } else {
+        this.notificationService.networkError();
+      }
+    }, 2000);
+
+    this.notificationService.info("Testing connection...", "Cancel");
+  }
+}
+```
+
+### Common Variations
+
+#### Undo/Redo Operations
+
+```typescript
+@Component({
+  template: `
+    <div class="data-list">
+      <div *ngFor="let item of items; let i = index" class="data-item">
+        <span>{{ item.name }}</span>
+        <button mat-icon-button (click)="deleteItem(i, item)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+})
+export class UndoOperationsComponent {
+  private snackBar = inject(MatSnackBar);
+  items = [
+    { id: 1, name: "Item 1" },
+    { id: 2, name: "Item 2" },
+    { id: 3, name: "Item 3" },
+  ];
+  private deletedItems: Array<{ item: any; index: number }> = [];
+
+  deleteItem(index: number, item: any): void {
+    // Remove item from list
+    this.items.splice(index, 1);
+
+    // Store for potential undo
+    this.deletedItems.push({ item, index });
+
+    // Show undo snackbar
+    const snackBarRef = this.snackBar.open(`"${item.name}" deleted`, "Undo", {
+      duration: 5000,
+    });
+
+    snackBarRef.onAction().subscribe(() => {
+      this.undoDelete();
+    });
+
+    // Clean up deleted items after snackbar dismisses
+    snackBarRef.afterDismissed().subscribe((result) => {
+      if (!result.dismissedByAction) {
+        this.deletedItems.pop(); // Remove from undo stack
+      }
+    });
+  }
+
+  private undoDelete(): void {
+    const lastDeleted = this.deletedItems.pop();
+    if (lastDeleted) {
+      this.items.splice(lastDeleted.index, 0, lastDeleted.item);
+      this.snackBar.open("Delete undone", "", { duration: 2000 });
+    }
+  }
+}
+```
+
+#### Form Validation Feedback
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <button type="submit" mat-raised-button color="primary">Submit</button>
+    </form>
+  `,
+})
+export class FormValidationComponent {
+  private snackBar = inject(MatSnackBar);
+  private fb = inject(FormBuilder);
+
+  userForm = this.fb.group({
+    username: ["", [Validators.required, Validators.minLength(3)]],
+    email: ["", [Validators.required, Validators.email]],
+  });
+
+  onSubmit(): void {
+    if (this.userForm.valid) {
+      this.submitForm();
+    } else {
+      this.showValidationErrors();
+    }
+  }
+
+  private showValidationErrors(): void {
+    const errors: string[] = [];
+
+    if (this.userForm.get("username")?.hasError("required")) {
+      errors.push("Username is required");
+    }
+    if (this.userForm.get("username")?.hasError("minlength")) {
+      errors.push("Username must be at least 3 characters");
+    }
+    if (this.userForm.get("email")?.hasError("required")) {
+      errors.push("Email is required");
+    }
+    if (this.userForm.get("email")?.hasError("email")) {
+      errors.push("Email format is invalid");
+    }
+
+    if (errors.length > 0) {
+      this.snackBar.open(`Please fix: ${errors.join(", ")}`, "OK", {
+        duration: 6000,
+        panelClass: ["validation-error-snackbar"],
+      });
+    }
+  }
+
+  private async submitForm(): Promise<void> {
+    try {
+      // Show loading state
+      this.snackBar.open("Submitting form...", "", { duration: 1000 });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Show success
+      this.snackBar.open("Form submitted successfully!", "View", {
+        duration: 4000,
+        panelClass: ["success-snackbar"],
+      });
+
+      this.userForm.reset();
+    } catch (error) {
+      this.snackBar.open("Failed to submit form", "Retry", {
+        duration: 0,
+        panelClass: ["error-snackbar"],
+      });
+    }
+  }
+}
+```
+
+#### Progressive Notification Updates
+
+```typescript
+@Component({
+  template: `
+    <button
+      mat-raised-button
+      (click)="startLongOperation()"
+      [disabled]="isProcessing"
+    >
+      {{ isProcessing ? "Processing..." : "Start Long Operation" }}
+    </button>
+  `,
+})
+export class ProgressiveNotificationComponent {
+  private snackBar = inject(MatSnackBar);
+  isProcessing = false;
+
+  async startLongOperation(): Promise<void> {
+    this.isProcessing = true;
+
+    try {
+      // Step 1: Initialize
+      let snackBarRef = this.snackBar.open("Initializing operation...", "", {
+        duration: 0,
+        panelClass: ["progress-snackbar"],
+      });
+
+      await this.delay(1000);
+
+      // Step 2: Processing
+      snackBarRef.dismiss();
+      snackBarRef = this.snackBar.open("Processing data...", "", {
+        duration: 0,
+        panelClass: ["progress-snackbar"],
+      });
+
+      await this.delay(2000);
+
+      // Step 3: Finalizing
+      snackBarRef.dismiss();
+      snackBarRef = this.snackBar.open("Finalizing...", "", {
+        duration: 0,
+        panelClass: ["progress-snackbar"],
+      });
+
+      await this.delay(1000);
+
+      // Step 4: Complete
+      snackBarRef.dismiss();
+      this.snackBar.open(
+        "✅ Operation completed successfully!",
+        "View Results",
+        {
+          duration: 5000,
+          panelClass: ["success-snackbar"],
+        },
+      );
+    } catch (error) {
+      this.snackBar.open("❌ Operation failed", "Retry", {
+        duration: 0,
+        panelClass: ["error-snackbar"],
+      });
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate duration**: Use shorter durations (2-3s) for simple confirmations, longer (4-6s) for actions with undo, and persistent (0) for errors requiring user action
+- **Position strategically**: Use bottom positioning for most cases, top for urgent notifications, and center alignment for important messages
+- **Provide meaningful actions**: Include action buttons for operations that can be undone, retried, or require follow-up
+- **Use appropriate politeness levels**: Set 'assertive' for errors and critical information, 'polite' for general updates, and 'off' for purely visual feedback
+- **Implement consistent messaging**: Establish consistent language patterns for different types of notifications across your application
+- **Handle multiple notifications**: Dismiss previous snackbars when showing new ones to avoid stacking confusion
+
+### Accessibility
+
+- **Screen reader announcements**: Configure politeness levels appropriately to ensure screen readers announce notifications at the right priority
+- **Clear action labels**: Use descriptive text for action buttons that clearly indicate what will happen when clicked
+- **Sufficient duration**: Ensure notifications stay visible long enough for users with disabilities to read and act upon them
+- **Color independence**: Don't rely solely on color to convey notification type; include text indicators or icons
+- **Keyboard navigation**: Ensure action buttons are accessible via keyboard navigation and maintain logical tab order
+
+### Performance
+
+- **Dismiss previous notifications**: Call dismiss() before showing new notifications to prevent memory leaks and confusion
+- **Optimize custom components**: Keep custom snackbar components lightweight and avoid expensive operations in their lifecycle
+- **Manage notification frequency**: Implement debouncing or throttling for rapid-fire notifications to prevent overwhelming users
+- **Clean up subscriptions**: Properly unsubscribe from snackbar observables to prevent memory leaks
+- **Use service patterns**: Implement notification services to centralize logic and reduce code duplication
+
+## Common Patterns
+
+### Pattern 1: Notification Queue Manager
+
+```typescript
+import { Injectable, inject } from "@angular/core";
+import { MatSnackBar, MatSnackBarRef } from "@angular/material/snack-bar";
+import { Subject, Observable } from "rxjs";
+
+export interface QueuedNotification {
+  message: string;
+  action?: string;
+  config?: any;
+  id?: string;
+}
+
+@Injectable({
+  providedIn: "root",
+})
+export class NotificationQueueService {
+  private snackBar = inject(MatSnackBar);
+  private queue: QueuedNotification[] = [];
+  private currentSnackBar: MatSnackBarRef<any> | null = null;
+  private isProcessing = false;
+
+  addToQueue(notification: QueuedNotification): void {
+    notification.id = Date.now().toString();
+    this.queue.push(notification);
+    this.processQueue();
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || this.queue.length === 0) {
+      return;
+    }
+
+    this.isProcessing = true;
+
+    while (this.queue.length > 0) {
+      const notification = this.queue.shift()!;
+      await this.showNotification(notification);
+    }
+
+    this.isProcessing = false;
+  }
+
+  private showNotification(notification: QueuedNotification): Promise<void> {
+    return new Promise((resolve) => {
+      this.currentSnackBar = this.snackBar.open(
+        notification.message,
+        notification.action,
+        {
+          duration: 3000,
+          ...notification.config,
+        },
+      );
+
+      this.currentSnackBar.afterDismissed().subscribe(() => {
+        this.currentSnackBar = null;
+        resolve();
+      });
+    });
+  }
+
+  clearQueue(): void {
+    this.queue = [];
+    if (this.currentSnackBar) {
+      this.currentSnackBar.dismiss();
+    }
+  }
+
+  // Convenience methods
+  queueSuccess(message: string): void {
+    this.addToQueue({
+      message: `✅ ${message}`,
+      config: { panelClass: ["success-snackbar"] },
+    });
+  }
+
+  queueError(message: string): void {
+    this.addToQueue({
+      message: `❌ ${message}`,
+      action: "Dismiss",
+      config: {
+        duration: 0,
+        panelClass: ["error-snackbar"],
+      },
+    });
+  }
+
+  queueInfo(message: string): void {
+    this.addToQueue({
+      message: `ℹ️ ${message}`,
+      config: { panelClass: ["info-snackbar"] },
+    });
+  }
+}
+
+// Usage example
+@Component({
+  template: `
+    <div class="batch-actions">
+      <button mat-button (click)="performBatchOperation()">
+        Process Multiple Items
+      </button>
+      <button mat-button (click)="clearNotifications()">
+        Clear Notifications
+      </button>
+    </div>
+  `,
+})
+export class BatchOperationComponent {
+  private notificationQueue = inject(NotificationQueueService);
+
+  performBatchOperation(): void {
+    // Simulate processing multiple items
+    const items = ["Document 1", "Document 2", "Document 3"];
+
+    items.forEach((item, index) => {
+      setTimeout(() => {
+        if (Math.random() > 0.3) {
+          this.notificationQueue.queueSuccess(`${item} processed successfully`);
+        } else {
+          this.notificationQueue.queueError(`Failed to process ${item}`);
+        }
+      }, index * 500);
+    });
+  }
+
+  clearNotifications(): void {
+    this.notificationQueue.clearQueue();
+  }
+}
+```
+
+### Pattern 2: Context-Aware Notification System
+
+```typescript
+import { Injectable, inject } from "@angular/core";
+import { Router, NavigationEnd } from "@angular/router";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { filter } from "rxjs/operators";
+
+export interface NotificationContext {
+  route?: string;
+  feature?: string;
+  userRole?: string;
+  importance?: "low" | "medium" | "high" | "critical";
+}
+
+export interface ContextualNotification {
+  message: string;
+  action?: string;
+  context: NotificationContext;
+  rules?: {
+    showOnlyOnRoutes?: string[];
+    hideOnRoutes?: string[];
+    minUserRole?: string;
+    maxFrequency?: number; // per hour
+  };
+}
+
+@Injectable({
+  providedIn: "root",
+})
+export class ContextualNotificationService {
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
+  private currentRoute = "";
+  private notificationHistory: Map<string, number[]> = new Map();
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.url;
+      });
+  }
+
+  show(notification: ContextualNotification): boolean {
+    if (!this.shouldShowNotification(notification)) {
+      return false;
+    }
+
+    this.recordNotification(notification);
+
+    const config = this.getConfigForContext(notification.context);
+
+    this.snackBar.open(notification.message, notification.action, config);
+    return true;
+  }
+
+  private shouldShowNotification(
+    notification: ContextualNotification,
+  ): boolean {
+    const rules = notification.rules;
+    if (!rules) return true;
+
+    // Check route restrictions
+    if (
+      rules.showOnlyOnRoutes &&
+      !rules.showOnlyOnRoutes.includes(this.currentRoute)
+    ) {
+      return false;
+    }
+    if (rules.hideOnRoutes && rules.hideOnRoutes.includes(this.currentRoute)) {
+      return false;
+    }
+
+    // Check frequency limits
+    if (rules.maxFrequency) {
+      const key = `${notification.context.feature || "general"}_${notification.message}`;
+      const timestamps = this.notificationHistory.get(key) || [];
+      const oneHourAgo = Date.now() - 60 * 60 * 1000;
+      const recentCount = timestamps.filter((time) => time > oneHourAgo).length;
+
+      if (recentCount >= rules.maxFrequency) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private recordNotification(notification: ContextualNotification): void {
+    const key = `${notification.context.feature || "general"}_${notification.message}`;
+    const timestamps = this.notificationHistory.get(key) || [];
+    timestamps.push(Date.now());
+
+    // Keep only last hour of timestamps
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const filteredTimestamps = timestamps.filter((time) => time > oneHourAgo);
+
+    this.notificationHistory.set(key, filteredTimestamps);
+  }
+
+  private getConfigForContext(context: NotificationContext): any {
+    const baseConfig = {
+      duration: 4000,
+      horizontalPosition: "start" as const,
+      verticalPosition: "bottom" as const,
+    };
+
+    // Adjust based on importance
+    switch (context.importance) {
+      case "critical":
+        return {
+          ...baseConfig,
+          duration: 0,
+          panelClass: ["critical-notification"],
+          politeness: "assertive" as const,
+          horizontalPosition: "center" as const,
+          verticalPosition: "top" as const,
+        };
+      case "high":
+        return {
+          ...baseConfig,
+          duration: 6000,
+          panelClass: ["high-importance-notification"],
+          politeness: "assertive" as const,
+        };
+      case "medium":
+        return {
+          ...baseConfig,
+          duration: 4000,
+          panelClass: ["medium-importance-notification"],
+        };
+      case "low":
+        return {
+          ...baseConfig,
+          duration: 2000,
+          panelClass: ["low-importance-notification"],
+          politeness: "polite" as const,
+        };
+      default:
+        return baseConfig;
+    }
+  }
+
+  // Feature-specific notification methods
+  showDataSaveNotification(success: boolean): void {
+    this.show({
+      message: success ? "Data saved successfully" : "Failed to save data",
+      action: success ? undefined : "Retry",
+      context: {
+        feature: "data-management",
+        importance: success ? "medium" : "high",
+      },
+      rules: {
+        maxFrequency: 3,
+        showOnlyOnRoutes: ["/dashboard", "/data", "/settings"],
+      },
+    });
+  }
+
+  showSystemMaintenanceNotification(): void {
+    this.show({
+      message: "System maintenance scheduled for tonight at 2 AM",
+      action: "Learn More",
+      context: {
+        importance: "critical",
+      },
+      rules: {
+        maxFrequency: 1, // Only show once per hour
+      },
+    });
+  }
+
+  showFeatureNotification(featureName: string): void {
+    this.show({
+      message: `New feature available: ${featureName}`,
+      action: "Try It",
+      context: {
+        feature: "feature-announcements",
+        importance: "low",
+      },
+      rules: {
+        maxFrequency: 1,
+        hideOnRoutes: ["/onboarding", "/setup"],
+      },
+    });
+  }
+}
+
+// Usage in components
+@Component({
+  template: `
+    <div class="feature-demo">
+      <button mat-button (click)="saveData()">Save Data</button>
+      <button mat-button (click)="showMaintenance()">
+        Show Maintenance Alert
+      </button>
+      <button mat-button (click)="announceFeature()">Announce Feature</button>
+    </div>
+  `,
+})
+export class ContextualNotificationDemoComponent {
+  private contextualNotifications = inject(ContextualNotificationService);
+
+  saveData(): void {
+    // Simulate save operation
+    const success = Math.random() > 0.3;
+    this.contextualNotifications.showDataSaveNotification(success);
+  }
+
+  showMaintenance(): void {
+    this.contextualNotifications.showSystemMaintenanceNotification();
+  }
+
+  announceFeature(): void {
+    this.contextualNotifications.showFeatureNotification("Dark Mode");
+  }
+}
+```

@@ -1,0 +1,1627 @@
+---
+title: Checkbox Components
+---
+
+# Checkbox Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate checkbox functionality. The Checkbox component provides Material Design styled checkboxes that enable users to select one or more options from a set of choices. It follows Material Design 3 specifications for selection controls, offering consistent visual styling, proper accessibility features, and support for intermediate states.
+
+### When to Use
+
+- **Multiple Selections**: When users need to select multiple items from a list of options (e.g., selecting multiple files, choosing preferences, filtering options)
+- **Binary Choices**: For simple yes/no or on/off decisions where the state needs to be explicitly shown (e.g., "Remember me", "Enable notifications", "I agree to terms")
+- **Form Controls**: In forms where users need to confirm understanding, accept terms, or enable optional features
+- **Data Tables**: For selecting individual rows or implementing "select all" functionality in data grids
+- **Settings Panels**: For toggling features on and off in configuration or preference screens
+- **Filtering Interfaces**: When building filter panels where multiple criteria can be applied simultaneously
+- **Task Lists**: For marking items as complete or incomplete in todo lists and checklists
+- **Permissions Management**: For granting or revoking specific permissions in user access control interfaces
+- **Bulk Operations**: When users need to select multiple items before performing batch actions
+- **Feature Toggles**: For enabling or disabling specific application features or experimental options
+
+### Architecture
+
+**No Coupling**: The Checkbox component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete checkbox implementation with all necessary features built-in including tri-state support
+- **Flexible integration**: Can be used anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and functionality regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system
+- **Form integration**: Works seamlessly with Angular Reactive Forms and Template-driven Forms
+
+## Components
+
+### MatCheckbox {Standalone Component}
+
+A versatile checkbox component that provides Material Design styling with support for checked, unchecked, and indeterminate states, along with comprehensive accessibility features.
+
+**Purpose:** Creates interactive checkboxes with Material Design styling, proper accessibility features, tri-state support, and form integration for various selection scenarios.
+
+**Interface:**
+
+```typescript
+interface MatCheckboxProps {
+  // State Management
+  checked?: boolean; // Whether the checkbox is selected
+  indeterminate?: boolean; // Sets checkbox to indeterminate state (tri-state)
+
+  // Interaction States
+  disabled?: boolean; // Whether the checkbox is disabled
+  required?: boolean; // Marks the checkbox as required in forms
+
+  // Appearance and Styling
+  color?: "primary" | "accent" | "warn"; // Theme color for the checkbox
+  labelPosition?: "before" | "after"; // Position of label relative to checkbox
+
+  // Accessibility
+  ariaLabel?: string; // Accessible label for the checkbox
+  ariaLabelledby?: string; // ID of element that labels the checkbox
+  ariaDescribedby?: string; // ID of element that describes the checkbox
+
+  // Form Integration
+  id?: string; // ID for the checkbox element
+  name?: string; // Name attribute for form submission
+  value?: any; // Value associated with the checkbox
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Events
+  change?: (event: MatCheckboxChange) => void; // Fired when checkbox state changes
+  indeterminateChange?: (indeterminate: boolean) => void; // Fired when indeterminate state changes
+}
+
+interface MatCheckboxChange {
+  source: MatCheckbox; // Reference to the checkbox instance
+  checked: boolean; // New checked state
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-checkbox-examples",
+  template: `
+    <!-- Basic checkbox -->
+    <mat-checkbox>Basic Checkbox</mat-checkbox>
+
+    <!-- Checked checkbox -->
+    <mat-checkbox [checked]="true">Pre-selected Option</mat-checkbox>
+
+    <!-- Disabled checkbox -->
+    <mat-checkbox [disabled]="true">Disabled Option</mat-checkbox>
+
+    <!-- Indeterminate checkbox -->
+    <mat-checkbox [indeterminate]="true">Partially Selected</mat-checkbox>
+
+    <!-- Checkbox with colors -->
+    <mat-checkbox color="primary">Primary Color</mat-checkbox>
+    <mat-checkbox color="accent">Accent Color</mat-checkbox>
+    <mat-checkbox color="warn">Warning Color</mat-checkbox>
+
+    <!-- Checkbox with label position -->
+    <mat-checkbox labelPosition="before">Label Before</mat-checkbox>
+
+    <!-- Checkbox with event handling -->
+    <mat-checkbox (change)="onCheckboxChange($event)">
+      Click me for event
+    </mat-checkbox>
+
+    <!-- Two-way data binding -->
+    <mat-checkbox [(ngModel)]="isChecked">
+      Bound to: {{ isChecked }}
+    </mat-checkbox>
+
+    <!-- Form integration -->
+    <form [formGroup]="checkboxForm">
+      <mat-checkbox formControlName="agreeToTerms" required>
+        I agree to the terms and conditions *
+      </mat-checkbox>
+    </form>
+
+    <!-- Accessibility enhanced -->
+    <mat-checkbox
+      [id]="'notifications-checkbox'"
+      [ariaLabel]="'Enable email notifications'"
+      (change)="toggleNotifications($event)"
+    >
+      Enable Notifications
+    </mat-checkbox>
+  `,
+  imports: [MatCheckboxModule, FormsModule, ReactiveFormsModule],
+})
+export class CheckboxExamplesComponent {
+  isChecked = false;
+
+  checkboxForm = this.fb.group({
+    agreeToTerms: [false, Validators.requiredTrue],
+  });
+
+  constructor(private fb: FormBuilder) {}
+
+  onCheckboxChange(event: MatCheckboxChange): void {
+    console.log("Checkbox changed:", event.checked);
+  }
+
+  toggleNotifications(event: MatCheckboxChange): void {
+    console.log("Notifications:", event.checked ? "enabled" : "disabled");
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Checkbox Usage
+
+```typescript
+import { MatCheckboxModule } from "@angular/material/checkbox";
+
+@Component({
+  selector: "app-basic-checkboxes",
+  template: `
+    <div class="checkbox-group">
+      <!-- Simple selection options -->
+      <mat-checkbox>Option 1</mat-checkbox>
+      <mat-checkbox>Option 2</mat-checkbox>
+      <mat-checkbox>Option 3</mat-checkbox>
+    </div>
+
+    <div class="checkbox-states">
+      <!-- Different states -->
+      <mat-checkbox [checked]="true">Checked</mat-checkbox>
+      <mat-checkbox [checked]="false">Unchecked</mat-checkbox>
+      <mat-checkbox [indeterminate]="true">Indeterminate</mat-checkbox>
+      <mat-checkbox [disabled]="true">Disabled</mat-checkbox>
+    </div>
+
+    <div class="checkbox-colors">
+      <!-- Color variations -->
+      <mat-checkbox color="primary" [checked]="true">Primary</mat-checkbox>
+      <mat-checkbox color="accent" [checked]="true">Accent</mat-checkbox>
+      <mat-checkbox color="warn" [checked]="true">Warn</mat-checkbox>
+    </div>
+  `,
+  styles: [
+    `
+      .checkbox-group,
+      .checkbox-states,
+      .checkbox-colors {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .checkbox-group {
+        border: 1px solid #e0e0e0;
+        padding: 16px;
+        border-radius: 4px;
+      }
+    `,
+  ],
+  imports: [MatCheckboxModule],
+})
+export class BasicCheckboxesComponent {}
+```
+
+### Advanced Checkbox Implementation
+
+```typescript
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatListModule } from "@angular/material/list";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+
+@Component({
+  selector: "app-advanced-checkboxes",
+  template: `
+    <div class="advanced-checkbox-examples">
+      <!-- Select All / Indeterminate Pattern -->
+      <mat-card class="select-all-card">
+        <mat-card-header>
+          <mat-card-title>Task List</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-checkbox
+            [checked]="allComplete"
+            [indeterminate]="someComplete"
+            (change)="setAll($event.checked)"
+            class="select-all-checkbox"
+          >
+            Select All Tasks
+          </mat-checkbox>
+
+          <mat-list class="task-list">
+            <mat-list-item *ngFor="let task of tasks">
+              <mat-checkbox
+                [(ngModel)]="task.completed"
+                (ngModelChange)="updateAllComplete()"
+                [color]="'primary'"
+              >
+                {{ task.name }}
+              </mat-checkbox>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Filter Checkboxes -->
+      <mat-card class="filter-card">
+        <mat-card-header>
+          <mat-card-title>Filter Options</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="filter-section">
+            <h4>Categories</h4>
+            <div class="checkbox-grid">
+              <mat-checkbox
+                *ngFor="let category of categories"
+                [(ngModel)]="category.selected"
+                (change)="onFilterChange()"
+                [color]="'accent'"
+              >
+                {{ category.name }} ({{ category.count }})
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <h4>Price Range</h4>
+            <div class="checkbox-grid">
+              <mat-checkbox
+                *ngFor="let range of priceRanges"
+                [(ngModel)]="range.selected"
+                (change)="onFilterChange()"
+                [color]="'accent'"
+              >
+                {{ range.label }}
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button mat-button (click)="clearAllFilters()">Clear All</button>
+            <button mat-button="filled" (click)="applyFilters()">
+              Apply Filters ({{ getSelectedFiltersCount() }})
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Form with Validation -->
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>Registration Form</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+            <div class="form-section">
+              <h4>Communication Preferences</h4>
+              <mat-checkbox
+                formControlName="emailNotifications"
+                color="primary"
+              >
+                Email notifications
+              </mat-checkbox>
+
+              <mat-checkbox formControlName="smsNotifications" color="primary">
+                SMS notifications
+              </mat-checkbox>
+
+              <mat-checkbox formControlName="marketingEmails" color="primary">
+                Marketing emails
+              </mat-checkbox>
+            </div>
+
+            <div class="form-section">
+              <h4>Terms and Agreements</h4>
+              <mat-checkbox
+                formControlName="agreeToTerms"
+                color="primary"
+                required
+                [ariaDescribedby]="'terms-help'"
+              >
+                I agree to the Terms of Service *
+              </mat-checkbox>
+              <div
+                id="terms-help"
+                class="help-text"
+                *ngIf="
+                  registrationForm.get('agreeToTerms')?.invalid &&
+                  registrationForm.get('agreeToTerms')?.touched
+                "
+              >
+                You must agree to the terms to continue
+              </div>
+
+              <mat-checkbox
+                formControlName="agreeToPrivacy"
+                color="primary"
+                required
+              >
+                I agree to the Privacy Policy *
+              </mat-checkbox>
+
+              <mat-checkbox
+                formControlName="ageConfirmation"
+                color="warn"
+                required
+              >
+                I confirm I am 18 years or older *
+              </mat-checkbox>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                mat-button="filled"
+                [disabled]="registrationForm.invalid"
+              >
+                Register
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Data Table with Selection -->
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>User Management</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-controls">
+            <mat-checkbox
+              [checked]="isAllUsersSelected()"
+              [indeterminate]="isSomeUsersSelected()"
+              (change)="toggleAllUsers($event)"
+              color="primary"
+            >
+              Select All Users
+            </mat-checkbox>
+
+            <div class="selected-count" *ngIf="getSelectedUsersCount() > 0">
+              {{ getSelectedUsersCount() }} user(s) selected
+            </div>
+
+            <button
+              mat-button="outlined"
+              [disabled]="getSelectedUsersCount() === 0"
+              (click)="deleteSelectedUsers()"
+            >
+              Delete Selected
+            </button>
+          </div>
+
+          <div class="user-list">
+            <div
+              *ngFor="let user of users"
+              class="user-item"
+              [class.selected]="user.selected"
+            >
+              <mat-checkbox
+                [(ngModel)]="user.selected"
+                (change)="onUserSelectionChange()"
+                color="primary"
+                [ariaLabel]="'Select user ' + user.name"
+              >
+              </mat-checkbox>
+              <div class="user-info">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+              <span class="user-role">{{ user.role }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-checkbox-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .select-all-checkbox {
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+
+      .task-list {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+
+      .filter-section {
+        margin-bottom: 24px;
+      }
+
+      .filter-section h4 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .form-section {
+        margin-bottom: 24px;
+      }
+
+      .form-section h4 {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .form-section mat-checkbox {
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #f44336;
+        margin-top: 4px;
+        margin-left: 32px;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .table-controls {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f5f5f5;
+        border-radius: 4px;
+      }
+
+      .selected-count {
+        font-size: 14px;
+        color: #666;
+        margin-left: auto;
+        margin-right: 16px;
+      }
+
+      .user-list {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+
+      .user-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        transition: background-color 0.2s;
+      }
+
+      .user-item:last-child {
+        border-bottom: none;
+      }
+
+      .user-item.selected {
+        background-color: #e3f2fd;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        margin-left: 12px;
+        flex: 1;
+      }
+
+      .user-name {
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .user-email {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .user-role {
+        font-size: 12px;
+        color: #666;
+        background: #e0e0e0;
+        padding: 4px 8px;
+        border-radius: 12px;
+      }
+
+      @media (max-width: 600px) {
+        .checkbox-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .table-controls {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+
+        .selected-count {
+          margin-left: 0;
+          margin-right: 0;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatCheckboxModule,
+    MatListModule,
+    MatButtonModule,
+    MatCardModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedCheckboxesComponent {
+  // Task List Data
+  tasks = [
+    { name: "Review pull requests", completed: false },
+    { name: "Update documentation", completed: true },
+    { name: "Fix login bug", completed: false },
+    { name: "Deploy to staging", completed: true },
+  ];
+
+  // Filter Data
+  categories = [
+    { name: "Electronics", count: 156, selected: false },
+    { name: "Clothing", count: 89, selected: false },
+    { name: "Books", count: 234, selected: false },
+    { name: "Home & Garden", count: 67, selected: false },
+  ];
+
+  priceRanges = [
+    { label: "Under $25", selected: false },
+    { label: "$25 - $50", selected: false },
+    { label: "$50 - $100", selected: false },
+    { label: "Over $100", selected: false },
+  ];
+
+  // User Data
+  users = [
+    {
+      name: "John Doe",
+      email: "john@example.com",
+      role: "Admin",
+      selected: false,
+    },
+    {
+      name: "Jane Smith",
+      email: "jane@example.com",
+      role: "User",
+      selected: false,
+    },
+    {
+      name: "Bob Johnson",
+      email: "bob@example.com",
+      role: "Editor",
+      selected: false,
+    },
+    {
+      name: "Alice Brown",
+      email: "alice@example.com",
+      role: "User",
+      selected: false,
+    },
+  ];
+
+  // Form
+  registrationForm = this.fb.group({
+    emailNotifications: [true],
+    smsNotifications: [false],
+    marketingEmails: [false],
+    agreeToTerms: [false, Validators.requiredTrue],
+    agreeToPrivacy: [false, Validators.requiredTrue],
+    ageConfirmation: [false, Validators.requiredTrue],
+  });
+
+  constructor(private fb: FormBuilder) {}
+
+  // Task List Methods
+  get allComplete(): boolean {
+    return this.tasks.length > 0 && this.tasks.every((task) => task.completed);
+  }
+
+  get someComplete(): boolean {
+    return this.tasks.some((task) => task.completed) && !this.allComplete;
+  }
+
+  setAll(completed: boolean): void {
+    this.tasks.forEach((task) => (task.completed = completed));
+  }
+
+  updateAllComplete(): void {
+    // This method is called when individual tasks change
+    // The getters handle the state automatically
+  }
+
+  // Filter Methods
+  onFilterChange(): void {
+    console.log("Filters changed");
+    // Apply filters logic here
+  }
+
+  getSelectedFiltersCount(): number {
+    const categoryCount = this.categories.filter((c) => c.selected).length;
+    const priceCount = this.priceRanges.filter((r) => r.selected).length;
+    return categoryCount + priceCount;
+  }
+
+  clearAllFilters(): void {
+    this.categories.forEach((c) => (c.selected = false));
+    this.priceRanges.forEach((r) => (r.selected = false));
+    this.onFilterChange();
+  }
+
+  applyFilters(): void {
+    console.log("Applying filters:", {
+      categories: this.categories.filter((c) => c.selected),
+      priceRanges: this.priceRanges.filter((r) => r.selected),
+    });
+  }
+
+  // Form Methods
+  onSubmit(): void {
+    if (this.registrationForm.valid) {
+      console.log("Form submitted:", this.registrationForm.value);
+    }
+  }
+
+  // User Selection Methods
+  isAllUsersSelected(): boolean {
+    return this.users.length > 0 && this.users.every((user) => user.selected);
+  }
+
+  isSomeUsersSelected(): boolean {
+    return (
+      this.users.some((user) => user.selected) && !this.isAllUsersSelected()
+    );
+  }
+
+  getSelectedUsersCount(): number {
+    return this.users.filter((user) => user.selected).length;
+  }
+
+  toggleAllUsers(event: MatCheckboxChange): void {
+    this.users.forEach((user) => (user.selected = event.checked));
+  }
+
+  onUserSelectionChange(): void {
+    // Called when individual user selection changes
+    // State is automatically managed by the template
+  }
+
+  deleteSelectedUsers(): void {
+    const selectedCount = this.getSelectedUsersCount();
+    if (
+      selectedCount > 0 &&
+      confirm(`Delete ${selectedCount} selected user(s)?`)
+    ) {
+      this.users = this.users.filter((user) => !user.selected);
+    }
+  }
+}
+```
+
+### Common Variations
+
+#### Checkbox Lists with Categories
+
+```typescript
+@Component({
+  template: `
+    <div class="categorized-checkboxes">
+      <div *ngFor="let category of checkboxCategories" class="category-section">
+        <h3 class="category-title">{{ category.title }}</h3>
+        <div class="category-description">{{ category.description }}</div>
+
+        <div class="checkbox-list">
+          <mat-checkbox
+            *ngFor="let option of category.options"
+            [(ngModel)]="option.selected"
+            [disabled]="option.disabled"
+            [color]="category.color || 'primary'"
+            (change)="onCategoryOptionChange(category, option)"
+          >
+            <span class="option-label">{{ option.label }}</span>
+            <span class="option-description" *ngIf="option.description">
+              {{ option.description }}
+            </span>
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .categorized-checkboxes {
+        max-width: 600px;
+      }
+
+      .category-section {
+        margin-bottom: 32px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .category-title {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .category-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+      }
+
+      .checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .option-label {
+        font-weight: 500;
+      }
+
+      .option-description {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+    `,
+  ],
+})
+export class CategorizedCheckboxesComponent {
+  checkboxCategories = [
+    {
+      title: "Privacy Settings",
+      description: "Control how your information is used",
+      color: "primary" as const,
+      options: [
+        {
+          label: "Profile Visibility",
+          description: "Allow others to see your profile",
+          selected: true,
+          disabled: false,
+        },
+        {
+          label: "Activity Tracking",
+          description: "Track your usage for analytics",
+          selected: false,
+          disabled: false,
+        },
+        {
+          label: "Data Sharing",
+          description: "Share anonymized data with partners",
+          selected: false,
+          disabled: false,
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      description: "Choose how you want to be notified",
+      color: "accent" as const,
+      options: [
+        {
+          label: "Email Alerts",
+          description: "Receive important updates via email",
+          selected: true,
+          disabled: false,
+        },
+        {
+          label: "Push Notifications",
+          description: "Get notifications on your device",
+          selected: false,
+          disabled: false,
+        },
+        {
+          label: "SMS Messages",
+          description: "Receive critical alerts via SMS",
+          selected: false,
+          disabled: true,
+        },
+      ],
+    },
+  ];
+
+  onCategoryOptionChange(category: any, option: any): void {
+    console.log(`${category.title}: ${option.label} = ${option.selected}`);
+  }
+}
+```
+
+#### Checkbox Trees with Hierarchical Selection
+
+```typescript
+@Component({
+  template: `
+    <div class="checkbox-tree">
+      <div *ngFor="let node of treeData" class="tree-node">
+        <mat-checkbox
+          [checked]="node.checked"
+          [indeterminate]="node.indeterminate"
+          (change)="onParentChange(node, $event)"
+          [color]="'primary'"
+          class="parent-checkbox"
+        >
+          {{ node.label }}
+        </mat-checkbox>
+
+        <div class="children" *ngIf="node.children && node.children.length > 0">
+          <mat-checkbox
+            *ngFor="let child of node.children"
+            [checked]="child.checked"
+            (change)="onChildChange(node, child, $event)"
+            [color]="'primary'"
+            class="child-checkbox"
+          >
+            {{ child.label }}
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .checkbox-tree {
+        max-width: 400px;
+      }
+
+      .tree-node {
+        margin-bottom: 16px;
+      }
+
+      .parent-checkbox {
+        font-weight: 500;
+      }
+
+      .children {
+        margin-left: 32px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .child-checkbox {
+        font-size: 14px;
+      }
+    `,
+  ],
+})
+export class CheckboxTreeComponent {
+  treeData = [
+    {
+      label: "Documents",
+      checked: false,
+      indeterminate: false,
+      children: [
+        { label: "Reports", checked: false },
+        { label: "Presentations", checked: false },
+        { label: "Spreadsheets", checked: false },
+      ],
+    },
+    {
+      label: "Media Files",
+      checked: false,
+      indeterminate: false,
+      children: [
+        { label: "Images", checked: false },
+        { label: "Videos", checked: false },
+        { label: "Audio", checked: false },
+      ],
+    },
+  ];
+
+  onParentChange(parent: any, event: MatCheckboxChange): void {
+    parent.checked = event.checked;
+    parent.indeterminate = false;
+
+    // Update all children to match parent
+    if (parent.children) {
+      parent.children.forEach((child: any) => {
+        child.checked = event.checked;
+      });
+    }
+  }
+
+  onChildChange(parent: any, child: any, event: MatCheckboxChange): void {
+    child.checked = event.checked;
+
+    // Update parent state based on children
+    const checkedChildren = parent.children.filter((c: any) => c.checked);
+
+    if (checkedChildren.length === 0) {
+      parent.checked = false;
+      parent.indeterminate = false;
+    } else if (checkedChildren.length === parent.children.length) {
+      parent.checked = true;
+      parent.indeterminate = false;
+    } else {
+      parent.checked = false;
+      parent.indeterminate = true;
+    }
+  }
+}
+```
+
+#### Dynamic Checkbox Generation
+
+```typescript
+@Component({
+  template: `
+    <div class="dynamic-checkboxes">
+      <div class="controls">
+        <button mat-button="outlined" (click)="addOption()">Add Option</button>
+        <button mat-button="outlined" (click)="removeSelected()">
+          Remove Selected
+        </button>
+        <button mat-button="text" (click)="clearAll()">Clear All</button>
+      </div>
+
+      <div class="checkbox-container" *ngIf="dynamicOptions.length > 0">
+        <mat-checkbox
+          *ngFor="let option of dynamicOptions; trackBy: trackByFn"
+          [(ngModel)]="option.selected"
+          [color]="'primary'"
+          (change)="onOptionChange(option)"
+          class="dynamic-option"
+        >
+          <span class="option-text">{{ option.text }}</span>
+          <button
+            mat-icon-button
+            (click)="removeOption(option)"
+            [attr.aria-label]="'Remove ' + option.text"
+            class="remove-button"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-checkbox>
+      </div>
+
+      <div class="empty-state" *ngIf="dynamicOptions.length === 0">
+        <p>No options available. Click "Add Option" to create some.</p>
+      </div>
+
+      <div class="summary" *ngIf="dynamicOptions.length > 0">
+        <p>
+          {{ getSelectedCount() }} of {{ dynamicOptions.length }} options
+          selected
+        </p>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .dynamic-checkboxes {
+        max-width: 500px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+
+      .checkbox-container {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .dynamic-option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+
+      .dynamic-option:last-child {
+        margin-bottom: 0;
+      }
+
+      .option-text {
+        flex: 1;
+      }
+
+      .remove-button {
+        margin-left: auto;
+        width: 32px;
+        height: 32px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 32px;
+        color: #666;
+        font-style: italic;
+      }
+
+      .summary {
+        font-size: 14px;
+        color: #666;
+        text-align: center;
+      }
+    `,
+  ],
+})
+export class DynamicCheckboxesComponent {
+  dynamicOptions: Array<{ id: number; text: string; selected: boolean }> = [];
+  private nextId = 1;
+
+  constructor() {
+    // Initialize with some options
+    this.addOption("Default Option 1");
+    this.addOption("Default Option 2");
+  }
+
+  addOption(text?: string): void {
+    const optionText = text || `Option ${this.nextId}`;
+    this.dynamicOptions.push({
+      id: this.nextId++,
+      text: optionText,
+      selected: false,
+    });
+  }
+
+  removeOption(option: any): void {
+    this.dynamicOptions = this.dynamicOptions.filter(
+      (opt) => opt.id !== option.id,
+    );
+  }
+
+  removeSelected(): void {
+    this.dynamicOptions = this.dynamicOptions.filter((opt) => !opt.selected);
+  }
+
+  clearAll(): void {
+    this.dynamicOptions = [];
+    this.nextId = 1;
+  }
+
+  onOptionChange(option: any): void {
+    console.log(
+      `Option "${option.text}" is now ${option.selected ? "selected" : "unselected"}`,
+    );
+  }
+
+  getSelectedCount(): number {
+    return this.dynamicOptions.filter((opt) => opt.selected).length;
+  }
+
+  trackByFn(index: number, item: any): number {
+    return item.id;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use clear, descriptive labels**: Checkbox labels should clearly describe what will happen when the option is selected
+- **Implement proper tri-state logic**: When using indeterminate states, ensure parent-child relationships are logically consistent
+- **Group related options**: Use visual grouping and clear hierarchy for sets of related checkboxes
+- **Provide immediate feedback**: Show the effects of checkbox selections immediately when possible
+- **Consider cognitive load**: Avoid overwhelming users with too many checkbox options at once
+
+### Accessibility
+
+- **Keyboard navigation**: Checkboxes automatically support keyboard navigation with Space key activation and Tab/Shift+Tab for focus movement
+- **Screen reader support**: Use descriptive labels and aria-label attributes for complex checkbox interactions
+- **Focus management**: Ensure checkboxes receive proper focus indicators and maintain logical tab order
+- **Group labeling**: Use fieldset and legend elements or aria-labelledby for checkbox groups
+- **State communication**: Ensure indeterminate and disabled states are properly communicated to assistive technologies
+
+### Performance
+
+- **TrackBy functions**: Use trackBy functions with \*ngFor when rendering dynamic checkbox lists to optimize change detection
+- **Lazy loading**: For large datasets, consider virtualizing or paginating checkbox lists
+- **Change detection**: Use OnPush change detection strategy for components with many checkboxes
+- **Event handling**: Implement efficient event handlers and avoid expensive operations in change callbacks
+- **Memory management**: Properly clean up subscriptions and event listeners in component lifecycle hooks
+
+## Common Patterns
+
+### Pattern 1: Select All with Filtering
+
+```typescript
+@Component({
+  template: `
+    <div class="filterable-checkbox-list">
+      <div class="list-controls">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search options</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="filterOptions()"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-checkbox
+          [checked]="isAllVisibleSelected()"
+          [indeterminate]="isSomeVisibleSelected()"
+          (change)="toggleAllVisible($event)"
+          color="primary"
+        >
+          Select All Visible ({{ getVisibleSelectedCount() }}/{{
+            filteredOptions.length
+          }})
+        </mat-checkbox>
+      </div>
+
+      <div class="options-list">
+        <mat-checkbox
+          *ngFor="let option of filteredOptions"
+          [(ngModel)]="option.selected"
+          (change)="onSelectionChange()"
+          color="primary"
+          class="list-option"
+        >
+          <span class="option-name">{{ option.name }}</span>
+          <span class="option-category">{{ option.category }}</span>
+        </mat-checkbox>
+      </div>
+
+      <div class="selection-summary">
+        Total selected: {{ getTotalSelectedCount() }} of {{ allOptions.length }}
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .filterable-checkbox-list {
+        max-width: 600px;
+      }
+
+      .list-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 4px;
+      }
+
+      .search-field {
+        width: 100%;
+      }
+
+      .options-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 16px;
+      }
+
+      .list-option {
+        display: block;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+
+      .option-name {
+        font-weight: 500;
+      }
+
+      .option-category {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .selection-summary {
+        margin-top: 16px;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class FilterableCheckboxListComponent {
+  searchTerm = "";
+  allOptions = [
+    { name: "JavaScript", category: "Programming Language", selected: false },
+    { name: "TypeScript", category: "Programming Language", selected: false },
+    { name: "Angular", category: "Framework", selected: false },
+    { name: "React", category: "Framework", selected: false },
+    { name: "Vue.js", category: "Framework", selected: false },
+    { name: "Node.js", category: "Runtime", selected: false },
+    { name: "Python", category: "Programming Language", selected: false },
+    { name: "Java", category: "Programming Language", selected: false },
+  ];
+  filteredOptions = [...this.allOptions];
+
+  filterOptions(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredOptions = [...this.allOptions];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredOptions = this.allOptions.filter(
+        (option) =>
+          option.name.toLowerCase().includes(term) ||
+          option.category.toLowerCase().includes(term),
+      );
+    }
+  }
+
+  isAllVisibleSelected(): boolean {
+    return (
+      this.filteredOptions.length > 0 &&
+      this.filteredOptions.every((option) => option.selected)
+    );
+  }
+
+  isSomeVisibleSelected(): boolean {
+    return (
+      this.filteredOptions.some((option) => option.selected) &&
+      !this.isAllVisibleSelected()
+    );
+  }
+
+  getVisibleSelectedCount(): number {
+    return this.filteredOptions.filter((option) => option.selected).length;
+  }
+
+  getTotalSelectedCount(): number {
+    return this.allOptions.filter((option) => option.selected).length;
+  }
+
+  toggleAllVisible(event: MatCheckboxChange): void {
+    this.filteredOptions.forEach((option) => (option.selected = event.checked));
+  }
+
+  onSelectionChange(): void {
+    // Called when individual selections change
+    console.log(
+      "Selection changed, total selected:",
+      this.getTotalSelectedCount(),
+    );
+  }
+}
+```
+
+### Pattern 2: Conditional Checkbox Dependencies
+
+```typescript
+@Component({
+  template: `
+    <div class="conditional-checkboxes">
+      <form [formGroup]="preferencesForm">
+        <div class="preference-section">
+          <h3>Notification Preferences</h3>
+
+          <mat-checkbox formControlName="enableNotifications" color="primary">
+            Enable Notifications
+          </mat-checkbox>
+
+          <div
+            class="sub-options"
+            *ngIf="preferencesForm.get('enableNotifications')?.value"
+          >
+            <mat-checkbox
+              formControlName="emailNotifications"
+              color="primary"
+              class="sub-option"
+            >
+              Email Notifications
+            </mat-checkbox>
+
+            <div
+              class="sub-sub-options"
+              *ngIf="preferencesForm.get('emailNotifications')?.value"
+            >
+              <mat-checkbox
+                formControlName="instantEmail"
+                color="accent"
+                class="sub-sub-option"
+              >
+                Instant Email Alerts
+              </mat-checkbox>
+
+              <mat-checkbox
+                formControlName="dailyDigest"
+                color="accent"
+                class="sub-sub-option"
+              >
+                Daily Email Digest
+              </mat-checkbox>
+            </div>
+
+            <mat-checkbox
+              formControlName="pushNotifications"
+              color="primary"
+              class="sub-option"
+            >
+              Push Notifications
+            </mat-checkbox>
+
+            <mat-checkbox
+              formControlName="smsNotifications"
+              color="primary"
+              class="sub-option"
+            >
+              SMS Notifications (Premium only)
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="preference-section">
+          <h3>Privacy Settings</h3>
+
+          <mat-checkbox formControlName="shareData" color="warn">
+            Allow Data Sharing
+          </mat-checkbox>
+
+          <div
+            class="warning-message"
+            *ngIf="preferencesForm.get('shareData')?.value"
+          >
+            <mat-icon>warning</mat-icon>
+            <span
+              >Enabling data sharing will allow us to share your anonymized
+              usage data with third parties.</span
+            >
+          </div>
+
+          <div
+            class="sub-options"
+            *ngIf="preferencesForm.get('shareData')?.value"
+          >
+            <mat-checkbox
+              formControlName="shareWithPartners"
+              color="warn"
+              class="sub-option"
+            >
+              Share with Business Partners
+            </mat-checkbox>
+
+            <mat-checkbox
+              formControlName="shareForResearch"
+              color="warn"
+              class="sub-option"
+            >
+              Share for Research Purposes
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-button="outlined"
+            type="button"
+            (click)="resetToDefaults()"
+          >
+            Reset to Defaults
+          </button>
+
+          <button
+            mat-button="filled"
+            type="button"
+            (click)="savePreferences()"
+            [disabled]="preferencesForm.invalid"
+          >
+            Save Preferences
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .conditional-checkboxes {
+        max-width: 600px;
+      }
+
+      .preference-section {
+        margin-bottom: 32px;
+        padding: 24px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .preference-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .sub-options {
+        margin-left: 32px;
+        margin-top: 16px;
+        padding-left: 16px;
+        border-left: 2px solid #e0e0e0;
+      }
+
+      .sub-option {
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .sub-sub-options {
+        margin-left: 32px;
+        margin-top: 12px;
+        padding-left: 16px;
+        border-left: 2px solid #2196f3;
+      }
+
+      .sub-sub-option {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .warning-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 12px 0;
+        padding: 12px;
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #856404;
+      }
+
+      .warning-message mat-icon {
+        color: #f39c12;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      @media (max-width: 600px) {
+        .sub-options {
+          margin-left: 16px;
+        }
+
+        .sub-sub-options {
+          margin-left: 16px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
+})
+export class ConditionalCheckboxesComponent {
+  preferencesForm = this.fb.group({
+    enableNotifications: [false],
+    emailNotifications: [false],
+    instantEmail: [false],
+    dailyDigest: [false],
+    pushNotifications: [false],
+    smsNotifications: [false],
+    shareData: [false],
+    shareWithPartners: [false],
+    shareForResearch: [false],
+  });
+
+  constructor(private fb: FormBuilder) {
+    // Set up conditional logic
+    this.setupConditionalLogic();
+  }
+
+  private setupConditionalLogic(): void {
+    // When main notification is disabled, disable all sub-notifications
+    this.preferencesForm
+      .get("enableNotifications")
+      ?.valueChanges.subscribe((enabled) => {
+        if (!enabled) {
+          this.preferencesForm.patchValue({
+            emailNotifications: false,
+            pushNotifications: false,
+            smsNotifications: false,
+          });
+        }
+      });
+
+    // When email notifications are disabled, disable email sub-options
+    this.preferencesForm
+      .get("emailNotifications")
+      ?.valueChanges.subscribe((enabled) => {
+        if (!enabled) {
+          this.preferencesForm.patchValue({
+            instantEmail: false,
+            dailyDigest: false,
+          });
+        }
+      });
+
+    // When data sharing is disabled, disable sharing sub-options
+    this.preferencesForm.get("shareData")?.valueChanges.subscribe((enabled) => {
+      if (!enabled) {
+        this.preferencesForm.patchValue({
+          shareWithPartners: false,
+          shareForResearch: false,
+        });
+      }
+    });
+  }
+
+  resetToDefaults(): void {
+    this.preferencesForm.reset({
+      enableNotifications: true,
+      emailNotifications: true,
+      instantEmail: false,
+      dailyDigest: true,
+      pushNotifications: false,
+      smsNotifications: false,
+      shareData: false,
+      shareWithPartners: false,
+      shareForResearch: false,
+    });
+  }
+
+  savePreferences(): void {
+    if (this.preferencesForm.valid) {
+      console.log("Saving preferences:", this.preferencesForm.value);
+      // Save to backend/local storage
+    }
+  }
+}
+```

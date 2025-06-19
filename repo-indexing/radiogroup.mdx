@@ -1,0 +1,2443 @@
+---
+title: RadioGroup Components
+---
+
+# RadioGroup Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate radio button group functionality with required hierarchical structure. The RadioGroup component group provides Material Design styled radio button groups that enable users to select exactly one option from a set of mutually exclusive choices. It follows Material Design 3 specifications for selection controls, offering consistent visual styling, proper accessibility features, and seamless form integration.
+
+### When to Use
+
+- **Single Selection from Multiple Options**: When users need to select exactly one option from a group of 2-7 mutually exclusive choices
+- **Form Data Entry**: For collecting structured data in forms where only one option should be selected from predefined choices
+- **Settings and Preferences**: When providing configuration options where only one setting can be active at a time
+- **Survey and Questionnaire Forms**: For survey questions that require a single answer from multiple choices
+- **Filter Controls**: When creating filter interfaces where only one filter option should be active
+- **Toggle Between States**: For interfaces that need to switch between different modes or states
+- **Payment or Shipping Options**: When users need to select one payment method or shipping option from available choices
+- **Account Type Selection**: For registration forms where users choose between different account types or subscription plans
+- **Accessibility-First Selection**: When you need properly structured, keyboard-navigable, and screen-reader friendly exclusive selection controls
+
+### Architecture
+
+**Critical/Strong Coupling**: The RadioGroup component group follows a required hierarchical structure where components must be used together in specific parent-child relationships. The architecture is built around:
+
+- **Required parent-child relationships**: `mat-radio-group` serves as the mandatory container for all radio button components
+- **Shared context dependencies**: The radio group manages mutual exclusivity, selection state, and form integration
+- **Compositional hierarchy**: Individual radio buttons must be children of the radio group to function properly
+
+### Component Interdependencies
+
+The RadioGroup component group requires strict composition patterns:
+
+- **`mat-radio-group`** → Required root container that manages selection state, form integration, and accessibility
+- **`mat-radio-button`** → Individual radio button components that must be direct children of `mat-radio-group`
+- **Selection Management** → Radio group ensures only one button can be selected at a time
+- **Form Integration** → Radio group provides form control interface and validation support
+- **Accessibility Context** → Radio group manages ARIA attributes and keyboard navigation for all child buttons
+
+## Components
+
+### MatRadioGroup {Primary Container Component}
+
+The mandatory root container component that manages radio button selection, form integration, and accessibility for all child radio buttons.
+
+**Purpose:** Serves as the foundational wrapper that coordinates selection state, ensures mutual exclusivity, provides form control interface, and manages accessibility attributes for all contained radio button components.
+
+**Interface:**
+
+```typescript
+interface MatRadioGroupProps {
+  // Selection Management
+  value?: any; // Currently selected value
+  name?: string; // Name attribute for form submission
+  selected?: MatRadioButton; // Currently selected radio button reference
+
+  // Form Integration
+  required?: boolean; // Whether selection is required
+  disabled?: boolean; // Whether the entire group is disabled
+
+  // Layout and Styling
+  labelPosition?: "before" | "after"; // Label position for all radio buttons
+  color?: "primary" | "accent" | "warn"; // Theme color for all radio buttons
+
+  // Events
+  change?: (event: MatRadioChange) => void; // Selection change event
+}
+
+interface MatRadioChange {
+  source: MatRadioButton; // The selected radio button
+  value: any; // The value of the selected radio button
+}
+```
+
+**Dependencies:** Requires Angular Material's radio module and at least one child `mat-radio-button`
+**Provides:** Selection management, form control interface, and accessibility context for all child radio buttons
+
+**Usage Example:**
+
+```typescript
+import { MatRadioModule } from "@angular/material/radio";
+import { ReactiveFormsModule, FormControl } from "@angular/forms";
+
+@Component({
+  selector: "app-radio-group-example",
+  template: `
+    <mat-radio-group
+      [(value)]="selectedOption"
+      (change)="onSelectionChange($event)"
+    >
+      <mat-radio-button value="option1">Option 1</mat-radio-button>
+      <mat-radio-button value="option2">Option 2</mat-radio-button>
+      <mat-radio-button value="option3">Option 3</mat-radio-button>
+    </mat-radio-group>
+
+    <!-- With form control -->
+    <mat-radio-group [formControl]="paymentMethod">
+      <mat-radio-button value="credit">Credit Card</mat-radio-button>
+      <mat-radio-button value="debit">Debit Card</mat-radio-button>
+      <mat-radio-button value="paypal">PayPal</mat-radio-button>
+    </mat-radio-group>
+  `,
+  imports: [MatRadioModule, ReactiveFormsModule],
+})
+export class RadioGroupExampleComponent {
+  selectedOption = "option2";
+  paymentMethod = new FormControl("credit");
+
+  onSelectionChange(event: MatRadioChange): void {
+    console.log("Selected:", event.value);
+  }
+}
+```
+
+### MatRadioButton {Individual Radio Button Component}
+
+Individual radio button components that represent selectable options within the radio group context.
+
+**Purpose:** Provides individual selectable options with Material Design styling, accessibility support, and integration with the parent radio group's selection management.
+
+**Interface:**
+
+```typescript
+interface MatRadioButtonProps {
+  // Identification and Value
+  value?: any; // The value associated with this radio button
+  id?: string; // Unique identifier
+  name?: string; // Name attribute (inherited from radio group)
+
+  // State Management
+  checked?: boolean; // Whether this radio button is selected
+  disabled?: boolean; // Whether this radio button is disabled
+  required?: boolean; // Whether selection is required (inherited from radio group)
+
+  // Styling and Layout
+  labelPosition?: "before" | "after"; // Position of the label relative to the radio circle
+  color?: "primary" | "accent" | "warn"; // Theme color
+  disableRipple?: boolean; // Whether to disable ripple effects
+
+  // Accessibility
+  ariaLabel?: string; // Accessibility label
+  ariaLabelledby?: string; // ID of element that labels this radio button
+  ariaDescribedby?: string; // ID of element that describes this radio button
+
+  // Events
+  change?: (event: MatRadioChange) => void; // Selection change event
+}
+```
+
+**Context Dependencies:** Must be used within `mat-radio-group`
+**Parent Requirements:** Required parent component is `mat-radio-group`
+**Provides:** Individual selectable option with accessible interaction and visual feedback
+
+**Usage Example:**
+
+```html
+<mat-radio-group [(value)]="selectedSize">
+  <!-- Basic radio button -->
+  <mat-radio-button value="small">Small</mat-radio-button>
+
+  <!-- Radio button with disabled state -->
+  <mat-radio-button value="medium" [disabled]="true">
+    Medium (Out of Stock)
+  </mat-radio-button>
+
+  <!-- Radio button with custom label position -->
+  <mat-radio-button value="large" labelPosition="before">
+    Large
+  </mat-radio-button>
+
+  <!-- Radio button with rich content -->
+  <mat-radio-button value="xl">
+    <div class="radio-content">
+      <strong>Extra Large</strong>
+      <p class="radio-description">Perfect for teams of 10+ people</p>
+    </div>
+  </mat-radio-button>
+
+  <!-- Radio button with icons -->
+  <mat-radio-button value="custom">
+    <div class="radio-with-icon">
+      <mat-icon>star</mat-icon>
+      Custom Size
+    </div>
+  </mat-radio-button>
+</mat-radio-group>
+```
+
+## Integration Patterns
+
+### Basic Radio Group Usage
+
+```typescript
+import { MatRadioModule } from "@angular/material/radio";
+
+@Component({
+  selector: "app-basic-radio-group",
+  template: `
+    <div class="radio-group-examples">
+      <!-- Simple radio group -->
+      <div class="example-section">
+        <h3>Choose a Size</h3>
+        <mat-radio-group [(value)]="selectedSize" class="radio-group">
+          <mat-radio-button value="small">Small</mat-radio-button>
+          <mat-radio-button value="medium">Medium</mat-radio-button>
+          <mat-radio-button value="large">Large</mat-radio-button>
+        </mat-radio-group>
+        <p>Selected: {{ selectedSize }}</p>
+      </div>
+
+      <!-- Radio group with custom styling -->
+      <div class="example-section">
+        <h3>Payment Method</h3>
+        <mat-radio-group
+          [(value)]="paymentMethod"
+          color="accent"
+          class="payment-radio-group"
+        >
+          <mat-radio-button value="credit">
+            <div class="payment-option">
+              <mat-icon>credit_card</mat-icon>
+              Credit Card
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="debit">
+            <div class="payment-option">
+              <mat-icon>payment</mat-icon>
+              Debit Card
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="paypal">
+            <div class="payment-option">
+              <mat-icon>account_balance_wallet</mat-icon>
+              PayPal
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Horizontal radio group -->
+      <div class="example-section">
+        <h3>Priority Level</h3>
+        <mat-radio-group [(value)]="priority" class="horizontal-radio-group">
+          <mat-radio-button value="low">Low</mat-radio-button>
+          <mat-radio-button value="medium">Medium</mat-radio-button>
+          <mat-radio-button value="high">High</mat-radio-button>
+          <mat-radio-button value="urgent">Urgent</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .radio-group-examples {
+        padding: 16px;
+        max-width: 600px;
+      }
+
+      .example-section {
+        margin-bottom: 32px;
+      }
+
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .payment-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .horizontal-radio-group {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 600px) {
+        .horizontal-radio-group {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
+  imports: [MatRadioModule],
+})
+export class BasicRadioGroupComponent {
+  selectedSize = "medium";
+  paymentMethod = "credit";
+  priority = "medium";
+}
+```
+
+### Advanced Radio Group with Form Integration
+
+```typescript
+import { MatRadioModule } from "@angular/material/radio";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from "@angular/forms";
+
+interface ShippingOption {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: string;
+  icon: string;
+}
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  fee?: number;
+}
+
+@Component({
+  selector: "app-advanced-radio-form",
+  template: `
+    <form [formGroup]="orderForm" class="order-form">
+      <h2>Complete Your Order</h2>
+
+      <!-- Account Type Selection -->
+      <div class="form-section">
+        <h3>Account Type</h3>
+        <mat-radio-group
+          formControlName="accountType"
+          class="account-type-group"
+        >
+          <mat-radio-button
+            *ngFor="let type of accountTypes"
+            [value]="type.id"
+            class="account-option"
+          >
+            <div class="account-card">
+              <div class="account-header">
+                <mat-icon>{{ type.icon }}</mat-icon>
+                <h4>{{ type.name }}</h4>
+                <span class="account-price">{{ type.price }}</span>
+              </div>
+              <p class="account-description">{{ type.description }}</p>
+              <ul class="account-features">
+                <li *ngFor="let feature of type.features">
+                  <mat-icon>check</mat-icon>
+                  {{ feature }}
+                </li>
+              </ul>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="orderForm.get('accountType')?.hasError('required') && orderForm.get('accountType')?.touched">
+          Please select an account type
+        </mat-error>
+      </div>
+
+      <!-- Shipping Options -->
+      <div class="form-section">
+        <h3>Shipping Method</h3>
+        <mat-radio-group
+          formControlName="shipping"
+          class="shipping-group"
+          [disabled]="!orderForm.get('accountType')?.value"
+        >
+          <mat-radio-button
+            *ngFor="let option of shippingOptions"
+            [value]="option.id"
+            class="shipping-option"
+          >
+            <div class="shipping-card">
+              <div class="shipping-header">
+                <mat-icon>{{ option.icon }}</mat-icon>
+                <div class="shipping-info">
+                  <span class="shipping-name">{{ option.name }}</span>
+                  <span class="shipping-duration">{{ option.duration }}</span>
+                </div>
+                <span class="shipping-price">
+                  {{ option.price === 0 ? 'Free' : '$' + option.price }}
+                </span>
+              </div>
+              <p class="shipping-description">{{ option.description }}</p>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="orderForm.get('shipping')?.hasError('required') && orderForm.get('shipping')?.touched">
+          Please select a shipping method
+        </mat-error>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="form-section">
+        <h3>Payment Method</h3>
+        <mat-radio-group
+          formControlName="paymentMethod"
+          class="payment-group"
+        >
+          <mat-radio-button
+            *ngFor="let method of paymentMethods"
+            [value]="method.id"
+            class="payment-option"
+          >
+            <div class="payment-card">
+              <div class="payment-header">
+                <mat-icon>{{ method.icon }}</mat-icon>
+                <div class="payment-info">
+                  <span class="payment-name">{{ method.name }}</span>
+                  <span class="payment-fee" *ngIf="method.fee">
+                    +${{ method.fee }} processing fee
+                  </span>
+                </div>
+              </div>
+              <p class="payment-description">{{ method.description }}</p>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="orderForm.get('paymentMethod')?.hasError('required') && orderForm.get('paymentMethod')?.touched">
+          Please select a payment method
+        </mat-error>
+      </div>
+
+      <!-- Marketing Preferences -->
+      <div class="form-section">
+        <h3>Communication Preferences</h3>
+        <mat-radio-group
+          formControlName="communications"
+          class="communications-group"
+        >
+          <mat-radio-button value="all">
+            <div class="communication-option">
+              <strong>All Communications</strong>
+              <p>Receive all updates, promotions, and newsletters</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="essential">
+            <div class="communication-option">
+              <strong>Essential Only</strong>
+              <p>Only account-related and order updates</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="none">
+            <div class="communication-option">
+              <strong>No Communications</strong>
+              <p>Opt out of all marketing communications</p>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary" *ngIf="orderForm.value.accountType">
+        <h3>Order Summary</h3>
+        <div class="summary-line">
+          <span>{{ getSelectedAccountType()?.name }}</span>
+          <span>{{ getSelectedAccountType()?.price }}</span>
+        </div>
+        <div class="summary-line" *ngIf="getSelectedShipping()">
+          <span>Shipping: {{ getSelectedShipping()?.name }}</span>
+          <span>{{ getSelectedShipping()?.price === 0 ? 'Free' : '$' + getSelectedShipping()?.price }}</span>
+        </div>
+        <div class="summary-line" *ngIf="getSelectedPaymentMethod()?.fee">
+          <span>Processing Fee</span>
+          <span>${{ getSelectedPaymentMethod()?.fee }}</span>
+        </div>
+        <div class="summary-total">
+          <span>Total</span>
+          <span>{{ calculateTotal() }}</span>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          mat-button="outlined"
+          (click)="resetForm()"
+        >
+          Reset
+        </button>
+        <button
+          type="submit"
+          mat-button="filled"
+          (click)="submitOrder()"
+          [disabled]="orderForm.invalid"
+        >
+          Complete Order
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .order-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .form-section {
+        margin-bottom: 32px;
+      }
+
+      .form-section h3 {
+        margin-bottom: 16px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      /* Account Type Styles */
+      .account-type-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      .account-card {
+        padding: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: border-color 0.2s;
+      }
+
+      .account-option[aria-checked="true"] .account-card {
+        border-color: #2196f3;
+        background-color: #f3f8ff;
+      }
+
+      .account-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .account-header h4 {
+        flex: 1;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .account-price {
+        font-weight: bold;
+        color: #2196f3;
+        font-size: 18px;
+      }
+
+      .account-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 12px;
+      }
+
+      .account-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .account-features li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+
+      .account-features mat-icon {
+        font-size: 16px;
+        color: #4caf50;
+      }
+
+      /* Shipping Styles */
+      .shipping-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .shipping-card {
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+
+      .shipping-option[aria-checked="true"] .shipping-card {
+        border-color: #2196f3;
+        background-color: #f3f8ff;
+      }
+
+      .shipping-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .shipping-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .shipping-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .shipping-duration {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .shipping-price {
+        font-weight: bold;
+        color: #2196f3;
+      }
+
+      .shipping-description {
+        font-size: 13px;
+        color: #666;
+        margin: 8px 0 0 32px;
+      }
+
+      /* Payment Styles */
+      .payment-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .payment-card {
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+
+      .payment-option[aria-checked="true"] .payment-card {
+        border-color: #2196f3;
+        background-color: #f3f8ff;
+      }
+
+      .payment-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .payment-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .payment-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .payment-fee {
+        font-size: 12px;
+        color: #f44336;
+        line-height: 1.2;
+      }
+
+      .payment-description {
+        font-size: 13px;
+        color: #666;
+        margin: 8px 0 0 32px;
+      }
+
+      /* Communications Styles */
+      .communications-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .communication-option {
+        margin-left: 8px;
+      }
+
+      .communication-option strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .communication-option p {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+      }
+
+      /* Order Summary */
+      .order-summary {
+        background: #f5f5f5;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+
+      .summary-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 16px;
+        border-top: 1px solid #ddd;
+        padding-top: 8px;
+        margin-top: 8px;
+      }
+
+      /* Form Actions */
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      /* Error Styles */
+      mat-error {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .account-type-group {
+          grid-template-columns: 1fr;
+        }
+
+        .shipping-header,
+        .payment-header {
+          flex-wrap: wrap;
+        }
+
+        .form-actions {
+          flex-direction: column-reverse;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    ReactiveFormsModule,
+  ],
+})
+export class AdvancedRadioFormComponent {
+  orderForm = new FormGroup({
+    accountType: new FormControl("", [Validators.required]),
+    shipping: new FormControl("", [Validators.required]),
+    paymentMethod: new FormControl("", [Validators.required]),
+    communications: new FormControl("essential"),
+  });
+
+  accountTypes = [
+    {
+      id: "basic",
+      name: "Basic",
+      price: "Free",
+      description: "Perfect for individuals getting started",
+      icon: "person",
+      features: [
+        "Up to 5 projects",
+        "Basic templates",
+        "Email support",
+        "1GB storage",
+      ],
+    },
+    {
+      id: "pro",
+      name: "Professional",
+      price: "$19/month",
+      description: "Ideal for growing businesses and teams",
+      icon: "business",
+      features: [
+        "Unlimited projects",
+        "Premium templates",
+        "Priority support",
+        "10GB storage",
+        "Advanced analytics",
+      ],
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: "Custom",
+      description: "For large organizations with complex needs",
+      icon: "corporate_fare",
+      features: [
+        "Everything in Pro",
+        "Custom integrations",
+        "Dedicated support",
+        "Unlimited storage",
+        "Advanced security",
+        "Custom branding",
+      ],
+    },
+  ];
+
+  shippingOptions: ShippingOption[] = [
+    {
+      id: "standard",
+      name: "Standard Shipping",
+      description: "Regular delivery to your address",
+      price: 0,
+      duration: "5-7 business days",
+      icon: "local_shipping",
+    },
+    {
+      id: "express",
+      name: "Express Shipping",
+      description: "Faster delivery with tracking",
+      price: 15,
+      duration: "2-3 business days",
+      icon: "speed",
+    },
+    {
+      id: "overnight",
+      name: "Overnight Delivery",
+      description: "Next day delivery before 10 AM",
+      price: 35,
+      duration: "1 business day",
+      icon: "flight_takeoff",
+    },
+  ];
+
+  paymentMethods: PaymentMethod[] = [
+    {
+      id: "credit",
+      name: "Credit Card",
+      description: "Visa, MasterCard, American Express",
+      icon: "credit_card",
+    },
+    {
+      id: "paypal",
+      name: "PayPal",
+      description: "Pay securely with your PayPal account",
+      icon: "account_balance_wallet",
+      fee: 2.5,
+    },
+    {
+      id: "bank",
+      name: "Bank Transfer",
+      description: "Direct bank transfer (may take 3-5 days)",
+      icon: "account_balance",
+    },
+  ];
+
+  getSelectedAccountType() {
+    const typeId = this.orderForm.get("accountType")?.value;
+    return this.accountTypes.find(type => type.id === typeId);
+  }
+
+  getSelectedShipping() {
+    const shippingId = this.orderForm.get("shipping")?.value;
+    return this.shippingOptions.find(option => option.id === shippingId);
+  }
+
+  getSelectedPaymentMethod() {
+    const methodId = this.orderForm.get("paymentMethod")?.value;
+    return this.paymentMethods.find(method => method.id === methodId);
+  }
+
+  calculateTotal(): string {
+    const accountType = this.getSelectedAccountType();
+    const shipping = this.getSelectedShipping();
+    const paymentMethod = this.getSelectedPaymentMethod();
+
+    if (!accountType) return "$0";
+
+    let total = 0;
+
+    // Account type pricing (simplified - only counting numeric prices)
+    if (accountType.price.includes("$")) {
+      total += parseFloat(accountType.price.replace(/[^0-9.]/g, ""));
+    }
+
+    // Shipping cost
+    if (shipping) {
+      total += shipping.price;
+    }
+
+    // Payment method fee
+    if (paymentMethod?.fee) {
+      total += paymentMethod.fee;
+    }
+
+    return total === 0 ? "Free" : `$${total.toFixed(2)}`;
+  }
+
+  resetForm(): void {
+    this.orderForm.reset({
+      accountType: "",
+      shipping: "",
+      paymentMethod: "",
+      communications: "essential",
+    });
+  }
+
+  submitOrder(): void {
+    if (this.orderForm.valid) {
+      const order = {
+        ...this.orderForm.value,
+        total: this.calculateTotal(),
+        timestamp: new Date(),
+      };
+      console.log("Order submitted:", order);
+      // Implement order submission logic
+    } else {
+      console.log("Form is invalid");
+      this.orderForm.markAllAsTouched();
+    }
+  }
+}
+```
+
+### Common Variations
+
+#### Survey Question Format
+
+```typescript
+@Component({
+  template: `
+    <div class="survey-form">
+      <h2>Product Feedback Survey</h2>
+
+      <!-- Satisfaction Rating -->
+      <div class="question-section">
+        <h3>How satisfied are you with our product?</h3>
+        <mat-radio-group [(value)]="satisfaction" class="rating-group">
+          <mat-radio-button
+            *ngFor="let rating of satisfactionRatings"
+            [value]="rating.value"
+            class="rating-option"
+          >
+            <div class="rating-content">
+              <div class="rating-faces">{{ rating.emoji }}</div>
+              <span class="rating-label">{{ rating.label }}</span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Usage Frequency -->
+      <div class="question-section">
+        <h3>How often do you use our product?</h3>
+        <mat-radio-group [(value)]="frequency" class="frequency-group">
+          <mat-radio-button value="daily">Daily</mat-radio-button>
+          <mat-radio-button value="weekly">Weekly</mat-radio-button>
+          <mat-radio-button value="monthly">Monthly</mat-radio-button>
+          <mat-radio-button value="rarely">Rarely</mat-radio-button>
+          <mat-radio-button value="never">Never</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="question-section">
+        <h3>Would you recommend our product to others?</h3>
+        <mat-radio-group
+          [(value)]="recommendation"
+          class="recommendation-group"
+        >
+          <mat-radio-button value="definitely">
+            <div class="recommendation-option">
+              <strong>Definitely</strong>
+              <p>I would actively recommend it</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="probably">
+            <div class="recommendation-option">
+              <strong>Probably</strong>
+              <p>I would likely recommend it</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="maybe">
+            <div class="recommendation-option">
+              <strong>Maybe</strong>
+              <p>I might recommend it</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="unlikely">
+            <div class="recommendation-option">
+              <strong>Unlikely</strong>
+              <p>I probably wouldn't recommend it</p>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="no">
+            <div class="recommendation-option">
+              <strong>No</strong>
+              <p>I would not recommend it</p>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .survey-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .question-section {
+        margin-bottom: 32px;
+        padding: 16px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .question-section h3 {
+        margin-bottom: 16px;
+        color: #333;
+      }
+
+      .rating-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .rating-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 80px;
+      }
+
+      .rating-faces {
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .rating-label {
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .frequency-group {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .recommendation-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .recommendation-option {
+        margin-left: 8px;
+      }
+
+      .recommendation-option strong {
+        display: block;
+        color: #333;
+      }
+
+      .recommendation-option p {
+        font-size: 13px;
+        color: #666;
+        margin: 2px 0 0 0;
+      }
+
+      @media (max-width: 600px) {
+        .rating-group {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .rating-content {
+          flex-direction: row;
+          min-width: auto;
+        }
+
+        .frequency-group {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+    `,
+  ],
+})
+export class SurveyRadioComponent {
+  satisfaction = "";
+  frequency = "";
+  recommendation = "";
+
+  satisfactionRatings = [
+    { value: "very-dissatisfied", label: "Very Dissatisfied", emoji: "😞" },
+    { value: "dissatisfied", label: "Dissatisfied", emoji: "😕" },
+    { value: "neutral", label: "Neutral", emoji: "😐" },
+    { value: "satisfied", label: "Satisfied", emoji: "🙂" },
+    { value: "very-satisfied", label: "Very Satisfied", emoji: "😊" },
+  ];
+}
+```
+
+#### Settings Panel Format
+
+```typescript
+@Component({
+  template: `
+    <div class="settings-panel">
+      <h2>Application Settings</h2>
+
+      <!-- Theme Selection -->
+      <div class="setting-group">
+        <h3>
+          <mat-icon>palette</mat-icon>
+          Theme
+        </h3>
+        <mat-radio-group [(value)]="theme" class="theme-group">
+          <mat-radio-button
+            *ngFor="let option of themeOptions"
+            [value]="option.value"
+            class="theme-option"
+          >
+            <div class="theme-preview">
+              <div
+                class="theme-colors"
+                [style.background]="option.preview"
+              ></div>
+              <div class="theme-info">
+                <span class="theme-name">{{ option.name }}</span>
+                <span class="theme-description">{{ option.description }}</span>
+              </div>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Notification Settings -->
+      <div class="setting-group">
+        <h3>
+          <mat-icon>notifications</mat-icon>
+          Notifications
+        </h3>
+        <mat-radio-group [(value)]="notifications" class="notification-group">
+          <mat-radio-button value="all">
+            <div class="notification-option">
+              <mat-icon>notifications_active</mat-icon>
+              <div>
+                <strong>All Notifications</strong>
+                <p>Receive all app notifications</p>
+              </div>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="important">
+            <div class="notification-option">
+              <mat-icon>priority_high</mat-icon>
+              <div>
+                <strong>Important Only</strong>
+                <p>Only critical notifications</p>
+              </div>
+            </div>
+          </mat-radio-button>
+          <mat-radio-button value="none">
+            <div class="notification-option">
+              <mat-icon>notifications_off</mat-icon>
+              <div>
+                <strong>No Notifications</strong>
+                <p>Disable all notifications</p>
+              </div>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Language Selection -->
+      <div class="setting-group">
+        <h3>
+          <mat-icon>language</mat-icon>
+          Language
+        </h3>
+        <mat-radio-group [(value)]="language" class="language-group">
+          <mat-radio-button *ngFor="let lang of languages" [value]="lang.code">
+            <div class="language-option">
+              <span class="language-flag">{{ lang.flag }}</span>
+              <span class="language-name">{{ lang.name }}</span>
+              <span class="language-native">{{ lang.nativeName }}</span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-panel {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .setting-group {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .setting-group:last-child {
+        border-bottom: none;
+      }
+
+      .setting-group h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .theme-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .theme-preview {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: 8px;
+      }
+
+      .theme-colors {
+        width: 40px;
+        height: 30px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+
+      .theme-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .theme-name {
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .theme-description {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .notification-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .notification-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: 8px;
+      }
+
+      .notification-option div {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .notification-option strong {
+        line-height: 1.2;
+      }
+
+      .notification-option p {
+        font-size: 12px;
+        color: #666;
+        margin: 2px 0 0 0;
+        line-height: 1.2;
+      }
+
+      .language-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .language-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: 8px;
+      }
+
+      .language-flag {
+        font-size: 18px;
+        width: 24px;
+      }
+
+      .language-name {
+        font-weight: 500;
+        flex: 1;
+      }
+
+      .language-native {
+        font-size: 12px;
+        color: #666;
+      }
+    `,
+  ],
+})
+export class SettingsRadioComponent {
+  theme = "light";
+  notifications = "important";
+  language = "en";
+
+  themeOptions = [
+    {
+      value: "light",
+      name: "Light Theme",
+      description: "Clean and bright interface",
+      preview: "linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)",
+    },
+    {
+      value: "dark",
+      name: "Dark Theme",
+      description: "Easy on the eyes",
+      preview: "linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)",
+    },
+    {
+      value: "blue",
+      name: "Blue Theme",
+      description: "Professional blue accent",
+      preview: "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
+    },
+  ];
+
+  languages = [
+    { code: "en", name: "English", nativeName: "English", flag: "🇺🇸" },
+    { code: "es", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
+    { code: "fr", name: "French", nativeName: "Français", flag: "🇫🇷" },
+    { code: "de", name: "German", nativeName: "Deutsch", flag: "🇩🇪" },
+    { code: "ja", name: "Japanese", nativeName: "日本語", flag: "🇯🇵" },
+  ];
+}
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Radio Group → Individual Buttons**: The `MatRadioGroup` manages the selection state and ensures only one radio button can be selected at a time
+2. **Individual Buttons → Radio Group**: When a radio button is clicked, it notifies the radio group to update the selection state
+3. **Radio Group → Form**: The radio group provides form control interface for integration with reactive forms and template-driven forms
+4. **Selection Events**: Selection changes bubble up from individual buttons through the radio group to parent components
+
+### Context Sharing
+
+- **Selection Context**: `MatRadioGroup` maintains the current selection state and ensures mutual exclusivity among child radio buttons
+- **Form Context**: Radio group provides form control interface and validation state management
+- **Accessibility Context**: Radio group manages ARIA attributes, focus management, and keyboard navigation for all child buttons
+- **Styling Context**: Radio group can provide consistent styling properties (color, label position) to all child radio buttons
+
+### Event Handling
+
+- **Selection Management**: Radio group coordinates selection changes and ensures only one option can be selected
+- **Keyboard Navigation**: Arrow keys navigate between radio buttons, Space/Enter select options
+- **Form Integration**: Selection changes trigger form validation and update form control values
+- **Change Events**: Radio group emits change events that include both the selected radio button and its value
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for mutually exclusive choices**: Radio groups are specifically designed for selecting exactly one option from multiple choices
+- **Limit options to 2-7 items**: For more than 7 options, consider using a select dropdown instead
+- **Provide clear, concise labels**: Each radio button should have descriptive text that clearly indicates what the option represents
+- **Set sensible defaults**: When possible, pre-select the most common or recommended option
+- **Group related options logically**: Organize radio buttons in a logical order (alphabetical, by priority, or by frequency of use)
+- **Use consistent layout**: Maintain consistent spacing and alignment across all radio groups in your application
+
+### Accessibility
+
+- **ARIA radiogroup**: Radio groups automatically provide proper ARIA radiogroup role and radio roles for screen readers
+- **Keyboard navigation**: Supports arrow key navigation between options and Space/Enter for selection
+- **Screen reader support**: Properly announces group labels, individual option labels, and selection state
+- **Focus management**: Maintains proper focus indicators and manages focus when navigating between options
+- **Label association**: Ensures proper association between radio buttons and their labels for accessibility
+
+### Performance
+
+- **Form optimization**: Use reactive forms with radio groups to leverage Angular's change detection optimizations
+- **State management**: Implement efficient state management for large forms with multiple radio groups
+- **Event handling**: Use appropriate change detection strategies to minimize unnecessary re-renders
+- **Bundle optimization**: Import only the radio module to minimize bundle size
+- **Memory management**: Properly unsubscribe from form value changes in component lifecycle
+
+## Common Patterns
+
+### Pattern 1: Multi-Step Form with Radio Selections
+
+```typescript
+@Component({
+  template: `
+    <div class="multi-step-form">
+      <div class="step-indicator">
+        <div
+          *ngFor="let step of steps; let i = index"
+          class="step"
+          [class.active]="currentStep === i"
+          [class.completed]="currentStep > i"
+        >
+          {{ i + 1 }}. {{ step.title }}
+        </div>
+      </div>
+
+      <form [formGroup]="registrationForm">
+        <!-- Step 1: Account Type -->
+        <div class="form-step" *ngIf="currentStep === 0">
+          <h2>Choose Account Type</h2>
+          <mat-radio-group formControlName="accountType" class="account-types">
+            <mat-radio-button value="personal">
+              <div class="account-choice">
+                <mat-icon>person</mat-icon>
+                <div>
+                  <strong>Personal Account</strong>
+                  <p>For individual use</p>
+                </div>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="business">
+              <div class="account-choice">
+                <mat-icon>business</mat-icon>
+                <div>
+                  <strong>Business Account</strong>
+                  <p>For companies and organizations</p>
+                </div>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Step 2: Plan Selection -->
+        <div class="form-step" *ngIf="currentStep === 1">
+          <h2>Select Your Plan</h2>
+          <mat-radio-group formControlName="plan" class="plan-selection">
+            <mat-radio-button
+              *ngFor="let plan of getAvailablePlans()"
+              [value]="plan.id"
+            >
+              <div class="plan-card">
+                <h3>{{ plan.name }}</h3>
+                <div class="plan-price">{{ plan.price }}</div>
+                <ul class="plan-features">
+                  <li *ngFor="let feature of plan.features">{{ feature }}</li>
+                </ul>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Step 3: Preferences -->
+        <div class="form-step" *ngIf="currentStep === 2">
+          <h2>Set Your Preferences</h2>
+
+          <div class="preference-section">
+            <h3>Email Notifications</h3>
+            <mat-radio-group formControlName="emailNotifications">
+              <mat-radio-button value="all">All notifications</mat-radio-button>
+              <mat-radio-button value="important"
+                >Important only</mat-radio-button
+              >
+              <mat-radio-button value="none">No emails</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div class="preference-section">
+            <h3>Data Privacy</h3>
+            <mat-radio-group formControlName="dataPrivacy">
+              <mat-radio-button value="standard"
+                >Standard privacy</mat-radio-button
+              >
+              <mat-radio-button value="enhanced"
+                >Enhanced privacy</mat-radio-button
+              >
+            </mat-radio-group>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="form-navigation">
+          <button
+            type="button"
+            mat-button="outlined"
+            (click)="previousStep()"
+            [disabled]="currentStep === 0"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            mat-button="filled"
+            (click)="nextStep()"
+            [disabled]="!canProceed()"
+          >
+            {{ currentStep === steps.length - 1 ? "Complete" : "Next" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .multi-step-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        padding: 0 16px;
+      }
+
+      .step {
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: #e0e0e0;
+        color: #666;
+        font-size: 14px;
+        font-weight: 500;
+        flex: 1;
+        text-align: center;
+        margin: 0 4px;
+      }
+
+      .step.active {
+        background: #2196f3;
+        color: white;
+      }
+
+      .step.completed {
+        background: #4caf50;
+        color: white;
+      }
+
+      .form-step {
+        min-height: 400px;
+        margin-bottom: 24px;
+      }
+
+      .account-types {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .account-choice {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: 8px;
+      }
+
+      .plan-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .plan-card {
+        padding: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .plan-card h3 {
+        margin: 0 0 8px 0;
+        color: #333;
+      }
+
+      .plan-price {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2196f3;
+        margin-bottom: 12px;
+      }
+
+      .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+      }
+
+      .plan-features li {
+        padding: 4px 0;
+        font-size: 14px;
+      }
+
+      .preference-section {
+        margin-bottom: 24px;
+      }
+
+      .preference-section h3 {
+        margin-bottom: 12px;
+        color: #333;
+      }
+
+      .preference-section mat-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-navigation {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+    `,
+  ],
+})
+export class MultiStepRadioFormComponent {
+  currentStep = 0;
+
+  steps = [
+    { title: "Account Type" },
+    { title: "Plan Selection" },
+    { title: "Preferences" },
+  ];
+
+  registrationForm = new FormGroup({
+    accountType: new FormControl("", [Validators.required]),
+    plan: new FormControl("", [Validators.required]),
+    emailNotifications: new FormControl("important"),
+    dataPrivacy: new FormControl("standard"),
+  });
+
+  personalPlans = [
+    {
+      id: "basic",
+      name: "Basic",
+      price: "Free",
+      features: ["5 projects", "Basic support", "1GB storage"],
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      price: "$9/month",
+      features: ["Unlimited projects", "Priority support", "10GB storage"],
+    },
+  ];
+
+  businessPlans = [
+    {
+      id: "team",
+      name: "Team",
+      price: "$19/month",
+      features: ["Team collaboration", "Advanced features", "50GB storage"],
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: "Custom",
+      features: ["Custom solutions", "Dedicated support", "Unlimited storage"],
+    },
+  ];
+
+  getAvailablePlans() {
+    const accountType = this.registrationForm.get("accountType")?.value;
+    return accountType === "personal" ? this.personalPlans : this.businessPlans;
+  }
+
+  canProceed(): boolean {
+    const currentStepValid = this.getCurrentStepControls().every(
+      (control) => this.registrationForm.get(control)?.valid,
+    );
+    return currentStepValid;
+  }
+
+  getCurrentStepControls(): string[] {
+    const stepControls = [
+      ["accountType"],
+      ["plan"],
+      ["emailNotifications", "dataPrivacy"],
+    ];
+    return stepControls[this.currentStep];
+  }
+
+  nextStep(): void {
+    if (this.canProceed()) {
+      if (this.currentStep < this.steps.length - 1) {
+        this.currentStep++;
+        // Reset plan selection when switching account types
+        if (this.currentStep === 1) {
+          this.registrationForm.get("plan")?.setValue("");
+        }
+      } else {
+        this.submitForm();
+      }
+    }
+  }
+
+  previousStep(): void {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+    }
+  }
+
+  submitForm(): void {
+    if (this.registrationForm.valid) {
+      console.log("Registration completed:", this.registrationForm.value);
+      // Handle form submission
+    }
+  }
+}
+```
+
+### Pattern 2: Dynamic Configuration Interface
+
+```typescript
+@Component({
+  template: `
+    <div class="configuration-interface">
+      <h2>System Configuration</h2>
+
+      <div class="config-sections">
+        <!-- Database Configuration -->
+        <div class="config-section">
+          <h3>Database Configuration</h3>
+          <mat-radio-group
+            [(value)]="config.database.type"
+            (change)="onDatabaseTypeChange($event)"
+          >
+            <mat-radio-button
+              *ngFor="let db of databaseTypes"
+              [value]="db.type"
+            >
+              <div class="config-option">
+                <mat-icon>{{ db.icon }}</mat-icon>
+                <div class="option-info">
+                  <strong>{{ db.name }}</strong>
+                  <p>{{ db.description }}</p>
+                  <div class="option-specs">
+                    <span *ngFor="let spec of db.specs" class="spec-badge">
+                      {{ spec }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+
+          <!-- Database-specific options -->
+          <div class="sub-options" *ngIf="config.database.type">
+            <h4>{{ getSelectedDatabase()?.name }} Options</h4>
+            <mat-radio-group
+              [(value)]="config.database.mode"
+              class="sub-option-group"
+            >
+              <mat-radio-button
+                *ngFor="let mode of getDatabaseModes()"
+                [value]="mode.value"
+              >
+                <div class="sub-option">
+                  <strong>{{ mode.name }}</strong>
+                  <p>{{ mode.description }}</p>
+                </div>
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+
+        <!-- Storage Configuration -->
+        <div class="config-section">
+          <h3>Storage Configuration</h3>
+          <mat-radio-group
+            [(value)]="config.storage.provider"
+            class="storage-group"
+          >
+            <mat-radio-button
+              *ngFor="let storage of storageProviders"
+              [value]="storage.id"
+            >
+              <div class="storage-option">
+                <div class="storage-header">
+                  <mat-icon>{{ storage.icon }}</mat-icon>
+                  <strong>{{ storage.name }}</strong>
+                  <span class="storage-price">{{ storage.pricing }}</span>
+                </div>
+                <p class="storage-description">{{ storage.description }}</p>
+                <div class="storage-features">
+                  <span
+                    *ngFor="let feature of storage.features"
+                    class="feature-tag"
+                  >
+                    {{ feature }}
+                  </span>
+                </div>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Deployment Environment -->
+        <div class="config-section">
+          <h3>Deployment Environment</h3>
+          <mat-radio-group
+            [(value)]="config.environment.type"
+            class="environment-group"
+          >
+            <mat-radio-button
+              *ngFor="let env of environments"
+              [value]="env.type"
+              [disabled]="!env.available"
+            >
+              <div class="environment-option">
+                <div class="env-header">
+                  <mat-icon [style.color]="env.color">{{ env.icon }}</mat-icon>
+                  <div class="env-info">
+                    <strong>{{ env.name }}</strong>
+                    <span
+                      class="env-status"
+                      [class]="env.available ? 'available' : 'unavailable'"
+                    >
+                      {{ env.available ? "Available" : "Coming Soon" }}
+                    </span>
+                  </div>
+                </div>
+                <p>{{ env.description }}</p>
+                <div class="env-specs">
+                  <div class="spec-item">
+                    <mat-icon>memory</mat-icon>
+                    <span>{{ env.specs.cpu }}</span>
+                  </div>
+                  <div class="spec-item">
+                    <mat-icon>storage</mat-icon>
+                    <span>{{ env.specs.memory }}</span>
+                  </div>
+                  <div class="spec-item">
+                    <mat-icon>language</mat-icon>
+                    <span>{{ env.specs.network }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Configuration Summary -->
+      <div class="config-summary">
+        <h3>Configuration Summary</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <strong>Database:</strong>
+            <span>{{ getSelectedDatabase()?.name || "Not selected" }}</span>
+          </div>
+          <div class="summary-item">
+            <strong>Storage:</strong>
+            <span>{{ getSelectedStorage()?.name || "Not selected" }}</span>
+          </div>
+          <div class="summary-item">
+            <strong>Environment:</strong>
+            <span>{{ getSelectedEnvironment()?.name || "Not selected" }}</span>
+          </div>
+          <div class="summary-item">
+            <strong>Estimated Cost:</strong>
+            <span class="cost-estimate">{{ calculateEstimatedCost() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="config-actions">
+        <button
+          type="button"
+          mat-button="outlined"
+          (click)="resetConfiguration()"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          mat-button="filled"
+          (click)="saveConfiguration()"
+          [disabled]="!isConfigurationComplete()"
+        >
+          Save Configuration
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .configuration-interface {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .config-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        margin-bottom: 32px;
+      }
+
+      .config-section {
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+
+      .config-section h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .config-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-left: 8px;
+        padding: 12px 0;
+      }
+
+      .option-info {
+        flex: 1;
+      }
+
+      .option-info strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #333;
+      }
+
+      .option-info p {
+        font-size: 13px;
+        color: #666;
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+      }
+
+      .option-specs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .spec-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .sub-options {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .sub-options h4 {
+        margin: 0 0 12px 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .sub-option-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .sub-option {
+        margin-left: 8px;
+      }
+
+      .sub-option strong {
+        display: block;
+        color: #333;
+      }
+
+      .sub-option p {
+        font-size: 12px;
+        color: #666;
+        margin: 2px 0 0 0;
+      }
+
+      .storage-group {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .storage-option {
+        margin-left: 8px;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: white;
+      }
+
+      .storage-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .storage-header strong {
+        flex: 1;
+        color: #333;
+      }
+
+      .storage-price {
+        font-weight: bold;
+        color: #2196f3;
+        font-size: 14px;
+      }
+
+      .storage-description {
+        font-size: 13px;
+        color: #666;
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+      }
+
+      .storage-features {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .feature-tag {
+        background: #f0f0f0;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 10px;
+        color: #666;
+      }
+
+      .environment-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .environment-option {
+        margin-left: 8px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .env-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .env-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .env-info strong {
+        color: #333;
+        line-height: 1.2;
+      }
+
+      .env-status {
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .env-status.available {
+        color: #4caf50;
+      }
+
+      .env-status.unavailable {
+        color: #ff9800;
+      }
+
+      .environment-option p {
+        font-size: 13px;
+        color: #666;
+        margin: 0 0 12px 0;
+        line-height: 1.4;
+      }
+
+      .env-specs {
+        display: flex;
+        gap: 12px;
+      }
+
+      .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .spec-item mat-icon {
+        font-size: 14px;
+      }
+
+      .config-summary {
+        background: #f5f5f5;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+
+      .config-summary h3 {
+        margin: 0 0 12px 0;
+        color: #333;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .summary-item:last-child {
+        border-bottom: none;
+      }
+
+      .cost-estimate {
+        font-weight: bold;
+        color: #2196f3;
+      }
+
+      .config-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      @media (max-width: 768px) {
+        .environment-group {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .config-actions {
+          flex-direction: column-reverse;
+        }
+      }
+    `,
+  ],
+})
+export class ConfigurationRadioComponent {
+  config = {
+    database: { type: "", mode: "" },
+    storage: { provider: "" },
+    environment: { type: "" },
+  };
+
+  databaseTypes = [
+    {
+      type: "postgresql",
+      name: "PostgreSQL",
+      description: "Powerful, open source object-relational database",
+      icon: "storage",
+      specs: ["ACID compliant", "JSON support", "Full-text search"],
+    },
+    {
+      type: "mysql",
+      name: "MySQL",
+      description: "World's most popular open source database",
+      icon: "dns",
+      specs: ["High performance", "Replication", "Clustering"],
+    },
+    {
+      type: "mongodb",
+      name: "MongoDB",
+      description: "Document-oriented NoSQL database",
+      icon: "description",
+      specs: ["Flexible schema", "Horizontal scaling", "Rich queries"],
+    },
+  ];
+
+  storageProviders = [
+    {
+      id: "aws-s3",
+      name: "Amazon S3",
+      description: "Secure, durable, highly-scalable object storage",
+      icon: "cloud",
+      pricing: "$0.023/GB",
+      features: [
+        "99.999999999% durability",
+        "Global infrastructure",
+        "Lifecycle policies",
+      ],
+    },
+    {
+      id: "gcp-storage",
+      name: "Google Cloud Storage",
+      description: "Unified object storage for developers and enterprises",
+      icon: "cloud_queue",
+      pricing: "$0.020/GB",
+      features: ["Multi-regional", "Auto-scaling", "Strong consistency"],
+    },
+    {
+      id: "local",
+      name: "Local Storage",
+      description: "Store files on local server infrastructure",
+      icon: "folder",
+      pricing: "Free",
+      features: ["Full control", "No bandwidth costs", "Private"],
+    },
+  ];
+
+  environments = [
+    {
+      type: "development",
+      name: "Development",
+      description: "For development and testing purposes",
+      icon: "code",
+      color: "#4caf50",
+      available: true,
+      specs: { cpu: "2 vCPU", memory: "4GB RAM", network: "100GB bandwidth" },
+    },
+    {
+      type: "staging",
+      name: "Staging",
+      description: "Pre-production environment for final testing",
+      icon: "preview",
+      color: "#ff9800",
+      available: true,
+      specs: { cpu: "4 vCPU", memory: "8GB RAM", network: "500GB bandwidth" },
+    },
+    {
+      type: "production",
+      name: "Production",
+      description: "Live production environment",
+      icon: "rocket_launch",
+      color: "#f44336",
+      available: true,
+      specs: { cpu: "8 vCPU", memory: "16GB RAM", network: "Unlimited" },
+    },
+    {
+      type: "enterprise",
+      name: "Enterprise",
+      description: "Enterprise-grade infrastructure with SLA",
+      icon: "business_center",
+      color: "#9c27b0",
+      available: false,
+      specs: { cpu: "16+ vCPU", memory: "32+ GB RAM", network: "Dedicated" },
+    },
+  ];
+
+  onDatabaseTypeChange(event: any): void {
+    this.config.database.mode = ""; // Reset mode when database type changes
+  }
+
+  getDatabaseModes() {
+    const dbType = this.config.database.type;
+    const modes = {
+      postgresql: [
+        {
+          value: "single",
+          name: "Single Instance",
+          description: "Single database instance",
+        },
+        {
+          value: "replica",
+          name: "Master-Replica",
+          description: "Master with read replicas",
+        },
+        {
+          value: "cluster",
+          name: "Cluster",
+          description: "High availability cluster",
+        },
+      ],
+      mysql: [
+        {
+          value: "single",
+          name: "Single Instance",
+          description: "Single database instance",
+        },
+        {
+          value: "replication",
+          name: "Replication",
+          description: "Master-slave replication",
+        },
+        {
+          value: "galera",
+          name: "Galera Cluster",
+          description: "Multi-master cluster",
+        },
+      ],
+      mongodb: [
+        {
+          value: "standalone",
+          name: "Standalone",
+          description: "Single MongoDB instance",
+        },
+        {
+          value: "replica-set",
+          name: "Replica Set",
+          description: "High availability replica set",
+        },
+        {
+          value: "sharded",
+          name: "Sharded Cluster",
+          description: "Horizontally scaled sharded cluster",
+        },
+      ],
+    };
+    return modes[dbType as keyof typeof modes] || [];
+  }
+
+  getSelectedDatabase() {
+    return this.databaseTypes.find(
+      (db) => db.type === this.config.database.type,
+    );
+  }
+
+  getSelectedStorage() {
+    return this.storageProviders.find(
+      (storage) => storage.id === this.config.storage.provider,
+    );
+  }
+
+  getSelectedEnvironment() {
+    return this.environments.find(
+      (env) => env.type === this.config.environment.type,
+    );
+  }
+
+  calculateEstimatedCost(): string {
+    // Simplified cost calculation
+    const storage = this.getSelectedStorage();
+    const environment = this.getSelectedEnvironment();
+
+    if (!storage || !environment) return "Configure all options";
+
+    let baseCost = 0;
+
+    // Environment costs (simplified)
+    const envCosts = {
+      development: 50,
+      staging: 150,
+      production: 500,
+      enterprise: 2000,
+    };
+    baseCost += envCosts[environment.type as keyof typeof envCosts];
+
+    // Storage costs (assuming 100GB)
+    if (storage.pricing !== "Free") {
+      const storageRate = parseFloat(storage.pricing.replace(/[^0-9.]/g, ""));
+      baseCost += storageRate * 100; // 100GB assumption
+    }
+
+    return `$${baseCost}/month`;
+  }
+
+  isConfigurationComplete(): boolean {
+    return !!(
+      this.config.database.type &&
+      this.config.storage.provider &&
+      this.config.environment.type
+    );
+  }
+
+  resetConfiguration(): void {
+    this.config = {
+      database: { type: "", mode: "" },
+      storage: { provider: "" },
+      environment: { type: "" },
+    };
+  }
+
+  saveConfiguration(): void {
+    if (this.isConfigurationComplete()) {
+      console.log("Configuration saved:", this.config);
+      // Implement configuration save logic
+    }
+  }
+}
+```

@@ -1,0 +1,1428 @@
+---
+title: ProgressBar Components
+---
+
+# ProgressBar Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate progress bar functionality. The ProgressBar component provides Material Design styled linear progress indicators that communicate the status of ongoing processes, data loading states, and task completion to users. It follows Material Design 3 specifications for progress indicators, offering multiple modes for different use cases, proper accessibility features, and smooth animation transitions.
+
+### When to Use
+
+- **Data Loading States**: When displaying the progress of data fetching, file uploads, or content loading operations
+- **Multi-Step Processes**: For indicating progress through multi-step workflows, wizards, or installation processes
+- **Background Operations**: When showing the status of background tasks like sync operations, exports, or batch processing
+- **Form Submission Progress**: During lengthy form submission or validation processes
+- **Download/Upload Progress**: For file transfer operations where users need visual feedback on completion status
+- **Indeterminate Loading**: When the exact progress is unknown but the system is actively working (using indeterminate mode)
+- **Buffer States**: For media streaming or progressive downloads where buffer status needs to be shown
+- **Query Operations**: For search operations or database queries where processing time is variable
+- **Accessibility-First Feedback**: When providing screen-reader compatible progress information with proper ARIA attributes
+
+### Architecture
+
+**No Coupling**: The ProgressBar component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete progress indicator implementation with multiple modes and animation support
+- **Flexible integration**: Can be used anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and functionality regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system
+- **Animation support**: Built-in smooth transitions and animations that can be configured or disabled
+
+## Components
+
+### MatProgressBar {Standalone Component}
+
+A versatile progress bar component that provides Material Design styling with multiple operation modes, smooth animations, and comprehensive accessibility support for various progress indication scenarios.
+
+**Purpose:** Creates linear progress indicators with Material Design styling, supporting determinate and indeterminate progress states, buffer visualization, and proper accessibility features for communicating task progress to users.
+
+**Interface:**
+
+```typescript
+interface MatProgressBarProps {
+  // Visual Appearance
+  color?: string | null; // Theme color (M2 themes only, deprecated in M3)
+
+  // Progress Values
+  value?: number; // Progress value (0-100), defaults to 0, mirrored to aria-valuenow
+  bufferValue?: number; // Buffer value (0-100), defaults to 0, used in buffer mode
+
+  // Operation Modes
+  mode?: ProgressBarMode; // Progress bar mode: 'determinate' | 'indeterminate' | 'buffer' | 'query'
+
+  // Events
+  animationEnd?: EventEmitter<ProgressAnimationEnd>; // Emitted when primary progress bar animation completes
+}
+
+// Supporting Types
+type ProgressBarMode = "determinate" | "indeterminate" | "buffer" | "query";
+
+interface ProgressAnimationEnd {
+  value: number; // Final value when animation completes
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-progress-examples",
+  template: `
+    <!-- Determinate progress bar with specific value -->
+    <mat-progress-bar mode="determinate" [value]="progressValue">
+    </mat-progress-bar>
+
+    <!-- Indeterminate progress bar for unknown duration -->
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+
+    <!-- Buffer progress bar for streaming content -->
+    <mat-progress-bar
+      mode="buffer"
+      [value]="loadedValue"
+      [bufferValue]="bufferedValue"
+    >
+    </mat-progress-bar>
+
+    <!-- Query progress bar for search operations -->
+    <mat-progress-bar mode="query"></mat-progress-bar>
+
+    <!-- Progress bar with animation end event -->
+    <mat-progress-bar
+      mode="determinate"
+      [value]="animatedValue"
+      (animationEnd)="onAnimationComplete($event)"
+    >
+    </mat-progress-bar>
+
+    <!-- Progress bar with accessibility labels -->
+    <div class="progress-container">
+      <label id="progress-label">File Upload Progress</label>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="uploadProgress"
+        [attr.aria-labelledby]="'progress-label'"
+        [attr.aria-describedby]="'progress-description'"
+      >
+      </mat-progress-bar>
+      <div id="progress-description">{{ uploadProgress }}% complete</div>
+    </div>
+  `,
+  imports: [MatProgressBarModule],
+})
+export class ProgressExamplesComponent {
+  progressValue = 45;
+  loadedValue = 35;
+  bufferedValue = 65;
+  animatedValue = 80;
+  uploadProgress = 25;
+
+  onAnimationComplete(event: { value: number }): void {
+    console.log("Progress animation completed at value:", event.value);
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Progress Indicators
+
+```typescript
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { Component } from "@angular/core";
+
+@Component({
+  selector: "app-basic-progress",
+  template: `
+    <div class="progress-examples">
+      <div class="progress-item">
+        <h3>Determinate Progress</h3>
+        <p>Use when you know the exact progress percentage</p>
+        <mat-progress-bar mode="determinate" [value]="75"></mat-progress-bar>
+        <span class="progress-text">75% Complete</span>
+      </div>
+
+      <div class="progress-item">
+        <h3>Indeterminate Progress</h3>
+        <p>Use when progress duration is unknown</p>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <span class="progress-text">Processing...</span>
+      </div>
+
+      <div class="progress-item">
+        <h3>Buffer Progress</h3>
+        <p>Use for streaming or progressive loading</p>
+        <mat-progress-bar mode="buffer" [value]="40" [bufferValue]="70">
+        </mat-progress-bar>
+        <span class="progress-text">Loaded: 40%, Buffered: 70%</span>
+      </div>
+
+      <div class="progress-item">
+        <h3>Query Progress</h3>
+        <p>Use for search or database operations</p>
+        <mat-progress-bar mode="query"></mat-progress-bar>
+        <span class="progress-text">Searching...</span>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .progress-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .progress-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .progress-item h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .progress-item p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: #888;
+        margin-top: 4px;
+      }
+
+      mat-progress-bar {
+        margin: 8px 0;
+      }
+    `,
+  ],
+  imports: [MatProgressBarModule],
+})
+export class BasicProgressComponent {}
+```
+
+### Advanced Progress Implementation
+
+```typescript
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { interval, Subscription } from "rxjs";
+
+@Component({
+  selector: "app-advanced-progress",
+  template: `
+    <div class="advanced-progress-examples">
+      <!-- File Upload Simulation -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>File Upload Progress</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="upload-status">
+            <mat-icon>{{ getUploadIcon() }}</mat-icon>
+            <span>{{ getUploadStatusText() }}</span>
+          </div>
+
+          <mat-progress-bar
+            mode="determinate"
+            [value]="uploadProgress"
+            [class.complete]="uploadProgress >= 100"
+            (animationEnd)="onUploadAnimationEnd($event)"
+          >
+          </mat-progress-bar>
+
+          <div class="progress-details">
+            <span>{{ uploadProgress.toFixed(1) }}% complete</span>
+            <span>{{ getUploadTimeRemaining() }}</span>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="startUpload()" [disabled]="isUploading">
+            {{ isUploading ? "Uploading..." : "Start Upload" }}
+          </button>
+          <button
+            mat-button
+            (click)="cancelUpload()"
+            [disabled]="!isUploading || uploadProgress >= 100"
+          >
+            Cancel
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Multi-Step Process -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>Installation Progress</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="step-progress">
+            <div class="step-info">
+              <span class="step-label">{{ getCurrentStepLabel() }}</span>
+              <span class="step-counter"
+                >Step {{ currentStep }} of {{ totalSteps }}</span
+              >
+            </div>
+
+            <mat-progress-bar
+              mode="determinate"
+              [value]="getOverallProgress()"
+              [class.installing]="isInstalling"
+            >
+            </mat-progress-bar>
+
+            <div class="step-details">
+              <div class="current-step-progress">
+                <span>{{ getCurrentStepLabel() }}</span>
+                <mat-progress-bar
+                  mode="indeterminate"
+                  *ngIf="isInstalling && currentStepProgress < 100"
+                >
+                </mat-progress-bar>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="currentStepProgress"
+                  *ngIf="!isInstalling || currentStepProgress >= 100"
+                >
+                </mat-progress-bar>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button
+            mat-button
+            (click)="startInstallation()"
+            [disabled]="isInstalling"
+          >
+            Start Installation
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Data Loading with Buffer -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>Streaming Data Load</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stream-status">
+            <mat-icon>cloud_download</mat-icon>
+            <span>{{ getStreamStatusText() }}</span>
+          </div>
+
+          <mat-progress-bar
+            mode="buffer"
+            [value]="streamProgress"
+            [bufferValue]="bufferProgress"
+            [class.streaming]="isStreaming"
+          >
+          </mat-progress-bar>
+
+          <div class="stream-details">
+            <div class="stream-stat">
+              <span class="label">Downloaded:</span>
+              <span class="value">{{ streamProgress.toFixed(1) }}%</span>
+            </div>
+            <div class="stream-stat">
+              <span class="label">Buffered:</span>
+              <span class="value">{{ bufferProgress.toFixed(1) }}%</span>
+            </div>
+            <div class="stream-stat">
+              <span class="label">Speed:</span>
+              <span class="value">{{ getDownloadSpeed() }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="startStream()" [disabled]="isStreaming">
+            Start Download
+          </button>
+          <button mat-button (click)="pauseStream()" [disabled]="!isStreaming">
+            {{ isStreamPaused ? "Resume" : "Pause" }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Search Progress -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>Database Search</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="search-status">
+            <mat-icon>search</mat-icon>
+            <span>{{ getSearchStatusText() }}</span>
+          </div>
+
+          <mat-progress-bar mode="query" *ngIf="isSearching">
+          </mat-progress-bar>
+
+          <mat-progress-bar
+            mode="determinate"
+            [value]="100"
+            *ngIf="searchCompleted"
+            class="complete"
+          >
+          </mat-progress-bar>
+
+          <div class="search-details" *ngIf="searchResults !== null">
+            <span
+              >Found {{ searchResults }} results in {{ searchDuration }}ms</span
+            >
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="startSearch()" [disabled]="isSearching">
+            Search Database
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-progress-examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        padding: 16px;
+      }
+
+      .progress-card {
+        height: fit-content;
+      }
+
+      .upload-status,
+      .stream-status,
+      .search-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-weight: 500;
+      }
+
+      .progress-details,
+      .stream-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #666;
+        margin-top: 8px;
+      }
+
+      .step-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .step-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .step-label {
+        font-weight: 500;
+      }
+
+      .step-counter {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .current-step-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      .current-step-progress span {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .stream-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .stream-stat {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .stream-stat .label {
+        color: #666;
+      }
+
+      .stream-stat .value {
+        font-weight: 500;
+      }
+
+      .search-details {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      /* Progress bar state styles */
+      mat-progress-bar.complete {
+        --mat-progress-bar-color: #4caf50;
+      }
+
+      mat-progress-bar.installing {
+        --mat-progress-bar-color: #2196f3;
+      }
+
+      mat-progress-bar.streaming {
+        --mat-progress-bar-color: #ff9800;
+      }
+
+      @media (max-width: 768px) {
+        .advanced-progress-examples {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatProgressBarModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+  ],
+})
+export class AdvancedProgressComponent implements OnInit, OnDestroy {
+  // Upload progress state
+  uploadProgress = 0;
+  isUploading = false;
+  uploadStartTime = 0;
+
+  // Installation progress state
+  currentStep = 1;
+  totalSteps = 4;
+  currentStepProgress = 0;
+  isInstalling = false;
+
+  // Stream progress state
+  streamProgress = 0;
+  bufferProgress = 0;
+  isStreaming = false;
+  isStreamPaused = false;
+  streamStartTime = 0;
+
+  // Search progress state
+  isSearching = false;
+  searchCompleted = false;
+  searchResults: number | null = null;
+  searchDuration = 0;
+
+  private subscriptions: Subscription[] = [];
+
+  ngOnInit(): void {
+    // Initialize any required observables
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  // Upload methods
+  startUpload(): void {
+    this.isUploading = true;
+    this.uploadProgress = 0;
+    this.uploadStartTime = Date.now();
+
+    const uploadInterval = interval(100).subscribe(() => {
+      this.uploadProgress += Math.random() * 2;
+      if (this.uploadProgress >= 100) {
+        this.uploadProgress = 100;
+        this.isUploading = false;
+        uploadInterval.unsubscribe();
+      }
+    });
+
+    this.subscriptions.push(uploadInterval);
+  }
+
+  cancelUpload(): void {
+    this.isUploading = false;
+    this.uploadProgress = 0;
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  onUploadAnimationEnd(event: { value: number }): void {
+    if (event.value >= 100) {
+      console.log("Upload completed successfully!");
+    }
+  }
+
+  getUploadIcon(): string {
+    if (this.uploadProgress >= 100) return "check_circle";
+    if (this.isUploading) return "cloud_upload";
+    return "cloud_upload";
+  }
+
+  getUploadStatusText(): string {
+    if (this.uploadProgress >= 100) return "Upload Complete";
+    if (this.isUploading) return "Uploading...";
+    return "Ready to Upload";
+  }
+
+  getUploadTimeRemaining(): string {
+    if (!this.isUploading || this.uploadProgress <= 0) return "";
+
+    const elapsed = Date.now() - this.uploadStartTime;
+    const rate = this.uploadProgress / elapsed;
+    const remaining = (100 - this.uploadProgress) / rate;
+
+    return `${Math.ceil(remaining / 1000)}s remaining`;
+  }
+
+  // Installation methods
+  startInstallation(): void {
+    this.isInstalling = true;
+    this.currentStep = 1;
+    this.currentStepProgress = 0;
+
+    this.runInstallationStep();
+  }
+
+  private runInstallationStep(): void {
+    const stepInterval = interval(50).subscribe(() => {
+      this.currentStepProgress += Math.random() * 3;
+
+      if (this.currentStepProgress >= 100) {
+        this.currentStepProgress = 100;
+
+        setTimeout(() => {
+          if (this.currentStep < this.totalSteps) {
+            this.currentStep++;
+            this.currentStepProgress = 0;
+            stepInterval.unsubscribe();
+            this.runInstallationStep();
+          } else {
+            this.isInstalling = false;
+            stepInterval.unsubscribe();
+          }
+        }, 500);
+      }
+    });
+
+    this.subscriptions.push(stepInterval);
+  }
+
+  getCurrentStepLabel(): string {
+    const labels = [
+      "Downloading packages...",
+      "Installing dependencies...",
+      "Configuring settings...",
+      "Finalizing installation...",
+    ];
+    return labels[this.currentStep - 1] || "";
+  }
+
+  getOverallProgress(): number {
+    const stepProgress = ((this.currentStep - 1) / this.totalSteps) * 100;
+    const currentStepContribution =
+      (this.currentStepProgress / 100) * (100 / this.totalSteps);
+    return Math.min(stepProgress + currentStepContribution, 100);
+  }
+
+  // Stream methods
+  startStream(): void {
+    this.isStreaming = true;
+    this.isStreamPaused = false;
+    this.streamProgress = 0;
+    this.bufferProgress = 0;
+    this.streamStartTime = Date.now();
+
+    const streamInterval = interval(100).subscribe(() => {
+      if (!this.isStreamPaused) {
+        // Buffer progresses faster than actual download
+        this.bufferProgress += Math.random() * 1.5;
+        this.streamProgress += Math.random() * 1;
+
+        // Keep buffer ahead of stream
+        if (this.bufferProgress <= this.streamProgress) {
+          this.bufferProgress = this.streamProgress + Math.random() * 10;
+        }
+
+        // Cap at 100%
+        this.bufferProgress = Math.min(this.bufferProgress, 100);
+        this.streamProgress = Math.min(this.streamProgress, 100);
+
+        if (this.streamProgress >= 100) {
+          this.isStreaming = false;
+          streamInterval.unsubscribe();
+        }
+      }
+    });
+
+    this.subscriptions.push(streamInterval);
+  }
+
+  pauseStream(): void {
+    this.isStreamPaused = !this.isStreamPaused;
+  }
+
+  getStreamStatusText(): string {
+    if (this.streamProgress >= 100) return "Download Complete";
+    if (this.isStreamPaused) return "Download Paused";
+    if (this.isStreaming) return "Downloading...";
+    return "Ready to Download";
+  }
+
+  getDownloadSpeed(): string {
+    if (!this.isStreaming) return "0 KB/s";
+
+    const elapsed = Date.now() - this.streamStartTime;
+    const speed = (this.streamProgress / elapsed) * 1000 * 10; // Simulated KB/s
+    return `${speed.toFixed(0)} KB/s`;
+  }
+
+  // Search methods
+  startSearch(): void {
+    this.isSearching = true;
+    this.searchCompleted = false;
+    this.searchResults = null;
+
+    const searchDuration = 2000 + Math.random() * 3000; // 2-5 seconds
+
+    setTimeout(() => {
+      this.isSearching = false;
+      this.searchCompleted = true;
+      this.searchResults = Math.floor(Math.random() * 1000);
+      this.searchDuration = searchDuration;
+    }, searchDuration);
+  }
+
+  getSearchStatusText(): string {
+    if (this.searchCompleted) return "Search Complete";
+    if (this.isSearching) return "Searching database...";
+    return "Ready to Search";
+  }
+}
+```
+
+### Common Variations
+
+#### Responsive Progress Layouts
+
+```typescript
+@Component({
+  template: `
+    <div class="responsive-progress-container">
+      <!-- Desktop: Horizontal layout with side labels -->
+      <div class="desktop-progress" *ngIf="!isMobile">
+        <div class="progress-row">
+          <span class="progress-label">Download Progress</span>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="downloadProgress"
+            class="progress-bar"
+          >
+          </mat-progress-bar>
+          <span class="progress-value">{{ downloadProgress }}%</span>
+        </div>
+      </div>
+
+      <!-- Mobile: Stacked layout -->
+      <div class="mobile-progress" *ngIf="isMobile">
+        <div class="progress-header">
+          <span class="progress-title">Download Progress</span>
+          <span class="progress-percentage">{{ downloadProgress }}%</span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="downloadProgress"
+          class="full-width-progress"
+        >
+        </mat-progress-bar>
+        <div class="progress-details">
+          <span>{{ getProgressDetails() }}</span>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .desktop-progress .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .desktop-progress .progress-label {
+        min-width: 150px;
+        font-weight: 500;
+      }
+
+      .desktop-progress .progress-bar {
+        flex: 1;
+      }
+
+      .desktop-progress .progress-value {
+        min-width: 50px;
+        text-align: right;
+        font-weight: 500;
+      }
+
+      .mobile-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .mobile-progress .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .mobile-progress .progress-title {
+        font-weight: 500;
+      }
+
+      .mobile-progress .progress-percentage {
+        font-weight: 600;
+        color: #2196f3;
+      }
+
+      .full-width-progress {
+        width: 100%;
+      }
+
+      .progress-details {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+      }
+    `,
+  ],
+})
+export class ResponsiveProgressComponent {
+  @Input() isMobile = false;
+  downloadProgress = 65;
+
+  getProgressDetails(): string {
+    return `${this.downloadProgress} of 100 MB downloaded`;
+  }
+}
+```
+
+#### Multi-Progress Dashboard
+
+```typescript
+@Component({
+  template: `
+    <div class="progress-dashboard">
+      <h2>System Status</h2>
+
+      <div class="progress-grid">
+        <div class="progress-item" *ngFor="let item of progressItems">
+          <div class="progress-header">
+            <mat-icon [class]="'status-' + item.status">{{
+              item.icon
+            }}</mat-icon>
+            <span class="progress-title">{{ item.title }}</span>
+            <span class="progress-status">{{ item.statusText }}</span>
+          </div>
+
+          <mat-progress-bar
+            [mode]="item.mode"
+            [value]="item.value"
+            [bufferValue]="item.bufferValue"
+            [class]="'status-' + item.status"
+          >
+          </mat-progress-bar>
+
+          <div class="progress-footer">
+            <span class="progress-time">{{ item.timeText }}</span>
+            <span
+              class="progress-percentage"
+              *ngIf="item.mode === 'determinate'"
+            >
+              {{ item.value }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .progress-dashboard {
+        padding: 24px;
+      }
+
+      .progress-dashboard h2 {
+        margin-bottom: 24px;
+        color: #333;
+      }
+
+      .progress-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .progress-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .progress-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .progress-title {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .progress-status {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        background: #f5f5f5;
+      }
+
+      .progress-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .progress-percentage {
+        font-weight: 600;
+      }
+
+      /* Status-based styling */
+      .status-success {
+        color: #4caf50;
+      }
+
+      .status-warning {
+        color: #ff9800;
+      }
+
+      .status-error {
+        color: #f44336;
+      }
+
+      .status-info {
+        color: #2196f3;
+      }
+
+      mat-progress-bar.status-success {
+        --mat-progress-bar-color: #4caf50;
+      }
+
+      mat-progress-bar.status-warning {
+        --mat-progress-bar-color: #ff9800;
+      }
+
+      mat-progress-bar.status-error {
+        --mat-progress-bar-color: #f44336;
+      }
+
+      mat-progress-bar.status-info {
+        --mat-progress-bar-color: #2196f3;
+      }
+    `,
+  ],
+})
+export class ProgressDashboardComponent {
+  progressItems = [
+    {
+      title: "Database Backup",
+      icon: "backup",
+      status: "success",
+      statusText: "Complete",
+      mode: "determinate" as const,
+      value: 100,
+      bufferValue: 100,
+      timeText: "Completed 2 min ago",
+    },
+    {
+      title: "File Synchronization",
+      icon: "sync",
+      status: "info",
+      statusText: "In Progress",
+      mode: "determinate" as const,
+      value: 73,
+      bufferValue: 85,
+      timeText: "3 min remaining",
+    },
+    {
+      title: "System Update",
+      icon: "system_update",
+      status: "warning",
+      statusText: "Downloading",
+      mode: "indeterminate" as const,
+      value: 0,
+      bufferValue: 0,
+      timeText: "Estimating time...",
+    },
+    {
+      title: "Network Test",
+      icon: "network_check",
+      status: "error",
+      statusText: "Failed",
+      mode: "determinate" as const,
+      value: 45,
+      bufferValue: 45,
+      timeText: "Failed at 45%",
+    },
+  ];
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate mode**: Use 'determinate' when progress percentage is known, 'indeterminate' for unknown duration, 'buffer' for streaming content, and 'query' for search operations
+- **Provide contextual information**: Always accompany progress bars with descriptive text explaining what operation is in progress
+- **Use consistent styling**: Maintain consistent progress bar heights and spacing throughout your application
+- **Show completion states**: Provide clear visual feedback when operations complete successfully or fail
+- **Implement proper loading states**: Show progress bars immediately when long-running operations begin
+
+### Accessibility
+
+- **ARIA attributes**: Progress bars automatically include proper ARIA roles and value attributes for screen readers
+- **Descriptive labeling**: Use aria-labelledby and aria-describedby to provide context about what progress is being shown
+- **Status announcements**: Consider using live regions to announce progress updates to screen reader users
+- **Keyboard accessibility**: Ensure surrounding controls (like cancel buttons) remain keyboard accessible during progress operations
+- **Color independence**: Don't rely solely on color to convey progress status; use text labels and icons as well
+
+### Performance
+
+- **Animation optimization**: Progress bar animations are optimized for smooth performance, but consider disabling animations for performance-critical applications
+- **Update frequency**: Limit progress updates to reasonable intervals (e.g., every 100ms) to avoid excessive DOM updates
+- **Memory management**: Properly clean up intervals and subscriptions when components are destroyed
+- **Bundle optimization**: Import only the progress bar module to minimize bundle size
+- **Efficient calculations**: Cache calculated values like time remaining to avoid repeated computations
+
+## Common Patterns
+
+### Pattern 1: File Upload with Progress
+
+```typescript
+@Component({
+  template: `
+    <div class="file-upload-progress">
+      <div class="upload-header">
+        <mat-icon>{{ getUploadIcon() }}</mat-icon>
+        <span class="filename">{{ fileName }}</span>
+        <span class="file-size">{{ formatFileSize(fileSize) }}</span>
+      </div>
+
+      <mat-progress-bar
+        mode="determinate"
+        [value]="uploadProgress"
+        [class.upload-complete]="uploadProgress >= 100"
+        (animationEnd)="onUploadComplete($event)"
+      >
+      </mat-progress-bar>
+
+      <div class="upload-details">
+        <span class="upload-status">{{ getUploadStatus() }}</span>
+        <span class="upload-speed">{{ getUploadSpeed() }}</span>
+      </div>
+
+      <div class="upload-actions" *ngIf="uploadProgress < 100">
+        <button mat-button (click)="cancelUpload()">Cancel</button>
+        <button mat-button (click)="pauseUpload()" *ngIf="!isPaused">
+          Pause
+        </button>
+        <button mat-button (click)="resumeUpload()" *ngIf="isPaused">
+          Resume
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .file-upload-progress {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 8px 0;
+      }
+
+      .upload-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .filename {
+        flex: 1;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-size {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .upload-details {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .upload-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        justify-content: flex-end;
+      }
+
+      mat-progress-bar.upload-complete {
+        --mat-progress-bar-color: #4caf50;
+      }
+    `,
+  ],
+})
+export class FileUploadProgressComponent {
+  @Input() fileName = "document.pdf";
+  @Input() fileSize = 2048576; // 2MB in bytes
+
+  uploadProgress = 0;
+  isPaused = false;
+  uploadSpeed = 0;
+  private startTime = Date.now();
+
+  getUploadIcon(): string {
+    if (this.uploadProgress >= 100) return "check_circle";
+    if (this.isPaused) return "pause_circle";
+    return "cloud_upload";
+  }
+
+  getUploadStatus(): string {
+    if (this.uploadProgress >= 100) return "Upload complete";
+    if (this.isPaused) return "Upload paused";
+    return `${this.uploadProgress.toFixed(1)}% uploaded`;
+  }
+
+  getUploadSpeed(): string {
+    if (this.uploadProgress >= 100) return "";
+    return `${this.uploadSpeed.toFixed(0)} KB/s`;
+  }
+
+  formatFileSize(bytes: number): string {
+    const sizes = ["B", "KB", "MB", "GB"];
+    if (bytes === 0) return "0 B";
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+  }
+
+  onUploadComplete(event: { value: number }): void {
+    if (event.value >= 100) {
+      console.log("File upload completed successfully");
+    }
+  }
+
+  cancelUpload(): void {
+    this.uploadProgress = 0;
+    console.log("Upload cancelled");
+  }
+
+  pauseUpload(): void {
+    this.isPaused = true;
+    console.log("Upload paused");
+  }
+
+  resumeUpload(): void {
+    this.isPaused = false;
+    console.log("Upload resumed");
+  }
+}
+```
+
+### Pattern 2: Multi-Step Process Progress
+
+```typescript
+@Component({
+  template: `
+    <div class="multi-step-progress">
+      <div class="step-header">
+        <h3>{{ processTitle }}</h3>
+        <span class="step-indicator">
+          Step {{ currentStep }} of {{ totalSteps }}
+        </span>
+      </div>
+
+      <!-- Overall progress -->
+      <div class="overall-progress">
+        <span class="progress-label">Overall Progress</span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getOverallProgress()"
+          class="overall-bar"
+        >
+        </mat-progress-bar>
+        <span class="progress-value"
+          >{{ getOverallProgress().toFixed(0) }}%</span
+        >
+      </div>
+
+      <!-- Current step progress -->
+      <div class="current-step">
+        <div class="step-info">
+          <mat-icon>{{ getCurrentStepIcon() }}</mat-icon>
+          <span class="step-name">{{ getCurrentStepName() }}</span>
+          <span class="step-status">{{ getCurrentStepStatus() }}</span>
+        </div>
+
+        <mat-progress-bar
+          [mode]="getCurrentStepMode()"
+          [value]="currentStepProgress"
+          [class.step-active]="isProcessing"
+        >
+        </mat-progress-bar>
+      </div>
+
+      <!-- Step list -->
+      <div class="step-list">
+        <div
+          class="step-item"
+          *ngFor="let step of steps; let i = index"
+          [class.completed]="i < currentStep - 1"
+          [class.active]="i === currentStep - 1"
+          [class.pending]="i > currentStep - 1"
+        >
+          <mat-icon class="step-icon">{{ getStepIcon(i) }}</mat-icon>
+          <span class="step-text">{{ step.name }}</span>
+
+          <mat-progress-bar
+            *ngIf="i === currentStep - 1 && isProcessing"
+            mode="indeterminate"
+            class="step-progress"
+          >
+          </mat-progress-bar>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .multi-step-progress {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        background: white;
+      }
+
+      .step-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .step-header h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .step-indicator {
+        font-size: 14px;
+        color: #666;
+        background: #f5f5f5;
+        padding: 4px 12px;
+        border-radius: 12px;
+      }
+
+      .overall-progress {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .progress-label {
+        min-width: 120px;
+        font-weight: 500;
+      }
+
+      .overall-bar {
+        flex: 1;
+      }
+
+      .progress-value {
+        min-width: 50px;
+        text-align: right;
+        font-weight: 600;
+        color: #2196f3;
+      }
+
+      .current-step {
+        margin-bottom: 24px;
+      }
+
+      .step-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .step-name {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .step-status {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .step-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .step-item.completed {
+        background: #f1f8e9;
+      }
+
+      .step-item.active {
+        background: #e3f2fd;
+      }
+
+      .step-item.pending {
+        background: #fafafa;
+        opacity: 0.7;
+      }
+
+      .step-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 18px;
+      }
+
+      .step-item.completed .step-icon {
+        color: #4caf50;
+      }
+
+      .step-item.active .step-icon {
+        color: #2196f3;
+      }
+
+      .step-item.pending .step-icon {
+        color: #999;
+      }
+
+      .step-text {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      .step-progress {
+        width: 60px;
+        height: 4px;
+      }
+
+      mat-progress-bar.step-active {
+        --mat-progress-bar-color: #2196f3;
+      }
+    `,
+  ],
+})
+export class MultiStepProgressComponent {
+  @Input() processTitle = "Installation Process";
+
+  currentStep = 2;
+  totalSteps = 4;
+  currentStepProgress = 65;
+  isProcessing = true;
+
+  steps = [
+    { name: "Download packages", icon: "download" },
+    { name: "Install dependencies", icon: "build" },
+    { name: "Configure settings", icon: "settings" },
+    { name: "Finalize installation", icon: "check" },
+  ];
+
+  getOverallProgress(): number {
+    const completedSteps = this.currentStep - 1;
+    const currentStepContribution =
+      (this.currentStepProgress / 100) * (1 / this.totalSteps);
+    return (completedSteps / this.totalSteps + currentStepContribution) * 100;
+  }
+
+  getCurrentStepName(): string {
+    return this.steps[this.currentStep - 1]?.name || "";
+  }
+
+  getCurrentStepIcon(): string {
+    return this.steps[this.currentStep - 1]?.icon || "help";
+  }
+
+  getCurrentStepStatus(): string {
+    if (this.currentStepProgress >= 100) return "Completed";
+    if (this.isProcessing) return `${this.currentStepProgress}% complete`;
+    return "Waiting";
+  }
+
+  getCurrentStepMode(): "determinate" | "indeterminate" {
+    return this.currentStepProgress > 0 ? "determinate" : "indeterminate";
+  }
+
+  getStepIcon(index: number): string {
+    if (index < this.currentStep - 1) return "check_circle";
+    if (index === this.currentStep - 1) return this.steps[index].icon;
+    return "radio_button_unchecked";
+  }
+}
+```
