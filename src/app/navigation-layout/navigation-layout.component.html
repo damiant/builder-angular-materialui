@@ -1,0 +1,66 @@
+<div class="navigation-layout-container">
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav opened mode="side" class="navigation-drawer">
+      <!-- Header Item -->
+      <mat-list>
+        <mat-list-item class="header-item">
+          <mat-icon matListItemIcon class="header-icon">{{
+            headerItem.icon
+          }}</mat-icon>
+          <div matListItemTitle class="header-title">
+            {{ headerItem.label }}
+          </div>
+          <div matListItemLine class="header-subtitle">
+            {{ headerItem.subtitle }}
+          </div>
+        </mat-list-item>
+      </mat-list>
+
+      <mat-divider></mat-divider>
+
+      <!-- Navigation Items -->
+      <mat-list class="navigation-list">
+        <mat-list-item
+          *ngFor="let item of navigationItems"
+          class="navigation-item"
+          [class.selected]="item.selected"
+          (click)="onNavigationItemClick(item)"
+        >
+          <mat-icon matListItemIcon [class.selected-icon]="item.selected">{{
+            item.icon
+          }}</mat-icon>
+          <div matListItemTitle [class.selected-text]="item.selected">
+            {{ item.label }}
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="main-content">
+      <div class="content-wrapper">
+        <mat-card class="content-card">
+          <mat-card-header>
+            <mat-card-title>{{ cardData.title }}</mat-card-title>
+            <mat-card-subtitle>{{ cardData.subtitle }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p class="card-text">{{ cardData.content }}</p>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              *ngFor="let action of cardData.actions"
+              mat-button
+              color="primary"
+              (click)="onCardAction(action.id)"
+              class="card-action-button"
+            >
+              {{ action.label }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

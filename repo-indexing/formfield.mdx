@@ -1,0 +1,898 @@
+---
+title: FormField Components
+---
+
+# FormField Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate components that handle form field structure with required wrapping hierarchy. The FormField component group provides a comprehensive solution for structuring form inputs with Material Design styling, floating labels, validation messages, and accessibility features that create a cohesive form control experience.
+
+### When to Use
+
+- **Form Input Structure**: When you need to wrap form controls (inputs, selects, textareas) with proper Material Design styling and behavior
+- **Floating Label Design**: For implementing floating label patterns where labels animate above the input when focused or filled
+- **Validation Display**: When displaying validation errors, hints, or help text below form controls
+- **Input Enhancements**: For adding prefix or suffix elements (icons, text, buttons) to enhance form control functionality
+- **Consistent Form Styling**: To maintain consistent Material Design form field appearance across your application
+- **Accessibility Requirements**: When you need proper ARIA labeling, error associations, and screen reader support for form controls
+- **Responsive Form Design**: For form fields that adapt to different screen sizes and input methods
+- **Complex Form Layouts**: In multi-step forms, settings panels, or data entry interfaces where form structure is critical
+
+### Architecture
+
+**Critical/Strong Coupling**: The FormField component group follows a required hierarchical structure where components must be used together in specific parent-child relationships. The architecture is built around:
+
+- **Required parent-child relationships**: `mat-form-field` serves as the mandatory container for all form field components
+- **Shared context dependencies**: The form field manages label animation, validation state, and accessibility attributes
+- **Compositional hierarchy**: Form controls, labels, hints, errors, and prefix/suffix elements work together as a unified system
+
+### Component Interdependencies
+
+The FormField component group requires strict composition patterns:
+
+- **`mat-form-field`** → Required root container that provides styling context and manages all child components
+- **Form Control** → Input elements (`matInput`, `mat-select`, etc.) must be direct children of `mat-form-field`
+- **`mat-label`** → Optional floating label component (child of `mat-form-field`)
+- **`mat-hint`** → Optional hint text displayed below the form control (child of `mat-form-field`)
+- **`mat-error`** → Error message component for validation feedback (child of `mat-form-field`)
+- **`mat-prefix`** → Optional prefix content displayed before the form control (child of `mat-form-field`)
+- **`mat-suffix`** → Optional suffix content displayed after the form control (child of `mat-form-field`)
+
+## Components
+
+### MatFormField {Primary Container Component}
+
+The mandatory root container component that provides Material Design styling and behavior for form controls.
+
+**Purpose:** Serves as the foundational wrapper that coordinates label animations, validation states, accessibility attributes, and visual styling for all contained form field components.
+
+**Interface:**
+
+```typescript
+interface MatFormFieldProps {
+  appearance?: "fill" | "outline" | "legacy" | "standard"; // Visual appearance style
+  color?: "primary" | "accent" | "warn"; // Theme color palette
+  floatLabel?: "always" | "never" | "auto"; // Label floating behavior
+  hideRequiredMarker?: boolean; // Whether to hide the required asterisk
+  hintLabel?: string; // Hint text (alternative to mat-hint)
+  subscriptSizing?: "fixed" | "dynamic"; // How subscript area (hints/errors) is sized
+}
+```
+
+**Dependencies:** Requires Angular Material's form field module and a form control child
+**Provides:** Styling context, label animation system, and accessibility infrastructure for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+
+@Component({
+  selector: "app-form-field-example",
+  template: `
+    <mat-form-field appearance="outline" color="primary">
+      <mat-label>Email Address</mat-label>
+      <input matInput type="email" placeholder="Enter your email" />
+      <mat-hint>We'll never share your email</mat-hint>
+    </mat-form-field>
+  `,
+  imports: [MatFormFieldModule, MatInputModule],
+})
+export class FormFieldExampleComponent {
+  // Component logic
+}
+```
+
+### MatLabel {Label Component}
+
+Component for displaying floating labels that animate above the form control when focused or filled.
+
+**Purpose:** Provides the primary label for form controls with Material Design floating label animation and accessibility integration.
+
+**Interface:**
+
+```typescript
+interface MatLabelProps {
+  // Content projection component - no direct props
+  // Label text provided through content projection
+  // Automatically integrates with form field for animations and accessibility
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field`
+**Parent Requirements:** Required parent component is `mat-form-field`
+**Provides:** Accessible label association and floating animation behavior
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>First Name</mat-label>
+  <input matInput />
+</mat-form-field>
+
+<!-- Label with icons -->
+<mat-form-field>
+  <mat-label>
+    <mat-icon>person</mat-icon>
+    Username
+  </mat-label>
+  <input matInput />
+</mat-form-field>
+```
+
+### MatHint {Hint Text Component}
+
+Component for displaying helpful hint text below the form control.
+
+**Purpose:** Provides supplementary information or guidance to users about the expected input format or behavior.
+
+**Interface:**
+
+```typescript
+interface MatHintProps {
+  align?: "start" | "end"; // Alignment of hint text (default: start)
+  id?: string; // Unique identifier for accessibility
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field`
+**Parent Requirements:** Required parent component is `mat-form-field`
+**Provides:** Accessible hint text with proper ARIA associations
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Password</mat-label>
+  <input matInput type="password" />
+  <mat-hint>Must be at least 8 characters</mat-hint>
+</mat-form-field>
+
+<!-- Multiple hints with alignment -->
+<mat-form-field>
+  <mat-label>Username</mat-label>
+  <input matInput maxlength="20" />
+  <mat-hint align="start">Choose a unique username</mat-hint>
+  <mat-hint align="end">0/20</mat-hint>
+</mat-form-field>
+```
+
+### MatError {Error Message Component}
+
+Component for displaying validation error messages below the form control.
+
+**Purpose:** Shows validation errors with proper styling and accessibility support, automatically managing visibility based on control state.
+
+**Interface:**
+
+```typescript
+interface MatErrorProps {
+  // Content projection component - no direct props
+  // Error message provided through content projection
+  // Automatically shown/hidden based on form control validation state
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field` and typically requires reactive forms for validation
+**Parent Requirements:** Required parent component is `mat-form-field`
+**Provides:** Accessible error messaging with automatic visibility management
+
+**Usage Example:**
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput [formControl]="emailControl" />
+      <mat-error *ngIf="emailControl.hasError('required')">
+        Email is required
+      </mat-error>
+      <mat-error *ngIf="emailControl.hasError('email')">
+        Please enter a valid email address
+      </mat-error>
+    </mat-form-field>
+  `,
+})
+export class EmailFormComponent {
+  emailControl = new FormControl("", [Validators.required, Validators.email]);
+}
+```
+
+### MatPrefix {Prefix Component}
+
+Component for displaying content before the form control input area.
+
+**Purpose:** Adds prefix content such as icons, text, or interactive elements that enhance the form control's functionality or provide visual context.
+
+**Interface:**
+
+```typescript
+interface MatPrefixProps {
+  // Content projection component - no direct props
+  // Prefix content provided through content projection
+  // Positioned before the form control input area
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field`
+**Parent Requirements:** Required parent component is `mat-form-field`
+**Provides:** Positioned prefix content that integrates with form field styling
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Amount</mat-label>
+  <span matPrefix>$ </span>
+  <input matInput type="number" />
+</mat-form-field>
+
+<!-- Icon prefix -->
+<mat-form-field>
+  <mat-label>Search</mat-label>
+  <mat-icon matPrefix>search</mat-icon>
+  <input matInput />
+</mat-form-field>
+
+<!-- Button prefix -->
+<mat-form-field>
+  <mat-label>Phone Number</mat-label>
+  <button mat-icon-button matPrefix>
+    <mat-icon>phone</mat-icon>
+  </button>
+  <input matInput type="tel" />
+</mat-form-field>
+```
+
+### MatSuffix {Suffix Component}
+
+Component for displaying content after the form control input area.
+
+**Purpose:** Adds suffix content such as icons, buttons, or text that provide additional functionality or visual feedback for the form control.
+
+**Interface:**
+
+```typescript
+interface MatSuffixProps {
+  // Content projection component - no direct props
+  // Suffix content provided through content projection
+  // Positioned after the form control input area
+}
+```
+
+**Context Dependencies:** Must be used within `mat-form-field`
+**Parent Requirements:** Required parent component is `mat-form-field`
+**Provides:** Positioned suffix content that integrates with form field styling
+
+**Usage Example:**
+
+```html
+<mat-form-field>
+  <mat-label>Password</mat-label>
+  <input matInput [type]="hidePassword ? 'password' : 'text'" />
+  <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+    <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+  </button>
+</mat-form-field>
+
+<!-- Text suffix -->
+<mat-form-field>
+  <mat-label>Weight</mat-label>
+  <input matInput type="number" />
+  <span matSuffix>kg</span>
+</mat-form-field>
+
+<!-- Clear button suffix -->
+<mat-form-field>
+  <mat-label>Search Query</mat-label>
+  <input matInput [(ngModel)]="searchValue" />
+  <button
+    mat-icon-button
+    matSuffix
+    (click)="searchValue = ''"
+    *ngIf="searchValue"
+  >
+    <mat-icon>clear</mat-icon>
+  </button>
+</mat-form-field>
+```
+
+## Integration Patterns
+
+### Basic Form Field with Label and Hint
+
+```typescript
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+
+@Component({
+  selector: "app-basic-form-field",
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Full Name</mat-label>
+      <input matInput placeholder="Enter your full name" />
+      <mat-hint>First and last name</mat-hint>
+    </mat-form-field>
+  `,
+  imports: [MatFormFieldModule, MatInputModule],
+})
+export class BasicFormFieldComponent {}
+```
+
+### Advanced Form Field with Validation
+
+```typescript
+import { ReactiveFormsModule, FormControl, Validators } from "@angular/forms";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatIconModule } from "@angular/material/icon";
+import { MatButtonModule } from "@angular/material/button";
+
+@Component({
+  selector: "app-validation-form-field",
+  template: `
+    <form [formGroup]="userForm" class="form-container">
+      <!-- Email field with validation -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email" />
+        <mat-hint>We'll use this for account notifications</mat-hint>
+        <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password field with visibility toggle -->
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          type="button"
+        >
+          <mat-icon>{{
+            hidePassword ? "visibility" : "visibility_off"
+          }}</mat-icon>
+        </button>
+        <mat-hint>Must be at least 8 characters</mat-hint>
+        <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+          Password is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+          Password must be at least 8 characters long
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Phone field with prefix -->
+      <mat-form-field appearance="outline">
+        <mat-label>Phone Number</mat-label>
+        <span matPrefix>+1 </span>
+        <input matInput type="tel" formControlName="phone" />
+        <mat-icon matSuffix>phone</mat-icon>
+        <mat-hint>Include area code</mat-hint>
+        <mat-error *ngIf="userForm.get('phone')?.hasError('required')">
+          Phone number is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('phone')?.hasError('pattern')">
+          Please enter a valid phone number
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Amount field with currency -->
+      <mat-form-field appearance="outline">
+        <mat-label>Budget</mat-label>
+        <span matPrefix>$ </span>
+        <input matInput type="number" formControlName="budget" min="0" />
+        <span matSuffix>.00</span>
+        <mat-hint>Monthly budget in USD</mat-hint>
+        <mat-error *ngIf="userForm.get('budget')?.hasError('required')">
+          Budget is required
+        </mat-error>
+        <mat-error *ngIf="userForm.get('budget')?.hasError('min')">
+          Budget must be greater than 0
+        </mat-error>
+      </mat-form-field>
+    </form>
+  `,
+  styles: [
+    `
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+    `,
+  ],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
+})
+export class ValidationFormFieldComponent {
+  hidePassword = true;
+
+  userForm = new FormGroup({
+    email: new FormControl("", [Validators.required, Validators.email]),
+    password: new FormControl("", [
+      Validators.required,
+      Validators.minLength(8),
+    ]),
+    phone: new FormControl("", [
+      Validators.required,
+      Validators.pattern(/^\d{3}-?\d{3}-?\d{4}$/),
+    ]),
+    budget: new FormControl("", [Validators.required, Validators.min(1)]),
+  });
+}
+```
+
+### Common Variations
+
+#### Form Field with Select Control
+
+```html
+<mat-form-field appearance="outline">
+  <mat-label>Country</mat-label>
+  <mat-select formControlName="country">
+    <mat-option value="us">United States</mat-option>
+    <mat-option value="ca">Canada</mat-option>
+    <mat-option value="uk">United Kingdom</mat-option>
+  </mat-select>
+  <mat-hint>Select your country of residence</mat-hint>
+</mat-form-field>
+```
+
+#### Form Field with Textarea
+
+```html
+<mat-form-field appearance="outline" class="full-width">
+  <mat-label>Description</mat-label>
+  <textarea matInput rows="4" formControlName="description"></textarea>
+  <mat-hint align="end">{{ description.length }}/500</mat-hint>
+  <mat-error *ngIf="form.get('description')?.hasError('maxlength')">
+    Description cannot exceed 500 characters
+  </mat-error>
+</mat-form-field>
+```
+
+#### Form Field with Datepicker
+
+```html
+<mat-form-field appearance="outline">
+  <mat-label>Birth Date</mat-label>
+  <input
+    matInput
+    [matDatepicker]="birthDatePicker"
+    formControlName="birthDate"
+  />
+  <mat-datepicker-toggle
+    matSuffix
+    [for]="birthDatePicker"
+  ></mat-datepicker-toggle>
+  <mat-datepicker #birthDatePicker></mat-datepicker>
+  <mat-hint>MM/DD/YYYY</mat-hint>
+</mat-form-field>
+```
+
+#### Form Field with Autocomplete
+
+```html
+<mat-form-field appearance="outline">
+  <mat-label>City</mat-label>
+  <input matInput [matAutocomplete]="cityAutocomplete" formControlName="city" />
+  <mat-autocomplete #cityAutocomplete="matAutocomplete">
+    <mat-option *ngFor="let city of filteredCities | async" [value]="city">
+      {{ city }}
+    </mat-option>
+  </mat-autocomplete>
+  <mat-hint>Start typing to see suggestions</mat-hint>
+</mat-form-field>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Form Field → Control**: The `MatFormField` provides styling context and manages the lifecycle of the contained form control
+2. **Control → Label**: Form control state (focused, filled, invalid) drives label animation and positioning
+3. **Control → Validation**: Form control validation state determines error message visibility and styling
+4. **Form Field → Hints/Errors**: The form field coordinates the display of hints and errors in the subscript area
+
+### Context Sharing
+
+- **Form Field Context**: `MatFormField` provides styling theme, appearance settings, and layout coordination
+- **Validation Context**: Form controls share validation state with error components for automatic visibility management
+- **Accessibility Context**: Form field manages ARIA relationships between labels, controls, hints, and errors
+- **Animation Context**: Label floating animations are coordinated with form control focus and fill states
+
+### Event Handling
+
+- **Focus Management**: Form field coordinates focus indicators and label animations
+- **Validation Events**: Form control validation state changes trigger error visibility and styling updates
+- **User Interaction**: Prefix/suffix interactive elements (buttons) handle their own events while maintaining form field styling
+- **State Propagation**: Form control state changes bubble up to update form field appearance and behavior
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Always use mat-form-field as container**: Wrap all form controls with `mat-form-field` for consistent Material Design styling
+- **Provide clear labels**: Use descriptive `mat-label` components that clearly indicate the expected input
+- **Include helpful hints**: Use `mat-hint` to provide guidance on input format, requirements, or expectations
+- **Implement proper validation**: Use `mat-error` with reactive forms to display validation messages
+- **Choose appropriate appearance**: Select the form field appearance (`outline`, `fill`, etc.) that fits your design system
+
+### Accessibility
+
+- **ARIA relationships**: Form fields automatically provide proper ARIA labels, descriptions, and error associations
+- **Label association**: Labels are properly associated with form controls for screen reader compatibility
+- **Error announcement**: Validation errors are announced to screen readers when they appear
+- **Focus management**: Form fields support proper keyboard navigation and focus indicators
+- **High contrast support**: All form field components work correctly with high contrast themes
+
+### Performance
+
+- **Validation optimization**: Use reactive forms with proper validation strategies to avoid unnecessary re-renders
+- **Error management**: Conditionally render error messages to minimize DOM updates
+- **Form state management**: Implement efficient form state management for large forms with many fields
+- **Change detection**: Use OnPush change detection strategy where appropriate for better performance
+- **Lazy validation**: Consider implementing lazy validation for expensive validation operations
+
+## Common Patterns
+
+### Pattern 1: User Registration Form
+
+```typescript
+@Component({
+  template: `
+    <form [formGroup]="registrationForm" class="registration-form">
+      <h2>Create Account</h2>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>First Name</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="firstName" />
+          <mat-error
+            *ngIf="registrationForm.get('firstName')?.hasError('required')"
+          >
+            First name is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" />
+          <mat-error
+            *ngIf="registrationForm.get('lastName')?.hasError('required')"
+          >
+            Last name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email" />
+        <mat-hint>We'll use this for your account login</mat-hint>
+        <mat-error *ngIf="registrationForm.get('email')?.hasError('required')">
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="registrationForm.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          type="button"
+        >
+          <mat-icon>{{
+            hidePassword ? "visibility" : "visibility_off"
+          }}</mat-icon>
+        </button>
+        <mat-hint
+          >Must contain at least 8 characters with numbers and letters</mat-hint
+        >
+        <mat-error
+          *ngIf="registrationForm.get('password')?.hasError('required')"
+        >
+          Password is required
+        </mat-error>
+        <mat-error
+          *ngIf="registrationForm.get('password')?.hasError('minlength')"
+        >
+          Password must be at least 8 characters
+        </mat-error>
+        <mat-error
+          *ngIf="registrationForm.get('password')?.hasError('pattern')"
+        >
+          Password must contain letters and numbers
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput type="password" formControlName="confirmPassword" />
+        <mat-error
+          *ngIf="registrationForm.get('confirmPassword')?.hasError('required')"
+        >
+          Password confirmation is required
+        </mat-error>
+        <mat-error
+          *ngIf="
+            registrationForm
+              .get('confirmPassword')
+              ?.hasError('passwordMismatch')
+          "
+        >
+          Passwords do not match
+        </mat-error>
+      </mat-form-field>
+    </form>
+  `,
+  styles: [
+    `
+      .registration-form {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .form-row {
+        display: flex;
+        gap: 16px;
+      }
+      .full-width {
+        width: 100%;
+      }
+      .half-width {
+        flex: 1;
+      }
+      .full-width,
+      .half-width {
+        margin-bottom: 16px;
+      }
+    `,
+  ],
+})
+export class UserRegistrationComponent {
+  hidePassword = true;
+
+  registrationForm = new FormGroup(
+    {
+      firstName: new FormControl("", [Validators.required]),
+      lastName: new FormControl("", [Validators.required]),
+      email: new FormControl("", [Validators.required, Validators.email]),
+      password: new FormControl("", [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]/),
+      ]),
+      confirmPassword: new FormControl("", [Validators.required]),
+    },
+    { validators: this.passwordMatchValidator },
+  );
+
+  passwordMatchValidator(form: AbstractControl): ValidationErrors | null {
+    const password = form.get("password");
+    const confirmPassword = form.get("confirmPassword");
+
+    if (password?.value !== confirmPassword?.value) {
+      confirmPassword?.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    }
+    return null;
+  }
+}
+```
+
+### Pattern 2: Search and Filter Interface
+
+```typescript
+@Component({
+  template: `
+    <div class="search-filter-container">
+      <div class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange()"
+            placeholder="Search products, categories, or brands"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            *ngIf="searchQuery"
+            (click)="clearSearch()"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+          <mat-hint>{{ searchResults.length }} results found</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-section">
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select
+            [(ngModel)]="selectedCategory"
+            (selectionChange)="onFilterChange()"
+          >
+            <mat-option value="">All Categories</mat-option>
+            <mat-option
+              *ngFor="let category of categories"
+              [value]="category.id"
+            >
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Price Range</mat-label>
+          <mat-select
+            [(ngModel)]="priceRange"
+            (selectionChange)="onFilterChange()"
+          >
+            <mat-option value="">Any Price</mat-option>
+            <mat-option value="0-25">$0 - $25</mat-option>
+            <mat-option value="25-50">$25 - $50</mat-option>
+            <mat-option value="50-100">$50 - $100</mat-option>
+            <mat-option value="100+">$100+</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Sort By</mat-label>
+          <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
+            <mat-option value="relevance">Relevance</mat-option>
+            <mat-option value="price-low">Price: Low to High</mat-option>
+            <mat-option value="price-high">Price: High to Low</mat-option>
+            <mat-option value="rating">Customer Rating</mat-option>
+            <mat-option value="newest">Newest First</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="advanced-filters" *ngIf="showAdvancedFilters">
+        <mat-form-field appearance="outline">
+          <mat-label>Brand</mat-label>
+          <mat-icon matPrefix>business</mat-icon>
+          <input
+            matInput
+            [matAutocomplete]="brandAutocomplete"
+            [(ngModel)]="selectedBrand"
+          />
+          <mat-autocomplete #brandAutocomplete="matAutocomplete">
+            <mat-option
+              *ngFor="let brand of filteredBrands | async"
+              [value]="brand"
+            >
+              {{ brand }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Minimum Rating</mat-label>
+          <mat-select [(ngModel)]="minRating">
+            <mat-option value="">Any Rating</mat-option>
+            <mat-option value="1">1+ Stars</mat-option>
+            <mat-option value="2">2+ Stars</mat-option>
+            <mat-option value="3">3+ Stars</mat-option>
+            <mat-option value="4">4+ Stars</mat-option>
+            <mat-option value="5">5 Stars Only</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>star</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .search-filter-container {
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+      .search-section {
+        margin-bottom: 16px;
+      }
+      .search-field {
+        width: 100%;
+      }
+      .filter-section {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .filter-section mat-form-field {
+        min-width: 200px;
+        flex: 1;
+      }
+      .advanced-filters {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .advanced-filters mat-form-field {
+        min-width: 200px;
+        flex: 1;
+      }
+    `,
+  ],
+})
+export class SearchFilterComponent {
+  searchQuery = "";
+  selectedCategory = "";
+  priceRange = "";
+  sortBy = "relevance";
+  selectedBrand = "";
+  minRating = "";
+  showAdvancedFilters = false;
+
+  searchResults: any[] = [];
+  categories = [
+    { id: "electronics", name: "Electronics" },
+    { id: "clothing", name: "Clothing" },
+    { id: "books", name: "Books" },
+  ];
+
+  filteredBrands = new Observable<string[]>();
+
+  onSearchChange(): void {
+    // Implement search logic
+    console.log("Searching for:", this.searchQuery);
+  }
+
+  onFilterChange(): void {
+    // Implement filter logic
+    console.log("Filters changed");
+  }
+
+  onSortChange(): void {
+    // Implement sort logic
+    console.log("Sort changed to:", this.sortBy);
+  }
+
+  clearSearch(): void {
+    this.searchQuery = "";
+    this.onSearchChange();
+  }
+}
+```

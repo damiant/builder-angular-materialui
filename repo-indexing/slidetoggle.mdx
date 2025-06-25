@@ -1,0 +1,2968 @@
+---
+title: SlideToggle Components
+---
+
+# SlideToggle Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate slide toggle functionality. The SlideToggle component provides Material Design styled toggle switches that enable users to switch between two states, typically representing "on" and "off" or "enabled" and "disabled". It follows Material Design 3 specifications for selection controls, offering intuitive visual feedback, proper accessibility features, and smooth animation transitions.
+
+### When to Use
+
+- **Feature Toggles**: When users need to enable or disable specific application features or settings (e.g., "Dark mode", "Enable notifications", "Auto-save")
+- **Binary State Controls**: For representing and controlling boolean states with clear visual feedback (e.g., "Public/Private", "Active/Inactive", "Online/Offline")
+- **Settings and Preferences**: In configuration panels where users need to toggle various options and see immediate visual confirmation of their choices
+- **Privacy Controls**: For managing privacy settings where the state needs to be clearly visible (e.g., "Location sharing", "Data collection", "Profile visibility")
+- **Accessibility Options**: When providing users with accessibility-related toggles (e.g., "High contrast", "Reduce motion", "Screen reader mode")
+- **Form Controls**: In forms where binary choices need more visual prominence than checkboxes provide
+- **Dashboard Controls**: For quick access controls in dashboards and admin panels (e.g., "Service status", "Maintenance mode", "API access")
+- **Mobile-First Interfaces**: When designing for touch interfaces where toggles provide better usability than traditional checkboxes
+- **Status Indicators**: For controls that represent and change system or item status with immediate visual feedback
+- **Experimental Features**: When allowing users to opt-in or opt-out of beta features or experimental functionality
+
+### Architecture
+
+**No Coupling**: The SlideToggle component is a standalone component that operates independently without requiring other components. It provides:
+
+- **Self-contained functionality**: Complete toggle implementation with all necessary features built-in including animation and state management
+- **Flexible integration**: Can be used anywhere in the application without dependencies on parent or child components
+- **Consistent behavior**: Maintains the same API and functionality regardless of context
+- **Theme integration**: Automatically inherits from the Material Design theme system
+- **Form integration**: Works seamlessly with Angular Reactive Forms and Template-driven Forms
+
+## Components
+
+### MatSlideToggle {Standalone Component}
+
+A versatile slide toggle component that provides Material Design styling with smooth animations, comprehensive accessibility features, and flexible customization options for binary state controls.
+
+**Purpose:** Creates interactive toggle switches with Material Design styling, smooth slide animations, proper accessibility features, and form integration for various binary choice scenarios.
+
+**Interface:**
+
+```typescript
+interface MatSlideToggleProps {
+  // State Management
+  checked?: boolean; // Whether the slide toggle is in the "checked" (on) state
+
+  // Interaction States
+  disabled?: boolean; // Whether the slide toggle is disabled
+  required?: boolean; // Marks the slide toggle as required in forms
+
+  // Appearance and Styling
+  color?: "primary" | "accent" | "warn"; // Theme color palette for the toggle
+  labelPosition?: "before" | "after"; // Position of label relative to toggle switch
+  disableRipple?: boolean; // Disables the ripple effect when toggle is interacted with
+
+  // Accessibility
+  ariaLabel?: string | null; // Accessible label for the toggle
+  ariaLabelledby?: string | null; // ID of element that labels the toggle
+  ariaDescribedby?: string | null; // ID of element that describes the toggle
+
+  // Form Integration
+  id?: string; // ID for the toggle element (auto-generated if not provided)
+  name?: string | null; // Name attribute for form submission
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Events
+  change?: (event: MatSlideToggleChange) => void; // Fired when toggle state changes
+  toggleChange?: () => void; // Fired when toggle is activated, regardless of state change
+}
+
+interface MatSlideToggleChange {
+  source: MatSlideToggle; // Reference to the slide toggle instance
+  checked: boolean; // New checked state of the toggle
+}
+```
+
+**Methods:**
+
+```typescript
+interface MatSlideToggleMethods {
+  focus(options?: FocusOptions): void; // Programmatically focus the toggle
+  toggle(): void; // Programmatically toggle the checked state
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-slide-toggle-examples",
+  template: `
+    <!-- Basic slide toggle -->
+    <mat-slide-toggle>Basic Toggle</mat-slide-toggle>
+
+    <!-- Checked slide toggle -->
+    <mat-slide-toggle [checked]="true">Pre-enabled Option</mat-slide-toggle>
+
+    <!-- Disabled slide toggle -->
+    <mat-slide-toggle [disabled]="true">Disabled Option</mat-slide-toggle>
+
+    <!-- Slide toggle with colors -->
+    <mat-slide-toggle color="primary" [checked]="true"
+      >Primary Color</mat-slide-toggle
+    >
+    <mat-slide-toggle color="accent" [checked]="true"
+      >Accent Color</mat-slide-toggle
+    >
+    <mat-slide-toggle color="warn" [checked]="true"
+      >Warning Color</mat-slide-toggle
+    >
+
+    <!-- Slide toggle with label position -->
+    <mat-slide-toggle labelPosition="before"
+      >Label Before Toggle</mat-slide-toggle
+    >
+
+    <!-- Slide toggle with event handling -->
+    <mat-slide-toggle (change)="onToggleChange($event)">
+      Toggle with Event Handler
+    </mat-slide-toggle>
+
+    <!-- Two-way data binding -->
+    <mat-slide-toggle [(ngModel)]="isEnabled">
+      Feature Enabled: {{ isEnabled ? "On" : "Off" }}
+    </mat-slide-toggle>
+
+    <!-- Form integration -->
+    <form [formGroup]="settingsForm">
+      <mat-slide-toggle formControlName="enableNotifications" required>
+        Enable Notifications *
+      </mat-slide-toggle>
+    </form>
+
+    <!-- Accessibility enhanced -->
+    <mat-slide-toggle
+      [id]="'dark-mode-toggle'"
+      [ariaLabel]="'Enable dark mode'"
+      (change)="toggleDarkMode($event)"
+    >
+      Dark Mode
+    </mat-slide-toggle>
+
+    <!-- Slide toggle without ripple -->
+    <mat-slide-toggle [disableRipple]="true">
+      No Ripple Effect
+    </mat-slide-toggle>
+  `,
+  imports: [MatSlideToggleModule, FormsModule, ReactiveFormsModule],
+})
+export class SlideToggleExamplesComponent {
+  isEnabled = false;
+
+  settingsForm = this.fb.group({
+    enableNotifications: [false, Validators.required],
+  });
+
+  constructor(private fb: FormBuilder) {}
+
+  onToggleChange(event: MatSlideToggleChange): void {
+    console.log("Toggle changed:", event.checked);
+  }
+
+  toggleDarkMode(event: MatSlideToggleChange): void {
+    console.log("Dark mode:", event.checked ? "enabled" : "disabled");
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic SlideToggle Usage
+
+```typescript
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+
+@Component({
+  selector: "app-basic-slide-toggles",
+  template: `
+    <div class="toggle-group">
+      <!-- Simple on/off toggles -->
+      <mat-slide-toggle>Wi-Fi</mat-slide-toggle>
+      <mat-slide-toggle>Bluetooth</mat-slide-toggle>
+      <mat-slide-toggle>Location Services</mat-slide-toggle>
+    </div>
+
+    <div class="toggle-states">
+      <!-- Different states -->
+      <mat-slide-toggle [checked]="true">Enabled by Default</mat-slide-toggle>
+      <mat-slide-toggle [checked]="false">Disabled by Default</mat-slide-toggle>
+      <mat-slide-toggle [disabled]="true">Read-only Toggle</mat-slide-toggle>
+    </div>
+
+    <div class="toggle-colors">
+      <!-- Color variations -->
+      <mat-slide-toggle color="primary" [checked]="true"
+        >Primary Theme</mat-slide-toggle
+      >
+      <mat-slide-toggle color="accent" [checked]="true"
+        >Accent Theme</mat-slide-toggle
+      >
+      <mat-slide-toggle color="warn" [checked]="true"
+        >Warning Theme</mat-slide-toggle
+      >
+    </div>
+
+    <div class="toggle-positions">
+      <!-- Label positioning -->
+      <mat-slide-toggle labelPosition="before" [checked]="true"
+        >Label Before</mat-slide-toggle
+      >
+      <mat-slide-toggle labelPosition="after" [checked]="true"
+        >Label After</mat-slide-toggle
+      >
+    </div>
+  `,
+  styles: [
+    `
+      .toggle-group,
+      .toggle-states,
+      .toggle-colors,
+      .toggle-positions {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+
+      .toggle-group {
+        background: #f8f9fa;
+      }
+
+      .toggle-states {
+        background: #fff3cd;
+      }
+
+      .toggle-colors {
+        background: #d1ecf1;
+      }
+
+      .toggle-positions {
+        background: #d4edda;
+      }
+    `,
+  ],
+  imports: [MatSlideToggleModule],
+})
+export class BasicSlideTogglesComponent {}
+```
+
+### Advanced SlideToggle Implementation
+
+```typescript
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { MatButtonModule } from "@angular/material/button";
+import { MatDividerModule } from "@angular/material/divider";
+import { MatListModule } from "@angular/material/list";
+
+@Component({
+  selector: "app-advanced-slide-toggles",
+  template: `
+    <div class="advanced-toggle-examples">
+      <!-- Settings Panel with Categories -->
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>settings</mat-icon>
+            Application Settings
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="settings-section">
+            <h3>Privacy & Security</h3>
+            <mat-list>
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.dataCollection"
+                  (change)="onSettingChange('dataCollection', $event)"
+                  color="primary"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Data Collection</span>
+                    <span class="setting-description"
+                      >Allow anonymous usage data collection for improving the
+                      app</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.locationSharing"
+                  (change)="onSettingChange('locationSharing', $event)"
+                  color="warn"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Location Sharing</span>
+                    <span class="setting-description"
+                      >Share your location with the application</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.biometricAuth"
+                  (change)="onSettingChange('biometricAuth', $event)"
+                  color="accent"
+                  [disabled]="!biometricAvailable"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Biometric Authentication</span>
+                    <span class="setting-description">
+                      {{
+                        biometricAvailable
+                          ? "Use fingerprint or face recognition"
+                          : "Not available on this device"
+                      }}
+                    </span>
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+            </mat-list>
+          </div>
+
+          <div class="settings-section">
+            <h3>Notifications</h3>
+            <mat-list>
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.pushNotifications"
+                  (change)="onNotificationToggle('push', $event)"
+                  color="primary"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Push Notifications</span>
+                    <span class="setting-description"
+                      >Receive push notifications on this device</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.emailNotifications"
+                  (change)="onNotificationToggle('email', $event)"
+                  color="primary"
+                  [disabled]="!settings.pushNotifications"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Email Notifications</span>
+                    <span class="setting-description">
+                      {{
+                        settings.pushNotifications
+                          ? "Receive notifications via email"
+                          : "Enable push notifications first"
+                      }}
+                    </span>
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.soundEnabled"
+                  (change)="onNotificationToggle('sound', $event)"
+                  color="accent"
+                  [disabled]="!settings.pushNotifications"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Notification Sounds</span>
+                    <span class="setting-description">
+                      {{
+                        settings.pushNotifications
+                          ? "Play sound for notifications"
+                          : "Enable push notifications first"
+                      }}
+                    </span>
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+            </mat-list>
+          </div>
+
+          <div class="settings-section">
+            <h3>Accessibility</h3>
+            <mat-list>
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.highContrast"
+                  (change)="onAccessibilityToggle('highContrast', $event)"
+                  color="accent"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">High Contrast Mode</span>
+                    <span class="setting-description"
+                      >Increase contrast for better visibility</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.reduceMotion"
+                  (change)="onAccessibilityToggle('reduceMotion', $event)"
+                  color="accent"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Reduce Motion</span>
+                    <span class="setting-description"
+                      >Minimize animations and transitions</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+
+              <mat-divider></mat-divider>
+
+              <mat-list-item>
+                <mat-slide-toggle
+                  [(ngModel)]="settings.screenReader"
+                  (change)="onAccessibilityToggle('screenReader', $event)"
+                  color="accent"
+                >
+                  <div class="setting-content">
+                    <span class="setting-title">Screen Reader Support</span>
+                    <span class="setting-description"
+                      >Optimize interface for screen readers</span
+                    >
+                  </div>
+                </mat-slide-toggle>
+              </mat-list-item>
+            </mat-list>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-button="outlined" (click)="resetToDefaults()">
+            Reset to Defaults
+          </button>
+          <button mat-button="filled" (click)="saveSettings()">
+            Save Settings
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Feature Toggle Dashboard -->
+      <mat-card class="feature-toggle-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>toggle_on</mat-icon>
+            Feature Toggles
+          </mat-card-title>
+          <mat-card-subtitle>
+            Control experimental and beta features
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="feature-grid">
+            <div
+              *ngFor="let feature of features"
+              class="feature-item"
+              [class.feature-enabled]="feature.enabled"
+            >
+              <div class="feature-header">
+                <mat-icon [class.feature-icon-enabled]="feature.enabled">
+                  {{ feature.icon }}
+                </mat-icon>
+                <span class="feature-name">{{ feature.name }}</span>
+                <span class="feature-badge" [class]="'badge-' + feature.status">
+                  {{ feature.status }}
+                </span>
+              </div>
+
+              <p class="feature-description">{{ feature.description }}</p>
+
+              <div class="feature-toggle">
+                <mat-slide-toggle
+                  [(ngModel)]="feature.enabled"
+                  (change)="onFeatureToggle(feature, $event)"
+                  [color]="getFeatureColor(feature.status)"
+                  [disabled]="feature.status === 'deprecated'"
+                  [disableRipple]="feature.status === 'deprecated'"
+                >
+                  {{ feature.enabled ? "Enabled" : "Disabled" }}
+                </mat-slide-toggle>
+              </div>
+
+              <div
+                class="feature-info"
+                *ngIf="feature.enabled && feature.warning"
+              >
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <span class="warning-text">{{ feature.warning }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- System Status Toggles -->
+      <mat-card class="system-status-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>dns</mat-icon>
+            System Status
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-grid">
+            <div *ngFor="let service of systemServices" class="status-item">
+              <div class="status-header">
+                <mat-icon
+                  [class]="
+                    'status-icon status-' +
+                    (service.active ? 'active' : 'inactive')
+                  "
+                >
+                  {{ service.icon }}
+                </mat-icon>
+                <span class="service-name">{{ service.name }}</span>
+              </div>
+
+              <div class="status-details">
+                <span class="status-label">Status:</span>
+                <span
+                  [class]="
+                    'status-text status-' +
+                    (service.active ? 'active' : 'inactive')
+                  "
+                >
+                  {{ service.active ? "Active" : "Inactive" }}
+                </span>
+              </div>
+
+              <div class="status-control">
+                <mat-slide-toggle
+                  [(ngModel)]="service.active"
+                  (change)="onServiceToggle(service, $event)"
+                  [color]="service.active ? 'primary' : 'warn'"
+                  [disabled]="service.maintenance"
+                  [disableRipple]="service.maintenance"
+                >
+                  {{
+                    service.maintenance
+                      ? "Under Maintenance"
+                      : service.active
+                        ? "Online"
+                        : "Offline"
+                  }}
+                </mat-slide-toggle>
+              </div>
+
+              <div
+                class="status-metrics"
+                *ngIf="service.active && service.metrics"
+              >
+                <div class="metric">
+                  <span class="metric-label">Uptime:</span>
+                  <span class="metric-value">{{ service.metrics.uptime }}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Load:</span>
+                  <span class="metric-value">{{ service.metrics.load }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-toggle-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .settings-card,
+      .feature-toggle-card,
+      .system-status-card {
+        width: 100%;
+      }
+
+      .settings-section {
+        margin-bottom: 32px;
+      }
+
+      .settings-section h3 {
+        margin: 0 0 16px 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .setting-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .setting-title {
+        font-weight: 500;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .setting-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      mat-list-item {
+        height: auto !important;
+        padding: 16px 0;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+      }
+
+      .feature-item {
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        transition: all 0.3s ease;
+      }
+
+      .feature-item.feature-enabled {
+        border-color: #2196f3;
+        background: #f3f9ff;
+      }
+
+      .feature-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .feature-icon-enabled {
+        color: #2196f3;
+      }
+
+      .feature-name {
+        font-weight: 500;
+        font-size: 16px;
+        flex: 1;
+      }
+
+      .feature-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .badge-stable {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .badge-beta {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .badge-experimental {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+
+      .badge-deprecated {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .feature-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+
+      .feature-toggle {
+        margin-bottom: 12px;
+      }
+
+      .feature-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #fff3cd;
+        border-radius: 4px;
+        border-left: 4px solid #ffc107;
+      }
+
+      .warning-icon {
+        color: #ff9800;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .warning-text {
+        font-size: 12px;
+        color: #856404;
+        line-height: 1.4;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .status-item {
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: white;
+      }
+
+      .status-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .status-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .status-icon.status-active {
+        color: #4caf50;
+      }
+
+      .status-icon.status-inactive {
+        color: #f44336;
+      }
+
+      .service-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .status-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+
+      .status-label {
+        color: #666;
+      }
+
+      .status-text.status-active {
+        color: #4caf50;
+        font-weight: 500;
+      }
+
+      .status-text.status-inactive {
+        color: #f44336;
+        font-weight: 500;
+      }
+
+      .status-control {
+        margin-bottom: 12px;
+      }
+
+      .status-metrics {
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+
+      .metric-label {
+        color: #666;
+      }
+
+      .metric-value {
+        font-weight: 500;
+      }
+
+      @media (max-width: 768px) {
+        .feature-grid,
+        .status-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .settings-section h3 {
+          font-size: 16px;
+        }
+
+        .feature-item,
+        .status-item {
+          padding: 16px;
+        }
+      }
+    `,
+  ],
+  imports: [
+    MatSlideToggleModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatListModule,
+    FormsModule,
+  ],
+})
+export class AdvancedSlideTogglesComponent {
+  biometricAvailable = true;
+
+  settings = {
+    dataCollection: false,
+    locationSharing: false,
+    biometricAuth: false,
+    pushNotifications: true,
+    emailNotifications: false,
+    soundEnabled: true,
+    highContrast: false,
+    reduceMotion: false,
+    screenReader: false,
+  };
+
+  features = [
+    {
+      name: "Advanced Analytics",
+      description:
+        "Enhanced data visualization and reporting capabilities with real-time insights.",
+      status: "stable",
+      icon: "analytics",
+      enabled: false,
+      warning: null,
+    },
+    {
+      name: "AI Assistant",
+      description:
+        "Experimental AI-powered assistant to help with task automation and suggestions.",
+      status: "experimental",
+      icon: "psychology",
+      enabled: false,
+      warning: "This feature is experimental and may impact performance.",
+    },
+    {
+      name: "Collaborative Editing",
+      description:
+        "Real-time collaborative editing for documents and projects.",
+      status: "beta",
+      icon: "group_work",
+      enabled: true,
+      warning: "Beta feature - please report any issues you encounter.",
+    },
+    {
+      name: "Legacy Import Tool",
+      description: "Import data from legacy systems and older file formats.",
+      status: "deprecated",
+      icon: "archive",
+      enabled: false,
+      warning: "This feature will be removed in the next major version.",
+    },
+  ];
+
+  systemServices = [
+    {
+      name: "API Gateway",
+      icon: "api",
+      active: true,
+      maintenance: false,
+      metrics: { uptime: "99.9%", load: "23%" },
+    },
+    {
+      name: "Database Cluster",
+      icon: "storage",
+      active: true,
+      maintenance: false,
+      metrics: { uptime: "99.7%", load: "45%" },
+    },
+    {
+      name: "Cache Service",
+      icon: "memory",
+      active: false,
+      maintenance: true,
+      metrics: null,
+    },
+    {
+      name: "Background Jobs",
+      icon: "schedule",
+      active: true,
+      maintenance: false,
+      metrics: { uptime: "98.5%", load: "67%" },
+    },
+  ];
+
+  onSettingChange(setting: string, event: MatSlideToggleChange): void {
+    console.log(`Setting ${setting} changed to:`, event.checked);
+
+    // Handle dependent settings
+    if (setting === "pushNotifications" && !event.checked) {
+      this.settings.emailNotifications = false;
+      this.settings.soundEnabled = false;
+    }
+  }
+
+  onNotificationToggle(type: string, event: MatSlideToggleChange): void {
+    console.log(
+      `${type} notifications:`,
+      event.checked ? "enabled" : "disabled",
+    );
+  }
+
+  onAccessibilityToggle(setting: string, event: MatSlideToggleChange): void {
+    console.log(
+      `Accessibility setting ${setting}:`,
+      event.checked ? "enabled" : "disabled",
+    );
+
+    // Apply accessibility changes immediately
+    if (setting === "highContrast") {
+      document.body.classList.toggle("high-contrast", event.checked);
+    } else if (setting === "reduceMotion") {
+      document.body.classList.toggle("reduce-motion", event.checked);
+    }
+  }
+
+  onFeatureToggle(feature: any, event: MatSlideToggleChange): void {
+    console.log(
+      `Feature ${feature.name}:`,
+      event.checked ? "enabled" : "disabled",
+    );
+
+    if (event.checked && feature.status === "experimental") {
+      // Show warning for experimental features
+      console.warn(`Enabling experimental feature: ${feature.name}`);
+    }
+  }
+
+  getFeatureColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      stable: "primary",
+      beta: "accent",
+      experimental: "warn",
+      deprecated: "warn",
+    };
+    return colors[status] || "primary";
+  }
+
+  onServiceToggle(service: any, event: MatSlideToggleChange): void {
+    console.log(
+      `Service ${service.name}:`,
+      event.checked ? "activated" : "deactivated",
+    );
+
+    if (!event.checked) {
+      service.metrics = null;
+    } else {
+      // Simulate metrics for activated services
+      service.metrics = {
+        uptime: "100%",
+        load: Math.floor(Math.random() * 50) + "%",
+      };
+    }
+  }
+
+  resetToDefaults(): void {
+    this.settings = {
+      dataCollection: false,
+      locationSharing: false,
+      biometricAuth: false,
+      pushNotifications: true,
+      emailNotifications: false,
+      soundEnabled: true,
+      highContrast: false,
+      reduceMotion: false,
+      screenReader: false,
+    };
+    console.log("Settings reset to defaults");
+  }
+
+  saveSettings(): void {
+    console.log("Saving settings:", this.settings);
+    // Save to backend or local storage
+  }
+}
+```
+
+### Common Variations
+
+#### Theme-Based Toggle Groups
+
+```typescript
+@Component({
+  template: `
+    <div class="theme-toggle-groups">
+      <div class="theme-section">
+        <h3>Appearance Settings</h3>
+        <div class="toggle-group">
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.darkMode"
+            (change)="onThemeChange('darkMode', $event)"
+            color="primary"
+          >
+            <div class="toggle-content">
+              <mat-icon>dark_mode</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Dark Mode</span>
+                <span class="toggle-description"
+                  >Use dark theme for better nighttime viewing</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.autoTheme"
+            (change)="onThemeChange('autoTheme', $event)"
+            color="accent"
+            [disabled]="themeSettings.darkMode"
+          >
+            <div class="toggle-content">
+              <mat-icon>brightness_auto</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Automatic Theme</span>
+                <span class="toggle-description">
+                  {{
+                    themeSettings.darkMode
+                      ? "Disable dark mode to use automatic theme"
+                      : "Switch theme based on system preferences"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.compactMode"
+            (change)="onThemeChange('compactMode', $event)"
+            color="primary"
+          >
+            <div class="toggle-content">
+              <mat-icon>compress</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Compact Layout</span>
+                <span class="toggle-description"
+                  >Reduce spacing and increase information density</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+      </div>
+
+      <div class="theme-section">
+        <h3>Visual Effects</h3>
+        <div class="toggle-group">
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.animations"
+            (change)="onThemeChange('animations', $event)"
+            color="accent"
+          >
+            <div class="toggle-content">
+              <mat-icon>animation</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Animations</span>
+                <span class="toggle-description"
+                  >Enable smooth transitions and animations</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.shadows"
+            (change)="onThemeChange('shadows', $event)"
+            color="accent"
+          >
+            <div class="toggle-content">
+              <mat-icon>layers</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Drop Shadows</span>
+                <span class="toggle-description"
+                  >Add depth with shadow effects</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            [(ngModel)]="themeSettings.gradients"
+            (change)="onThemeChange('gradients', $event)"
+            color="accent"
+          >
+            <div class="toggle-content">
+              <mat-icon>gradient</mat-icon>
+              <div class="toggle-text">
+                <span class="toggle-title">Gradient Backgrounds</span>
+                <span class="toggle-description"
+                  >Use colorful gradient backgrounds for cards and panels</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .theme-toggle-groups {
+        max-width: 600px;
+      }
+
+      .theme-section {
+        margin-bottom: 32px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .theme-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .toggle-group {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .toggle-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .toggle-content mat-icon {
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .toggle-text {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .toggle-title {
+        font-weight: 500;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .toggle-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      mat-slide-toggle {
+        width: 100%;
+      }
+
+      @media (max-width: 600px) {
+        .toggle-content {
+          gap: 12px;
+        }
+
+        .toggle-content mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    `,
+  ],
+})
+export class ThemeToggleGroupsComponent {
+  themeSettings = {
+    darkMode: false,
+    autoTheme: true,
+    compactMode: false,
+    animations: true,
+    shadows: true,
+    gradients: false,
+  };
+
+  onThemeChange(setting: string, event: MatSlideToggleChange): void {
+    console.log(`Theme setting ${setting}:`, event.checked);
+
+    // Handle dependent settings
+    if (setting === "darkMode" && event.checked) {
+      this.themeSettings.autoTheme = false;
+    }
+
+    // Apply theme changes immediately
+    this.applyThemeChanges();
+  }
+
+  private applyThemeChanges(): void {
+    const body = document.body;
+
+    body.classList.toggle("dark-theme", this.themeSettings.darkMode);
+    body.classList.toggle("compact-layout", this.themeSettings.compactMode);
+    body.classList.toggle("no-animations", !this.themeSettings.animations);
+    body.classList.toggle("no-shadows", !this.themeSettings.shadows);
+    body.classList.toggle("gradient-backgrounds", this.themeSettings.gradients);
+  }
+}
+```
+
+#### Dynamic Toggle Lists
+
+```typescript
+@Component({
+  template: `
+    <div class="dynamic-toggle-lists">
+      <div class="controls">
+        <button mat-button="outlined" (click)="addToggle()">Add Toggle</button>
+        <button mat-button="outlined" (click)="removeSelected()">
+          Remove Selected
+        </button>
+        <button mat-button="text" (click)="toggleAll()">
+          {{ allEnabled ? "Disable All" : "Enable All" }}
+        </button>
+      </div>
+
+      <div class="toggle-list" *ngIf="dynamicToggles.length > 0">
+        <div
+          *ngFor="let toggle of dynamicToggles; trackBy: trackByFn"
+          class="dynamic-toggle-item"
+          [class.marked-for-removal]="toggle.markedForRemoval"
+        >
+          <mat-slide-toggle
+            [(ngModel)]="toggle.enabled"
+            (change)="onToggleChange(toggle, $event)"
+            [color]="'primary'"
+            [disabled]="toggle.markedForRemoval"
+          >
+            <div class="toggle-item-content">
+              <span class="toggle-name">{{ toggle.name }}</span>
+              <span class="toggle-id">ID: {{ toggle.id }}</span>
+            </div>
+          </mat-slide-toggle>
+
+          <div class="toggle-actions">
+            <button
+              mat-icon-button
+              (click)="markForRemoval(toggle)"
+              [disabled]="toggle.markedForRemoval"
+              matTooltip="Mark for removal"
+              aria-label="Mark for removal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="dynamicToggles.length === 0">
+        <mat-icon>toggle_off</mat-icon>
+        <p>No toggles available. Click "Add Toggle" to create some.</p>
+      </div>
+
+      <div class="summary" *ngIf="dynamicToggles.length > 0">
+        <div class="summary-stats">
+          <span class="stat"> Total: {{ dynamicToggles.length }} </span>
+          <span class="stat"> Enabled: {{ getEnabledCount() }} </span>
+          <span class="stat"> Disabled: {{ getDisabledCount() }} </span>
+        </div>
+
+        <div class="bulk-controls">
+          <mat-slide-toggle
+            [checked]="allEnabled"
+            [indeterminate]="someEnabled"
+            (change)="onBulkToggle($event)"
+            color="accent"
+          >
+            Bulk Control
+          </mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .dynamic-toggle-lists {
+        max-width: 600px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+
+      .toggle-list {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .dynamic-toggle-item {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #e0e0e0;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .dynamic-toggle-item:last-child {
+        border-bottom: none;
+      }
+
+      .dynamic-toggle-item.marked-for-removal {
+        background: #ffebee;
+        opacity: 0.6;
+      }
+
+      .toggle-item-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .toggle-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .toggle-id {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .toggle-actions {
+        margin-left: 16px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #666;
+        background: #fafafa;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .empty-state mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      .summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .summary-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 14px;
+      }
+
+      .stat {
+        color: #666;
+      }
+
+      .bulk-controls {
+        display: flex;
+        align-items: center;
+      }
+
+      @media (max-width: 600px) {
+        .controls {
+          flex-direction: column;
+        }
+
+        .controls button {
+          width: 100%;
+        }
+
+        .summary {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .summary-stats {
+          justify-content: space-around;
+        }
+      }
+    `,
+  ],
+})
+export class DynamicToggleListsComponent {
+  dynamicToggles: Array<{
+    id: number;
+    name: string;
+    enabled: boolean;
+    markedForRemoval: boolean;
+  }> = [];
+
+  private nextId = 1;
+
+  constructor() {
+    // Initialize with some toggles
+    this.addToggle("Feature Alpha");
+    this.addToggle("Feature Beta");
+    this.addToggle("Feature Gamma");
+  }
+
+  get allEnabled(): boolean {
+    const activeToggles = this.dynamicToggles.filter(
+      (t) => !t.markedForRemoval,
+    );
+    return activeToggles.length > 0 && activeToggles.every((t) => t.enabled);
+  }
+
+  get someEnabled(): boolean {
+    const activeToggles = this.dynamicToggles.filter(
+      (t) => !t.markedForRemoval,
+    );
+    return activeToggles.some((t) => t.enabled) && !this.allEnabled;
+  }
+
+  addToggle(name?: string): void {
+    const toggleName = name || `Feature ${this.nextId}`;
+    this.dynamicToggles.push({
+      id: this.nextId++,
+      name: toggleName,
+      enabled: false,
+      markedForRemoval: false,
+    });
+  }
+
+  markForRemoval(toggle: any): void {
+    toggle.markedForRemoval = true;
+    toggle.enabled = false;
+  }
+
+  removeSelected(): void {
+    this.dynamicToggles = this.dynamicToggles.filter(
+      (t) => !t.markedForRemoval,
+    );
+  }
+
+  toggleAll(): void {
+    const newState = !this.allEnabled;
+    this.dynamicToggles
+      .filter((t) => !t.markedForRemoval)
+      .forEach((t) => (t.enabled = newState));
+  }
+
+  onToggleChange(toggle: any, event: MatSlideToggleChange): void {
+    console.log(`Toggle "${toggle.name}" (ID: ${toggle.id}):`, event.checked);
+  }
+
+  onBulkToggle(event: MatSlideToggleChange): void {
+    this.dynamicToggles
+      .filter((t) => !t.markedForRemoval)
+      .forEach((t) => (t.enabled = event.checked));
+  }
+
+  getEnabledCount(): number {
+    return this.dynamicToggles.filter((t) => !t.markedForRemoval && t.enabled)
+      .length;
+  }
+
+  getDisabledCount(): number {
+    return this.dynamicToggles.filter((t) => !t.markedForRemoval && !t.enabled)
+      .length;
+  }
+
+  trackByFn(index: number, item: any): number {
+    return item.id;
+  }
+}
+```
+
+#### Conditional Toggle Dependencies
+
+```typescript
+@Component({
+  template: `
+    <div class="conditional-toggles">
+      <form [formGroup]="conditionalForm">
+        <div class="toggle-section">
+          <h3>Master Controls</h3>
+
+          <mat-slide-toggle formControlName="masterSwitch" color="primary">
+            <div class="master-toggle-content">
+              <mat-icon>power_settings_new</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Master Switch</span>
+                <span class="toggle-description"
+                  >Enable all system features</span
+                >
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+
+        <div
+          class="toggle-section"
+          [class.section-disabled]="!conditionalForm.get('masterSwitch')?.value"
+        >
+          <h3>Core Features</h3>
+
+          <mat-slide-toggle
+            formControlName="coreFeatureA"
+            color="primary"
+            [disabled]="!conditionalForm.get('masterSwitch')?.value"
+          >
+            <div class="dependent-toggle-content">
+              <mat-icon>featured_play_list</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Core Feature A</span>
+                <span class="toggle-description">
+                  {{
+                    conditionalForm.get("masterSwitch")?.value
+                      ? "Essential functionality for data processing"
+                      : "Enable master switch to access this feature"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            formControlName="coreFeatureB"
+            color="primary"
+            [disabled]="!conditionalForm.get('masterSwitch')?.value"
+          >
+            <div class="dependent-toggle-content">
+              <mat-icon>build</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Core Feature B</span>
+                <span class="toggle-description">
+                  {{
+                    conditionalForm.get("masterSwitch")?.value
+                      ? "Advanced tools and utilities"
+                      : "Enable master switch to access this feature"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+
+        <div
+          class="toggle-section"
+          [class.section-disabled]="!conditionalForm.get('coreFeatureA')?.value"
+        >
+          <h3>Feature A Extensions</h3>
+
+          <mat-slide-toggle
+            formControlName="extensionA1"
+            color="accent"
+            [disabled]="!conditionalForm.get('coreFeatureA')?.value"
+          >
+            <div class="extension-toggle-content">
+              <mat-icon>extension</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Extension A1</span>
+                <span class="toggle-description">
+                  {{
+                    conditionalForm.get("coreFeatureA")?.value
+                      ? "Additional processing capabilities"
+                      : "Enable Core Feature A to access extensions"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            formControlName="extensionA2"
+            color="accent"
+            [disabled]="!conditionalForm.get('coreFeatureA')?.value"
+          >
+            <div class="extension-toggle-content">
+              <mat-icon>tune</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Extension A2</span>
+                <span class="toggle-description">
+                  {{
+                    conditionalForm.get("coreFeatureA")?.value
+                      ? "Advanced configuration options"
+                      : "Enable Core Feature A to access extensions"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+
+        <div
+          class="toggle-section experimental-section"
+          [class.section-disabled]="!allCoreEnabled"
+        >
+          <h3>
+            Experimental Features
+            <mat-icon class="experimental-icon">science</mat-icon>
+          </h3>
+
+          <div class="experimental-warning" *ngIf="allCoreEnabled">
+            <mat-icon>warning</mat-icon>
+            <span
+              >These features are experimental and may affect system
+              stability.</span
+            >
+          </div>
+
+          <mat-slide-toggle
+            formControlName="experimentalFeature1"
+            color="warn"
+            [disabled]="!allCoreEnabled"
+          >
+            <div class="experimental-toggle-content">
+              <mat-icon>biotech</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">AI Enhancement</span>
+                <span class="toggle-description">
+                  {{
+                    allCoreEnabled
+                      ? "Experimental AI-powered feature enhancement"
+                      : "Enable all core features to access experimental options"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+
+          <mat-slide-toggle
+            formControlName="experimentalFeature2"
+            color="warn"
+            [disabled]="!allCoreEnabled"
+          >
+            <div class="experimental-toggle-content">
+              <mat-icon>psychology</mat-icon>
+              <div class="toggle-info">
+                <span class="toggle-title">Predictive Analytics</span>
+                <span class="toggle-description">
+                  {{
+                    allCoreEnabled
+                      ? "Machine learning predictions and insights"
+                      : "Enable all core features to access experimental options"
+                  }}
+                </span>
+              </div>
+            </div>
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-button="outlined"
+            type="button"
+            (click)="resetToSafeMode()"
+          >
+            Reset to Safe Mode
+          </button>
+
+          <button
+            mat-button="outlined"
+            type="button"
+            (click)="enableAllRecommended()"
+          >
+            Enable Recommended
+          </button>
+
+          <button
+            mat-button="filled"
+            type="button"
+            (click)="saveConfiguration()"
+            [disabled]="conditionalForm.invalid"
+          >
+            Save Configuration
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .conditional-toggles {
+        max-width: 700px;
+      }
+
+      .toggle-section {
+        margin-bottom: 32px;
+        padding: 24px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .toggle-section.section-disabled {
+        background: #f5f5f5;
+        border-color: #ccc;
+        opacity: 0.7;
+      }
+
+      .experimental-section {
+        border-color: #ff9800;
+        background: #fff8e1;
+      }
+
+      .experimental-section.section-disabled {
+        background: #f5f5f5;
+        border-color: #ccc;
+      }
+
+      .toggle-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .experimental-icon {
+        color: #ff9800;
+      }
+
+      .experimental-warning {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #856404;
+      }
+
+      .experimental-warning mat-icon {
+        color: #f39c12;
+      }
+
+      .master-toggle-content,
+      .dependent-toggle-content,
+      .extension-toggle-content,
+      .experimental-toggle-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .master-toggle-content mat-icon {
+        color: #4caf50;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .dependent-toggle-content mat-icon {
+        color: #2196f3;
+      }
+
+      .extension-toggle-content mat-icon {
+        color: #9c27b0;
+      }
+
+      .experimental-toggle-content mat-icon {
+        color: #ff5722;
+      }
+
+      .toggle-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .toggle-title {
+        font-weight: 500;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .toggle-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      mat-slide-toggle {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      mat-slide-toggle:last-child {
+        margin-bottom: 0;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 700px) {
+        .toggle-section {
+          padding: 16px;
+        }
+
+        .master-toggle-content,
+        .dependent-toggle-content,
+        .extension-toggle-content,
+        .experimental-toggle-content {
+          gap: 12px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+        }
+
+        .form-actions button {
+          width: 100%;
+        }
+      }
+    `,
+  ],
+})
+export class ConditionalToggleDependenciesComponent {
+  conditionalForm = this.fb.group({
+    masterSwitch: [false],
+    coreFeatureA: [false],
+    coreFeatureB: [false],
+    extensionA1: [false],
+    extensionA2: [false],
+    experimentalFeature1: [false],
+    experimentalFeature2: [false],
+  });
+
+  constructor(private fb: FormBuilder) {
+    this.setupConditionalLogic();
+  }
+
+  get allCoreEnabled(): boolean {
+    return (
+      this.conditionalForm.get("coreFeatureA")?.value &&
+      this.conditionalForm.get("coreFeatureB")?.value
+    );
+  }
+
+  private setupConditionalLogic(): void {
+    // Master switch controls all features
+    this.conditionalForm
+      .get("masterSwitch")
+      ?.valueChanges.subscribe((enabled) => {
+        if (!enabled) {
+          this.conditionalForm.patchValue({
+            coreFeatureA: false,
+            coreFeatureB: false,
+          });
+        }
+      });
+
+    // Core Feature A controls its extensions
+    this.conditionalForm
+      .get("coreFeatureA")
+      ?.valueChanges.subscribe((enabled) => {
+        if (!enabled) {
+          this.conditionalForm.patchValue({
+            extensionA1: false,
+            extensionA2: false,
+          });
+        }
+      });
+
+    // All core features control experimental features
+    this.conditionalForm.valueChanges.subscribe(() => {
+      if (!this.allCoreEnabled) {
+        this.conditionalForm.patchValue(
+          {
+            experimentalFeature1: false,
+            experimentalFeature2: false,
+          },
+          { emitEvent: false },
+        );
+      }
+    });
+  }
+
+  resetToSafeMode(): void {
+    this.conditionalForm.reset({
+      masterSwitch: true,
+      coreFeatureA: true,
+      coreFeatureB: false,
+      extensionA1: false,
+      extensionA2: false,
+      experimentalFeature1: false,
+      experimentalFeature2: false,
+    });
+  }
+
+  enableAllRecommended(): void {
+    this.conditionalForm.patchValue({
+      masterSwitch: true,
+      coreFeatureA: true,
+      coreFeatureB: true,
+      extensionA1: true,
+      extensionA2: false,
+      experimentalFeature1: false,
+      experimentalFeature2: false,
+    });
+  }
+
+  saveConfiguration(): void {
+    if (this.conditionalForm.valid) {
+      console.log("Saving configuration:", this.conditionalForm.value);
+
+      // Show confirmation
+      const enabledFeatures = Object.entries(this.conditionalForm.value)
+        .filter(([key, value]) => value)
+        .map(([key]) => key);
+
+      console.log("Enabled features:", enabledFeatures);
+    }
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Use for binary states only**: Slide toggles are specifically designed for on/off or enabled/disabled states - use radio buttons or selects for multiple options
+- **Provide immediate visual feedback**: Slide toggles should show their state clearly and respond to user interaction with smooth animations
+- **Use descriptive labels**: Clearly indicate what state the toggle controls and what happens when it's activated
+- **Consider toggle dependencies**: When toggles affect other toggles, provide clear visual indication of the relationship and disable dependent options appropriately
+- **Maintain consistent behavior**: Ensure toggles behave predictably across your application with consistent positioning and styling
+
+### Accessibility
+
+- **Keyboard navigation**: Slide toggles automatically support keyboard navigation with Space key activation and Tab/Shift+Tab for focus movement
+- **Screen reader support**: Use descriptive labels and aria-label attributes for toggles that need additional context
+- **Focus management**: Ensure toggles receive proper focus indicators and maintain logical tab order
+- **State communication**: Toggle states are automatically communicated to assistive technologies through proper ARIA attributes
+- **Color independence**: Don't rely solely on color to indicate toggle state - the visual animation and position provide clear state indication
+
+### Performance
+
+- **Efficient change detection**: Use OnPush change detection strategy for components with many toggles to optimize performance
+- **Debounced updates**: For toggles that trigger expensive operations, consider debouncing the change events to avoid excessive API calls
+- **Conditional rendering**: Use \*ngIf to conditionally render dependent toggles and their related content to improve performance
+- **TrackBy functions**: When rendering dynamic toggle lists, use trackBy functions to optimize change detection
+- **Animation optimization**: Consider disabling ripple effects for performance-critical applications with many toggles
+
+## Common Patterns
+
+### Pattern 1: Settings Panel with Categories
+
+```typescript
+@Component({
+  template: `
+    <div class="settings-panel">
+      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+        <div *ngFor="let category of settingCategories" class="category-panel">
+          <h3 class="category-title">
+            <mat-icon>{{ category.icon }}</mat-icon>
+            {{ category.title }}
+          </h3>
+
+          <div class="category-description">{{ category.description }}</div>
+
+          <div class="settings-list">
+            <div *ngFor="let setting of category.settings" class="setting-item">
+              <mat-slide-toggle
+                [formControlName]="setting.key"
+                [color]="setting.color || 'primary'"
+                [disabled]="isSettingDisabled(setting)"
+                (change)="onSettingChange(setting, $event)"
+              >
+                <div class="setting-content">
+                  <div class="setting-header">
+                    <span class="setting-name">{{ setting.name }}</span>
+                    <span
+                      *ngIf="setting.badge"
+                      class="setting-badge"
+                      [class]="'badge-' + setting.badge.type"
+                    >
+                      {{ setting.badge.text }}
+                    </span>
+                  </div>
+                  <div class="setting-description">
+                    {{ setting.description }}
+                  </div>
+                  <div
+                    *ngIf="
+                      setting.warning && settingsForm.get(setting.key)?.value
+                    "
+                    class="setting-warning"
+                  >
+                    <mat-icon>warning</mat-icon>
+                    {{ setting.warning }}
+                  </div>
+                </div>
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button mat-button="outlined" type="button" (click)="resetSettings()">
+            Reset All
+          </button>
+          <button
+            mat-button="filled"
+            type="submit"
+            [disabled]="settingsForm.invalid"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  `,
+  styles: [
+    `
+      .settings-panel {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .category-panel {
+        margin-bottom: 32px;
+        padding: 24px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .category-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .category-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .settings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .setting-item {
+        padding: 16px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .setting-item:last-child {
+        border-bottom: none;
+      }
+
+      .setting-content {
+        width: 100%;
+      }
+
+      .setting-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .setting-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .setting-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .badge-new {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .badge-beta {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .badge-premium {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+
+      .setting-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+
+      .setting-warning {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #f57c00;
+        margin-top: 8px;
+      }
+
+      .setting-warning mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+
+      .panel-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 2px solid #e0e0e0;
+      }
+
+      @media (max-width: 600px) {
+        .category-panel {
+          padding: 16px;
+        }
+
+        .panel-actions {
+          flex-direction: column;
+        }
+
+        .panel-actions button {
+          width: 100%;
+        }
+      }
+    `,
+  ],
+})
+export class SettingsPanelComponent {
+  settingsForm = this.fb.group({
+    // Privacy settings
+    dataCollection: [false],
+    cookies: [true],
+    analytics: [false],
+
+    // Notification settings
+    emailNotifications: [true],
+    pushNotifications: [false],
+    marketingEmails: [false],
+
+    // Performance settings
+    autoSave: [true],
+    compression: [false],
+    prefetch: [true],
+  });
+
+  settingCategories = [
+    {
+      title: "Privacy & Data",
+      icon: "privacy_tip",
+      description: "Control how your data is collected and used",
+      settings: [
+        {
+          key: "dataCollection",
+          name: "Data Collection",
+          description: "Allow collection of usage data to improve the service",
+          color: "warn",
+          warning: "Disabling this may affect personalized features",
+        },
+        {
+          key: "cookies",
+          name: "Cookies",
+          description: "Store preferences and session information",
+          color: "primary",
+        },
+        {
+          key: "analytics",
+          name: "Analytics",
+          description: "Share anonymous usage statistics",
+          color: "accent",
+          badge: { type: "new", text: "New" },
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      icon: "notifications",
+      description: "Manage how and when you receive notifications",
+      settings: [
+        {
+          key: "emailNotifications",
+          name: "Email Notifications",
+          description: "Receive important updates via email",
+          color: "primary",
+        },
+        {
+          key: "pushNotifications",
+          name: "Push Notifications",
+          description: "Get real-time notifications in your browser",
+          color: "primary",
+          badge: { type: "beta", text: "Beta" },
+        },
+        {
+          key: "marketingEmails",
+          name: "Marketing Communications",
+          description: "Receive promotional offers and news",
+          color: "accent",
+        },
+      ],
+    },
+    {
+      title: "Performance",
+      icon: "speed",
+      description: "Optimize application performance and resource usage",
+      settings: [
+        {
+          key: "autoSave",
+          name: "Auto-save",
+          description: "Automatically save your work every few minutes",
+          color: "primary",
+        },
+        {
+          key: "compression",
+          name: "Data Compression",
+          description: "Compress data to reduce bandwidth usage",
+          color: "accent",
+          badge: { type: "premium", text: "Premium" },
+        },
+        {
+          key: "prefetch",
+          name: "Content Prefetching",
+          description: "Load content in advance for faster navigation",
+          color: "primary",
+          warning: "May increase data usage",
+        },
+      ],
+    },
+  ];
+
+  constructor(private fb: FormBuilder) {}
+
+  isSettingDisabled(setting: any): boolean {
+    // Example: Premium features require subscription
+    return setting.badge?.type === "premium" && !this.hasPremiumSubscription();
+  }
+
+  onSettingChange(setting: any, event: MatSlideToggleChange): void {
+    console.log(`Setting ${setting.name} changed to:`, event.checked);
+
+    // Handle special cases
+    if (setting.key === "dataCollection" && !event.checked) {
+      // Disable analytics when data collection is off
+      this.settingsForm.patchValue({ analytics: false });
+    }
+  }
+
+  resetSettings(): void {
+    this.settingsForm.reset({
+      dataCollection: false,
+      cookies: true,
+      analytics: false,
+      emailNotifications: true,
+      pushNotifications: false,
+      marketingEmails: false,
+      autoSave: true,
+      compression: false,
+      prefetch: true,
+    });
+  }
+
+  saveSettings(): void {
+    if (this.settingsForm.valid) {
+      console.log("Saving settings:", this.settingsForm.value);
+    }
+  }
+
+  private hasPremiumSubscription(): boolean {
+    // Mock premium check
+    return false;
+  }
+}
+```
+
+### Pattern 2: Feature Flag Management
+
+```typescript
+@Component({
+  template: `
+    <div class="feature-flags-manager">
+      <div class="manager-header">
+        <h2>Feature Flag Management</h2>
+        <div class="header-actions">
+          <button mat-button="outlined" (click)="refreshFlags()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+          <button
+            mat-button="filled"
+            (click)="saveAllChanges()"
+            [disabled]="!hasUnsavedChanges"
+          >
+            <mat-icon>save</mat-icon>
+            Save All Changes
+          </button>
+        </div>
+      </div>
+
+      <div class="flags-filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Filter by environment</mat-label>
+          <mat-select
+            [(ngModel)]="selectedEnvironment"
+            (selectionChange)="filterFlags()"
+          >
+            <mat-option *ngFor="let env of environments" [value]="env">
+              {{ env }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Search flags</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchTerm"
+            (input)="filterFlags()"
+            placeholder="Enter flag name..."
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="flags-grid">
+        <div
+          *ngFor="let flag of filteredFlags"
+          class="flag-card"
+          [class]="'flag-' + flag.status"
+        >
+          <div class="flag-header">
+            <div class="flag-title-section">
+              <h4 class="flag-name">{{ flag.name }}</h4>
+              <span class="flag-key">{{ flag.key }}</span>
+            </div>
+
+            <div class="flag-status">
+              <span class="status-badge" [class]="'status-' + flag.status">
+                {{ flag.status }}
+              </span>
+              <mat-icon
+                *ngIf="flag.hasChanges"
+                class="changes-icon"
+                matTooltip="Unsaved changes"
+              >
+                edit
+              </mat-icon>
+            </div>
+          </div>
+
+          <p class="flag-description">{{ flag.description }}</p>
+
+          <div class="flag-metadata">
+            <div class="metadata-item">
+              <span class="metadata-label">Owner:</span>
+              <span class="metadata-value">{{ flag.owner }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Created:</span>
+              <span class="metadata-value">{{
+                flag.createdDate | date: "shortDate"
+              }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Last Modified:</span>
+              <span class="metadata-value">{{
+                flag.lastModified | date: "short"
+              }}</span>
+            </div>
+          </div>
+
+          <div class="flag-environments">
+            <div
+              *ngFor="let env of flag.environments"
+              class="environment-toggle"
+            >
+              <mat-slide-toggle
+                [(ngModel)]="env.enabled"
+                (change)="onFlagToggle(flag, env, $event)"
+                [color]="getEnvironmentColor(env.name)"
+                [disabled]="!canModifyEnvironment(env.name)"
+              >
+                <div class="env-toggle-content">
+                  <span class="env-name">{{ env.name }}</span>
+                  <span
+                    class="env-rollout"
+                    *ngIf="env.enabled && env.rolloutPercentage < 100"
+                  >
+                    {{ env.rolloutPercentage }}% rollout
+                  </span>
+                </div>
+              </mat-slide-toggle>
+
+              <div class="env-actions" *ngIf="env.enabled">
+                <button
+                  mat-icon-button
+                  matTooltip="Configure rollout"
+                  (click)="openRolloutConfig(flag, env)"
+                >
+                  <mat-icon>tune</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flag-actions">
+            <button mat-button="text" (click)="viewFlagHistory(flag)">
+              <mat-icon>history</mat-icon>
+              History
+            </button>
+
+            <button mat-button="text" (click)="duplicateFlag(flag)">
+              <mat-icon>content_copy</mat-icon>
+              Duplicate
+            </button>
+
+            <button
+              mat-button="text"
+              (click)="archiveFlag(flag)"
+              [disabled]="flag.status === 'archived'"
+              class="archive-button"
+            >
+              <mat-icon>archive</mat-icon>
+              Archive
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredFlags.length === 0">
+        <mat-icon>flag</mat-icon>
+        <h3>No feature flags found</h3>
+        <p>Try adjusting your filters or create a new feature flag.</p>
+        <button mat-button="filled" (click)="createNewFlag()">
+          <mat-icon>add</mat-icon>
+          Create Feature Flag
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .feature-flags-manager {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .manager-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .manager-header h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 500;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .flags-filters {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+
+      .flags-filters mat-form-field {
+        min-width: 200px;
+      }
+
+      .flags-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 24px;
+      }
+
+      .flag-card {
+        padding: 24px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        transition: all 0.3s ease;
+      }
+
+      .flag-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .flag-active {
+        border-color: #4caf50;
+        background: #f8fff8;
+      }
+
+      .flag-inactive {
+        border-color: #f44336;
+        background: #fff8f8;
+      }
+
+      .flag-archived {
+        border-color: #9e9e9e;
+        background: #f5f5f5;
+        opacity: 0.7;
+      }
+
+      .flag-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .flag-title-section {
+        flex: 1;
+      }
+
+      .flag-name {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .flag-key {
+        font-size: 12px;
+        color: #666;
+        font-family: monospace;
+        background: #f0f0f0;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+
+      .flag-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-active {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .status-inactive {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .status-archived {
+        background: #f5f5f5;
+        color: #666;
+      }
+
+      .changes-icon {
+        color: #ff9800;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .flag-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 16px;
+      }
+
+      .flag-metadata {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+        margin-bottom: 20px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 4px;
+      }
+
+      .metadata-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .metadata-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+      }
+
+      .metadata-value {
+        font-size: 13px;
+        color: #333;
+      }
+
+      .flag-environments {
+        margin-bottom: 20px;
+      }
+
+      .environment-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .environment-toggle:last-child {
+        border-bottom: none;
+      }
+
+      .env-toggle-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .env-name {
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .env-rollout {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .env-actions {
+        margin-left: 12px;
+      }
+
+      .flag-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+        flex-wrap: wrap;
+      }
+
+      .archive-button {
+        color: #f44336 !important;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #666;
+      }
+
+      .empty-state mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 24px;
+        opacity: 0.5;
+      }
+
+      .empty-state h3 {
+        margin: 0 0 8px 0;
+        font-size: 24px;
+        font-weight: 400;
+      }
+
+      .empty-state p {
+        margin: 0 0 24px 0;
+        font-size: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .flags-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .flags-filters {
+          flex-direction: column;
+        }
+
+        .flags-filters mat-form-field {
+          width: 100%;
+        }
+
+        .manager-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .header-actions {
+          justify-content: center;
+        }
+      }
+    `,
+  ],
+})
+export class FeatureFlagManagerComponent {
+  selectedEnvironment = "all";
+  searchTerm = "";
+
+  environments = ["all", "development", "staging", "production"];
+
+  featureFlags = [
+    {
+      name: "New Dashboard",
+      key: "dashboard_v2",
+      description:
+        "Enhanced dashboard with improved analytics and user experience",
+      owner: "Frontend Team",
+      status: "active",
+      createdDate: new Date("2024-01-15"),
+      lastModified: new Date("2024-01-20"),
+      hasChanges: false,
+      environments: [
+        { name: "development", enabled: true, rolloutPercentage: 100 },
+        { name: "staging", enabled: true, rolloutPercentage: 100 },
+        { name: "production", enabled: false, rolloutPercentage: 0 },
+      ],
+    },
+    {
+      name: "AI-Powered Search",
+      key: "ai_search_beta",
+      description:
+        "Experimental AI-enhanced search functionality with natural language processing",
+      owner: "Data Science Team",
+      status: "active",
+      createdDate: new Date("2024-01-10"),
+      lastModified: new Date("2024-01-18"),
+      hasChanges: true,
+      environments: [
+        { name: "development", enabled: true, rolloutPercentage: 100 },
+        { name: "staging", enabled: true, rolloutPercentage: 50 },
+        { name: "production", enabled: true, rolloutPercentage: 5 },
+      ],
+    },
+    {
+      name: "Legacy File Upload",
+      key: "old_file_upload",
+      description:
+        "Deprecated file upload system - being replaced by new drag-and-drop interface",
+      owner: "Backend Team",
+      status: "archived",
+      createdDate: new Date("2023-08-20"),
+      lastModified: new Date("2024-01-05"),
+      hasChanges: false,
+      environments: [
+        { name: "development", enabled: false, rolloutPercentage: 0 },
+        { name: "staging", enabled: false, rolloutPercentage: 0 },
+        { name: "production", enabled: false, rolloutPercentage: 0 },
+      ],
+    },
+  ];
+
+  filteredFlags = [...this.featureFlags];
+
+  get hasUnsavedChanges(): boolean {
+    return this.featureFlags.some((flag) => flag.hasChanges);
+  }
+
+  filterFlags(): void {
+    let filtered = this.featureFlags;
+
+    // Filter by environment
+    if (this.selectedEnvironment !== "all") {
+      filtered = filtered.filter((flag) =>
+        flag.environments.some((env) => env.name === this.selectedEnvironment),
+      );
+    }
+
+    // Filter by search term
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (flag) =>
+          flag.name.toLowerCase().includes(term) ||
+          flag.key.toLowerCase().includes(term) ||
+          flag.description.toLowerCase().includes(term),
+      );
+    }
+
+    this.filteredFlags = filtered;
+  }
+
+  onFlagToggle(flag: any, environment: any, event: MatSlideToggleChange): void {
+    environment.enabled = event.checked;
+    flag.hasChanges = true;
+    flag.lastModified = new Date();
+
+    if (!event.checked) {
+      environment.rolloutPercentage = 0;
+    } else {
+      environment.rolloutPercentage = 100;
+    }
+
+    console.log(`Flag ${flag.name} in ${environment.name}:`, event.checked);
+  }
+
+  getEnvironmentColor(envName: string): string {
+    const colors: { [key: string]: string } = {
+      development: "accent",
+      staging: "warn",
+      production: "primary",
+    };
+    return colors[envName] || "primary";
+  }
+
+  canModifyEnvironment(envName: string): boolean {
+    // Production requires special permissions
+    return envName !== "production" || this.hasProductionAccess();
+  }
+
+  refreshFlags(): void {
+    console.log("Refreshing feature flags...");
+    // Reload flags from backend
+  }
+
+  saveAllChanges(): void {
+    console.log("Saving all changes...");
+    this.featureFlags.forEach((flag) => (flag.hasChanges = false));
+  }
+
+  viewFlagHistory(flag: any): void {
+    console.log("Viewing history for flag:", flag.name);
+  }
+
+  duplicateFlag(flag: any): void {
+    console.log("Duplicating flag:", flag.name);
+  }
+
+  archiveFlag(flag: any): void {
+    if (
+      confirm(
+        `Archive flag "${flag.name}"? This will disable it in all environments.`,
+      )
+    ) {
+      flag.status = "archived";
+      flag.environments.forEach((env: any) => (env.enabled = false));
+      flag.hasChanges = true;
+      console.log("Flag archived:", flag.name);
+    }
+  }
+
+  openRolloutConfig(flag: any, environment: any): void {
+    console.log("Opening rollout config for:", flag.name, environment.name);
+  }
+
+  createNewFlag(): void {
+    console.log("Creating new feature flag...");
+  }
+
+  private hasProductionAccess(): boolean {
+    // Mock permission check
+    return true;
+  }
+}
+```

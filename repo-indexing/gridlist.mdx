@@ -1,0 +1,1647 @@
+---
+title: GridList Components
+---
+
+# GridList Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate grid list functionality with required hierarchical structure. The GridList component group provides a comprehensive solution for creating responsive grid layouts with flexible tile arrangements, supporting various content types from image galleries to dashboard widgets with proper Material Design styling and behavior.
+
+### When to Use
+
+- **Image Galleries**: When displaying collections of images, photos, or media content in a responsive grid layout
+- **Dashboard Layouts**: For creating dashboard interfaces with widgets, cards, or metrics arranged in a structured grid
+- **Product Catalogs**: When showcasing products, services, or items in a grid format with consistent spacing and alignment
+- **Portfolio Displays**: For presenting portfolios, projects, or creative works in an organized grid structure
+- **Content Grids**: When organizing various types of content (articles, videos, documents) in a visually appealing grid layout
+- **Responsive Layouts**: For layouts that need to adapt to different screen sizes while maintaining grid structure
+- **Uniform Content Display**: When you need consistent sizing and spacing for content items of varying types
+- **Interactive Galleries**: For creating interactive grid interfaces with hover effects, selection, and navigation
+
+### Architecture
+
+**Critical/Strong Coupling**: The GridList component group follows a required hierarchical structure where components must be used together in specific parent-child relationships. The architecture is built around:
+
+- **Required parent-child relationships**: `mat-grid-list` serves as the mandatory container that defines grid structure and behavior
+- **Shared layout context**: Grid list manages column distribution, spacing, and responsive behavior for all contained tiles
+- **Compositional hierarchy**: Grid tiles and their content components work together as a unified layout system
+
+### Component Interdependencies
+
+The GridList component group requires strict composition patterns:
+
+- **`mat-grid-list`** → Required root container that defines grid columns, spacing, and layout behavior
+- **`mat-grid-tile`** → Individual grid items that must be direct children of `mat-grid-list`
+- **`mat-grid-tile-header`** → Optional header content for tiles (child of `mat-grid-tile`)
+- **`mat-grid-tile-footer`** → Optional footer content for tiles (child of `mat-grid-tile`)
+- **`mat-grid-tile-text`** → Text content component used within headers and footers (child of header/footer)
+
+## Components
+
+### MatGridList {Primary Container Component}
+
+The mandatory root container component that defines the grid structure and manages tile layout behavior.
+
+**Purpose:** Serves as the foundational grid container that establishes column count, spacing, row heights, and responsive behavior for all contained grid tiles.
+
+**Interface:**
+
+```typescript
+interface MatGridListProps {
+  cols: number; // Number of columns in the grid (required)
+  gutterSize?: string; // Size of gaps between tiles (default: '1px')
+  rowHeight?: string | number; // Height strategy: ratio like '4:3', fixed like '100px', or 'fit'
+}
+```
+
+**Dependencies:** Requires Angular Material's grid-list module and mat-grid-tile children
+**Provides:** Grid layout context, column distribution, and spacing coordination for all child tiles
+
+**Usage Example:**
+
+```typescript
+import { MatGridListModule } from "@angular/material/grid-list";
+
+@Component({
+  selector: "app-photo-gallery",
+  template: `
+    <mat-grid-list cols="4" rowHeight="200px" gutterSize="4px">
+      <mat-grid-tile *ngFor="let photo of photos">
+        <img [src]="photo.url" [alt]="photo.title" />
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  imports: [MatGridListModule],
+})
+export class PhotoGalleryComponent {
+  photos = [
+    { url: "assets/photo1.jpg", title: "Photo 1" },
+    { url: "assets/photo2.jpg", title: "Photo 2" },
+    // ... more photos
+  ];
+}
+```
+
+### MatGridTile {Grid Item Component}
+
+Individual grid item component that occupies cells within the grid list and can span multiple columns or rows.
+
+**Purpose:** Represents a single item in the grid that can contain content and optionally span multiple grid cells for flexible layout arrangements.
+
+**Interface:**
+
+```typescript
+interface MatGridTileProps {
+  colspan?: number; // Number of columns the tile spans (default: 1)
+  rowspan?: number; // Number of rows the tile spans (default: 1)
+  // Content provided through content projection
+}
+```
+
+**Context Dependencies:** Must be used within `mat-grid-list`
+**Parent Requirements:** Required parent component is `mat-grid-list`
+**Provides:** Individual grid cell container with optional spanning capabilities
+
+**Usage Example:**
+
+```html
+<mat-grid-list cols="4" rowHeight="100px">
+  <!-- Regular tile (1x1) -->
+  <mat-grid-tile>
+    <p>Regular tile content</p>
+  </mat-grid-tile>
+
+  <!-- Wide tile spanning 2 columns -->
+  <mat-grid-tile colspan="2">
+    <p>Wide tile content</p>
+  </mat-grid-tile>
+
+  <!-- Tall tile spanning 2 rows -->
+  <mat-grid-tile rowspan="2">
+    <p>Tall tile content</p>
+  </mat-grid-tile>
+
+  <!-- Large tile spanning 2x2 -->
+  <mat-grid-tile colspan="2" rowspan="2">
+    <p>Large tile content</p>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+### MatGridTileHeader {Tile Header Component}
+
+Component for displaying header content at the top of a grid tile with Material Design styling.
+
+**Purpose:** Provides a structured header area for grid tiles that can contain titles, subtitles, and interactive elements with proper styling and positioning.
+
+**Interface:**
+
+```typescript
+interface MatGridTileHeaderProps {
+  // Content projection component - no direct props
+  // Header content provided through content projection
+  // Automatically positioned at top of tile with proper styling
+}
+```
+
+**Context Dependencies:** Must be used within `mat-grid-tile`
+**Parent Requirements:** Required parent component is `mat-grid-tile`
+**Provides:** Header positioning, background styling, and text contrast for tile headers
+
+**Usage Example:**
+
+```html
+<mat-grid-list cols="3" rowHeight="200px">
+  <mat-grid-tile>
+    <mat-grid-tile-header>
+      <h3 mat-line>Article Title</h3>
+      <p mat-line>Published: March 2024</p>
+    </mat-grid-tile-header>
+    <img src="assets/article-image.jpg" alt="Article" />
+  </mat-grid-tile>
+
+  <!-- Header with action button -->
+  <mat-grid-tile>
+    <mat-grid-tile-header>
+      <h3>Dashboard Widget</h3>
+      <button mat-icon-button>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-grid-tile-header>
+    <div class="widget-content">Widget data...</div>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+### MatGridTileFooter {Tile Footer Component}
+
+Component for displaying footer content at the bottom of a grid tile with Material Design styling.
+
+**Purpose:** Provides a structured footer area for grid tiles that can contain captions, metadata, actions, or additional information with proper styling and positioning.
+
+**Interface:**
+
+```typescript
+interface MatGridTileFooterProps {
+  // Content projection component - no direct props
+  // Footer content provided through content projection
+  // Automatically positioned at bottom of tile with proper styling
+}
+```
+
+**Context Dependencies:** Must be used within `mat-grid-tile`
+**Parent Requirements:** Required parent component is `mat-grid-tile`
+**Provides:** Footer positioning, background styling, and text contrast for tile footers
+
+**Usage Example:**
+
+```html
+<mat-grid-list cols="4" rowHeight="300px">
+  <mat-grid-tile>
+    <img src="assets/photo.jpg" alt="Photo" />
+    <mat-grid-tile-footer>
+      <h4 mat-line>Photo Caption</h4>
+      <p mat-line>Taken on March 15, 2024</p>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+
+  <!-- Footer with actions -->
+  <mat-grid-tile>
+    <div class="tile-content">Content here</div>
+    <mat-grid-tile-footer>
+      <span>Image Gallery</span>
+      <button mat-icon-button>
+        <mat-icon>favorite</mat-icon>
+      </button>
+      <button mat-icon-button>
+        <mat-icon>share</mat-icon>
+      </button>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+### MatGridTileText {Tile Text Component}
+
+Text content component specifically designed for use within grid tile headers and footers with proper Material Design typography.
+
+**Purpose:** Provides properly styled text content for tile headers and footers with appropriate line height, color contrast, and typography hierarchy.
+
+**Interface:**
+
+```typescript
+interface MatGridTileTextProps {
+  // Applied as directive to text elements
+  // Provides proper typography and contrast for tile text content
+  // Automatically handles text overflow and line height
+}
+```
+
+**Context Dependencies:** Typically used within `mat-grid-tile-header` or `mat-grid-tile-footer`
+**Parent Requirements:** Best used within tile header or footer components
+**Provides:** Text styling, contrast, and typography optimized for tile overlays
+
+**Usage Example:**
+
+```html
+<mat-grid-list cols="3" rowHeight="250px">
+  <mat-grid-tile>
+    <img src="assets/product.jpg" alt="Product" />
+
+    <mat-grid-tile-header>
+      <h3 mat-grid-tile-text>Premium Product</h3>
+    </mat-grid-tile-header>
+
+    <mat-grid-tile-footer>
+      <h4 mat-grid-tile-text>$299.99</h4>
+      <p mat-grid-tile-text>Free shipping available</p>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+
+  <!-- Multi-line text content -->
+  <mat-grid-tile>
+    <div class="content-background"></div>
+    <mat-grid-tile-footer>
+      <div mat-grid-tile-text>
+        <h4>Article Title</h4>
+        <p>
+          Brief description of the article content that provides context to the
+          reader.
+        </p>
+        <span class="metadata">March 2024 • 5 min read</span>
+      </div>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+## Integration Patterns
+
+### Basic Image Gallery
+
+```typescript
+import { MatGridListModule } from "@angular/material/grid-list";
+
+@Component({
+  selector: "app-basic-gallery",
+  template: `
+    <mat-grid-list cols="3" rowHeight="200px" gutterSize="2px">
+      <mat-grid-tile *ngFor="let image of images">
+        <img [src]="image.url" [alt]="image.alt" class="gallery-image" />
+        <mat-grid-tile-footer>
+          <h4 mat-line>{{ image.title }}</h4>
+        </mat-grid-tile-footer>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    `,
+  ],
+  imports: [MatGridListModule],
+})
+export class BasicGalleryComponent {
+  images = [
+    {
+      url: "assets/gallery1.jpg",
+      title: "Sunset View",
+      alt: "Beautiful sunset",
+    },
+    {
+      url: "assets/gallery2.jpg",
+      title: "Mountain Peak",
+      alt: "Snow-capped mountain",
+    },
+    {
+      url: "assets/gallery3.jpg",
+      title: "Ocean Waves",
+      alt: "Crashing ocean waves",
+    },
+  ];
+}
+```
+
+### Advanced Dashboard Layout
+
+```typescript
+import { MatGridListModule } from "@angular/material/grid-list";
+import { MatCardModule } from "@angular/material/card";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-dashboard-grid",
+  template: `
+    <mat-grid-list
+      [cols]="breakpoint"
+      rowHeight="300px"
+      gutterSize="16px"
+      class="dashboard-grid"
+    >
+      <!-- Large metric tile -->
+      <mat-grid-tile [colspan]="breakpoint === 1 ? 1 : 2" rowspan="1">
+        <mat-grid-tile-header>
+          <h3>Monthly Revenue</h3>
+          <button mat-icon-button (click)="refreshData('revenue')">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </mat-grid-tile-header>
+
+        <div class="metric-content">
+          <div class="metric-value">{{ revenue | currency }}</div>
+          <div class="metric-change" [class.positive]="revenueChange > 0">
+            <mat-icon>{{
+              revenueChange > 0 ? "trending_up" : "trending_down"
+            }}</mat-icon>
+            {{ revenueChange }}%
+          </div>
+        </div>
+
+        <mat-grid-tile-footer>
+          <span>Compared to last month</span>
+          <button mat-button>VIEW DETAILS</button>
+        </mat-grid-tile-footer>
+      </mat-grid-tile>
+
+      <!-- Chart tile -->
+      <mat-grid-tile [colspan]="breakpoint === 1 ? 1 : 2" rowspan="2">
+        <mat-grid-tile-header>
+          <h3>Sales Analytics</h3>
+          <div class="header-controls">
+            <mat-select [(value)]="chartPeriod" placeholder="Period">
+              <mat-option value="week">This Week</mat-option>
+              <mat-option value="month">This Month</mat-option>
+              <mat-option value="quarter">This Quarter</mat-option>
+            </mat-select>
+          </div>
+        </mat-grid-tile-header>
+
+        <div class="chart-container">
+          <!-- Chart component would go here -->
+          <div class="chart-placeholder">
+            <mat-icon>bar_chart</mat-icon>
+            <p>Sales Chart Visualization</p>
+          </div>
+        </div>
+      </mat-grid-tile>
+
+      <!-- Quick stats tiles -->
+      <mat-grid-tile
+        *ngFor="let stat of quickStats"
+        [colspan]="breakpoint === 1 ? 1 : 1"
+      >
+        <mat-grid-tile-header>
+          <h4>{{ stat.title }}</h4>
+          <mat-icon [style.color]="stat.iconColor">{{ stat.icon }}</mat-icon>
+        </mat-grid-tile-header>
+
+        <div class="stat-content">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-subtitle">{{ stat.subtitle }}</div>
+        </div>
+
+        <mat-grid-tile-footer>
+          <button mat-button color="primary">{{ stat.action }}</button>
+        </mat-grid-tile-footer>
+      </mat-grid-tile>
+
+      <!-- Recent activity tile -->
+      <mat-grid-tile [colspan]="breakpoint === 1 ? 1 : 3" rowspan="1">
+        <mat-grid-tile-header>
+          <h3>Recent Activity</h3>
+          <button mat-button>VIEW ALL</button>
+        </mat-grid-tile-header>
+
+        <div class="activity-list">
+          <div *ngFor="let activity of recentActivities" class="activity-item">
+            <mat-icon>{{ activity.icon }}</mat-icon>
+            <div class="activity-details">
+              <span class="activity-text">{{ activity.text }}</span>
+              <span class="activity-time">{{ activity.time }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  `,
+  styles: [
+    `
+      .dashboard-grid {
+        margin: 16px;
+      }
+
+      .metric-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 48px;
+        font-weight: bold;
+        color: #2e7d32;
+      }
+
+      .metric-change {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 16px;
+        color: #d32f2f;
+      }
+
+      .metric-change.positive {
+        color: #2e7d32;
+      }
+
+      .chart-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .chart-placeholder {
+        text-align: center;
+        color: #666;
+      }
+
+      .chart-placeholder mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+      }
+
+      .stat-content {
+        text-align: center;
+        padding: 16px;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1976d2;
+      }
+
+      .stat-subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+      }
+
+      .activity-list {
+        padding: 16px;
+        overflow-y: auto;
+        height: 100%;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .activity-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .activity-text {
+        font-size: 14px;
+        color: #333;
+      }
+
+      .activity-time {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-grid {
+          margin: 8px;
+        }
+      }
+    `,
+  ],
+  imports: [MatGridListModule, MatCardModule, MatButtonModule, MatIconModule],
+})
+export class DashboardGridComponent implements OnInit {
+  breakpoint = 4;
+  revenue = 125000;
+  revenueChange = 12.5;
+  chartPeriod = "month";
+
+  quickStats = [
+    {
+      title: "Total Orders",
+      value: "1,234",
+      subtitle: "This month",
+      icon: "shopping_cart",
+      iconColor: "#1976d2",
+      action: "VIEW ORDERS",
+    },
+    {
+      title: "New Customers",
+      value: "89",
+      subtitle: "This week",
+      icon: "person_add",
+      iconColor: "#388e3c",
+      action: "VIEW CUSTOMERS",
+    },
+    {
+      title: "Conversion Rate",
+      value: "3.2%",
+      subtitle: "Up from last month",
+      icon: "trending_up",
+      iconColor: "#f57c00",
+      action: "VIEW ANALYTICS",
+    },
+  ];
+
+  recentActivities = [
+    {
+      icon: "shopping_cart",
+      text: "New order #1234 received",
+      time: "2 mins ago",
+    },
+    {
+      icon: "person",
+      text: "Customer John Doe registered",
+      time: "15 mins ago",
+    },
+    {
+      icon: "payment",
+      text: "Payment processed for order #1233",
+      time: "1 hour ago",
+    },
+    {
+      icon: "inventory",
+      text: 'Product "Widget A" low stock alert',
+      time: "2 hours ago",
+    },
+  ];
+
+  @HostListener("window:resize", ["$event"])
+  onResize(event: any) {
+    this.updateBreakpoint(event.target.innerWidth);
+  }
+
+  ngOnInit() {
+    this.updateBreakpoint(window.innerWidth);
+  }
+
+  updateBreakpoint(width: number) {
+    if (width <= 600) {
+      this.breakpoint = 1;
+    } else if (width <= 960) {
+      this.breakpoint = 2;
+    } else if (width <= 1280) {
+      this.breakpoint = 3;
+    } else {
+      this.breakpoint = 4;
+    }
+  }
+
+  refreshData(type: string) {
+    console.log(`Refreshing ${type} data`);
+    // Implement data refresh logic
+  }
+}
+```
+
+### Common Variations
+
+#### Responsive Product Grid
+
+```html
+<mat-grid-list [cols]="getColsForScreen()" rowHeight="400px" gutterSize="8px">
+  <mat-grid-tile *ngFor="let product of products">
+    <img [src]="product.imageUrl" [alt]="product.name" class="product-image" />
+
+    <mat-grid-tile-header>
+      <div class="product-badge" *ngIf="product.isNew">NEW</div>
+      <button mat-icon-button (click)="toggleWishlist(product)">
+        <mat-icon [color]="isInWishlist(product) ? 'warn' : 'default'">
+          {{ isInWishlist(product) ? 'favorite' : 'favorite_border' }}
+        </mat-icon>
+      </button>
+    </mat-grid-tile-header>
+
+    <mat-grid-tile-footer>
+      <div class="product-info">
+        <h4 mat-line>{{ product.name }}</h4>
+        <p mat-line class="product-price">${{ product.price }}</p>
+        <div class="product-rating">
+          <mat-icon *ngFor="let star of getStars(product.rating)"
+            >{{ star }}</mat-icon
+          >
+          <span>({{ product.reviewCount }})</span>
+        </div>
+      </div>
+      <button mat-mini-fab color="primary" (click)="addToCart(product)">
+        <mat-icon>add_shopping_cart</mat-icon>
+      </button>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+#### Portfolio Showcase
+
+```html
+<mat-grid-list cols="3" rowHeight="350px" gutterSize="12px">
+  <mat-grid-tile
+    *ngFor="let project of portfolio"
+    [colspan]="project.featured ? 2 : 1"
+    [rowspan]="project.featured ? 2 : 1"
+  >
+    <div class="portfolio-item" (click)="openProject(project)">
+      <img [src]="project.thumbnailUrl" [alt]="project.title" />
+      <div class="overlay">
+        <mat-icon>visibility</mat-icon>
+        <span>View Project</span>
+      </div>
+    </div>
+
+    <mat-grid-tile-footer>
+      <div class="project-details">
+        <h4 mat-line>{{ project.title }}</h4>
+        <p mat-line>{{ project.category }}</p>
+        <div class="project-tags">
+          <mat-chip-set>
+            <mat-chip *ngFor="let tag of project.tags.slice(0, 3)">
+              {{ tag }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+#### Media Gallery with Categories
+
+```html
+<mat-grid-list cols="4" rowHeight="1:1" gutterSize="4px">
+  <mat-grid-tile
+    *ngFor="let media of filteredMedia"
+    [colspan]="media.type === 'video' ? 2 : 1"
+  >
+    <div class="media-container">
+      <img
+        *ngIf="media.type === 'image'"
+        [src]="media.url"
+        [alt]="media.title"
+      />
+
+      <video
+        *ngIf="media.type === 'video'"
+        [poster]="media.thumbnailUrl"
+        controls
+      >
+        <source [src]="media.url" type="video/mp4" />
+      </video>
+
+      <div class="media-overlay">
+        <mat-icon
+          >{{ media.type === 'video' ? 'play_circle' : 'fullscreen' }}</mat-icon
+        >
+      </div>
+    </div>
+
+    <mat-grid-tile-header *ngIf="media.category">
+      <mat-chip [color]="getCategoryColor(media.category)">
+        {{ media.category }}
+      </mat-chip>
+    </mat-grid-tile-header>
+
+    <mat-grid-tile-footer>
+      <span mat-line>{{ media.title }}</span>
+      <span mat-line class="media-duration">{{ media.duration }}</span>
+    </mat-grid-tile-footer>
+  </mat-grid-tile>
+</mat-grid-list>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **Grid List → Tiles**: The `MatGridList` distributes available space among tiles based on column count and span settings
+2. **Tiles → Content**: Grid tiles provide positioning and sizing context for their content and header/footer components
+3. **Layout → Responsive**: Grid list handles responsive behavior by adjusting column count and tile sizing based on screen size
+4. **Container → Spacing**: Grid list manages gutters and spacing between all tiles uniformly
+
+### Context Sharing
+
+- **Layout Context**: `MatGridList` provides grid structure, column distribution, and spacing configuration to all tiles
+- **Positioning Context**: Grid tiles coordinate with headers and footers for proper overlay positioning
+- **Responsive Context**: Grid list manages responsive behavior and breakpoint handling for the entire grid
+- **Theme Integration**: All components inherit Material Design theme colors and typography
+
+### Event Handling
+
+- **Tile Interactions**: Individual tiles can handle click, hover, and other interaction events
+- **Content Events**: Images, videos, and interactive content within tiles manage their own events
+- **Header/Footer Actions**: Interactive elements in headers and footers handle their own events while maintaining proper z-index
+- **Grid Events**: The grid container can handle overall layout events like resize or orientation changes
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate column count**: Select column counts that work well across different screen sizes (consider responsive breakpoints)
+- **Use consistent row heights**: Maintain visual harmony by using consistent row height strategies (ratios work better than fixed heights)
+- **Optimize tile spanning**: Use colspan and rowspan strategically to create visual hierarchy without breaking grid alignment
+- **Provide meaningful content**: Ensure tiles contain purposeful content that benefits from grid layout presentation
+- **Consider loading performance**: Lazy load images and content for large grids to improve initial page load times
+
+### Accessibility
+
+- **Image alt text**: Always provide meaningful alt text for images within grid tiles
+- **Keyboard navigation**: Ensure tiles and their interactive elements support proper keyboard navigation
+- **Focus management**: Implement clear focus indicators for interactive tiles and their content
+- **Screen reader support**: Use appropriate ARIA labels and roles for complex tile content
+- **Content hierarchy**: Maintain proper heading hierarchy within tile headers and content
+
+### Performance
+
+- **Virtual scrolling**: Consider implementing virtual scrolling for very large grids to optimize rendering performance
+- **Image optimization**: Use appropriate image sizes and formats, consider responsive images for different screen densities
+- **Lazy loading**: Implement lazy loading for tile content that's not immediately visible
+- **Change detection**: Use OnPush change detection strategy where appropriate to minimize unnecessary re-renders
+- **Memory management**: Properly handle component lifecycle for dynamically generated grid content
+
+## Common Patterns
+
+### Pattern 1: Interactive Photo Gallery
+
+```typescript
+@Component({
+  template: `
+    <div class="gallery-container">
+      <div class="gallery-controls">
+        <mat-form-field appearance="outline">
+          <mat-label>Filter by Category</mat-label>
+          <mat-select
+            [(value)]="selectedCategory"
+            (selectionChange)="filterPhotos()"
+          >
+            <mat-option value="">All Photos</mat-option>
+            <mat-option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-button-toggle-group [(value)]="viewMode" (change)="updateLayout()">
+          <mat-button-toggle value="grid">
+            <mat-icon>grid_view</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="list">
+            <mat-icon>view_list</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <mat-grid-list
+        [cols]="getColumnsForMode()"
+        [rowHeight]="getRowHeightForMode()"
+        gutterSize="8px"
+        class="photo-gallery"
+      >
+        <mat-grid-tile
+          *ngFor="let photo of filteredPhotos; trackBy: trackByPhotoId"
+          (click)="openLightbox(photo)"
+          class="photo-tile"
+        >
+          <div class="photo-container">
+            <img
+              [src]="photo.thumbnailUrl"
+              [alt]="photo.title"
+              class="photo-image"
+              (load)="onImageLoad(photo)"
+              (error)="onImageError(photo)"
+            />
+
+            <div class="photo-overlay">
+              <div class="overlay-actions">
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); toggleFavorite(photo)"
+                >
+                  <mat-icon [color]="photo.isFavorite ? 'warn' : 'default'">
+                    {{ photo.isFavorite ? "favorite" : "favorite_border" }}
+                  </mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); sharePhoto(photo)"
+                >
+                  <mat-icon>share</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); downloadPhoto(photo)"
+                >
+                  <mat-icon>download</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <mat-grid-tile-header *ngIf="viewMode === 'list'">
+            <div class="photo-metadata">
+              <mat-chip [color]="getCategoryColor(photo.category)">
+                {{ photo.category }}
+              </mat-chip>
+              <span class="photo-date">{{
+                photo.dateTaken | date: "shortDate"
+              }}</span>
+            </div>
+          </mat-grid-tile-header>
+
+          <mat-grid-tile-footer>
+            <div class="photo-info">
+              <h4 mat-line>{{ photo.title }}</h4>
+              <p mat-line *ngIf="viewMode === 'list'">
+                {{ photo.description }}
+              </p>
+              <div class="photo-stats">
+                <span class="likes">
+                  <mat-icon>favorite</mat-icon>
+                  {{ photo.likes }}
+                </span>
+                <span class="views">
+                  <mat-icon>visibility</mat-icon>
+                  {{ photo.views }}
+                </span>
+              </div>
+            </div>
+          </mat-grid-tile-footer>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  `,
+  styles: [
+    `
+      .gallery-container {
+        padding: 16px;
+      }
+
+      .gallery-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .photo-gallery {
+        min-height: 400px;
+      }
+
+      .photo-tile {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .photo-tile:hover {
+        transform: scale(1.02);
+      }
+
+      .photo-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .photo-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      .photo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 4px;
+      }
+
+      .photo-tile:hover .photo-overlay {
+        opacity: 1;
+      }
+
+      .overlay-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .overlay-actions button {
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .photo-metadata {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .photo-date {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .photo-info {
+        width: 100%;
+      }
+
+      .photo-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 4px;
+      }
+
+      .photo-stats span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .photo-stats mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .gallery-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    `,
+  ],
+})
+export class InteractivePhotoGalleryComponent {
+  selectedCategory = "";
+  viewMode = "grid";
+
+  photos: Photo[] = [];
+  filteredPhotos: Photo[] = [];
+  categories = ["Nature", "Architecture", "People", "Travel", "Art"];
+
+  getColumnsForMode(): number {
+    const screenWidth = window.innerWidth;
+    if (this.viewMode === "list") {
+      return screenWidth > 768 ? 2 : 1;
+    }
+
+    if (screenWidth > 1200) return 5;
+    if (screenWidth > 960) return 4;
+    if (screenWidth > 600) return 3;
+    return 2;
+  }
+
+  getRowHeightForMode(): string {
+    return this.viewMode === "list" ? "200px" : "1:1";
+  }
+
+  filterPhotos(): void {
+    this.filteredPhotos = this.selectedCategory
+      ? this.photos.filter((photo) => photo.category === this.selectedCategory)
+      : this.photos;
+  }
+
+  updateLayout(): void {
+    // Force grid recalculation
+    setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+  }
+
+  trackByPhotoId(index: number, photo: Photo): string {
+    return photo.id;
+  }
+
+  toggleFavorite(photo: Photo): void {
+    photo.isFavorite = !photo.isFavorite;
+    if (photo.isFavorite) {
+      photo.likes++;
+    } else {
+      photo.likes--;
+    }
+  }
+
+  sharePhoto(photo: Photo): void {
+    if (navigator.share) {
+      navigator.share({
+        title: photo.title,
+        text: photo.description,
+        url: photo.fullUrl,
+      });
+    }
+  }
+
+  downloadPhoto(photo: Photo): void {
+    const link = document.createElement("a");
+    link.href = photo.fullUrl;
+    link.download = `${photo.title}.jpg`;
+    link.click();
+  }
+
+  openLightbox(photo: Photo): void {
+    // Implement lightbox functionality
+    photo.views++;
+    console.log("Opening lightbox for:", photo.title);
+  }
+
+  getCategoryColor(category: string): string {
+    const colors: { [key: string]: string } = {
+      Nature: "primary",
+      Architecture: "accent",
+      People: "warn",
+      Travel: "primary",
+      Art: "accent",
+    };
+    return colors[category] || "primary";
+  }
+
+  onImageLoad(photo: Photo): void {
+    console.log("Image loaded:", photo.title);
+  }
+
+  onImageError(photo: Photo): void {
+    console.error("Failed to load image:", photo.title);
+    // Set fallback image
+  }
+}
+
+interface Photo {
+  id: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  fullUrl: string;
+  category: string;
+  dateTaken: Date;
+  likes: number;
+  views: number;
+  isFavorite: boolean;
+}
+```
+
+### Pattern 2: Product Showcase Grid
+
+```typescript
+@Component({
+  template: `
+    <div class="product-showcase">
+      <div class="showcase-header">
+        <h2>Featured Products</h2>
+        <div class="header-controls">
+          <mat-form-field appearance="outline">
+            <mat-label>Sort by</mat-label>
+            <mat-select [(value)]="sortBy" (selectionChange)="sortProducts()">
+              <mat-option value="featured">Featured</mat-option>
+              <mat-option value="price-low">Price: Low to High</mat-option>
+              <mat-option value="price-high">Price: High to Low</mat-option>
+              <mat-option value="rating">Highest Rated</mat-option>
+              <mat-option value="newest">Newest</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <mat-grid-list
+        [cols]="responsiveCols"
+        rowHeight="450px"
+        gutterSize="16px"
+        class="products-grid">
+
+        <mat-grid-tile
+          *ngFor="let product of sortedProducts; trackBy: trackByProductId"
+          [colspan]="product.featured ? 2 : 1"
+          [rowspan]="product.featured ? 2 : 1"
+          class="product-tile">
+
+          <div class="product-container">
+            <!-- Product image with hover effects -->
+            <div class="product-image-container">
+              <img
+                [src]="product.primaryImage"
+                [alt]="product.name"
+                class="product-image primary"
+                (mouseenter)="showSecondaryImage(product)"
+                (mouseleave)="showPrimaryImage(product)">
+
+              <img
+                *ngIf="product.secondaryImage"
+                [src]="product.secondaryImage"
+                [alt]="product.name + ' alternate view'"
+                class="product-image secondary"
+                [class.visible]="product.showSecondary">
+
+              <!-- Product badges -->
+              <div class="product-badges">
+                <mat-chip *ngIf="product.isNew" color="accent" class="badge">
+                  NEW
+                </mat-chip>
+                <mat-chip *ngIf="product.discount > 0" color="warn" class="badge">
+                  -{{ product.discount }}%
+                </mat-chip>
+                <mat-chip *ngIf="product.isBestseller" color="primary" class="badge">
+                  BESTSELLER
+                </mat-chip>
+              </div>
+
+              <!-- Quick action buttons -->
+              <div class="quick-actions">
+                <button mat-mini-fab (click)="quickView(product)" title="Quick View">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button
+                  mat-mini-fab
+                  (click)="toggleWishlist(product)"
+                  [color]="product.inWishlist ? 'warn' : 'default'"
+                  title="Add to Wishlist">
+                  <mat-icon>{{ product.inWishlist ? 'favorite' : 'favorite_border' }}</mat-icon>
+                </button>
+                <button mat-mini-fab (click)="compareProduct(product)" title="Compare">
+                  <mat-icon>compare_arrows</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Product content -->
+            <div class="product-content">
+              <div class="product-rating">
+                <div class="stars">
+                  <mat-icon
+                    *ngFor="let star of getStarArray(product.rating)"
+                    [class]="star.type">
+                    {{ star.icon }}
+                  </mat-icon>
+                </div>
+                <span class="rating-text">({{ product.reviewCount }})</span>
+              </div>
+
+              <h3 class="product-name">{{ product.name }}</h3>
+              <p class="product-brand">{{ product.brand }}</p>
+
+              <div class="product-pricing">
+                <span class="current-price">${{ product.currentPrice }}</span>
+                <span
+                  *ngIf="product.originalPrice > product.currentPrice"
+                  class="original-price">
+                  ${{ product.originalPrice }}
+                </span>
+              </div>
+
+              <div class="product-variants" *ngIf="product.variants?.length">
+                <span class="variants-label">Available in:</span>
+                <div class="color-variants">
+                  <button
+                    *ngFor="let color of product.variants.slice(0, 4)"
+                    class="color-swatch"
+                    [style.background-color]="color.hex"
+                    [title]="color.name"
+                    (click)="selectVariant(product, color)">
+                  </button>
+                  <span
+                    *ngIf="product.variants.length > 4"
+                    class="more-variants">
+                    +{{ product.variants.length - 4 }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <mat-grid-tile-footer>
+            <div class="product-actions">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="addToCart(product)"
+                [disabled]="!product.inStock"
+                class="add-to-cart-btn">
+                {{ product.inStock ? 'ADD TO CART' : 'OUT OF STOCK' }}
+              </button>
+
+              <button mat-stroked-button (click)="viewProduct(product)">
+                VIEW DETAILS
+              </button>
+            </div>
+          </mat-grid-tile-footer>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  `,
+  styles: [`
+    .product-showcase {
+      padding: 24px;
+    }
+
+    .showcase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .showcase-header h2 {
+      margin: 0;
+      color: #333;
+    }
+
+    .products-grid {
+      margin-top: 16px;
+    }
+
+    .product-tile {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-image-container {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-image.secondary {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+    }
+
+    .product-image.secondary.visible {
+      opacity: 1;
+    }
+
+    .product-badges {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: bold;
+      min-height: 20px;
+    }
+
+    .quick-actions {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-tile:hover .quick-actions {
+      opacity: 1;
+    }
+
+    .product-content {
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .product-rating {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .stars {
+      display: flex;
+      gap: 2px;
+    }
+
+    .stars mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .stars mat-icon.filled {
+      color: #ffc107;
+    }
+
+    .stars mat-icon.half {
+      color: #ffc107;
+    }
+
+    .stars mat-icon.empty {
+      color: #e0e0e0;
+    }
+
+    .rating-text {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .product-name {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .product-brand {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .product-pricing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .current-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+
+    .original-price {
+      font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .product-variants {
+      margin-bottom: 12px;
+    }
+
+    .variants-label {
+      font-size: 12px;
+      color: #666;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .color-variants {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .color-swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .more-variants {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .product-actions {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      padding: 0 16px;
+    }
+
+    .add-to-cart-btn {
+      flex: 1;
+    }
+
+    @media (max-width: 1200px) {
+      .showcase-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .product-showcase {
+        padding: 16px;
+      }
+
+      .product-actions {
+        flex-direction: column;
+      }
+    }
+  `]
+})
+export class ProductShowcaseGridComponent implements OnInit {
+  sortBy = 'featured';
+  responsiveCols = 4;
+
+  products: Product[] = [];
+  sortedProducts: Product[] = [];
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.updateResponsiveCols(event.target.innerWidth);
+  }
+
+  ngOnInit() {
+    this.updateResponsiveCols(window.innerWidth);
+    this.loadProducts();
+    this.sortProducts();
+  }
+
+  updateResponsiveCols(width: number) {
+    if (width > 1400) {
+      this.responsiveCols = 5;
+    } else if (width > 1100) {
+      this.responsiveCols = 4;
+    } else if (width > 800) {
+      this.responsiveCols = 3;
+    } else if (width > 500) {
+      this.responsiveCols = 2;
+    } else {
+      this.responsiveCols = 1;
+    }
+  }
+
+  loadProducts() {
+    // Load products from service
+    this.products = [
+      // Sample product data
+    ];
+  }
+
+  sortProducts() {
+    switch (this.sortBy) {
+      case 'price-low':
+        this.sortedProducts = [...this.products].sort((a, b) => a.currentPrice - b.currentPrice);
+        break;
+      case 'price-high':
+        this.sortedProducts = [...this.products].sort((a, b) => b.currentPrice - a.currentPrice);
+        break;
+      case 'rating':
+        this.sortedProducts = [...this.products].sort((a, b) => b.rating - a.rating);
+        break;
+      case 'newest':
+        this.sortedProducts = [...this.products].sort((a, b) =>
+          new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime());
+        break;
+      default:
+        this.sortedProducts = [...this.products].sort((a, b) =>
+          (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    }
+  }
+
+  trackByProductId(index: number, product: Product): string {
+    return product.id;
+  }
+
+  getStarArray(rating: number): { type: string; icon: string }[] {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push({ type: 'filled', icon: 'star' });
+    }
+
+    if (hasHalfStar) {
+      stars.push({ type: 'half', icon: 'star_half' });
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push({ type: 'empty', icon: 'star_border' });
+    }
+
+    return stars;
+  }
+
+  showSecondaryImage(product: Product) {
+    if (product.secondaryImage) {
+      product.showSecondary = true;
+    }
+  }
+
+  showPrimaryImage(product: Product) {
+    product.showSecondary = false;
+  }
+
+  quickView(product: Product) {
+    console.log('Quick view:', product.name);
+  }
+
+  toggleWishlist(product: Product) {
+    product.inWishlist = !product.inWishlist;
+  }
+
+  compareProduct(product: Product) {
+    console.log('Compare:', product.name);
+  }
+
+  selectVariant(product: Product, variant: any) {
+    console.log('Selected variant:', variant.name, 'for', product.name);
+  }
+
+  addToCart(product: Product) {
+    console.log('Add to cart:', product.name);
+  }
+
+  viewProduct(product: Product) {
+    console.log('View product details:', product.name);
+  }
+}
+
+interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  primaryImage: string;
+  secondaryImage?: string;
+  currentPrice: number;
+  originalPrice: number;
+  rating: number;
+  reviewCount: number;
+  isNew: boolean;
+  discount: number;
+  isBestseller: boolean;
+  inStock: boolean;
+  inWishlist: boolean;
+  featured: boolean;
+  dateAdded: string;
+  variants?: { name: string; hex: string }[];
+  showSecondary?: boolean;
+}
+```

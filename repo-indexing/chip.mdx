@@ -1,0 +1,669 @@
+---
+title: Chip Components
+---
+
+# Chip Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate chip functionality. The Chip component group provides a comprehensive solution for creating Material Design chips - compact elements that represent inputs, attributes, or actions. Chips allow users to enter information, make selections, filter content, or trigger actions in a visually appealing and space-efficient manner.
+
+### When to Use
+
+- **Tags and Labels**: When you need to display keywords, categories, or labels associated with content (e.g., article tags, product categories)
+- **Input Enhancement**: For creating tag-like inputs where users can add multiple items (e.g., email recipients, skill lists, filter options)
+- **Selectable Filters**: When implementing filter interfaces where users can select/deselect multiple criteria (e.g., search filters, preferences)
+- **Contact Representations**: For displaying contact chips in messaging applications or email interfaces with avatars and remove functionality
+- **Status Indicators**: When showing status information that can be interacted with or removed (e.g., applied filters, selected options)
+- **Choice Lists**: For presenting selectable options in a more compact format than traditional checkboxes or radio buttons
+- **Dynamic Lists**: When building interfaces where users can add, remove, or modify list items dynamically
+- **Form Enhancement**: For improving form interfaces with interactive elements that combine selection and removal capabilities
+
+### Architecture
+
+**Strong Coupling**: The Chip component group exhibits strong coupling with required hierarchical relationships and shared context dependencies. The architecture provides:
+
+- **Required parent-child relationships**: Container components (`MatChipSet`, `MatChipListbox`, `MatChipGrid`) manage collections of chip components
+- **Shared context dependencies**: Container components provide selection state, focus management, and keyboard navigation to child chips
+- **Communication patterns**: Event bubbling for selection changes, removal events, and form control integration
+- **Compositional hierarchy**: Specialized chip types (`MatChip`, `MatChipOption`, `MatChipRow`) must be used within appropriate containers
+
+### Component Interdependencies
+
+The Chip component group operates through a hierarchical system with specific parent-child requirements:
+
+- **`MatChipSet`** → Basic container providing focus management and chip organization (parent to `MatChip`)
+- **`MatChipListbox`** → Selectable container with form integration (parent to `MatChipOption`)
+- **`MatChipGrid`** → Advanced container with input integration (parent to `MatChipRow`)
+- **`MatChip`** → Basic chip implementation (child of `MatChipSet`)
+- **`MatChipOption`** → Selectable chip with selection state (child of `MatChipListbox`)
+- **`MatChipRow`** → Editable chip with input capabilities (child of `MatChipGrid`)
+- **Chip Actions** → Interior components for avatars, remove buttons, and trailing icons (children of chips)
+
+## Components
+
+### MatChipSet {Primary Container Component}
+
+The foundational container component that provides basic chip management, focus handling, and keyboard navigation for a collection of chips.
+
+**Purpose:** Creates a container for basic chips with focus management, keyboard navigation, and consistent spacing. Serves as the foundation for more specialized chip containers.
+
+**Interface:**
+
+```typescript
+interface MatChipSetProps {
+  // Container States
+  disabled?: boolean; // Whether the entire chip set is disabled
+  role?: string | null; // ARIA role for the chip set container
+  tabIndex?: number; // Tab order for keyboard navigation
+
+  // Content (provided through content projection)
+  // Expects MatChip components as children
+}
+```
+
+**Dependencies:** Requires Angular Material's chips module and CDK focus management
+**Provides:** Focus management, keyboard navigation, and chip organization context to child `MatChip` components
+
+**Usage Example:**
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-basic-chips",
+  template: `
+    <mat-chip-set>
+      <mat-chip>Angular</mat-chip>
+      <mat-chip>TypeScript</mat-chip>
+      <mat-chip removable (removed)="removeChip($event)">
+        JavaScript
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  `,
+  imports: [MatChipsModule, MatIconModule],
+})
+export class BasicChipsComponent {
+  removeChip(event: MatChipEvent) {
+    console.log("Chip removed:", event.chip.value);
+  }
+}
+```
+
+### MatChipListbox {Selectable Container Component}
+
+An extension of `MatChipSet` that supports chip selection and form integration, designed for use with `MatChipOption` components.
+
+**Purpose:** Provides selectable chip functionality with form control integration, supporting single or multiple selection modes and NgModel compatibility.
+
+**Interface:**
+
+```typescript
+interface MatChipListboxProps {
+  // Selection Configuration
+  multiple?: boolean; // Whether multiple chips can be selected
+  selectable?: boolean; // Whether chips can be selected
+  compareWith?: (o1: any, o2: any) => boolean; // Custom comparison function for values
+
+  // Form Integration
+  value?: any; // Current value (single chip or array of chips)
+  required?: boolean; // Whether selection is required
+  hideSingleSelectionIndicator?: boolean; // Whether to hide checkmark for single selection
+
+  // Container States
+  disabled?: boolean; // Whether the listbox is disabled
+  ariaOrientation?: "horizontal" | "vertical"; // Orientation for screen readers
+
+  // Events
+  change?: EventEmitter<MatChipListboxChange>; // Emitted when selection changes
+}
+```
+
+**Context Dependencies:** Provides selection state management and form control integration to child `MatChipOption` components
+**Parent Requirements:** Should contain `MatChipOption` components for proper functionality
+
+**Usage Example:**
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { FormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-selectable-chips",
+  template: `
+    <mat-chip-listbox
+      [(ngModel)]="selectedTags"
+      multiple
+      (change)="onSelectionChange($event)"
+    >
+      <mat-chip-option value="angular">Angular</mat-chip-option>
+      <mat-chip-option value="react">React</mat-chip-option>
+      <mat-chip-option value="vue">Vue</mat-chip-option>
+      <mat-chip-option value="svelte">Svelte</mat-chip-option>
+    </mat-chip-listbox>
+
+    <p>Selected: {{ selectedTags | json }}</p>
+  `,
+  imports: [MatChipsModule, FormsModule],
+})
+export class SelectableChipsComponent {
+  selectedTags: string[] = ["angular"];
+
+  onSelectionChange(event: MatChipListboxChange) {
+    console.log("Selection changed:", event.value);
+  }
+}
+```
+
+### MatChipGrid {Advanced Container Component}
+
+An advanced container that combines chip functionality with text input capabilities, designed for dynamic chip creation and editing.
+
+**Purpose:** Provides advanced chip management with input integration, form field compatibility, and editable chip support for dynamic user-generated chip lists.
+
+**Interface:**
+
+```typescript
+interface MatChipGridProps {
+  // Form Field Integration
+  value?: any[]; // Array of chip values
+  placeholder?: string; // Placeholder text for the input
+  required?: boolean; // Whether input is required
+  disabled?: boolean; // Whether the grid is disabled
+  errorStateMatcher?: ErrorStateMatcher; // Custom error state matching
+
+  // Form Field Control Implementation
+  id?: string; // Unique identifier
+  empty?: boolean; // Whether the grid is empty
+  focused?: boolean; // Whether the grid has focus
+  shouldLabelFloat?: boolean; // Whether label should float
+
+  // Events
+  change?: EventEmitter<MatChipGridChange>; // Emitted when chips change
+  valueChange?: EventEmitter<any>; // Emitted when value changes
+}
+```
+
+**Context Dependencies:** Provides input integration and form field compatibility to child `MatChipRow` components
+**Parent Requirements:** Should contain `MatChipRow` components and be used within `mat-form-field`
+
+**Usage Example:**
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-chip-input",
+  template: `
+    <mat-form-field appearance="outline">
+      <mat-label>Skills</mat-label>
+      <mat-chip-grid #chipGrid [(ngModel)]="skills">
+        <mat-chip-row
+          *ngFor="let skill of skills"
+          (removed)="removeSkill(skill)"
+          [editable]="true"
+          (edited)="editSkill(skill, $event)"
+        >
+          {{ skill }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-row>
+      </mat-chip-grid>
+      <input
+        placeholder="Add skill..."
+        [matChipInputFor]="chipGrid"
+        (matChipInputTokenEnd)="addSkill($event)"
+      />
+    </mat-form-field>
+  `,
+  imports: [MatChipsModule, MatFormFieldModule, MatInputModule, MatIconModule],
+})
+export class ChipInputComponent {
+  skills: string[] = ["Angular", "TypeScript"];
+
+  addSkill(event: MatChipInputEvent) {
+    const value = (event.value || "").trim();
+    if (value) {
+      this.skills.push(value);
+    }
+    event.chipInput!.clear();
+  }
+
+  removeSkill(skill: string) {
+    const index = this.skills.indexOf(skill);
+    if (index >= 0) {
+      this.skills.splice(index, 1);
+    }
+  }
+
+  editSkill(oldSkill: string, event: MatChipEditedEvent) {
+    const index = this.skills.indexOf(oldSkill);
+    if (index >= 0) {
+      this.skills[index] = event.value;
+    }
+  }
+}
+```
+
+### MatChip {Basic Chip Component}
+
+The foundational chip component providing core chip functionality with optional removal and interaction capabilities.
+
+**Purpose:** Creates individual chip elements with Material Design styling, interaction support, and optional removal functionality for basic chip use cases.
+
+**Interface:**
+
+```typescript
+interface MatChipProps {
+  // Identification
+  id?: string; // Unique identifier for the chip
+  value?: any; // Value associated with the chip
+
+  // Visual States
+  color?: string | null; // Theme color (M2 themes only)
+  highlighted?: boolean; // Whether chip appears selected
+  disabled?: boolean; // Whether chip is disabled
+
+  // Interaction
+  removable?: boolean; // Whether chip can be removed
+  disableRipple?: boolean; // Whether to disable ripple effect
+  role?: string | null; // ARIA role
+
+  // Accessibility
+  ariaLabel?: string | null; // ARIA label for chip content
+  ariaDescription?: string | null; // ARIA description
+
+  // Events
+  removed?: EventEmitter<MatChipEvent>; // Emitted when chip is removed
+  destroyed?: EventEmitter<MatChipEvent>; // Emitted when chip is destroyed
+}
+```
+
+**Context Dependencies:** Requires parent `MatChipSet` for proper focus management and keyboard navigation
+**Parent Requirements:** Must be used within `MatChipSet` or its extensions
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatChipSet
+<mat-chip-set>
+  <mat-chip
+    value="angular"
+    removable="true"
+    (removed)="onChipRemoved($event)"
+    highlighted="true">
+    Angular Framework
+    <mat-icon matChipRemove>cancel</mat-icon>
+  </mat-chip>
+</mat-chip-set>
+```
+
+### MatChipOption {Selectable Chip Component}
+
+An extension of `MatChip` that supports selection states and is designed for use within `MatChipListbox`.
+
+**Purpose:** Provides selectable chip functionality with selection state management, visual selection indicators, and integration with listbox selection logic.
+
+**Interface:**
+
+```typescript
+interface MatChipOptionProps {
+  // Selection States
+  selected?: boolean; // Whether chip is selected
+  selectable?: boolean; // Whether chip can be selected
+
+  // Inherited from MatChip
+  id?: string;
+  value?: any;
+  color?: string | null;
+  highlighted?: boolean;
+  disabled?: boolean;
+  removable?: boolean;
+  disableRipple?: boolean;
+
+  // Events
+  selectionChange?: EventEmitter<MatChipSelectionChange>; // Emitted when selection changes
+  removed?: EventEmitter<MatChipEvent>;
+  destroyed?: EventEmitter<MatChipEvent>;
+}
+```
+
+**Context Dependencies:** Requires parent `MatChipListbox` for selection state management
+**Parent Requirements:** Must be used within `MatChipListbox` for proper functionality
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatChipListbox
+<mat-chip-listbox [(ngModel)]="selectedOptions" multiple>
+  <mat-chip-option
+    value="option1"
+    (selectionChange)="onSelectionChange($event)">
+    Option 1
+  </mat-chip-option>
+  <mat-chip-option value="option2">
+    Option 2
+  </mat-chip-option>
+</mat-chip-listbox>
+```
+
+### MatChipRow {Editable Chip Component}
+
+An advanced chip component that supports in-place editing and is designed for use within `MatChipGrid`.
+
+**Purpose:** Provides editable chip functionality with in-place text editing, enhanced keyboard navigation, and integration with form input systems.
+
+**Interface:**
+
+```typescript
+interface MatChipRowProps {
+  // Editing Capabilities
+  editable?: boolean; // Whether chip can be edited in-place
+
+  // Inherited from MatChip
+  id?: string;
+  value?: any;
+  color?: string | null;
+  highlighted?: boolean;
+  disabled?: boolean;
+  removable?: boolean;
+  disableRipple?: boolean;
+
+  // Events
+  edited?: EventEmitter<MatChipEditedEvent>; // Emitted when editing completes
+  removed?: EventEmitter<MatChipEvent>;
+  destroyed?: EventEmitter<MatChipEvent>;
+}
+```
+
+**Context Dependencies:** Requires parent `MatChipGrid` for input integration and form control functionality
+**Parent Requirements:** Must be used within `MatChipGrid` for proper functionality
+
+**Usage Example:**
+
+```typescript
+// Must be used within MatChipGrid
+<mat-form-field>
+  <mat-chip-grid>
+    <mat-chip-row
+      editable="true"
+      (edited)="onChipEdited($event)"
+      (removed)="onChipRemoved($event)">
+      Editable Chip
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip-row>
+  </mat-chip-grid>
+</mat-form-field>
+```
+
+## Integration Patterns
+
+### Basic Chip Set {Required Structure}
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
+
+// Minimal required structure for basic chips
+@Component({
+  template: `
+    <mat-chip-set>
+      <mat-chip>Basic Chip</mat-chip>
+      <mat-chip removable (removed)="remove($event)">
+        Removable Chip
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <mat-chip disabled>Disabled Chip</mat-chip>
+    </mat-chip-set>
+  `,
+  imports: [MatChipsModule, MatIconModule],
+})
+export class BasicChipPattern {}
+```
+
+### Selectable Chip Listbox {Required Structure}
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { FormsModule } from "@angular/forms";
+
+// Required structure for selectable chips
+@Component({
+  template: `
+    <mat-chip-listbox [(ngModel)]="selectedValues" multiple>
+      <mat-chip-option value="angular">Angular</mat-chip-option>
+      <mat-chip-option value="react">React</mat-chip-option>
+      <mat-chip-option value="vue">Vue</mat-chip-option>
+    </mat-chip-listbox>
+  `,
+  imports: [MatChipsModule, FormsModule],
+})
+export class SelectableChipPattern {
+  selectedValues: string[] = [];
+}
+```
+
+### Dynamic Chip Grid {Required Structure}
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+
+// Required structure for dynamic chip input
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Tags</mat-label>
+      <mat-chip-grid #chipGrid [(ngModel)]="tags">
+        <mat-chip-row
+          *ngFor="let tag of tags"
+          [editable]="true"
+          (edited)="editTag(tag, $event)"
+          (removed)="removeTag(tag)"
+        >
+          {{ tag }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-row>
+      </mat-chip-grid>
+      <input
+        placeholder="Add tag..."
+        [matChipInputFor]="chipGrid"
+        (matChipInputTokenEnd)="addTag($event)"
+      />
+    </mat-form-field>
+  `,
+  imports: [MatChipsModule, MatFormFieldModule, MatInputModule],
+})
+export class DynamicChipPattern {
+  tags: string[] = ["angular", "material"];
+
+  addTag(event: MatChipInputEvent) {
+    const value = event.value?.trim();
+    if (value) {
+      this.tags.push(value);
+      event.chipInput!.clear();
+    }
+  }
+
+  removeTag(tag: string) {
+    const index = this.tags.indexOf(tag);
+    if (index >= 0) {
+      this.tags.splice(index, 1);
+    }
+  }
+
+  editTag(oldTag: string, event: MatChipEditedEvent) {
+    const index = this.tags.indexOf(oldTag);
+    if (index >= 0) {
+      this.tags[index] = event.value;
+    }
+  }
+}
+```
+
+### Advanced Usage with Avatars and Actions
+
+```typescript
+import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
+
+// Complex usage with avatars and multiple actions
+@Component({
+  template: `
+    <mat-chip-set>
+      <mat-chip>
+        <img matChipAvatar src="avatar.jpg" alt="User" />
+        John Doe
+        <mat-icon matChipTrailingIcon>info</mat-icon>
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+
+      <mat-chip highlighted>
+        <mat-icon matChipAvatar>star</mat-icon>
+        Featured Item
+        <mat-icon matChipRemove>close</mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  `,
+  imports: [MatChipsModule, MatIconModule],
+})
+export class AdvancedChipPattern {}
+```
+
+## Component Relationships
+
+### Data Flow
+
+The chip component group follows a hierarchical data flow pattern:
+
+1. **Container Level**: Container components (`MatChipSet`, `MatChipListbox`, `MatChipGrid`) manage overall state and provide context
+2. **Chip Level**: Individual chips receive context from containers and emit events upward
+3. **Action Level**: Chip actions (remove, trailing icons) interact with their parent chip
+4. **Form Integration**: `MatChipGrid` and `MatChipListbox` integrate with Angular Forms and form fields
+
+### Context Sharing
+
+- **Focus Management**: Container components provide focus management through CDK FocusKeyManager
+- **Selection State**: `MatChipListbox` manages selection state for `MatChipOption` children
+- **Form Integration**: `MatChipGrid` provides form control integration for `MatChipRow` children
+- **Keyboard Navigation**: All containers provide consistent keyboard navigation patterns
+
+### Event Handling
+
+- **Chip Events**: Bubble up from individual chips to container components
+- **Selection Events**: Managed by listbox containers and propagated to form controls
+- **Input Events**: Handled by chip grid for dynamic chip creation
+- **Removal Events**: Processed by containers to update internal state and external bindings
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose the Right Container**: Use `MatChipSet` for basic display, `MatChipListbox` for selection, and `MatChipGrid` for dynamic input
+- **Maintain Consistency**: Use consistent chip styling and interaction patterns throughout your application
+- **Form Integration**: Always wrap `MatChipGrid` in `mat-form-field` for proper form integration and accessibility
+- **Provide Clear Actions**: When using removable chips, always include clear visual indicators (like icons) for removal actions
+- **Value Management**: Implement proper value comparison functions for complex objects in selectable chip scenarios
+
+### Accessibility
+
+- **ARIA Relationships**: Container components automatically manage ARIA relationships between chips and their containers
+- **Keyboard Navigation**: All chip containers support arrow key navigation and proper focus management
+- **Screen Reader Support**: Chips provide appropriate ARIA labels and descriptions for screen reader compatibility
+- **Focus Management**: Container components handle focus restoration when chips are removed or added dynamically
+
+### Performance
+
+- **Virtual Scrolling**: For large chip lists, consider implementing virtual scrolling at the container level
+- **Change Detection**: Use OnPush change detection strategy when possible, as chip containers support this optimization
+- **Event Handling**: Implement efficient event handlers that avoid unnecessary DOM manipulation or state updates
+- **Memory Management**: Properly clean up subscriptions and event listeners in component destroy lifecycle
+
+## Common Patterns
+
+### Pattern 1: Tag Input with Autocomplete
+
+```typescript
+@Component({
+  template: `
+    <mat-form-field>
+      <mat-label>Skills</mat-label>
+      <mat-chip-grid #chipGrid>
+        <mat-chip-row
+          *ngFor="let skill of skills"
+          (removed)="removeSkill(skill)"
+        >
+          {{ skill }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip-row>
+      </mat-chip-grid>
+      <input
+        [matChipInputFor]="chipGrid"
+        [matAutocomplete]="auto"
+        (matChipInputTokenEnd)="addSkill($event)"
+      />
+      <mat-autocomplete #auto="matAutocomplete">
+        <mat-option *ngFor="let option of filteredSkills" [value]="option">
+          {{ option }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  `,
+})
+export class TagInputWithAutocompletePattern {}
+```
+
+### Pattern 2: Filter Chips with Clear All
+
+```typescript
+@Component({
+  template: `
+    <div class="filter-section">
+      <mat-chip-listbox [(ngModel)]="selectedFilters" multiple>
+        <mat-chip-option
+          *ngFor="let filter of availableFilters"
+          [value]="filter.id"
+        >
+          {{ filter.label }}
+        </mat-chip-option>
+      </mat-chip-listbox>
+
+      <button
+        mat-button
+        *ngIf="selectedFilters.length > 0"
+        (click)="clearAllFilters()"
+      >
+        Clear All
+      </button>
+    </div>
+  `,
+})
+export class FilterChipsPattern {}
+```
+
+### Pattern 3: Contact Chips with Avatar
+
+```typescript
+@Component({
+  template: `
+    <mat-chip-set>
+      <mat-chip
+        *ngFor="let contact of contacts"
+        (removed)="removeContact(contact)"
+      >
+        <img matChipAvatar [src]="contact.avatar" [alt]="contact.name" />
+        {{ contact.name }}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  `,
+})
+export class ContactChipsPattern {}
+```

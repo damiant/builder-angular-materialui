@@ -1,0 +1,912 @@
+---
+title: List Components
+---
+
+# List Components
+
+## Overview
+
+### Purpose
+
+Use this component group to generate list functionality with optional hierarchical structure. The List component group provides a comprehensive solution for displaying collections of items in a vertical layout, supporting both simple content lists and navigation lists with Material Design styling, interaction patterns, and accessibility features.
+
+### When to Use
+
+- **Content Lists**: When you need to display collections of related items such as contacts, articles, or product listings
+- **Navigation Menus**: For creating vertical navigation structures with proper interaction states and accessibility
+- **Settings Panels**: When organizing configuration options or menu items in a structured vertical layout
+- **Data Display Lists**: For presenting structured data where each item contains multiple pieces of information
+- **Action Lists**: When creating lists of actionable items like menu options, commands, or user actions
+- **Hierarchical Content**: For displaying content with optional subheaders to organize and categorize list items
+- **Mobile Interfaces**: In responsive designs where vertical lists provide optimal touch interaction
+- **Dashboard Sidebars**: For navigation lists in application layouts and dashboard interfaces
+
+### Architecture
+
+**Moderate Coupling**: The List component group follows an optional hierarchical structure where components work together to enhance functionality but can be used independently. The architecture provides:
+
+- **Optional parent-child relationships**: `mat-list` and `mat-nav-list` serve as containers with optional specialized child components
+- **Flexible composition**: List items can be used independently or within list containers for enhanced styling and behavior
+- **Content organization**: Subheader components work with lists to create structured, categorized content sections
+
+### Component Interdependencies
+
+The List component group provides flexible composition patterns:
+
+- **`mat-list`** → Primary container for content lists with Material Design styling
+- **`mat-nav-list`** → Specialized container for navigation lists with enhanced interaction states
+- **`mat-list-item`** → Individual list items that can be used within lists or independently
+- **`mat-list-subheader`** → Optional subheader component for categorizing and organizing list sections
+
+## Components
+
+### MatList {Primary Container Component}
+
+The foundational component that provides Material Design list styling and serves as the container for list items and content.
+
+**Purpose:** Creates a Material Design list container with proper spacing, typography, and accessibility features that serves as the foundation for displaying collections of related items.
+
+**Interface:**
+
+```typescript
+interface MatListProps {
+  disableRipple?: boolean; // Disables ripple effect for all child list items (default: false)
+  disabled?: boolean; // Disables the entire list and all child items (default: false)
+  // Content projection for list items and subheaders
+}
+```
+
+**Dependencies:** Requires Angular Material's list module
+**Provides:** Material Design list styling, spacing, and accessibility foundation for all child components
+
+**Usage Example:**
+
+```typescript
+import { MatListModule } from "@angular/material/list";
+
+@Component({
+  selector: "app-basic-list",
+  template: `
+    <mat-list>
+      <mat-list-item>Item 1</mat-list-item>
+      <mat-list-item>Item 2</mat-list-item>
+      <mat-list-item>Item 3</mat-list-item>
+    </mat-list>
+  `,
+  imports: [MatListModule],
+})
+export class BasicListComponent {}
+```
+
+### MatNavList {Navigation Container Component}
+
+Specialized list component designed for navigation interfaces with enhanced interaction states and accessibility features.
+
+**Purpose:** Provides a navigation list container with proper ARIA roles, keyboard navigation support, and interaction states optimized for navigation menus and link collections.
+
+**Interface:**
+
+```typescript
+interface MatNavListProps {
+  disableRipple?: boolean; // Disables ripple effect for all child list items (default: false)
+  disabled?: boolean; // Disables the entire navigation list and all child items (default: false)
+  // Content projection for navigation list items
+  // Automatically applies navigation ARIA roles and keyboard support
+}
+```
+
+**Context Dependencies:** Best used for navigation menus and link collections
+**Parent Requirements:** Standalone component or within navigation containers
+**Provides:** Navigation-specific styling, ARIA roles, and keyboard navigation support
+
+**Usage Example:**
+
+```typescript
+import { MatListModule } from "@angular/material/list";
+import { RouterModule } from "@angular/router";
+
+@Component({
+  selector: "app-navigation-list",
+  template: `
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dashboard">
+        <mat-icon matListIcon>dashboard</mat-icon>
+        <span matLine>Dashboard</span>
+      </a>
+      <a mat-list-item routerLink="/users">
+        <mat-icon matListIcon>people</mat-icon>
+        <span matLine>Users</span>
+      </a>
+      <a mat-list-item routerLink="/settings">
+        <mat-icon matListIcon>settings</mat-icon>
+        <span matLine>Settings</span>
+      </a>
+    </mat-nav-list>
+  `,
+  imports: [MatListModule, RouterModule],
+})
+export class NavigationListComponent {}
+```
+
+### MatListItem {List Item Component}
+
+Individual list item component that can be used within list containers or independently for flexible content display.
+
+**Purpose:** Provides a single list item with Material Design styling, interaction states, and support for various content layouts including text, icons, and actions.
+
+**Interface:**
+
+```typescript
+interface MatListItemProps {
+  disableRipple?: boolean; // Disables ripple effect for this specific item (default: false)
+  disabled?: boolean; // Disables this specific list item (default: false)
+  lines?: number; // Number of lines this item should occupy (affects height and text layout)
+  // Content projection for item content including text, icons, and actions
+}
+```
+
+**Context Dependencies:** Can be used within `mat-list` or `mat-nav-list` containers, or independently
+**Parent Requirements:** Optional - works standalone or within list containers
+**Provides:** List item styling, interaction states, and flexible content layout
+
+**Usage Example:**
+
+```html
+<!-- Within a list container -->
+<mat-list>
+  <mat-list-item>
+    <mat-icon matListIcon>folder</mat-icon>
+    <span matLine>Documents</span>
+    <span matLine>Last modified: March 15, 2024</span>
+  </mat-list-item>
+
+  <mat-list-item [lines]="2">
+    <img matListAvatar src="assets/user.jpg" alt="User avatar" />
+    <h3 matLine>John Smith</h3>
+    <p matLine>Senior Software Engineer</p>
+    <button mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
+
+<!-- Standalone usage -->
+<mat-list-item class="standalone-item">
+  <span matLine>Standalone list item</span>
+</mat-list-item>
+```
+
+### MatListSubheaderCssMatStyler {Subheader Component}
+
+Component for creating section headers within lists to organize and categorize list content.
+
+**Purpose:** Provides subheader styling and functionality for organizing list content into logical sections with proper typography and spacing.
+
+**Interface:**
+
+```typescript
+interface MatListSubheaderProps {
+  // Applied as directive to elements within lists
+  // Provides subheader typography and spacing
+  // Integrates with list layout and accessibility features
+}
+```
+
+**Context Dependencies:** Best used within `mat-list` or `mat-nav-list` containers
+**Parent Requirements:** Typically child of list containers for proper styling and spacing
+**Provides:** Subheader typography, spacing, and accessibility roles
+
+**Usage Example:**
+
+```html
+<mat-list>
+  <h3 matSubheader>Recent Files</h3>
+  <mat-list-item>
+    <mat-icon matListIcon>description</mat-icon>
+    <span matLine>Document.pdf</span>
+  </mat-list-item>
+  <mat-list-item>
+    <mat-icon matListIcon>image</mat-icon>
+    <span matLine>Photo.jpg</span>
+  </mat-list-item>
+
+  <mat-divider></mat-divider>
+
+  <h3 matSubheader>Shared Files</h3>
+  <mat-list-item>
+    <mat-icon matListIcon>folder_shared</mat-icon>
+    <span matLine>Team Documents</span>
+  </mat-list-item>
+  <mat-list-item>
+    <mat-icon matListIcon>folder_shared</mat-icon>
+    <span matLine>Project Files</span>
+  </mat-list-item>
+</mat-list>
+```
+
+## Integration Patterns
+
+### Basic Content List
+
+```typescript
+import { MatListModule } from "@angular/material/list";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-basic-content-list",
+  template: `
+    <mat-list>
+      <mat-list-item *ngFor="let item of items">
+        <mat-icon matListIcon>{{ item.icon }}</mat-icon>
+        <span matLine>{{ item.title }}</span>
+        <span matLine>{{ item.subtitle }}</span>
+      </mat-list-item>
+    </mat-list>
+  `,
+  imports: [MatListModule, MatIconModule],
+})
+export class BasicContentListComponent {
+  items = [
+    { icon: "inbox", title: "Inbox", subtitle: "5 new messages" },
+    { icon: "drafts", title: "Drafts", subtitle: "3 unsent messages" },
+    { icon: "send", title: "Sent", subtitle: "Last sent 2 hours ago" },
+  ];
+}
+```
+
+### Advanced Navigation List with Sections
+
+```typescript
+import { MatListModule } from "@angular/material/list";
+import { MatIconModule } from "@angular/material/icon";
+import { MatDividerModule } from "@angular/material/divider";
+import { RouterModule } from "@angular/router";
+
+@Component({
+  selector: "app-advanced-navigation",
+  template: `
+    <mat-nav-list class="navigation-list">
+      <!-- Primary Navigation -->
+      <h3 matSubheader>Main Navigation</h3>
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon matListIcon>dashboard</mat-icon>
+        <span matLine>Dashboard</span>
+        <span matLine>Overview and analytics</span>
+      </a>
+
+      <a mat-list-item routerLink="/projects" routerLinkActive="active">
+        <mat-icon matListIcon>work</mat-icon>
+        <span matLine>Projects</span>
+        <span matLine>{{ projectCount }} active projects</span>
+      </a>
+
+      <a mat-list-item routerLink="/team" routerLinkActive="active">
+        <mat-icon matListIcon>people</mat-icon>
+        <span matLine>Team</span>
+        <span matLine>Manage team members</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <!-- Secondary Navigation -->
+      <h3 matSubheader>Tools & Settings</h3>
+      <a mat-list-item routerLink="/reports" routerLinkActive="active">
+        <mat-icon matListIcon>assessment</mat-icon>
+        <span matLine>Reports</span>
+        <span matLine>Analytics and insights</span>
+      </a>
+
+      <a mat-list-item routerLink="/settings" routerLinkActive="active">
+        <mat-icon matListIcon>settings</mat-icon>
+        <span matLine>Settings</span>
+        <span matLine>App configuration</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <!-- User Actions -->
+      <h3 matSubheader>Account</h3>
+      <a mat-list-item routerLink="/profile" routerLinkActive="active">
+        <mat-icon matListIcon>account_circle</mat-icon>
+        <span matLine>Profile</span>
+        <span matLine>Manage your account</span>
+      </a>
+
+      <button mat-list-item (click)="logout()">
+        <mat-icon matListIcon>exit_to_app</mat-icon>
+        <span matLine>Sign Out</span>
+        <span matLine>End your session</span>
+      </button>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .navigation-list {
+        width: 280px;
+        border-right: 1px solid #e0e0e0;
+      }
+
+      .navigation-list .active {
+        background-color: rgba(63, 81, 181, 0.1);
+        color: #3f51b5;
+      }
+
+      .navigation-list .active mat-icon {
+        color: #3f51b5;
+      }
+    `,
+  ],
+  imports: [MatListModule, MatIconModule, MatDividerModule, RouterModule],
+})
+export class AdvancedNavigationComponent {
+  projectCount = 12;
+
+  logout(): void {
+    // Implement logout logic
+    console.log("User logged out");
+  }
+}
+```
+
+### Common Variations
+
+#### Contact List with Avatars
+
+```html
+<mat-list class="contact-list">
+  <h3 matSubheader>Contacts</h3>
+  <mat-list-item *ngFor="let contact of contacts" [lines]="2">
+    <img
+      matListAvatar
+      [src]="contact.photoUrl"
+      [alt]="contact.name + ' photo'"
+    />
+    <h3 matLine>{{ contact.name }}</h3>
+    <p matLine>
+      <span>{{ contact.email }}</span>
+      <span class="contact-phone"> — {{ contact.phone }}</span>
+    </p>
+    <button mat-icon-button (click)="callContact(contact)">
+      <mat-icon>phone</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
+```
+
+#### File Browser List
+
+```html
+<mat-list class="file-browser">
+  <h3 matSubheader>
+    <mat-icon>folder</mat-icon>
+    {{ currentFolder }}
+  </h3>
+
+  <mat-list-item *ngFor="let file of files" (click)="selectFile(file)">
+    <mat-icon matListIcon>{{ getFileIcon(file.type) }}</mat-icon>
+    <span matLine>{{ file.name }}</span>
+    <span matLine>{{ file.size | fileSize }} • {{ file.modified | date }}</span>
+    <button
+      mat-icon-button
+      (click)="downloadFile(file)"
+      *ngIf="file.type !== 'folder'"
+    >
+      <mat-icon>download</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
+```
+
+#### Settings List with Toggle Controls
+
+```html
+<mat-list class="settings-list">
+  <h3 matSubheader>Notifications</h3>
+
+  <mat-list-item>
+    <mat-icon matListIcon>email</mat-icon>
+    <span matLine>Email Notifications</span>
+    <span matLine>Receive updates via email</span>
+    <mat-slide-toggle [(ngModel)]="emailNotifications"></mat-slide-toggle>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-icon matListIcon>notifications</mat-icon>
+    <span matLine>Push Notifications</span>
+    <span matLine>Browser and mobile notifications</span>
+    <mat-slide-toggle [(ngModel)]="pushNotifications"></mat-slide-toggle>
+  </mat-list-item>
+
+  <mat-divider></mat-divider>
+
+  <h3 matSubheader>Privacy</h3>
+
+  <mat-list-item>
+    <mat-icon matListIcon>visibility</mat-icon>
+    <span matLine>Profile Visibility</span>
+    <span matLine>Who can see your profile</span>
+    <mat-select [(ngModel)]="profileVisibility">
+      <mat-option value="public">Public</mat-option>
+      <mat-option value="friends">Friends Only</mat-option>
+      <mat-option value="private">Private</mat-option>
+    </mat-select>
+  </mat-list-item>
+</mat-list>
+```
+
+## Component Relationships
+
+### Data Flow
+
+1. **List Container → List Items**: List containers provide styling context and accessibility infrastructure for child list items
+2. **List Items → Content**: List items coordinate the layout of icons, text lines, and actions within the item structure
+3. **Subheaders → List Organization**: Subheaders provide semantic and visual organization for grouped list content
+4. **Navigation Lists → Router**: Navigation lists integrate with Angular Router for navigation state management
+
+### Context Sharing
+
+- **Styling Context**: List containers provide Material Design theme context and spacing coordination for all child components
+- **Accessibility Context**: Lists manage ARIA roles, navigation support, and screen reader compatibility
+- **Interaction Context**: List containers coordinate interaction states (hover, focus, active) for child items
+- **Layout Context**: Lists provide consistent spacing, alignment, and typography scaling for child components
+
+### Event Handling
+
+- **Item Selection**: List items handle click, keyboard, and touch events for selection and navigation
+- **Navigation Events**: Navigation lists integrate with router navigation and state management
+- **Accessibility Events**: Lists support keyboard navigation (arrow keys, Enter, Space) for accessibility compliance
+- **Custom Actions**: List items can contain custom interactive elements (buttons, toggles) that handle their own events
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Choose appropriate list type**: Use `mat-list` for content display and `mat-nav-list` for navigation menus
+- **Organize with subheaders**: Use subheaders to group related list items and improve content organization
+- **Limit item content**: Keep list items focused and avoid overcrowding with too many elements
+- **Maintain consistent interaction**: Ensure all list items follow consistent interaction patterns for user experience
+- **Consider performance**: Use virtual scrolling for large lists and implement efficient change detection strategies
+
+### Accessibility
+
+- **ARIA roles**: List components automatically provide proper ARIA roles (list, listitem, navigation)
+- **Keyboard navigation**: Lists support arrow key navigation, Enter/Space activation, and Tab navigation
+- **Screen reader support**: List items are properly announced with content hierarchy and interaction states
+- **Focus management**: Lists maintain proper focus indicators and focus trapping for keyboard users
+- **Semantic structure**: Use proper heading hierarchy with subheaders for screen reader navigation
+
+### Performance
+
+- **Virtual scrolling**: Implement virtual scrolling for lists with many items to improve rendering performance
+- **Change detection**: Use OnPush change detection strategy and trackBy functions for efficient list updates
+- **Lazy loading**: Consider lazy loading list content for large datasets or remote data
+- **Efficient filtering**: Implement efficient filtering and searching mechanisms for interactive lists
+- **Memory management**: Properly handle subscriptions and component lifecycle for dynamic lists
+
+## Common Patterns
+
+### Pattern 1: Email Inbox Interface
+
+```typescript
+@Component({
+  template: `
+    <div class="inbox-container">
+      <mat-list class="email-list">
+        <h3 matSubheader>
+          Inbox ({{ unreadCount }} unread)
+          <button mat-icon-button (click)="markAllRead()">
+            <mat-icon>mark_email_read</mat-icon>
+          </button>
+        </h3>
+
+        <mat-list-item
+          *ngFor="let email of emails; trackBy: trackByEmailId"
+          [class.unread]="!email.read"
+          (click)="openEmail(email)"
+          [lines]="2"
+        >
+          <img
+            matListAvatar
+            [src]="email.sender.avatar"
+            [alt]="email.sender.name"
+          />
+
+          <div matLine class="email-header">
+            <span class="sender-name">{{ email.sender.name }}</span>
+            <span class="email-date">{{ email.date | date: "MMM d" }}</span>
+          </div>
+
+          <div matLine class="email-content">
+            <span class="subject" [class.font-weight-bold]="!email.read">
+              {{ email.subject }}
+            </span>
+            <span class="preview">{{ email.preview }}</span>
+          </div>
+
+          <div class="email-actions">
+            <button
+              mat-icon-button
+              (click)="toggleStar(email); $event.stopPropagation()"
+              [class.starred]="email.starred"
+            >
+              <mat-icon>{{ email.starred ? "star" : "star_border" }}</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              (click)="archiveEmail(email); $event.stopPropagation()"
+            >
+              <mat-icon>archive</mat-icon>
+            </button>
+          </div>
+        </mat-list-item>
+
+        <mat-list-item *ngIf="emails.length === 0" class="empty-state">
+          <mat-icon matListIcon>inbox</mat-icon>
+          <span matLine>No emails in your inbox</span>
+          <span matLine>When you receive emails, they'll appear here</span>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  `,
+  styles: [
+    `
+      .inbox-container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .email-list {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+      }
+
+      .email-list mat-list-item {
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s ease;
+      }
+
+      .email-list mat-list-item:hover {
+        background-color: #f5f5f5;
+      }
+
+      .email-list mat-list-item.unread {
+        background-color: #fff3e0;
+      }
+
+      .email-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sender-name {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .email-date {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .email-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .subject {
+        font-size: 14px;
+        color: #333;
+      }
+
+      .font-weight-bold {
+        font-weight: 600;
+      }
+
+      .preview {
+        font-size: 13px;
+        color: #666;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .email-actions {
+        display: flex;
+        gap: 4px;
+      }
+
+      .starred {
+        color: #ffc107;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+      }
+    `,
+  ],
+})
+export class EmailInboxComponent {
+  @Input() emails: Email[] = [];
+
+  get unreadCount(): number {
+    return this.emails.filter((email) => !email.read).length;
+  }
+
+  trackByEmailId(index: number, email: Email): string {
+    return email.id;
+  }
+
+  openEmail(email: Email): void {
+    if (!email.read) {
+      email.read = true;
+    }
+    // Navigate to email detail or open in modal
+    console.log("Opening email:", email.subject);
+  }
+
+  toggleStar(email: Email): void {
+    email.starred = !email.starred;
+  }
+
+  archiveEmail(email: Email): void {
+    // Remove from inbox list or update status
+    console.log("Archiving email:", email.subject);
+  }
+
+  markAllRead(): void {
+    this.emails.forEach((email) => (email.read = true));
+  }
+}
+```
+
+### Pattern 2: Multi-Level Navigation Menu
+
+```typescript
+@Component({
+  template: `
+    <mat-nav-list class="multi-level-nav">
+      <!-- Main Navigation Sections -->
+      <div *ngFor="let section of navigationSections" class="nav-section">
+        <h3 matSubheader>
+          <mat-icon>{{ section.icon }}</mat-icon>
+          {{ section.title }}
+        </h3>
+
+        <!-- Top-level navigation items -->
+        <ng-container *ngFor="let item of section.items">
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            *ngIf="!item.children"
+            [class.nav-item]="true"
+          >
+            <mat-icon matListIcon>{{ item.icon }}</mat-icon>
+            <span matLine>{{ item.label }}</span>
+            <span matLine *ngIf="item.description">{{ item.description }}</span>
+            <mat-icon *ngIf="item.badge" class="badge-icon">{{
+              item.badge
+            }}</mat-icon>
+          </a>
+
+          <!-- Expandable navigation items with children -->
+          <div *ngIf="item.children" class="expandable-nav-item">
+            <mat-list-item
+              (click)="toggleExpanded(item)"
+              [class.nav-item]="true"
+              [class.expanded]="item.expanded"
+            >
+              <mat-icon matListIcon>{{ item.icon }}</mat-icon>
+              <span matLine>{{ item.label }}</span>
+              <span matLine *ngIf="item.description">{{
+                item.description
+              }}</span>
+              <mat-icon class="expand-icon">
+                {{
+                  item.expanded ? "keyboard_arrow_down" : "keyboard_arrow_right"
+                }}
+              </mat-icon>
+            </mat-list-item>
+
+            <!-- Child navigation items -->
+            <div class="child-nav-items" *ngIf="item.expanded">
+              <a
+                mat-list-item
+                *ngFor="let child of item.children"
+                [routerLink]="child.route"
+                routerLinkActive="active"
+                class="child-nav-item"
+              >
+                <mat-icon matListIcon>{{ child.icon }}</mat-icon>
+                <span matLine>{{ child.label }}</span>
+                <span matLine *ngIf="child.description">{{
+                  child.description
+                }}</span>
+              </a>
+            </div>
+          </div>
+        </ng-container>
+
+        <mat-divider *ngIf="!isLastSection(section)"></mat-divider>
+      </div>
+
+      <!-- User Profile Section -->
+      <div class="user-profile-section">
+        <mat-divider></mat-divider>
+        <mat-list-item class="user-profile-item" (click)="openUserMenu()">
+          <img
+            matListAvatar
+            [src]="currentUser.avatar"
+            [alt]="currentUser.name"
+          />
+          <span matLine>{{ currentUser.name }}</span>
+          <span matLine>{{ currentUser.email }}</span>
+          <mat-icon>keyboard_arrow_up</mat-icon>
+        </mat-list-item>
+      </div>
+    </mat-nav-list>
+  `,
+  styles: [
+    `
+      .multi-level-nav {
+        width: 320px;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #e0e0e0;
+        background: #fafafa;
+      }
+
+      .nav-section {
+        margin-bottom: 8px;
+      }
+
+      .nav-item {
+        transition: all 0.2s ease;
+      }
+
+      .nav-item:hover {
+        background-color: rgba(63, 81, 181, 0.04);
+      }
+
+      .nav-item.active {
+        background-color: rgba(63, 81, 181, 0.1);
+        color: #3f51b5;
+        border-right: 3px solid #3f51b5;
+      }
+
+      .nav-item.active mat-icon {
+        color: #3f51b5;
+      }
+
+      .expand-icon {
+        margin-left: auto;
+        transition: transform 0.2s ease;
+      }
+
+      .expandable-nav-item.expanded .expand-icon {
+        transform: rotate(90deg);
+      }
+
+      .child-nav-items {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-left: 2px solid #e0e0e0;
+        margin-left: 16px;
+      }
+
+      .child-nav-item {
+        padding-left: 32px;
+        font-size: 14px;
+      }
+
+      .child-nav-item mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .badge-icon {
+        color: #ff5722;
+        font-size: 16px;
+        margin-left: auto;
+      }
+
+      .user-profile-section {
+        margin-top: auto;
+        position: sticky;
+        bottom: 0;
+        background: #fafafa;
+      }
+
+      .user-profile-item {
+        background: white;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .user-profile-item:hover {
+        background-color: #f5f5f5;
+      }
+    `,
+  ],
+})
+export class MultiLevelNavigationComponent {
+  currentUser = {
+    name: "John Smith",
+    email: "john.smith@example.com",
+    avatar: "assets/user-avatar.jpg",
+  };
+
+  navigationSections = [
+    {
+      title: "Main",
+      icon: "home",
+      items: [
+        {
+          label: "Dashboard",
+          icon: "dashboard",
+          route: "/dashboard",
+          description: "Overview and analytics",
+        },
+        {
+          label: "Projects",
+          icon: "work",
+          route: "/projects",
+          description: "12 active projects",
+          children: [
+            {
+              label: "Active Projects",
+              icon: "play_arrow",
+              route: "/projects/active",
+            },
+            {
+              label: "Completed",
+              icon: "check_circle",
+              route: "/projects/completed",
+            },
+            { label: "Archived", icon: "archive", route: "/projects/archived" },
+          ],
+        },
+      ],
+    },
+    {
+      title: "Management",
+      icon: "business",
+      items: [
+        {
+          label: "Team",
+          icon: "people",
+          route: "/team",
+          description: "Manage team members",
+        },
+        {
+          label: "Reports",
+          icon: "assessment",
+          route: "/reports",
+          description: "Analytics and insights",
+          badge: "new",
+        },
+      ],
+    },
+  ];
+
+  toggleExpanded(item: any): void {
+    item.expanded = !item.expanded;
+  }
+
+  isLastSection(section: any): boolean {
+    return (
+      this.navigationSections.indexOf(section) ===
+      this.navigationSections.length - 1
+    );
+  }
+
+  openUserMenu(): void {
+    // Open user menu or profile options
+    console.log("Opening user menu");
+  }
+}
+```

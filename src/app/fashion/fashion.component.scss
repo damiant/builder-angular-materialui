@@ -1,0 +1,98 @@
+.fashion-container {
+  padding: 20px;
+  font-family:
+    Kentledge,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 991px) {
+    padding: 16px;
+  }
+
+  .welcome-card {
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    @media (max-width: 991px) {
+      max-width: 100%;
+    }
+
+    .mat-mdc-card-header {
+      padding: 32px 40px 0 40px;
+
+      @media (max-width: 991px) {
+        padding: 24px 20px 0 20px;
+      }
+    }
+
+    .mat-mdc-card-content {
+      padding: 32px 40px 40px 40px;
+
+      @media (max-width: 991px) {
+        padding: 24px 20px 20px 20px;
+      }
+    }
+  }
+
+  .page-title {
+    font-size: 32px;
+    color: #000;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .welcome-message {
+    font-size: 18px;
+    color: #4f5474;
+    line-height: 1.5;
+    margin: 24px 0 32px 0;
+  }
+
+  .navigation-section {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+
+    .nav-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      min-width: 180px;
+
+      .mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Global styling overrides for consistency
+::ng-deep {
+  .fashion-container {
+    .mat-mdc-raised-button.mat-primary {
+      background-color: #562e76;
+
+      &:hover {
+        background-color: #442059;
+      }
+    }
+  }
+}

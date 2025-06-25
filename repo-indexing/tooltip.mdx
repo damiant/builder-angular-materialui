@@ -1,0 +1,1234 @@
+---
+title: Tooltip Components
+---
+
+# Tooltip Components
+
+## Overview
+
+### Purpose
+
+Use this component to generate tooltip functionality. The Tooltip component provides an accessible way to display contextual information or help text when users hover over, focus on, or touch an element. It creates small overlays that appear near trigger elements to provide additional context without cluttering the interface.
+
+### When to Use
+
+- **Contextual Help**: When you need to provide additional information about UI elements without taking up permanent screen space
+- **Icon Explanations**: For icon buttons or symbols that may not be immediately clear to all users
+- **Form Field Assistance**: To provide input hints, validation messages, or formatting examples for form fields
+- **Abbreviation Definitions**: When displaying acronyms, technical terms, or shortened text that may need clarification
+- **Feature Descriptions**: For new or complex features that benefit from brief explanations
+- **Status Information**: To show additional details about system states, progress indicators, or data values
+- **Navigation Aids**: For menu items or buttons where the action may not be obvious from the visual design
+- **Accessibility Enhancement**: To provide text alternatives for visual information or to supplement sparse interfaces
+
+### Architecture
+
+**No Coupling**: The Tooltip component is a standalone directive that can be applied to any HTML element. It works independently and doesn't require specific parent-child relationships or shared contexts with other components. The tooltip functionality is self-contained and manages its own positioning, display logic, and accessibility features.
+
+### Component Interdependencies
+
+The Tooltip component operates as a standalone directive with no required dependencies on other components:
+
+- **Self-contained positioning**: Automatically calculates optimal placement relative to trigger elements
+- **Independent lifecycle**: Manages its own show/hide behavior and animations
+- **Universal applicability**: Can be applied to any HTML element or Angular component
+
+## Components
+
+### MatTooltip {Standalone Tooltip Directive}
+
+A directive that transforms any element into a tooltip trigger, displaying contextual information in an overlay panel.
+
+**Purpose:** Provides accessible tooltip functionality with automatic positioning, keyboard support, and customizable appearance for displaying contextual information on hover, focus, or touch interactions.
+
+**Interface:**
+
+```typescript
+interface MatTooltipProps {
+  matTooltip: string; // The tooltip message text (required)
+  matTooltipPosition?:
+    | "left"
+    | "right"
+    | "above"
+    | "below"
+    | "before"
+    | "after"; // Tooltip position relative to trigger (default: 'below')
+  matTooltipClass?: string | string[]; // CSS classes to apply to the tooltip
+  matTooltipShowDelay?: number; // Delay in milliseconds before showing tooltip (default: 0)
+  matTooltipHideDelay?: number; // Delay in milliseconds before hiding tooltip (default: 0)
+  matTooltipDisabled?: boolean; // Whether tooltip is disabled (default: false)
+  matTooltipTouchGestures?: "auto" | "on" | "off"; // Touch gesture behavior (default: 'auto')
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+
+@Component({
+  selector: "app-tooltip-demo",
+  template: `
+    <!-- Basic tooltip -->
+    <button mat-button matTooltip="This is a helpful tooltip">Hover me</button>
+
+    <!-- Tooltip with custom position -->
+    <button
+      mat-icon-button
+      matTooltip="Settings panel"
+      matTooltipPosition="above"
+    >
+      <mat-icon>settings</mat-icon>
+    </button>
+
+    <!-- Tooltip with delay -->
+    <button
+      mat-raised-button
+      matTooltip="This tooltip appears after a delay"
+      [matTooltipShowDelay]="1000"
+      [matTooltipHideDelay]="500"
+    >
+      Delayed Tooltip
+    </button>
+
+    <!-- Conditional tooltip -->
+    <button
+      mat-button
+      [matTooltip]="getTooltipText()"
+      [matTooltipDisabled]="tooltipDisabled"
+    >
+      {{ tooltipDisabled ? "Tooltip Disabled" : "Tooltip Enabled" }}
+    </button>
+
+    <!-- Tooltip with custom styling -->
+    <span
+      matTooltip="Custom styled tooltip"
+      matTooltipClass="custom-tooltip"
+      class="tooltip-trigger"
+    >
+      Custom Styled Tooltip
+    </span>
+  `,
+  styles: [
+    `
+      .tooltip-trigger {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #e3f2fd;
+        border-radius: 4px;
+        cursor: help;
+        border-bottom: 1px dashed #1976d2;
+      }
+    `,
+  ],
+  imports: [MatTooltipModule, MatButtonModule, MatIconModule],
+})
+export class TooltipDemoComponent {
+  tooltipDisabled = false;
+
+  getTooltipText(): string {
+    return "Dynamic tooltip text updated at " + new Date().toLocaleTimeString();
+  }
+}
+```
+
+## Integration Patterns
+
+### Basic Text Tooltip
+
+```typescript
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatButtonModule } from "@angular/material/button";
+
+@Component({
+  selector: "app-basic-tooltip",
+  template: `
+    <div class="tooltip-examples">
+      <!-- Simple text tooltip -->
+      <button mat-button matTooltip="Click to save your changes">Save</button>
+
+      <!-- Tooltip on text span -->
+      <p>
+        The server responded with a
+        <span matTooltip="HyperText Transfer Protocol" class="tooltip-term">
+          HTTP
+        </span>
+        status code.
+      </p>
+
+      <!-- Tooltip on input field -->
+      <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input
+          matInput
+          placeholder="Enter username"
+          matTooltip="Username must be 3-20 characters long"
+        />
+      </mat-form-field>
+    </div>
+  `,
+  styles: [
+    `
+      .tooltip-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+      }
+
+      .tooltip-term {
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        cursor: help;
+        color: #1976d2;
+      }
+    `,
+  ],
+  imports: [
+    MatTooltipModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
+})
+export class BasicTooltipComponent {}
+```
+
+### Advanced Tooltip Configuration
+
+```typescript
+@Component({
+  selector: "app-advanced-tooltip",
+  template: `
+    <div class="advanced-tooltip-demo">
+      <h3>Positioning Examples</h3>
+      <div class="position-grid">
+        <button
+          mat-button
+          matTooltip="Tooltip above"
+          matTooltipPosition="above"
+        >
+          Above
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Tooltip below"
+          matTooltipPosition="below"
+        >
+          Below
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Tooltip to the left"
+          matTooltipPosition="left"
+        >
+          Left
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Tooltip to the right"
+          matTooltipPosition="right"
+        >
+          Right
+        </button>
+      </div>
+
+      <h3>Timing Examples</h3>
+      <div class="timing-examples">
+        <button
+          mat-button
+          matTooltip="Instant tooltip"
+          [matTooltipShowDelay]="0"
+        >
+          Instant
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Tooltip with 500ms delay"
+          [matTooltipShowDelay]="500"
+        >
+          500ms Delay
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Tooltip with 1s delay"
+          [matTooltipShowDelay]="1000"
+        >
+          1s Delay
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Custom hide delay"
+          [matTooltipShowDelay]="200"
+          [matTooltipHideDelay]="1000"
+        >
+          Slow Hide
+        </button>
+      </div>
+
+      <h3>Dynamic Content</h3>
+      <div class="dynamic-examples">
+        <button
+          mat-button
+          [matTooltip]="dynamicTooltipText"
+          (click)="updateTooltipText()"
+        >
+          Dynamic Content ({{ clickCount }})
+        </button>
+
+        <button
+          mat-button
+          [matTooltip]="conditionalTooltip"
+          [matTooltipDisabled]="!showTooltip"
+          (click)="toggleTooltip()"
+        >
+          {{ showTooltip ? "Tooltip Enabled" : "Tooltip Disabled" }}
+        </button>
+      </div>
+
+      <h3>Touch Gesture Configuration</h3>
+      <div class="touch-examples">
+        <button
+          mat-button
+          matTooltip="Auto touch behavior"
+          matTooltipTouchGestures="auto"
+        >
+          Auto Touch
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Touch gestures enabled"
+          matTooltipTouchGestures="on"
+        >
+          Touch On
+        </button>
+
+        <button
+          mat-button
+          matTooltip="Touch gestures disabled"
+          matTooltipTouchGestures="off"
+        >
+          Touch Off
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .advanced-tooltip-demo {
+        padding: 16px;
+        max-width: 600px;
+      }
+
+      .advanced-tooltip-demo h3 {
+        margin: 24px 0 16px 0;
+        color: #333;
+        font-size: 1.2em;
+      }
+
+      .position-grid,
+      .timing-examples,
+      .dynamic-examples,
+      .touch-examples {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+
+      .position-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        max-width: 300px;
+      }
+    `,
+  ],
+  imports: [MatTooltipModule, MatButtonModule],
+})
+export class AdvancedTooltipComponent {
+  clickCount = 0;
+  showTooltip = true;
+
+  get dynamicTooltipText(): string {
+    return `Button clicked ${this.clickCount} times`;
+  }
+
+  get conditionalTooltip(): string {
+    return "This tooltip can be toggled on and off";
+  }
+
+  updateTooltipText(): void {
+    this.clickCount++;
+  }
+
+  toggleTooltip(): void {
+    this.showTooltip = !this.showTooltip;
+  }
+}
+```
+
+### Common Variations
+
+#### Form Field Tooltips
+
+```typescript
+@Component({
+  template: `
+    <form class="tooltip-form">
+      <mat-form-field>
+        <mat-label>Email Address</mat-label>
+        <input
+          matInput
+          type="email"
+          placeholder="user@example.com"
+          matTooltip="We'll never share your email address"
+          matTooltipPosition="right"
+        />
+        <mat-icon matSuffix matTooltip="Email is required for account recovery">
+          info
+        </mat-icon>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          matTooltip="Password must be at least 8 characters with uppercase, lowercase, and numbers"
+          matTooltipClass="password-tooltip"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePassword"
+          matTooltip="Toggle password visibility"
+        >
+          <mat-icon>{{
+            hidePassword ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Phone Number</mat-label>
+        <input
+          matInput
+          placeholder="(555) 123-4567"
+          [matTooltip]="phoneTooltipText"
+          matTooltipPosition="above"
+        />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          [disabled]="!isFormValid"
+          [matTooltip]="submitTooltipText"
+          [matTooltipDisabled]="isFormValid"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [
+    `
+      .tooltip-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+        padding: 16px;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+    `,
+  ],
+})
+export class FormTooltipComponent {
+  hidePassword = true;
+  isFormValid = false;
+
+  get phoneTooltipText(): string {
+    return "Enter your phone number in format: (XXX) XXX-XXXX";
+  }
+
+  get submitTooltipText(): string {
+    return this.isFormValid
+      ? "Submit the form"
+      : "Please fill in all required fields";
+  }
+}
+```
+
+#### Data Table with Tooltips
+
+```typescript
+@Component({
+  template: `
+    <mat-table [dataSource]="tableData" class="data-table">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>
+          Name
+          <mat-icon
+            class="header-info"
+            matTooltip="Employee full name as registered in the system"
+            matTooltipPosition="above"
+          >
+            info_outline
+          </mat-icon>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span
+            [matTooltip]="getNameTooltip(element)"
+            [matTooltipDisabled]="!element.nickname"
+          >
+            {{ element.name }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-icon
+            [class]="'status-' + element.status"
+            [matTooltip]="getStatusTooltip(element.status)"
+            matTooltipPosition="above"
+          >
+            {{ getStatusIcon(element.status) }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="progress">
+        <mat-header-cell *matHeaderCellDef>Progress</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-progress-bar
+            [value]="element.progress"
+            [matTooltip]="getProgressTooltip(element)"
+            matTooltipPosition="above"
+          ></mat-progress-bar>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button
+            mat-icon-button
+            [disabled]="!canEdit(element)"
+            [matTooltip]="getEditTooltip(element)"
+            (click)="editItem(element)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            [disabled]="!canDelete(element)"
+            [matTooltip]="getDeleteTooltip(element)"
+            (click)="deleteItem(element)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+  `,
+  styles: [
+    `
+      .data-table {
+        width: 100%;
+      }
+
+      .header-info {
+        font-size: 16px;
+        margin-left: 4px;
+        color: rgba(0, 0, 0, 0.54);
+        cursor: help;
+      }
+
+      .status-active {
+        color: #4caf50;
+      }
+      .status-pending {
+        color: #ff9800;
+      }
+      .status-inactive {
+        color: #f44336;
+      }
+    `,
+  ],
+})
+export class DataTableTooltipComponent {
+  displayedColumns = ["name", "status", "progress", "actions"];
+
+  tableData = [
+    {
+      id: 1,
+      name: "John Doe",
+      nickname: "Johnny",
+      status: "active",
+      progress: 75,
+      editable: true,
+      deletable: true,
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      nickname: null,
+      status: "pending",
+      progress: 30,
+      editable: true,
+      deletable: false,
+    },
+    {
+      id: 3,
+      name: "Bob Johnson",
+      nickname: "Bobby",
+      status: "inactive",
+      progress: 0,
+      editable: false,
+      deletable: true,
+    },
+  ];
+
+  getNameTooltip(element: any): string {
+    return element.nickname ? `Also known as "${element.nickname}"` : "";
+  }
+
+  getStatusTooltip(status: string): string {
+    const tooltips = {
+      active: "Employee is currently active and working",
+      pending: "Employee setup is in progress",
+      inactive: "Employee is not currently active",
+    };
+    return tooltips[status] || "Unknown status";
+  }
+
+  getStatusIcon(status: string): string {
+    const icons = {
+      active: "check_circle",
+      pending: "schedule",
+      inactive: "cancel",
+    };
+    return icons[status] || "help";
+  }
+
+  getProgressTooltip(element: any): string {
+    return `${element.name}'s completion: ${element.progress}%`;
+  }
+
+  canEdit(element: any): boolean {
+    return element.editable;
+  }
+
+  canDelete(element: any): boolean {
+    return element.deletable;
+  }
+
+  getEditTooltip(element: any): string {
+    return this.canEdit(element)
+      ? `Edit ${element.name}`
+      : `Cannot edit ${element.name} - insufficient permissions`;
+  }
+
+  getDeleteTooltip(element: any): string {
+    return this.canDelete(element)
+      ? `Delete ${element.name}`
+      : `Cannot delete ${element.name} - item is protected`;
+  }
+
+  editItem(element: any): void {
+    console.log("Editing:", element);
+  }
+
+  deleteItem(element: any): void {
+    console.log("Deleting:", element);
+  }
+}
+```
+
+#### Icon Button Tooltips
+
+```typescript
+@Component({
+  template: `
+    <div class="icon-toolbar">
+      <div class="toolbar-section">
+        <h4>File Operations</h4>
+        <button
+          mat-icon-button
+          matTooltip="Create new document"
+          matTooltipPosition="below"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Open existing document"
+          matTooltipPosition="below"
+        >
+          <mat-icon>folder_open</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Save current document (Ctrl+S)"
+          matTooltipPosition="below"
+          [disabled]="!hasChanges"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
+      </div>
+
+      <div class="toolbar-section">
+        <h4>Editing</h4>
+        <button
+          mat-icon-button
+          [matTooltip]="undoTooltip"
+          [matTooltipDisabled]="!canUndo"
+          [disabled]="!canUndo"
+        >
+          <mat-icon>undo</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          [matTooltip]="redoTooltip"
+          [matTooltipDisabled]="!canRedo"
+          [disabled]="!canRedo"
+        >
+          <mat-icon>redo</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Copy selected text (Ctrl+C)"
+          [disabled]="!hasSelection"
+        >
+          <mat-icon>content_copy</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Paste from clipboard (Ctrl+V)"
+          [disabled]="!hasClipboardContent"
+        >
+          <mat-icon>content_paste</mat-icon>
+        </button>
+      </div>
+
+      <div class="toolbar-section">
+        <h4>View</h4>
+        <button
+          mat-icon-button
+          [matTooltip]="zoomInTooltip"
+          [disabled]="zoomLevel >= maxZoom"
+          (click)="zoomIn()"
+        >
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+
+        <span class="zoom-display" [matTooltip]="zoomTooltip">
+          {{ zoomLevel }}%
+        </span>
+
+        <button
+          mat-icon-button
+          [matTooltip]="zoomOutTooltip"
+          [disabled]="zoomLevel <= minZoom"
+          (click)="zoomOut()"
+        >
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Reset zoom to 100%"
+          [disabled]="zoomLevel === 100"
+          (click)="resetZoom()"
+        >
+          <mat-icon>zoom_out_map</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .icon-toolbar {
+        display: flex;
+        gap: 24px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background: #fafafa;
+      }
+
+      .toolbar-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .toolbar-section h4 {
+        margin: 0 0 8px 0;
+        font-size: 0.875rem;
+        color: #666;
+        text-align: center;
+      }
+
+      .zoom-display {
+        font-size: 0.875rem;
+        padding: 4px 8px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 40px;
+        text-align: center;
+        cursor: help;
+      }
+    `,
+  ],
+})
+export class IconTooltipComponent {
+  hasChanges = false;
+  canUndo = true;
+  canRedo = false;
+  hasSelection = false;
+  hasClipboardContent = true;
+  zoomLevel = 100;
+  minZoom = 25;
+  maxZoom = 500;
+
+  get undoTooltip(): string {
+    return this.canUndo ? "Undo last action (Ctrl+Z)" : "Nothing to undo";
+  }
+
+  get redoTooltip(): string {
+    return this.canRedo
+      ? "Redo last undone action (Ctrl+Y)"
+      : "Nothing to redo";
+  }
+
+  get zoomInTooltip(): string {
+    return this.zoomLevel >= this.maxZoom
+      ? `Maximum zoom level reached (${this.maxZoom}%)`
+      : "Zoom in (Ctrl++)";
+  }
+
+  get zoomOutTooltip(): string {
+    return this.zoomLevel <= this.minZoom
+      ? `Minimum zoom level reached (${this.minZoom}%)`
+      : "Zoom out (Ctrl+-)";
+  }
+
+  get zoomTooltip(): string {
+    return `Current zoom level: ${this.zoomLevel}%`;
+  }
+
+  zoomIn(): void {
+    if (this.zoomLevel < this.maxZoom) {
+      this.zoomLevel = Math.min(this.zoomLevel + 25, this.maxZoom);
+    }
+  }
+
+  zoomOut(): void {
+    if (this.zoomLevel > this.minZoom) {
+      this.zoomLevel = Math.max(this.zoomLevel - 25, this.minZoom);
+    }
+  }
+
+  resetZoom(): void {
+    this.zoomLevel = 100;
+  }
+}
+```
+
+## Best Practices
+
+### Usage Guidelines
+
+- **Keep tooltip text concise**: Limit tooltip content to brief, helpful information that enhances understanding without overwhelming users
+- **Use consistent positioning**: Establish positioning patterns for similar UI elements to create predictable user experiences
+- **Provide meaningful information**: Ensure tooltips add value by explaining functionality, providing context, or offering helpful hints
+- **Consider mobile users**: Configure touch gestures appropriately for mobile interfaces where hover interactions aren't available
+- **Avoid redundant information**: Don't use tooltips that simply repeat visible text or obvious functionality
+
+### Accessibility
+
+- **Screen reader support**: Tooltips automatically provide proper ARIA attributes and are announced by screen readers
+- **Keyboard accessibility**: Tooltips appear on focus events, making them accessible to keyboard-only users
+- **High contrast compatibility**: Tooltip styling respects system high contrast settings and user preferences
+- **Focus management**: Tooltips don't interfere with normal keyboard navigation and focus flow
+- **Alternative text**: For icon-only buttons, tooltips serve as accessible labels that screen readers can announce
+
+### Performance
+
+- **Lazy loading**: Tooltip overlays are created only when needed, reducing initial page load impact
+- **Event efficiency**: Tooltip triggers use optimized event listeners that don't impact scroll or resize performance
+- **Memory management**: Tooltip instances are properly cleaned up when elements are destroyed
+- **Position caching**: Positioning calculations are cached to avoid unnecessary recalculation during rapid hover events
+- **Debounced updates**: Dynamic tooltip content updates are debounced to prevent excessive re-rendering
+
+## Common Patterns
+
+### Pattern 1: Help System Integration
+
+```typescript
+@Component({
+  template: `
+    <div class="help-enabled-interface">
+      <div class="page-header">
+        <h1>
+          User Management
+          <button
+            mat-icon-button
+            class="help-toggle"
+            (click)="toggleHelpMode()"
+            [matTooltip]="helpModeTooltip"
+          >
+            <mat-icon [color]="helpMode ? 'accent' : 'default'">
+              {{ helpMode ? "help" : "help_outline" }}
+            </mat-icon>
+          </button>
+        </h1>
+      </div>
+
+      <div class="content-section">
+        <button
+          mat-raised-button
+          color="primary"
+          [matTooltip]="
+            helpMode ? 'Creates a new user account in the system' : 'Add User'
+          "
+          [matTooltipShowDelay]="helpMode ? 0 : 500"
+          [matTooltipClass]="helpMode ? 'help-tooltip' : ''"
+        >
+          <mat-icon>person_add</mat-icon>
+          Add User
+        </button>
+
+        <button
+          mat-button
+          [matTooltip]="
+            helpMode
+              ? 'Export user data to CSV file for external use'
+              : 'Export Users'
+          "
+          [matTooltipShowDelay]="helpMode ? 0 : 500"
+          [matTooltipClass]="helpMode ? 'help-tooltip' : ''"
+        >
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+
+        <mat-form-field>
+          <mat-label>Search Users</mat-label>
+          <input
+            matInput
+            placeholder="Enter search terms"
+            [matTooltip]="
+              helpMode
+                ? 'Search by name, email, or role. Use partial matches for broader results.'
+                : 'Search users'
+            "
+            [matTooltipShowDelay]="helpMode ? 0 : 500"
+            [matTooltipClass]="helpMode ? 'help-tooltip' : ''"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="help-status" *ngIf="helpMode">
+        <mat-icon>info</mat-icon>
+        <span
+          >Help mode is active - hover over elements for detailed
+          explanations</span
+        >
+        <button mat-button (click)="toggleHelpMode()">Exit Help</button>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .help-enabled-interface {
+        padding: 16px;
+        max-width: 800px;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .page-header h1 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .help-toggle {
+        margin-left: 8px;
+      }
+
+      .content-section {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        margin-bottom: 16px;
+      }
+
+      .help-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #e3f2fd;
+        border-radius: 4px;
+        color: #1565c0;
+      }
+
+      .help-status mat-icon {
+        color: #1976d2;
+      }
+    `,
+  ],
+})
+export class HelpSystemComponent {
+  helpMode = false;
+
+  get helpModeTooltip(): string {
+    return this.helpMode
+      ? "Exit help mode to return to normal tooltips"
+      : "Enable help mode for detailed explanations";
+  }
+
+  toggleHelpMode(): void {
+    this.helpMode = !this.helpMode;
+  }
+}
+```
+
+### Pattern 2: Progressive Disclosure with Tooltips
+
+```typescript
+@Component({
+  template: `
+    <div class="progressive-disclosure">
+      <div class="basic-controls">
+        <h3>Basic Settings</h3>
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput matTooltip="Display name for this item" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            matTooltip="Brief description visible to other users"
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="advanced-section">
+        <button
+          mat-button
+          (click)="showAdvanced = !showAdvanced"
+          class="section-toggle"
+        >
+          <mat-icon>{{
+            showAdvanced ? "expand_less" : "expand_more"
+          }}</mat-icon>
+          Advanced Settings
+          <mat-icon
+            class="help-icon"
+            matTooltip="Additional configuration options for power users"
+            matTooltipPosition="right"
+          >
+            help_outline
+          </mat-icon>
+        </button>
+
+        <div class="advanced-controls" *ngIf="showAdvanced">
+          <mat-form-field>
+            <mat-label>Cache Duration</mat-label>
+            <mat-select
+              matTooltip="How long to cache this item (affects performance vs freshness)"
+              matTooltipClass="technical-tooltip"
+            >
+              <mat-option value="300">5 minutes</mat-option>
+              <mat-option value="1800">30 minutes</mat-option>
+              <mat-option value="3600">1 hour</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Priority</mat-label>
+            <input
+              matInput
+              type="number"
+              [matTooltip]="priorityTooltip"
+              matTooltipClass="technical-tooltip"
+              matTooltipPosition="above"
+            />
+          </mat-form-field>
+
+          <mat-checkbox
+            [matTooltip]="debugModeTooltip"
+            matTooltipClass="warning-tooltip"
+            [(ngModel)]="debugMode"
+          >
+            Enable Debug Mode
+          </mat-checkbox>
+
+          <div class="expert-section" *ngIf="debugMode">
+            <h4>
+              Expert Options
+              <mat-icon
+                class="warning-icon"
+                matTooltip="These settings can significantly impact system performance"
+                matTooltipClass="warning-tooltip"
+              >
+                warning
+              </mat-icon>
+            </h4>
+
+            <mat-form-field>
+              <mat-label>Custom Headers</mat-label>
+              <textarea
+                matInput
+                rows="4"
+                placeholder="key: value"
+                [matTooltip]="customHeadersTooltip"
+                matTooltipClass="code-tooltip"
+              ></textarea>
+            </mat-form-field>
+
+            <mat-slider
+              min="1"
+              max="100"
+              step="1"
+              [value]="concurrencyLimit"
+              (valueChange)="concurrencyLimit = $event"
+              [matTooltip]="getConcurrencyTooltip()"
+              matTooltipClass="technical-tooltip"
+            >
+            </mat-slider>
+            <div class="slider-label">
+              Concurrency Limit: {{ concurrencyLimit }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .progressive-disclosure {
+        max-width: 600px;
+        padding: 16px;
+      }
+
+      .basic-controls,
+      .advanced-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .section-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 16px 0;
+        justify-content: flex-start;
+      }
+
+      .help-icon {
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.54);
+        margin-left: auto;
+      }
+
+      .expert-section {
+        margin-top: 16px;
+        padding: 16px;
+        border: 2px dashed #ff9800;
+        border-radius: 4px;
+        background: rgba(255, 152, 0, 0.05);
+      }
+
+      .expert-section h4 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        color: #f57c00;
+      }
+
+      .warning-icon {
+        color: #ff9800;
+      }
+
+      .slider-label {
+        font-size: 0.875rem;
+        color: rgba(0, 0, 0, 0.6);
+        text-align: center;
+      }
+    `,
+  ],
+})
+export class ProgressiveDisclosureComponent {
+  showAdvanced = false;
+  debugMode = false;
+  concurrencyLimit = 10;
+
+  get priorityTooltip(): string {
+    return "Higher numbers indicate higher priority (1-100). Items with higher priority are processed first.";
+  }
+
+  get debugModeTooltip(): string {
+    return "Warning: Debug mode enables verbose logging and may impact performance";
+  }
+
+  get customHeadersTooltip(): string {
+    return `Enter custom HTTP headers in format:
+Content-Type: application/json
+Authorization: Bearer token
+X-Custom-Header: value`;
+  }
+
+  getConcurrencyTooltip(): string {
+    return `Maximum ${this.concurrencyLimit} concurrent ${this.concurrencyLimit === 1 ? "operation" : "operations"}. 
+Lower values = more stable, higher values = faster processing.`;
+  }
+}
+```
