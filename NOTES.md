@@ -15,4 +15,5 @@ Always run `npm run lint` and resolve any issues
 ```
 
 When you use Fusion it should show something like the following after it completes steps:
+
 ![Chat Screenshot](./change.png)
