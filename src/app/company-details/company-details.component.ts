@@ -1,21 +1,22 @@
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
   FormGroup,
   Validators,
-} from "@angular/forms";
-import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatInputModule } from "@angular/material/input";
-import { MatSelectModule } from "@angular/material/select";
-import { MatDatepickerModule } from "@angular/material/datepicker";
-import { MatNativeDateModule } from "@angular/material/core";
-import { MatChipsModule } from "@angular/material/chips";
-import { MatSlideToggleModule } from "@angular/material/slide-toggle";
-import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+} from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import HeaderComponent from '../header.component';
 
 export interface CompanyDetails {
   generalInfo: {
@@ -65,7 +66,7 @@ export interface CompanyDetails {
 }
 
 @Component({
-  selector: "app-company-details",
+  selector: 'app-company-details',
   standalone: true,
   imports: [
     CommonModule,
@@ -80,21 +81,22 @@ export interface CompanyDetails {
     MatSlideToggleModule,
     MatButtonModule,
     MatIconModule,
+    HeaderComponent
   ],
-  templateUrl: "./company-details.component.html",
-  styleUrls: ["./company-details.component.scss"],
+  templateUrl: './company-details.component.html',
+  styleUrls: ['./company-details.component.scss'],
 })
 export class CompanyDetailsComponent implements OnInit {
   companyDetailsForm!: FormGroup;
   partneringWithAgency = false;
 
-  countries = ["USA", "Canada", "Mexico"];
-  states = ["California", "New York", "Texas", "Florida"];
-  services = ["Service 1", "Service 2", "Service 3"];
-  audiences = ["Audience 1", "Audience 2", "Audience 3"];
-  yearTypes = ["Calendar Year", "Fiscal Year", "Academic Year"];
-  relationships = ["Relationship 1", "Relationship 2", "Relationship 3"];
-  leveragingGroups = ["Group 1", "Group 2", "Group 3"];
+  countries = ['USA', 'Canada', 'Mexico'];
+  states = ['California', 'New York', 'Texas', 'Florida'];
+  services = ['Service 1', 'Service 2', 'Service 3'];
+  audiences = ['Audience 1', 'Audience 2', 'Audience 3'];
+  yearTypes = ['Calendar Year', 'Fiscal Year', 'Academic Year'];
+  relationships = ['Relationship 1', 'Relationship 2', 'Relationship 3'];
+  leveragingGroups = ['Group 1', 'Group 2', 'Group 3'];
 
   constructor(private fb: FormBuilder) {}
 
@@ -105,47 +107,47 @@ export class CompanyDetailsComponent implements OnInit {
   private initializeForm(): void {
     this.companyDetailsForm = this.fb.group({
       generalInfo: this.fb.group({
-        companyType: ["Pharmaceutical", Validators.required],
-        companyName: ["Actelion Pharmaceuticals US, Inc.", Validators.required],
-        streetAddress1: ["", Validators.required],
-        streetAddress2: [""],
-        country: ["USA", Validators.required],
-        state: ["", Validators.required],
-        city: ["", Validators.required],
-        zip: ["", Validators.required],
-        requestedBy: ["", Validators.required],
-        requestDate: ["", Validators.required],
-        geographicLocation: ["", Validators.required],
+        companyType: ['Pharmaceutical', Validators.required],
+        companyName: ['Actelion Pharmaceuticals US, Inc.', Validators.required],
+        streetAddress1: ['', Validators.required],
+        streetAddress2: [''],
+        country: ['USA', Validators.required],
+        state: ['', Validators.required],
+        city: ['', Validators.required],
+        zip: ['', Validators.required],
+        requestedBy: ['', Validators.required],
+        requestDate: ['', Validators.required],
+        geographicLocation: ['', Validators.required],
       }),
       purchasingContact: this.fb.group({
-        firstName: ["Robert"],
-        lastName: ["Fox"],
-        phone: ["(684) 555-0102"],
-        email: ["robertfox@gmail.com"],
+        firstName: ['Robert'],
+        lastName: ['Fox'],
+        phone: ['(684) 555-0102'],
+        email: ['robertfox@gmail.com'],
       }),
       termAndHistory: this.fb.group({
-        startDate: ["", Validators.required],
-        endDate: ["", Validators.required],
-        agreementTerm: ["Agreement Term"],
-        contractHistory: ["Contract History"],
-        contractHistoryComments: ["Contract History Comments"],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
+        agreementTerm: ['Agreement Term'],
+        contractHistory: ['Contract History'],
+        contractHistoryComments: ['Contract History Comments'],
       }),
       partnerships: this.fb.group({
         partneringWithAnotherAgency: [false],
       }),
       servicesAndExclusions: this.fb.group({
-        services: [""],
-        audience: [""],
-        yearType: [""],
+        services: [''],
+        audience: [''],
+        yearType: [''],
         exclusions: [false],
       }),
       policies: this.fb.group({
         conflictPolicyInMSA: [false],
       }),
       other: this.fb.group({
-        relationships: [""],
-        salesTaxId: ["Sales Tax ID"],
-        leveragingGroup: [""],
+        relationships: [''],
+        salesTaxId: ['Sales Tax ID'],
+        leveragingGroup: [''],
         otaClient: [false],
       }),
     });
@@ -154,7 +156,7 @@ export class CompanyDetailsComponent implements OnInit {
   onPartnershipChange(isPartnering: boolean): void {
     this.partneringWithAgency = isPartnering;
     this.companyDetailsForm
-      .get("partnerships.partneringWithAnotherAgency")
+      .get('partnerships.partneringWithAnotherAgency')
       ?.setValue(isPartnering);
   }
 
@@ -170,10 +172,10 @@ export class CompanyDetailsComponent implements OnInit {
   onSubmit(): void {
     if (this.companyDetailsForm.valid) {
       const formData: CompanyDetails = this.companyDetailsForm.value;
-      console.log("Company Details:", formData);
+      console.log('Company Details:', formData);
       // Handle form submission
     } else {
-      console.log("Form is invalid");
+      console.log('Form is invalid');
     }
   }
 }

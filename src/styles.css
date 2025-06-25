@@ -1,4 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&family=Roboto:wght@400;500;700&family=Inter:wght@400;600;700&display=swap");
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: "Poppins", Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Reset some default Material Design styles for better control */
+.mat-mdc-button {
+  &.mat-mdc-button-base {
+    border-radius: 8px;
+  }
+}
